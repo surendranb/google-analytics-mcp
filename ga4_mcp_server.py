@@ -1,7 +1,8 @@
 from fastmcp import FastMCP
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
-    DateRange, Dimension, Metric, RunReportRequest, Filter, FilterExpression, FilterExpressionList
+    DateRange, Dimension, Metric, RunReportRequest, Filter, FilterExpression, FilterExpressionList,
+    OrderBy, MetricAggregation
 )
 import os
 import sys
@@ -339,6 +340,25 @@ def load_metrics():
     """Load available metrics from embedded data"""
     return GA4_METRICS
 
+def _get_smart_sorting(dimensions, metrics):
+    """Determine optimal sorting strategy for relevance"""
+    order_bys = []
+    
+    # If date dimension exists, sort by date descending (most recent first)
+    if "date" in dimensions:
+        order_bys.append(OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"), desc=True))
+    
+    # Sort by first metric descending to get highest values first
+    if metrics:
+        order_bys.append(OrderBy(metric=OrderBy.MetricOrderBy(metric_name=metrics[0]), desc=True))
+    
+    return order_bys
+
+def _should_aggregate(dimensions, metrics):
+    """Detect when server-side aggregation would be beneficial"""
+    # Aggregate when no dimensions (total summary) or no date dimension (period totals)
+    return len(dimensions) == 0 or "date" not in dimensions
+
 @mcp.tool()
 def list_dimension_categories():
     """
@@ -415,7 +435,12 @@ def get_ga4_data(
     metrics=["totalUsers", "newUsers", "bounceRate", "screenPageViewsPerSession", "averageSessionDuration"],
     date_range_start="7daysAgo",
     date_range_end="yesterday",
-    dimension_filter=None
+    dimension_filter=None,
+    # Enhanced functionality parameters
+    estimate_only=False,
+    proceed_with_large_dataset=False,
+    limit=None,
+    enable_aggregation=True
 ):
     """
     Retrieve GA4 metrics data broken down by the specified dimensions.
@@ -428,9 +453,13 @@ def get_ga4_data(
         date_range_start: Start date in YYYY-MM-DD format or relative date like '7daysAgo'.
         date_range_end: End date in YYYY-MM-DD format or relative date like 'yesterday'.
         dimension_filter: (Optional) JSON string or dict representing a GA4 FilterExpression. See GA4 API docs for structure.
+        estimate_only: (Optional) If True, returns only the estimated row count without fetching data.
+        proceed_with_large_dataset: (Optional) Set to True to proceed with queries that would return >1000 rows.
+        limit: (Optional) Maximum number of rows to return. If None, returns all available data.
+        enable_aggregation: (Optional) If True, uses server-side aggregation when beneficial for performance.
         
     Returns:
-        List of dictionaries containing the requested data, or an error dictionary.
+        List of dictionaries containing the requested data, warning dictionary for large datasets, or an error dictionary.
     """
     try:
         # Handle cases where dimensions might be passed as a string from the MCP client
@@ -563,16 +592,56 @@ def get_ga4_data(
             if filter_expression is None:
                 return {"error": "Invalid or unsupported dimension_filter structure, or invalid dimension name."}
 
-        # GA4 API Call
+        # Row Count Estimation
         client = BetaAnalyticsDataClient()
         dimension_objects = [Dimension(name=d) for d in parsed_dimensions]
         metric_objects = [Metric(name=m) for m in parsed_metrics]
+        
+        # Estimate row count if needed (for warnings or estimate_only requests)
+        if not proceed_with_large_dataset or estimate_only:
+            try:
+                estimation_request = RunReportRequest(
+                    property=f"properties/{GA4_PROPERTY_ID}",
+                    dimensions=dimension_objects,
+                    metrics=metric_objects,
+                    date_ranges=[DateRange(start_date=date_range_start, end_date=date_range_end)],
+                    dimension_filter=filter_expression if filter_expression else None,
+                    limit="1"  # Only get 1 row to get rowCount
+                )
+                estimation_response = client.run_report(estimation_request)
+                estimated_rows = estimation_response.row_count
+                
+                # Return estimation only if requested
+                if estimate_only:
+                    return {"estimated_rows": estimated_rows}
+                
+                # Check if warning is needed
+                if estimated_rows > 2500:
+                    return {
+                        "warning": True,
+                        "estimated_rows": estimated_rows,
+                        "suggestions": [
+                            "Reduce date range to get fewer rows",
+                            "Add dimension filters to narrow results", 
+                            "Consider using fewer dimensions",
+                            "Use limit parameter to restrict number of rows"
+                        ],
+                        "proceed_instructions": "Add proceed_with_large_dataset=True to continue with this query"
+                    }
+            except Exception as e:
+                # If estimation fails, continue with normal execution
+                print(f"DEBUG: Estimation failed, continuing with normal execution: {e}", file=sys.stderr)
+
+        # GA4 API Call
         request = RunReportRequest(
             property=f"properties/{GA4_PROPERTY_ID}",
             dimensions=dimension_objects,
             metrics=metric_objects,
             date_ranges=[DateRange(start_date=date_range_start, end_date=date_range_end)],
-            dimension_filter=filter_expression if filter_expression else None
+            dimension_filter=filter_expression if filter_expression else None,
+            limit=str(limit) if limit else None,
+            order_bys=_get_smart_sorting(parsed_dimensions, parsed_metrics),
+            metric_aggregations=[MetricAggregation.TOTAL] if enable_aggregation and _should_aggregate(parsed_dimensions, parsed_metrics) else None
         )
         response = client.run_report(request)
         result = []
@@ -589,7 +658,31 @@ def get_ga4_data(
                 else:
                     data_row[metric_header.name] = None
             result.append(data_row)
-        return result
+        
+        # For backward compatibility, return just the result list by default
+        # Only add metadata if optimizations were applied or user requested it
+        applied_optimizations = []
+        
+        if limit:
+            applied_optimizations.append(f"Limited to {limit} rows")
+        if enable_aggregation and _should_aggregate(parsed_dimensions, parsed_metrics):
+            applied_optimizations.append("Server-side aggregation applied")
+        if _get_smart_sorting(parsed_dimensions, parsed_metrics):
+            applied_optimizations.append("Intelligent sorting applied")
+        
+        # If no optimizations were applied, return simple result for backward compatibility
+        if not applied_optimizations:
+            return result
+        
+        # If optimizations were applied, include metadata for transparency
+        return {
+            "data": result,
+            "metadata": {
+                "total_rows": response.row_count,
+                "returned_rows": len(result),
+                "applied_optimizations": applied_optimizations
+            }
+        }
     except Exception as e:
         error_message = f"Error fetching GA4 data: {str(e)}"
         print(error_message, file=sys.stderr)

@@ -288,11 +288,54 @@ This demonstrates:
 
 ---
 
+## 🚀 Performance Optimizations
+
+This MCP server includes **built-in optimizations** to prevent context window crashes and ensure smooth operation:
+
+### Smart Data Volume Management
+- **Automatic row estimation** - Checks data volume before fetching
+- **Interactive warnings** - Alerts when queries would return >2,500 rows
+- **Optimization suggestions** - Provides specific recommendations to reduce data volume
+
+### Server-Side Processing
+- **Intelligent aggregation** - Automatically aggregates data when beneficial (e.g., totals across time periods)
+- **Smart sorting** - Returns most relevant data first (recent dates, highest values)
+- **Efficient filtering** - Leverages GA4's server-side filtering capabilities
+
+### User Control Parameters
+- `limit` - Set maximum number of rows to return
+- `proceed_with_large_dataset=True` - Override warnings for large datasets
+- `enable_aggregation=False` - Disable automatic aggregation
+- `estimate_only=True` - Get row count estimates without fetching data
+
+### Example: Handling Large Datasets
+```python
+# This query would normally return 2,605 rows and crash context window
+get_ga4_data(
+    dimensions=["date", "pagePath", "country"],
+    date_range_start="90daysAgo"
+)
+# Returns: {"warning": True, "estimated_rows": 2605, "suggestions": [...]}
+
+# Use monthly aggregation instead
+get_ga4_data(
+    dimensions=["month", "pagePath", "country"], 
+    date_range_start="90daysAgo"
+)
+# Returns: Clean monthly data with manageable row count
+```
+
+---
+
 ## Available Tools
 
-The server provides 5 main tools:
+The server provides 5 main tools with **built-in optimization** to prevent context window crashes:
 
 1. **`get_ga4_data`** - Retrieve GA4 data with custom dimensions and metrics
+   - **Smart data volume warnings** - Alerts when queries would return >2,500 rows
+   - **Server-side aggregation** - Automatically aggregates data when beneficial
+   - **Intelligent sorting** - Returns most relevant data first
+   - **User control parameters** - `limit`, `proceed_with_large_dataset`, `enable_aggregation`
 2. **`list_dimension_categories`** - Browse available dimension categories
 3. **`list_metric_categories`** - Browse available metric categories
 4. **`get_dimensions_by_category`** - Get dimensions for a specific category

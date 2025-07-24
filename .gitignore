@@ -1,5 +1,25 @@
+# Python
 venv/
 *.pyc
 __pycache__/
 .env
 .DS_Store
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Release artifacts (temporary files)
+RELEASE_PLAN.md
+GITHUB_RELEASE_NOTES.md
+release-commands.sh
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
