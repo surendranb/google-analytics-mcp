@@ -52,7 +52,6 @@ pip3 --version
    - Existing project: Select from dropdown
 3. **Enable the Analytics APIs**:
    - Go to "APIs & Services" → "Library"
-   - Search for "Google Analytics Reporting API" → Click "Enable"
    - Search for "Google Analytics Data API" → Click "Enable"
 4. **Create Service Account**:
    - Go to "APIs & Services" → "Credentials"
