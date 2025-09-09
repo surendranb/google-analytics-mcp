@@ -23,3 +23,6 @@ release-commands.sh
 
 # OS files
 Thumbs.db
+
+# Kiro IDE files
+.kiro/
