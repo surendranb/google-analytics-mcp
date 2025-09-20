@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2025-09-20
+
+### 🔧 Critical Bug Fix
+
+#### Fixed
+- **Issue #10: Multiple Filter Data Accuracy** - Fixed critical data accuracy issue where filtered queries returned incorrect user counts
+  - **Root Cause**: When users applied filters, they received daily breakdowns instead of properly aggregated period totals
+  - **Solution**: Improved aggregation logic to return deduplicated user counts matching GA4 browser interface
+  - **Impact**: Multiple filters (3+) now return accurate data identical to GA4 browser results
+  - **Verification**: Comprehensive testing with 3, 4, and 5 filter combinations across multiple date ranges
+
+#### Added
+- **Python 3.13 Support** - Added official support for Python 3.13.x
+  - Tested and verified compatibility with latest Python version
+  - Maintains full backward compatibility with Python 3.10-3.12
+
+#### Technical Details
+- **User Deduplication**: Fixed improper summation of daily user counts across time periods
+- **Server-Side Aggregation**: Leverages GA4 API's proper aggregation when date dimension is not present
+- **Filter Complexity**: Verified that filter complexity (3, 4, 5+ filters) doesn't affect accuracy
+- **Browser Parity**: All filtered results now match GA4 browser interface exactly
+
+### 📊 Verification Results
+- ✅ 3 Filters (US+Desktop+Chrome): Accurate across all date ranges
+- ✅ 4 Filters (+New York): Accurate across all date ranges  
+- ✅ 5 Filters (+Windows): Accurate across all date ranges
+- ✅ All results verified against GA4 browser interface
+
 ## [1.2.0] - 2025-01-24
 
 ### 🚀 Major Performance Enhancements
