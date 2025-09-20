@@ -356,7 +356,9 @@ def _get_smart_sorting(dimensions, metrics):
 
 def _should_aggregate(dimensions, metrics):
     """Detect when server-side aggregation would be beneficial"""
-    # Aggregate when no dimensions (total summary) or no date dimension (period totals)
+    # Based on GA4 Data API documentation:
+    # - Use MetricAggregation.TOTAL for period summaries (no date dimension)
+    # - Don't use aggregation when date dimension is present (daily breakdowns)
     return len(dimensions) == 0 or "date" not in dimensions
 
 @mcp.tool()
