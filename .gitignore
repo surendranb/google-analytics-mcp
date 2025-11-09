@@ -26,3 +26,8 @@ Thumbs.db
 
 # Kiro IDE files
 .kiro/
+
+# Gemini session artifacts
+learnings.md
+test_results.md
+gemini.md

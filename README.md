@@ -330,17 +330,15 @@ get_ga4_data(
 
 ## Available Tools
 
-The server provides 5 main tools with **built-in optimization** to prevent context window crashes:
+The server provides a suite of tools for data reporting and schema discovery.
 
-1. **`get_ga4_data`** - Retrieve GA4 data with custom dimensions and metrics
-   - **Smart data volume warnings** - Alerts when queries would return >2,500 rows
-   - **Server-side aggregation** - Automatically aggregates data when beneficial
-   - **Intelligent sorting** - Returns most relevant data first
-   - **User control parameters** - `limit`, `proceed_with_large_dataset`, `enable_aggregation`
-2. **`list_dimension_categories`** - Browse available dimension categories
-3. **`list_metric_categories`** - Browse available metric categories
-4. **`get_dimensions_by_category`** - Get dimensions for a specific category
-5. **`get_metrics_by_category`** - Get metrics for a specific category
+1.  **`search_schema`** - Searches for a keyword across all available dimensions and metrics. This is the most efficient way to discover fields for a query.
+2.  **`get_ga4_data`** - Retrieve GA4 data with built-in intelligence for better and safer results (includes data volume protection, smart aggregation, and intelligent sorting).
+3.  **`list_dimension_categories`** - Lists all available dimension categories.
+4.  **`list_metric_categories`** - Lists all available metric categories.
+5.  **`get_dimensions_by_category`** - Gets all dimensions for a specific category.
+6.  **`get_metrics_by_category`** - Gets all metrics for a specific category.
+7.  **`get_property_schema`** - Returns the complete schema for the property (Warning: this can be a very large object).
 
 ---
 
@@ -409,13 +407,14 @@ pip install --user google-analytics-mcp
 
 ```
 google-analytics-mcp/
-├── ga4_mcp_server.py       # Main MCP server
-├── ga4_dimensions.json     # All available GA4 dimensions
-├── ga4_metrics.json        # All available GA4 metrics
-├── requirements.txt        # Python dependencies
-├── pyproject.toml          # Package configuration
+├── ga4_mcp/                # Main package directory
+│   ├── server.py           # Core server logic
+│   ├── coordinator.py      # MCP instance
+│   └── tools/              # Tool definitions (reporting, metadata)
+├── pyproject.toml          # Package configuration for PyPI
+├── requirements.txt        # Dependencies for local dev
 ├── README.md               # This file
-└── claude-config-template.json  # MCP configuration template
+└── ...
 ```
 
 ---
