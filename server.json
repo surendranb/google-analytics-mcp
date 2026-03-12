@@ -1,29 +1,36 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.surendranb/google-analytics-mcp",
-  "description": "An MCP server that provides [describe what your server does]",
+  "description": "Query Google Analytics 4 data through MCP with schema discovery, server-side aggregation, and analysis-friendly defaults.",
   "status": "active",
   "repository": {
     "url": "https://github.com/surendranb/google-analytics-mcp",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "2.0.1",
   "packages": [
     {
       "registry_type": "pypi",
       "registry_base_url": "https://pypi.org",
       "identifier": "google-analytics-mcp",
-      "version": "1.2.0",
+      "version": "2.0.1",
       "transport": {
         "type": "stdio"
       },
       "environment_variables": [
         {
-          "description": "Your API key for the service",
+          "description": "Absolute path to your Google Cloud service account JSON key with GA4 property access.",
           "is_required": true,
           "format": "string",
           "is_secret": true,
-          "name": "YOUR_API_KEY"
+          "name": "GOOGLE_APPLICATION_CREDENTIALS"
+        },
+        {
+          "description": "Numeric GA4 Property ID to query, for example 123456789.",
+          "is_required": true,
+          "format": "string",
+          "is_secret": false,
+          "name": "GA4_PROPERTY_ID"
         }
       ]
     }

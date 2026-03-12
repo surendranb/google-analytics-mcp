@@ -11,7 +11,7 @@ mcp-name: io.github.surendranb/google-analytics-mcp
 [![GitHub stars](https://img.shields.io/github/stars/surendranb/google-analytics-mcp?style=social)](https://github.com/surendranb/google-analytics-mcp/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/surendranb/google-analytics-mcp?style=social)](https://github.com/surendranb/google-analytics-mcp/network/members)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/surendranb/google-analytics-mcp)
 
 Connect Google Analytics 4 data to Claude, Cursor and other MCP clients. Query your website traffic, user behavior, and analytics data in natural language with access to 200+ GA4 dimensions and metrics.
@@ -40,7 +40,7 @@ pip3 --version
 **Required:**
 - Python 3.10 or higher
 - Google Analytics 4 property with data
-- Service account with Analytics Reporting API access
+- Service account with Google Analytics Data API access and GA4 property access
 
 ---
 
@@ -126,24 +126,44 @@ If you see "✅ GA4 credentials working!" you're ready to proceed.
 
 ## Step 2: Install the MCP Server
 
-Choose one method:
+There are two supported ways to launch the server:
 
-### Method A: pip install (Recommended)
+- `ga4-mcp-server` when the installed console script is available on your `PATH`
+- `python -m ga4_mcp` when you want to use a specific interpreter or virtual environment
 
-```bash
-pip install google-analytics-mcp
-```
-
-**MCP Configuration:**
-
-First, check your Python command:
+### Method A: Install from PyPI (Recommended)
 
 ```bash
-python3 --version
-python --version
+python3 -m pip install google-analytics-mcp
 ```
 
-Then use the appropriate configuration:
+If your machine uses `python` instead of `python3`, run:
+
+```bash
+python -m pip install google-analytics-mcp
+```
+
+#### Option 1: Use the console script
+
+Use this when `ga4-mcp-server` is available on your `PATH`:
+
+```json
+{
+  "mcpServers": {
+    "ga4-analytics": {
+      "command": "ga4-mcp-server",
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
+        "GA4_PROPERTY_ID": "123456789"
+      }
+    }
+  }
+}
+```
+
+#### Option 2: Use an explicit Python interpreter
+
+Use this when you want to pin the exact Python runtime or when the console script is not on your `PATH`.
 
 If `python3 --version` worked:
 
@@ -152,7 +172,7 @@ If `python3 --version` worked:
   "mcpServers": {
     "ga4-analytics": {
       "command": "python3",
-      "args": ["-m", "ga4_mcp_server"],
+      "args": ["-m", "ga4_mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
         "GA4_PROPERTY_ID": "123456789"
@@ -169,7 +189,7 @@ If `python --version` worked:
   "mcpServers": {
     "ga4-analytics": {
       "command": "python",
-      "args": ["-m", "ga4_mcp_server"],
+      "args": ["-m", "ga4_mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
         "GA4_PROPERTY_ID": "123456789"
@@ -179,15 +199,17 @@ If `python --version` worked:
 }
 ```
 
-### Method B: GitHub download
+### Method B: Install from a local clone
 
 ```bash
 git clone https://github.com/surendranb/google-analytics-mcp.git
 cd google-analytics-mcp
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install .
 ```
+
+If you plan to modify the package locally, use `python -m pip install -e .` instead.
 
 **MCP Configuration:**
 
@@ -195,8 +217,8 @@ pip install -r requirements.txt
 {
   "mcpServers": {
     "ga4-analytics": {
-      "command": "/full/path/to/ga4-mcp-server/venv/bin/python",
-      "args": ["/full/path/to/ga4-mcp-server/ga4_mcp_server.py"],
+      "command": "/full/path/to/google-analytics-mcp/.venv/bin/python",
+      "args": ["-m", "ga4_mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
         "GA4_PROPERTY_ID": "123456789"
@@ -211,9 +233,9 @@ pip install -r requirements.txt
 ## Step 3: Update Configuration
 
 **Replace these placeholders in your MCP configuration:**
-- `/path/to/your/service-account-key.json` with your JSON file path
-- `123456789` with your GA4 Property ID
-- `/full/path/to/ga4-mcp-server/` with your download path (Method B only)
+- `/path/to/your/service-account-key.json` with the absolute path to your JSON key
+- `123456789` with your numeric GA4 Property ID
+- `/full/path/to/google-analytics-mcp/.venv/bin/python` with your virtual environment's Python path (Method B only)
 
 ---
 
@@ -369,32 +391,35 @@ Access to **200+ GA4 dimensions and metrics** organized by category:
 
 ## Troubleshooting
 
-**If you get "No module named ga4_mcp_server" (Method A):**
-```bash
-pip3 install --user google-analytics-mcp
-```
+**If `ga4-mcp-server` is not found:**
+- Use the explicit interpreter launch style instead: `python -m ga4_mcp`
+- Reinstall with the same Python interpreter your MCP client will use
 
-**If you get "executable file not found":**
-- Try the other Python command (`python` vs `python3`)
-- Use `pip3` instead of `pip` if needed
+**If you get `No module named ga4_mcp`:**
+```bash
+/full/path/to/python -m pip install google-analytics-mcp
+```
+Install the package with the exact interpreter you reference in your MCP configuration.
 
 **Permission errors:**
 ```bash
 # Try user install instead of system-wide
-pip install --user google-analytics-mcp
+python -m pip install --user google-analytics-mcp
 ```
 
-**Credentials not working:**
-1. **Verify the JSON file path** is correct and accessible
+**If the server says the credentials file is missing:**
+1. **Verify the JSON file path** is absolute, correct, and accessible
 2. **Check service account permissions**:
    - Go to Google Cloud Console → IAM & Admin → IAM
    - Find your service account → Check permissions
 3. **Verify GA4 access**:
    - GA4 → Admin → Property access management
    - Check for your service account email
-4. **Verify ID type**:
-   - Property ID: numeric (e.g., `123456789`) ✅
-   - Measurement ID: starts with G- (e.g., `G-XXXXXXXXXX`) ❌
+
+**If the server says `GA4_PROPERTY_ID` is invalid or queries return no data:**
+- Use the numeric **Property ID** (for example `123456789`)
+- Do **not** use the **Measurement ID** (for example `G-XXXXXXXXXX`)
+- Confirm the service account has at least Viewer access on that property
 
 **API quota/rate limit errors:**
 - GA4 has daily quotas and rate limits
@@ -421,4 +446,4 @@ google-analytics-mcp/
 
 ## License
 
-MIT License
+Apache License 2.0

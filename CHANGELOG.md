@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-03-12
+
+### Changed
+- Aligned the README, PyPI long description, and config templates around the supported launch commands: `ga4-mcp-server` and `python -m ga4_mcp`
+- Updated MCP registry metadata to use the current package version, accurate environment variables, and a production-ready description
+- Standardized the project license on Apache-2.0 and added a top-level `LICENSE` file
+- Added a release checklist so future version bumps, changelog entries, and public metadata stay in sync
+
+### Added
+- GitHub Actions smoke checks for builds, installs, imports, and console entrypoint metadata across Python 3.10-3.13
+- An automated consistency checker that fails when stale `ga4_mcp_server` references or version drift appear in package-facing files
+
+## [2.0.0] - 2025-11-09
+
+### Changed
+- Refactored the project from a single-module layout into the `ga4_mcp` package
+- Added the supported launch paths `ga4-mcp-server` and `python -m ga4_mcp`
+- Introduced schema discovery tools for searching dimensions and metrics by keyword or category
+
+### Removed
+- Removed the legacy `ga4_mcp_server.py` module and bundled static schema JSON files in favor of live property metadata
+
 ## [1.2.2] - 2025-09-20
 
 ### 🔧 Critical Bug Fix

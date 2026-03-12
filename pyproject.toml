@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "google-analytics-mcp"
-version = "2.0.0" # Major version bump for refactoring
+version = "2.0.1"
 description = "Google Analytics 4 MCP Server with Smart Optimizations - Access GA4 data in Claude, Cursor and other MCP clients. Prevents context window crashes with intelligent data volume management."
 readme = "README.md"
-license = {text = "MIT"}
+license = "Apache-2.0"
 authors = [
     {name = "Surendran B", email = "reachsuren@gmail.com"}
 ]
@@ -21,7 +21,6 @@ keywords = ["google-analytics", "mcp", "ai-assistant", "analytics", "ga4", "clau
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

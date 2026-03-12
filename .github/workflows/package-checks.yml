@@ -1,0 +1,50 @@
+name: Package Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  package-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build
+
+      - name: Check package-facing consistency
+        run: python scripts/check_package_consistency.py
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Install built wheel
+        run: python -m pip install --force-reinstall dist/*.whl
+
+      - name: Smoke test imports
+        run: python -c "import ga4_mcp; import ga4_mcp.server; import ga4_mcp.tools.metadata; import ga4_mcp.tools.reporting"
+
+      - name: Validate installed entry point
+        run: |
+          python - <<'PY'
+          from importlib.metadata import distribution
+
+          entry_points = {entry_point.name: entry_point.value for entry_point in distribution("google-analytics-mcp").entry_points}
+          assert entry_points.get("ga4-mcp-server") == "ga4_mcp.server:main", entry_points
+          print("Console entry point OK")
+          PY
