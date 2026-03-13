@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.surendranb/google-analytics-mcp",
-  "description": "Query Google Analytics 4 data through MCP with schema discovery, server-side aggregation, and analysis-friendly defaults.",
+  "description": "Google Analytics 4 MCP server for AI agents and agentic workflows with schema discovery, server-side aggregation, and analysis-ready defaults.",
   "status": "active",
   "repository": {
     "url": "https://github.com/surendranb/google-analytics-mcp",

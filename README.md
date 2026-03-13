@@ -14,13 +14,22 @@ mcp-name: io.github.surendranb/google-analytics-mcp
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com/surendranb/google-analytics-mcp)
 
-Connect Google Analytics 4 data to Claude, Cursor and other MCP clients. Query your website traffic, user behavior, and analytics data in natural language with access to 200+ GA4 dimensions and metrics.
+Connect Google Analytics 4 data to AI agents, agentic workflows, and MCP clients. Give agents analysis-ready access to website traffic, user behavior, and performance data with schema discovery, server-side aggregation, and safe defaults that reduce data wrangling.
 
-**Compatible with:** Claude, Cursor and other MCP clients.
+**Built for:** AI agents, analyst copilots, and MCP runtimes across Claude, ChatGPT, Cursor, Windsurf, and custom hosts.
 
 I also built a [Google Search Console MCP](https://github.com/surendranb/google-search-console-mcp) that enables you to mix & match the data from both the sources
 
 </p>
+---
+
+## Why Agents Use This Server
+
+- **Analysis-ready outputs** with server-side aggregation, so agents spend more time answering questions and less time wrangling rows
+- **Live schema discovery** for each GA4 property, including category-based exploration for dimensions and metrics
+- **Context-safe defaults** that estimate large datasets before they blow up a conversation or workflow
+- **Portable MCP surface** that works across agent runtimes, IDE copilots, and custom automation
+
 ---
 
 ## Prerequisites

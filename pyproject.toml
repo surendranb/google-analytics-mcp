@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "google-analytics-mcp"
 version = "2.0.1"
-description = "Google Analytics 4 MCP Server with Smart Optimizations - Access GA4 data in Claude, Cursor and other MCP clients. Prevents context window crashes with intelligent data volume management."
+description = "Google Analytics 4 MCP server for AI agents and agentic workflows. Gives agents analysis-ready GA4 access with schema discovery, server-side aggregation, and smart defaults."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [
@@ -17,7 +17,7 @@ dependencies = [
     "google-analytics-data==0.19.0",
     "google-auth==2.40.0"
 ]
-keywords = ["google-analytics", "mcp", "ai-assistant", "analytics", "ga4", "claude", "cursor", "windsurf"]
+keywords = ["google-analytics", "mcp", "mcp-server", "ai-agent", "analytics", "ga4", "agentic-workflows", "llm"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
