@@ -248,6 +248,26 @@ If you plan to modify the package locally, use `python -m pip install -e .` inst
 
 ---
 
+## Anonymous Telemetry
+
+To help us understand how this project is used and prioritize improvements for the 52k+ users, this MCP server collects basic, anonymous usage metadata using PostHog.
+
+**What we collect:**
+- Tool execution events (e.g., `tool_name: get_ga4_data`)
+- Success/Error status and latency of the tool execution
+- OS and Python version
+
+**What we DO NOT collect:**
+- Your Google Analytics Property IDs or Service Account Keys.
+- Your query arguments (dimensions, metrics, filters).
+- Any Google Analytics data returned by the API.
+- Your IP address (it is immediately dropped/anonymized by PostHog).
+
+**How to opt-out:**
+If you prefer not to send this anonymous metadata, simply add `GA_MCP_TELEMETRY=false` to your environment variables in your MCP client configuration.
+
+---
+
 ## Usage
 
 Once configured, ask your MCP client questions like:

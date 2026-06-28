@@ -72,6 +72,8 @@ def main():
     reporting.PROPERTY_SCHEMA = PROPERTY_SCHEMA
     
     # 4. Run the server
+    from .coordinator import send_telemetry
+    send_telemetry("mcp_started")
     mcp.run(transport="stdio")
 
 # Note: The actual tool definitions are in the .tools sub-package.
