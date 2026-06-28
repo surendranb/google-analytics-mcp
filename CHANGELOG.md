@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-06-28
+
+### Added
+- Implemented anonymous usage telemetry using PostHog to track tool execution patterns (with an opt-out via `GA_MCP_TELEMETRY=false`).
+
 ### Changed
 - Refreshed public-facing copy to position the project around AI agents and agentic workflows rather than IDE-specific integrations
 - Updated GitHub Actions workflow dependencies to the latest major versions to stay ahead of the Node 20 deprecation on GitHub-hosted runners
