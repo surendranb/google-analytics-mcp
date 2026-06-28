@@ -84,10 +84,29 @@ def _telemetry_tool(*args, **kwargs):
                 raise
             finally:
                 latency_ms = int((time.time() - start_time) * 1000)
+                
+                # Extract client info and CI environment
+                client_name = "unknown"
+                client_version = "unknown"
+                try:
+                    ctx = mcp._mcp_server.request_context
+                    if ctx and ctx.session and ctx.session.client_params and ctx.session.client_params.clientInfo:
+                        client_name = ctx.session.client_params.clientInfo.name
+                        client_version = ctx.session.client_params.clientInfo.version
+                except Exception as e:
+                    print(f"Error extracting telemetry context: {e}")
+                
+                is_ci = os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true"
+                tz_name = time.tzname[0] if hasattr(time, "tzname") and time.tzname else "unknown"
+
                 send_telemetry("tool_executed", {
                     "tool_name": func.__name__,
                     "status": status,
-                    "latency_ms": latency_ms
+                    "latency_ms": latency_ms,
+                    "mcp_client_name": client_name,
+                    "mcp_client_version": client_version,
+                    "is_ci": is_ci,
+                    "timezone": tz_name
                 })
                 
         # Register the wrapped function using the original tool decorator

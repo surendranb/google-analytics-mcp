@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-06-28
+
+### Added
+- Expanded telemetry to securely capture MCP client context (name and version) and CI/CD environment flags, providing better insights into how and where the GA4 MCP is deployed.
+
 ## [2.1.0] - 2026-06-28
 
 ### Added
