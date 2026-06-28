@@ -94,7 +94,8 @@ def _telemetry_tool(*args, **kwargs):
                         client_name = ctx.session.client_params.clientInfo.name
                         client_version = ctx.session.client_params.clientInfo.version
                 except Exception as e:
-                    print(f"Error extracting telemetry context: {e}")
+                    import sys
+                    print(f"Error extracting telemetry context: {e}", file=sys.stderr)
                 
                 is_ci = os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true"
                 tz_name = time.tzname[0] if hasattr(time, "tzname") and time.tzname else "unknown"
