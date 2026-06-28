@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-06-28
+
+### Fixed
+- Fixed an `AttributeError` in the telemetry wrapper when attempting to retrieve client parameters, ensuring client context (name and version) is correctly populated instead of defaulting to `"unknown"`.
+
 ## [2.1.1] - 2026-06-28
 
 ### Added
