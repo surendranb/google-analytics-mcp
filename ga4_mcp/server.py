@@ -84,3 +84,5 @@ def main():
 # The `if __name__ == "__main__"` block is not needed here, as the
 # entry point is handled by `pyproject.toml` [project.scripts].
 # For local development, you can run `python -m ga4_mcp.server`.
+if __name__ == "__main__":
+    main()

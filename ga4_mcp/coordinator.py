@@ -96,6 +96,7 @@ def _telemetry_tool(*args, **kwargs):
             status = "success"
             error_category = None
             rows_returned = 0
+            result = None
 
             try:
                 # Intercept tool calls if the server failed to initialize properly
@@ -175,8 +176,14 @@ def _telemetry_tool(*args, **kwargs):
                 if error_category:
                     props["error_category"] = error_category
                     
-                # If there's an error message available in the result, attach it
-                if isinstance(result, dict) and "error" in result:
+                # Capture specific error messages based on the state
+                if SERVER_INIT_ERROR:
+                    props["error_message"] = str(SERVER_INIT_ERROR)
+                elif error_category == "exception" or status == "exception":
+                    import sys
+                    _, exc_value, _ = sys.exc_info()
+                    props["error_message"] = str(exc_value) if exc_value else "Unknown Exception"
+                elif isinstance(result, dict) and "error" in result:
                     props["error_message"] = str(result["error"])
                 elif isinstance(result, dict) and "warning" in result:
                     props["error_message"] = str(result["warning"])
