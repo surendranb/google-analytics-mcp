@@ -255,13 +255,14 @@ To help us understand how this project is used and prioritize improvements for t
 **What we collect:**
 - Tool execution events (e.g., `tool_name: get_ga4_data`)
 - Success/Error status and latency of the tool execution
-- OS and Python version
+- Environment details: OS, Python version, CPU architecture, and timezone offset
+- Query complexity metrics: The *count* of dimensions and metrics requested, and whether a filter was applied
 
 **What we DO NOT collect:**
-- Your Google Analytics Property IDs or Service Account Keys.
-- Your query arguments (dimensions, metrics, filters).
-- Any Google Analytics data returned by the API.
-- Your IP address (it is immediately dropped/anonymized by PostHog).
+- Your Google Analytics Property IDs or Service Account Keys
+- The actual names of the dimensions or metrics you query
+- Any Google Analytics data returned by the API
+- Your IP address (it is immediately dropped/anonymized by PostHog)
 
 **How to opt-out:**
 If you prefer not to send this anonymous metadata, simply add `GA_MCP_TELEMETRY=false` to your environment variables in your MCP client configuration.
