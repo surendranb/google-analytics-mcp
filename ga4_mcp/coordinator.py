@@ -61,6 +61,9 @@ def send_telemetry(event: str, properties: dict = None):
     # Run in a daemon thread so it doesn't block execution or shutdown
     threading.Thread(target=_send, daemon=True).start()
 
+# Global state to capture boot-time configuration errors without crashing the server
+SERVER_INIT_ERROR = None
+
 # Creates the singleton mcp object that is imported by all other modules.
 mcp = FastMCP("Google Analytics 4")
 
@@ -73,14 +76,39 @@ def _telemetry_tool(*args, **kwargs):
         def wrapper(*w_args, **w_kwargs):
             start_time = time.time()
             status = "success"
+            error_category = None
+            rows_returned = 0
+
             try:
-                result = func(*w_args, **w_kwargs)
-                # GA4 MCP often returns {"error": ...} on handled errors
-                if isinstance(result, dict) and "error" in result:
+                # Intercept tool calls if the server failed to initialize properly
+                if SERVER_INIT_ERROR:
                     status = "error"
+                    error_category = "InitError"
+                    return f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
+
+                result = func(*w_args, **w_kwargs)
+                
+                # Analyze result dictionaries for specific error/warning types
+                if isinstance(result, dict):
+                    if "error" in result:
+                        status = "error"
+                        err_str = str(result["error"])
+                        if "DO NOT GUESS" in err_str or "Invalid dimension" in err_str or "Invalid metric" in err_str:
+                            error_category = "SchemaHallucination"
+                        elif "IAM Error" in err_str or "PermissionDenied" in err_str or "403" in err_str:
+                            error_category = "IAMError"
+                        else:
+                            error_category = "APIError"
+                    elif "warning" in result:
+                        status = "warning"
+                        error_category = "SmartVolumeWarning"
+                    elif "metadata" in result:
+                        rows_returned = result.get("metadata", {}).get("returned_rows", 0)
+                        
                 return result
-            except Exception:
+            except Exception as e:
                 status = "exception"
+                error_category = e.__class__.__name__
                 raise
             finally:
                 latency_ms = int((time.time() - start_time) * 1000)
@@ -100,15 +128,20 @@ def _telemetry_tool(*args, **kwargs):
                 is_ci = os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true"
                 tz_name = time.tzname[0] if hasattr(time, "tzname") and time.tzname else "unknown"
 
-                send_telemetry("tool_executed", {
+                props = {
                     "tool_name": func.__name__,
                     "status": status,
                     "latency_ms": latency_ms,
                     "mcp_client_name": client_name,
                     "mcp_client_version": client_version,
                     "is_ci": is_ci,
-                    "timezone": tz_name
-                })
+                    "timezone": tz_name,
+                    "rows_returned": rows_returned
+                }
+                if error_category:
+                    props["error_category"] = error_category
+                    
+                send_telemetry("tool_executed", props)
                 
         # Register the wrapped function using the original tool decorator
         return _original_tool(*args, **kwargs)(wrapper)

@@ -33,6 +33,8 @@ def main():
     4. Starts the server and listens for requests.
     """
     print("Starting GA4 MCP server...", file=sys.stderr)
+    import ga4_mcp.coordinator as coordinator
+    config_status = "valid"
 
     # 1. Validate environment variables
     credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -40,29 +42,31 @@ def main():
 
     if not credentials_path:
         print("ERROR: GOOGLE_APPLICATION_CREDENTIALS environment variable not set.", file=sys.stderr)
-        print("Please set it to the path of your service account JSON file.", file=sys.stderr)
-        sys.exit(1)
-
-    if not property_id:
+        coordinator.SERVER_INIT_ERROR = "GOOGLE_APPLICATION_CREDENTIALS environment variable not set. Please set it to the path of your service account JSON file."
+        config_status = "error"
+    elif not property_id:
         print("ERROR: GA4_PROPERTY_ID environment variable not set.", file=sys.stderr)
-        print("Please set it to your GA4 property ID (e.g., '123456789').", file=sys.stderr)
-        sys.exit(1)
-
-    if not os.path.exists(credentials_path):
+        coordinator.SERVER_INIT_ERROR = "GA4_PROPERTY_ID environment variable not set. Please set it to your GA4 property ID (e.g., '123456789')."
+        config_status = "error"
+    elif not os.path.exists(credentials_path):
         print(f"ERROR: Credentials file not found at '{credentials_path}'.", file=sys.stderr)
-        print("Please check the GOOGLE_APPLICATION_CREDENTIALS path.", file=sys.stderr)
-        sys.exit(1)
-
-    # 2. Fetch and cache the GA4 property schema
-    print(f"Fetching schema for property '{property_id}'...", file=sys.stderr)
-    global PROPERTY_SCHEMA
-    try:
-        PROPERTY_SCHEMA = metadata.get_property_schema_uncached(property_id)
-        print("Schema loaded successfully.", file=sys.stderr)
-    except Exception as e:
-        print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
-        print("Please ensure the service account has 'Viewer' permissions on the GA4 property and the Data API is enabled.", file=sys.stderr)
-        sys.exit(1)
+        coordinator.SERVER_INIT_ERROR = f"Credentials file not found at '{credentials_path}'. Please check the GOOGLE_APPLICATION_CREDENTIALS path."
+        config_status = "error"
+    else:
+        # 2. Fetch and cache the GA4 property schema
+        print(f"Fetching schema for property '{property_id}'...", file=sys.stderr)
+        global PROPERTY_SCHEMA
+        try:
+            PROPERTY_SCHEMA = metadata.get_property_schema_uncached(property_id)
+            print("Schema loaded successfully.", file=sys.stderr)
+        except Exception as e:
+            print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
+            err_str = str(e)
+            if "403" in err_str or "PermissionDenied" in err_str or "permission" in err_str.lower():
+                coordinator.SERVER_INIT_ERROR = "IAM Error: The service account does not have Viewer access to the GA4 property. Please grant access in the GA4 Admin console."
+            else:
+                coordinator.SERVER_INIT_ERROR = f"Could not fetch GA4 property schema: {err_str}"
+            config_status = "error"
 
     # 3. Register tools
     # Tools are defined in other modules and decorated with @mcp.tool().
@@ -73,7 +77,7 @@ def main():
     
     # 4. Run the server
     from .coordinator import send_telemetry
-    send_telemetry("mcp_started")
+    send_telemetry("mcp_started", {"config_status": config_status})
     mcp.run(transport="stdio")
 
 # Note: The actual tool definitions are in the .tools sub-package.
