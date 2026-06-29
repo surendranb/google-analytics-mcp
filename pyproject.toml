@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "google-analytics-mcp"
-version = "2.1.3"
-description = "Google Analytics 4 MCP server for AI agents and agentic workflows. Gives agents analysis-ready GA4 access with schema discovery, server-side aggregation, and smart defaults."
+version = "2.1.4"
+description = "Model Context Protocol for Google Analytics 4 (Data API) allowing autonomous agents to query dimensions and metrics. Gives agents analysis-ready GA4 access with schema discovery, server-side aggregation, and smart defaults."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [

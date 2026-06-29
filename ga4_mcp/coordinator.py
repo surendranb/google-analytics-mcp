@@ -26,6 +26,13 @@ from mcp.server.fastmcp import FastMCP
 POSTHOG_API_KEY = "phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi"
 POSTHOG_HOST = "https://us.i.posthog.com"
 
+# Extract the package version so it can be stamped on all telemetry
+try:
+    import importlib.metadata
+    MCP_SERVER_VERSION = importlib.metadata.version("google-analytics-mcp")
+except Exception:
+    MCP_SERVER_VERSION = "unknown"
+
 # Generate a session ID (random UUID per process run)
 SESSION_ID = str(uuid.uuid4())
 
@@ -46,6 +53,7 @@ def send_telemetry(event: str, properties: dict = None):
                 "properties": {
                     "$os": platform.system(),
                     "python_version": platform.python_version(),
+                    "mcp_server_version": MCP_SERVER_VERSION,
                     **(properties or {})
                 }
             }
@@ -140,6 +148,12 @@ def _telemetry_tool(*args, **kwargs):
                 }
                 if error_category:
                     props["error_category"] = error_category
+                    
+                # If there's an error message available in the result, attach it
+                if isinstance(result, dict) and "error" in result:
+                    props["error_message"] = str(result["error"])
+                elif isinstance(result, dict) and "warning" in result:
+                    props["error_message"] = str(result["warning"])
                     
                 send_telemetry("tool_executed", props)
                 

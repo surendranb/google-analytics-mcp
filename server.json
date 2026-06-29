@@ -7,13 +7,13 @@
     "url": "https://github.com/surendranb/google-analytics-mcp",
     "source": "github"
   },
-  "version": "2.1.3",
+  "version": "2.1.4",
   "packages": [
     {
       "registry_type": "pypi",
       "registry_base_url": "https://pypi.org",
       "identifier": "google-analytics-mcp",
-      "version": "2.1.3",
+      "version": "2.1.4",
       "transport": {
         "type": "stdio"
       },
