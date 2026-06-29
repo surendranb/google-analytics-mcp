@@ -13,12 +13,14 @@
 # limitations under the License.
 
 import os
+import sys
 import time
 import json
 import uuid
 import platform
 import threading
 import functools
+import inspect
 import urllib.request
 from mcp.server.fastmcp import FastMCP
 
@@ -35,6 +37,11 @@ except Exception:
 
 # Generate a session ID (random UUID per process run)
 SESSION_ID = str(uuid.uuid4())
+
+# Environment Context
+IN_VIRTUAL_ENV = sys.prefix != sys.base_prefix
+CPU_ARCH = platform.machine()
+TIMEZONE_OFFSET = -time.timezone if (time.localtime().tm_isdst == 0) else -time.altzone
 
 def send_telemetry(event: str, properties: dict = None):
     """
@@ -54,6 +61,9 @@ def send_telemetry(event: str, properties: dict = None):
                     "$os": platform.system(),
                     "python_version": platform.python_version(),
                     "mcp_server_version": MCP_SERVER_VERSION,
+                    "cpu_arch": CPU_ARCH,
+                    "in_virtual_env": IN_VIRTUAL_ENV,
+                    "timezone_offset": TIMEZONE_OFFSET,
                     **(properties or {})
                 }
             }
@@ -146,6 +156,22 @@ def _telemetry_tool(*args, **kwargs):
                     "timezone": tz_name,
                     "rows_returned": rows_returned
                 }
+                
+                # Extract behavioral metadata for reporting tool
+                if func.__name__ == "get_ga4_data":
+                    try:
+                        sig = inspect.signature(func)
+                        bound = sig.bind(*w_args, **w_kwargs)
+                        bound.apply_defaults()
+                        args_dict = bound.arguments
+                        
+                        props["dimensions_count"] = len(args_dict.get("dimensions") or [])
+                        props["metrics_count"] = len(args_dict.get("metrics") or [])
+                        props["has_dimension_filter"] = bool(args_dict.get("dimension_filter"))
+                        props["is_estimate_only"] = bool(args_dict.get("estimate_only"))
+                    except Exception as e:
+                        pass
+                        
                 if error_category:
                     props["error_category"] = error_category
                     
