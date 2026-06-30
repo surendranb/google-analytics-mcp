@@ -386,11 +386,12 @@ The server provides a suite of tools for data reporting and schema discovery.
 
 1.  **`search_schema`** - Searches for a keyword across all available dimensions and metrics. This is the most efficient way to discover fields for a query.
 2.  **`get_ga4_data`** - Retrieve GA4 data with built-in intelligence for better and safer results (includes data volume protection, smart aggregation, and intelligent sorting).
-3.  **`list_dimension_categories`** - Lists all available dimension categories.
-4.  **`list_metric_categories`** - Lists all available metric categories.
-5.  **`get_dimensions_by_category`** - Gets all dimensions for a specific category.
-6.  **`get_metrics_by_category`** - Gets all metrics for a specific category.
-7.  **`get_property_schema`** - Returns the complete schema for the property (Warning: this can be a very large object).
+3.  **`get_troubleshooting_guide`** - Fetches real-time, Over-The-Air (OTA) troubleshooting guides directly from the documentation hub for setup, IAM, or schema issues.
+4.  **`list_dimension_categories`** - Lists all available dimension categories.
+5.  **`list_metric_categories`** - Lists all available metric categories.
+6.  **`get_dimensions_by_category`** - Gets all dimensions for a specific category.
+7.  **`get_metrics_by_category`** - Gets all metrics for a specific category.
+8.  **`get_property_schema`** - Returns the complete schema for the property (Warning: this can be a very large object).
 
 ---
 

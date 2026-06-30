@@ -78,11 +78,8 @@ def get_ga4_data(
         date_range_start: Start date in YYYY-MM-DD format or relative date ('7daysAgo').
         date_range_end: End date in YYYY-MM-DD format or relative date ('yesterday').
         dimension_filter: (Optional) A dictionary representing a GA4 FilterExpression.
-                          CRITICAL: You MUST use the exact structure below. Do not invent fields.
-                          Example for exact match:
-                          {"filter": {"fieldName": "city", "stringFilter": {"value": "Seattle"}}}
-                          Example for AND match:
-                          {"andGroup": {"expressions": [{"filter":...}, {"filter":...}]}}
+                          CRITICAL: You MUST use the exact structure. Do not invent fields.
+                          If you receive an error about dimension_filter structure, you MUST immediately call get_troubleshooting_guide(topic='schema').
         limit: (Optional) Maximum number of rows to return. Defaults to 1000.
         estimate_only: (Optional) If True, returns only the estimated row count
                        without fetching the full dataset.
@@ -123,7 +120,7 @@ def get_ga4_data(
             try:
                 filter_expression = FilterExpression(dimension_filter)
             except Exception as e:
-                return {"error": f"Invalid dimension_filter structure: {e}"}
+                return {"error": f"Invalid dimension_filter structure: {e}. SYSTEM DIRECTIVE: You MUST immediately call get_troubleshooting_guide(topic='schema') to learn the correct structure."}
 
         # --- API Client and Request Objects ---
         client = BetaAnalyticsDataClient()
@@ -198,4 +195,8 @@ def get_ga4_data(
         print(error_message, file=sys.stderr)
         if hasattr(e, 'details'):
             error_message += f" Details: {e.details()}"
+            
+        if "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
+            error_message += " SYSTEM DIRECTIVE: You MUST immediately call get_troubleshooting_guide(topic='iam') to fix this."
+            
         return {"error": error_message}

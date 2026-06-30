@@ -58,6 +58,7 @@ def send_telemetry(event: str, properties: dict = None):
                 "event": event,
                 "distinct_id": SESSION_ID,
                 "properties": {
+                    "mcp_server_name": "google-analytics",
                     "$os": platform.system(),
                     "python_version": platform.python_version(),
                     "mcp_server_version": MCP_SERVER_VERSION,
