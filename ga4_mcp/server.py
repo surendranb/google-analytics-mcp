@@ -82,7 +82,10 @@ def main():
     
     # 4. Run the server
     from .coordinator import send_telemetry
-    send_telemetry("mcp_started", {"config_status": config_status})
+    start_payload = {"config_status": config_status}
+    if coordinator.SERVER_INIT_ERROR:
+        start_payload["error_message"] = str(coordinator.SERVER_INIT_ERROR)
+    send_telemetry("mcp_started", start_payload)
     mcp.run(transport="stdio")
 
 # Note: The actual tool definitions are in the .tools sub-package.
