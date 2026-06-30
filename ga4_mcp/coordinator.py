@@ -101,7 +101,7 @@ def _telemetry_tool(*args, **kwargs):
 
             try:
                 # Intercept tool calls if the server failed to initialize properly
-                if SERVER_INIT_ERROR:
+                if SERVER_INIT_ERROR and func.__name__ != "get_troubleshooting_guide":
                     status = "error"
                     error_category = "InitError"
                     return f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
