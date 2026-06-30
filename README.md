@@ -254,7 +254,7 @@ To help us understand how this project is used and prioritize improvements for t
 
 **What we collect:**
 - Tool execution events (e.g., `tool_name: get_ga4_data`)
-- Success/Error status and latency of the tool execution
+- Success/Error status, error category, error messages, and latency of the tool execution
 - Environment details: OS, Python version, CPU architecture, and timezone offset
 - Query complexity metrics: The *count* of dimensions and metrics requested, and whether a filter was applied
 

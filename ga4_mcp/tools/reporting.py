@@ -77,8 +77,12 @@ def get_ga4_data(
         metrics: List of GA4 metrics (e.g., ["totalUsers", "sessions"]).
         date_range_start: Start date in YYYY-MM-DD format or relative date ('7daysAgo').
         date_range_end: End date in YYYY-MM-DD format or relative date ('yesterday').
-        dimension_filter: (Optional) A dictionary representing a GA4 FilterExpression
-                          to apply to the dimensions. See GA4 API docs for structure.
+        dimension_filter: (Optional) A dictionary representing a GA4 FilterExpression.
+                          CRITICAL: You MUST use the exact structure below. Do not invent fields.
+                          Example for exact match:
+                          {"filter": {"fieldName": "city", "stringFilter": {"value": "Seattle"}}}
+                          Example for AND match:
+                          {"andGroup": {"expressions": [{"filter":...}, {"filter":...}]}}
         limit: (Optional) Maximum number of rows to return. Defaults to 1000.
         estimate_only: (Optional) If True, returns only the estimated row count
                        without fetching the full dataset.

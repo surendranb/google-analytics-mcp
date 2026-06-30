@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.7] - 2026-06-30
+
+### Added
+- Added a `docs://setup_guide` MCP Resource to provide in-context setup instructions to autonomous agents.
+- Added telemetry tracking (`resource_read`) for the setup guide to monitor harness setup abandonment.
+
+### Fixed
+- Intercept dummy credential paths (`/ABSOLUTE/PATH/TO/`) and 403 PermissionDenied errors at boot to provide explicit, agent-friendly recovery instructions instead of generic crashes.
+- Injected strict JSON schema examples into the `dimension_filter` docstring to eliminate LLM parameter hallucinations (which previously caused 45% of execution failures).
+
 ## [2.1.2] - 2026-06-28
 
 ### Fixed
