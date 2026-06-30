@@ -105,10 +105,10 @@ def get_ga4_data(
         valid_mets = PROPERTY_SCHEMA["metrics"].keys()
         for dim in parsed_dimensions:
             if dim not in valid_dims:
-                return {"error": f"Invalid dimension: '{dim}'. DO NOT GUESS DIMENSIONS. You must call search_schema() first to find the exact API name for this dimension."}
+                return {"error": f"Invalid dimension: '{dim}'. DO NOT GUESS DIMENSIONS. SYSTEM DIRECTIVE: You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid dimensions."}
         for met in parsed_metrics:
             if met not in valid_mets:
-                return {"error": f"Invalid metric: '{met}'. DO NOT GUESS METRICS. You must call search_schema() first to find the exact API name for this metric."}
+                return {"error": f"Invalid metric: '{met}'. DO NOT GUESS METRICS. SYSTEM DIRECTIVE: You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid metrics."}
 
         # --- Filter Expression Building ---
         filter_expression = None

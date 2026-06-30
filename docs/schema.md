@@ -81,3 +81,8 @@ If you need to combine multiple filters, you MUST use `andGroup` or `orGroup`. N
 ```
 
 **CRITICAL RULE:** A filter expression can ONLY have ONE top-level key: either `filter`, `andGroup`, `orGroup`, or `notExpression`.
+
+## 5. Finding Valid Dimensions and Metrics
+If you encounter an "Invalid dimension" or "Invalid metric" error, it means you guessed an API name that does not exist in GA4. 
+You MUST use the `search_schema()` tool to find the exact API name.
+For example, if the user asks for "conversions", call `search_schema(keyword="conversions")` to discover that the correct GA4 API metric is `keyEvents`.
