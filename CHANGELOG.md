@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.9] - 2026-06-30
+
+### Changed
+- Expanded the `docs://setup_guide` resource into a comprehensive troubleshooting manual that covers missing environment variables, dummy path copy-paste traps, invalid JSON file paths, IAM Permission Denied errors, and expired ADC tokens.
+
+### Fixed
+- The instruction to read the `docs://setup_guide` resource is now appended to *all* boot-time configuration errors (previously it was only triggered by 403s and dummy paths), ensuring AI agents always know where to look to help the user fix their setup.
+
 ## [2.1.8] - 2026-06-30
 
 ### Fixed

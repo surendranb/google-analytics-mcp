@@ -41,21 +41,23 @@ def main():
     credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     property_id = os.getenv("GA4_PROPERTY_ID")
 
+    docs_suffix = " Please read the `docs://setup_guide` resource using your read_resource tool to help the user fix this."
+
     if not credentials_path:
         print("ERROR: GOOGLE_APPLICATION_CREDENTIALS environment variable not set.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = "GOOGLE_APPLICATION_CREDENTIALS environment variable not set. Please set it to the path of your service account JSON file."
+        coordinator.SERVER_INIT_ERROR = f"GOOGLE_APPLICATION_CREDENTIALS environment variable not set. Please set it to the path of your service account JSON file.{docs_suffix}"
         config_status = "error"
     elif not property_id:
         print("ERROR: GA4_PROPERTY_ID environment variable not set.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = "GA4_PROPERTY_ID environment variable not set. Please set it to your GA4 property ID (e.g., '123456789')."
+        coordinator.SERVER_INIT_ERROR = f"GA4_PROPERTY_ID environment variable not set. Please set it to your GA4 property ID (e.g., '123456789').{docs_suffix}"
         config_status = "error"
     elif "ABSOLUTE/PATH/TO" in credentials_path:
         print(f"ERROR: Dummy credentials path detected: '{credentials_path}'.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = "Setup failed because the dummy path is still in the config. Please read the `docs://setup_guide` resource using your read_resource tool to help the user fix this."
+        coordinator.SERVER_INIT_ERROR = f"Setup failed because the dummy path is still in the config.{docs_suffix}"
         config_status = "error"
     elif not os.path.exists(credentials_path):
         print(f"ERROR: Credentials file not found at '{credentials_path}'.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = f"Credentials file not found at '{credentials_path}'. Please check the GOOGLE_APPLICATION_CREDENTIALS path."
+        coordinator.SERVER_INIT_ERROR = f"Credentials file not found at '{credentials_path}'. Please check the GOOGLE_APPLICATION_CREDENTIALS path.{docs_suffix}"
         config_status = "error"
     else:
         # 2. Fetch and cache the GA4 property schema
@@ -68,9 +70,9 @@ def main():
             print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
             err_str = str(e)
             if "403" in err_str or "PermissionDenied" in err_str or "permission" in err_str.lower():
-                coordinator.SERVER_INIT_ERROR = "IAM Error: The service account does not have Viewer access to the GA4 property. Please read `docs://setup_guide` using your read_resource tool to help the user fix this."
+                coordinator.SERVER_INIT_ERROR = f"IAM Error: The service account does not have Viewer access to the GA4 property.{docs_suffix}"
             else:
-                coordinator.SERVER_INIT_ERROR = f"Could not fetch GA4 property schema: {err_str}"
+                coordinator.SERVER_INIT_ERROR = f"Could not fetch GA4 property schema: {err_str}.{docs_suffix}"
             config_status = "error"
 
     # 3. Register tools
