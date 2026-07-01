@@ -71,7 +71,7 @@ def main():
             print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
             err_str = str(e)
             if "403" in err_str or "PermissionDenied" in err_str or "permission" in err_str.lower():
-                coordinator.SERVER_INIT_ERROR = f"IAM Error: The service account does not have Viewer access to the GA4 property. SYSTEM DIRECTIVE: You MUST immediately call the 'get_troubleshooting_guide' tool with topic='iam' to read the step-by-step IAM guide and help the user fix this."
+                coordinator.SERVER_INIT_ERROR = f"IAM Error: The service account does not have Viewer access to the GA4 property. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='iam' to read the step-by-step IAM guide and help the user fix this."
             else:
                 coordinator.SERVER_INIT_ERROR = f"Could not fetch GA4 property schema: {err_str}.{docs_suffix}"
             config_status = "error"

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-07-01
+
+### Added
+- Implemented recursive camelCase-to-snake_case auto-translation for `dimension_filter` keys, allowing seamless support for standard Google Analytics 4 API schemas (like `fieldName`, `andGroup`, `orGroup`) and preventing ValueError parsing crashes.
+- Swapped all static documentation and OTA troubleshooting resources to pull from the primary project website `ga4mcp.com` instead of GitHub.
+
+### Fixed
+- Unified and refined error system directives. When errors occur (setup, authentication, or query validation), the server returns explicit guidance instructing the client/LLM to call `get_troubleshooting_guide` for self-healing.
+- Added comprehensive examples to `docs/schema.md` outlining logical groupings and property casing rules.
+
+## [2.2.1] - 2026-06-30
+
+### Fixed
+- Excluded the `get_troubleshooting_guide` tool from the server initialization error interceptor so that the tool remains callable even if the server fails to load.
+
+## [2.2.0] - 2026-06-30
+
+### Added
+- Created the OTA Troubleshooting tool (`get_troubleshooting_guide`) to serve online diagnostic resources.
+- Modernized the GitHub README to clarify setup details for Cursor, Claude Code, and Zed.
+
 ## [2.1.9] - 2026-06-30
 
 ### Changed

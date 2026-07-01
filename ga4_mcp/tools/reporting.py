@@ -27,6 +27,17 @@ from ga4_mcp.coordinator import mcp
 # This global variable will be populated by the server on startup.
 PROPERTY_SCHEMA = None
 
+def _camel_to_snake(name: str) -> str:
+    import re
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
+
+def _convert_keys_to_snake(d):
+    if isinstance(d, dict):
+        return {_camel_to_snake(k): _convert_keys_to_snake(v) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [_convert_keys_to_snake(x) for x in d]
+    return d
+
 def _get_smart_sorting(dimensions, metrics):
     """Determine optimal sorting strategy for relevance."""
     order_bys = []
@@ -39,6 +50,7 @@ def _get_smart_sorting(dimensions, metrics):
 def _should_aggregate(dimensions, metrics):
     """Detect when server-side aggregation would be beneficial."""
     return len(dimensions) == 0 or "date" not in dimensions
+
 
 @mcp.tool()
 def get_ga4_data(
@@ -55,9 +67,11 @@ def get_ga4_data(
     """
     Retrieve GA4 data with built-in intelligence for better and safer results.
 
-    This tool is a powerful wrapper around the Google Analytics Data API. It not only
-    fetches data but also includes "smart" features to protect against context window
-    overloads and to provide more relevant results by default.
+    CRITICAL WORKFLOW INSTRUCTIONS FOR AI AGENTS:
+    To ensure deterministic and successful data retrieval, you MUST follow this sequence:
+    1. DISCOVER: NEVER guess dimension or metric names. Always call `search_schema`, `list_dimension_categories`, or `list_metric_categories` FIRST to verify the exact API names available for this property.
+    2. RETRIEVE: Call this tool (`get_ga4_data`) using the verified dimensions and metrics.
+    3. TROUBLESHOOT: If you receive a SchemaError, an Invalid Dimension/Metric error, or an error about `dimension_filter` structure, DO NOT RETRY BY GUESSING. You MUST immediately call `get_troubleshooting_guide(topic='schema')` to learn the correct structure and available fields.
 
     **Smart Features:**
     - **Data Volume Protection:** Before running a query that could produce a huge
@@ -73,13 +87,14 @@ def get_ga4_data(
       relevant data at the top.
 
     Args:
-        dimensions: List of GA4 dimensions (e.g., ["date", "city"]).
-        metrics: List of GA4 metrics (e.g., ["totalUsers", "sessions"]).
+        dimensions: List of GA4 dimensions (e.g., ["date", "city"]). MUST be verified via schema tools.
+        metrics: List of GA4 metrics (e.g., ["totalUsers", "sessions"]). MUST be verified via schema tools.
         date_range_start: Start date in YYYY-MM-DD format or relative date ('7daysAgo').
         date_range_end: End date in YYYY-MM-DD format or relative date ('yesterday').
         dimension_filter: (Optional) A dictionary representing a GA4 FilterExpression.
-                          CRITICAL: You MUST use the exact structure. Do not invent fields.
-                          If you receive an error about dimension_filter structure, you MUST immediately call get_troubleshooting_guide(topic='schema').
+                          CRITICAL: The GA4 API requires a very specific, nested dictionary structure.
+                          DO NOT GUESS the structure (e.g., do not use `field_name`). If you are unsure how
+                          to format a FilterExpression, call get_troubleshooting_guide(topic='schema') first.
         limit: (Optional) Maximum number of rows to return. Defaults to 1000.
         estimate_only: (Optional) If True, returns only the estimated row count
                        without fetching the full dataset.
@@ -105,22 +120,20 @@ def get_ga4_data(
         valid_mets = PROPERTY_SCHEMA["metrics"].keys()
         for dim in parsed_dimensions:
             if dim not in valid_dims:
-                return {"error": f"Invalid dimension: '{dim}'. DO NOT GUESS DIMENSIONS. SYSTEM DIRECTIVE: You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid dimensions."}
+                return {"error": f"Invalid dimension: '{dim}'. DO NOT GUESS DIMENSIONS. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid dimensions."}
         for met in parsed_metrics:
             if met not in valid_mets:
-                return {"error": f"Invalid metric: '{met}'. DO NOT GUESS METRICS. SYSTEM DIRECTIVE: You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid metrics."}
+                return {"error": f"Invalid metric: '{met}'. DO NOT GUESS METRICS. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid metrics."}
 
         # --- Filter Expression Building ---
         filter_expression = None
         if dimension_filter:
-            # The original script had a complex recursive builder. For this refactoring,
-            # we'll rely on the user passing a correctly structured dict, similar to the
-            # official google/analytics-mcp project. This simplifies the code greatly.
-            # A more robust builder can be added back later if needed.
             try:
-                filter_expression = FilterExpression(dimension_filter)
+                # Recursively translate camelCase keys to snake_case for proto-plus compatibility
+                snake_filter = _convert_keys_to_snake(dimension_filter)
+                filter_expression = FilterExpression(snake_filter)
             except Exception as e:
-                return {"error": f"Invalid dimension_filter structure: {e}. SYSTEM DIRECTIVE: You MUST immediately call get_troubleshooting_guide(topic='schema') to learn the correct structure."}
+                return {"error": f"Invalid dimension_filter structure: {e}. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='schema') to learn the correct structure."}
 
         # --- API Client and Request Objects ---
         client = BetaAnalyticsDataClient()
@@ -197,6 +210,6 @@ def get_ga4_data(
             error_message += f" Details: {e.details()}"
             
         if "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
-            error_message += " SYSTEM DIRECTIVE: You MUST immediately call get_troubleshooting_guide(topic='iam') to fix this."
+            error_message += " SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='iam') to read the step-by-step IAM permissions guide and help the user resolve this."
             
         return {"error": error_message}
