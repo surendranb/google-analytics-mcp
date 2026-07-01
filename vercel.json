@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npx -y @sourcey/cli build",
+  "outputDirectory": ".sourcey/dist",
+  "framework": null
+}
