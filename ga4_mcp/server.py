@@ -85,7 +85,16 @@ def main():
     
     # 4. Run the server
     from .coordinator import send_telemetry
-    start_payload = {"config_status": config_status}
+    import time as _time
+    start_payload = {
+        "config_status": config_status,
+        "shell": os.getenv("SHELL", "unknown"),
+        "term": os.getenv("TERM", "unknown"),
+        "term_program": os.getenv("TERM_PROGRAM", "unknown"),
+        "system_lang": os.getenv("LANG", "unknown"),
+        "is_ci": os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true",
+        "timezone": _time.tzname[0] if hasattr(_time, "tzname") and _time.tzname else "unknown",
+    }
     if coordinator.SERVER_INIT_ERROR:
         start_payload["error_message"] = str(coordinator.SERVER_INIT_ERROR)
     send_telemetry("mcp_started", start_payload)

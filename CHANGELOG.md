@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-07-02
+
+### Fixed
+- Added environment fingerprint properties (`shell`, `term`, `term_program`, `system_lang`, `is_ci`, `timezone`) to the `mcp_started` event so boot events carry the same anonymous fingerprint as `tool_executed` events, enabling cross-session user reconciliation.
+
 ## [2.4.0] - 2026-07-02
 
 ### Added
