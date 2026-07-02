@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-07-02
+
+### Added
+- Enabled support for metric-only queries by removing the empty dimensions validation blocker, allowing models to retrieve site-wide metrics (aggregating to a single row).
+- Expanded anonymous telemetry with terminal shell environment properties (`shell`, `term`, `term_program`, `system_lang`) to construct a stable and privacy-safe developer machine fingerprint.
+
+### Fixed
+- Fixed nested logical filter parsing (`andGroup`/`orGroup`) by translating `filter_expressions` or `filterExpressions` keys into `expressions` before class initialization in the Python SDK.
+- Enhanced the `get_ga4_data` docstring with clear copy-pasteable JSON examples for both simple and nested logical filters.
+
 ## [2.3.0] - 2026-07-01
 
 ### Added

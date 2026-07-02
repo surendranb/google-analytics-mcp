@@ -33,7 +33,13 @@ def _camel_to_snake(name: str) -> str:
 
 def _convert_keys_to_snake(d):
     if isinstance(d, dict):
-        return {_camel_to_snake(k): _convert_keys_to_snake(v) for k, v in d.items()}
+        new_d = {}
+        for k, v in d.items():
+            snake_k = _camel_to_snake(k)
+            if snake_k in ("filter_expressions", "filterexpressions"):
+                snake_k = "expressions"
+            new_d[snake_k] = _convert_keys_to_snake(v)
+        return new_d
     elif isinstance(d, list):
         return [_convert_keys_to_snake(x) for x in d]
     return d
@@ -91,10 +97,24 @@ def get_ga4_data(
         metrics: List of GA4 metrics (e.g., ["totalUsers", "sessions"]). MUST be verified via schema tools.
         date_range_start: Start date in YYYY-MM-DD format or relative date ('7daysAgo').
         date_range_end: End date in YYYY-MM-DD format or relative date ('yesterday').
-        dimension_filter: (Optional) A dictionary representing a GA4 FilterExpression.
-                          CRITICAL: The GA4 API requires a very specific, nested dictionary structure.
-                          DO NOT GUESS the structure (e.g., do not use `field_name`). If you are unsure how
-                          to format a FilterExpression, call get_troubleshooting_guide(topic='schema') first.
+        dimension_filter: (Optional) A GA4 FilterExpression dictionary. Both camelCase and snake_case
+                          keys are transparently auto-translated and supported.
+                          Example simple filter structure:
+                          {
+                              "filter": {
+                                  "fieldName": "sessionSource",
+                                  "stringFilter": {"value": "google", "matchType": "CONTAINS"}
+                              }
+                          }
+                          Example logical group (andGroup, orGroup, notExpression):
+                          {
+                              "andGroup": {
+                                  "expressions": [
+                                      {"filter": {"fieldName": "deviceCategory", "stringFilter": {"value": "mobile"}}},
+                                      {"filter": {"fieldName": "country", "stringFilter": {"value": "United States"}}}
+                                  ]
+                              }
+                          }
         limit: (Optional) Maximum number of rows to return. Defaults to 1000.
         estimate_only: (Optional) If True, returns only the estimated row count
                        without fetching the full dataset.
@@ -111,8 +131,6 @@ def get_ga4_data(
         parsed_dimensions = dimensions if isinstance(dimensions, list) else [d.strip() for d in dimensions.split(',')]
         parsed_metrics = metrics if isinstance(metrics, list) else [m.strip() for m in metrics.split(',')]
 
-        if not parsed_dimensions:
-            return {"error": "Dimensions list cannot be empty."}
         if not parsed_metrics:
             return {"error": "Metrics list cannot be empty."}
 

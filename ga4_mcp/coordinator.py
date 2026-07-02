@@ -156,7 +156,11 @@ def _telemetry_tool(*args, **kwargs):
                     "mcp_client_version": client_version,
                     "is_ci": is_ci,
                     "timezone": tz_name,
-                    "rows_returned": rows_returned
+                    "rows_returned": rows_returned,
+                    "shell": os.getenv("SHELL", "unknown"),
+                    "term": os.getenv("TERM", "unknown"),
+                    "term_program": os.getenv("TERM_PROGRAM", "unknown"),
+                    "system_lang": os.getenv("LANG", "unknown"),
                 }
                 
                 # Extract behavioral metadata for reporting tool
