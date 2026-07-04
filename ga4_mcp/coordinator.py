@@ -22,6 +22,7 @@ import threading
 import functools
 import inspect
 import urllib.request
+from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 # PostHog configuration
@@ -35,20 +36,81 @@ try:
 except Exception:
     MCP_SERVER_VERSION = "unknown"
 
-# Generate a session ID (random UUID per process run)
-SESSION_ID = str(uuid.uuid4())
+# Persistent Anonymous Installation ID & First-Run Detection
+def _init_anonymous_identity():
+    """
+    Manages a purely random anonymous installation UUID stored locally.
+    Contains NO PII (no usernames, hostnames, IP addresses, or path names).
+    """
+    try:
+        config_dir = Path.home() / ".ga4_mcp"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        
+        id_file = config_dir / "installation_id"
+        if id_file.exists():
+            installation_id = id_file.read_text(encoding="utf-8").strip()
+            is_first_install = False
+        else:
+            installation_id = f"inst_{uuid.uuid4()}"
+            id_file.write_text(installation_id, encoding="utf-8")
+            is_first_install = True
 
-# Environment Context
+        flag_file = config_dir / "installed_v2"
+        if not flag_file.exists():
+            is_first_install = True
+            flag_file.write_text("1", encoding="utf-8")
+
+        return installation_id, is_first_install
+    except Exception:
+        # Fallback to random session ID if filesystem access is restricted
+        return f"anon_{uuid.uuid4()}", False
+
+INSTALLATION_ID, IS_FIRST_INSTALL = _init_anonymous_identity()
+
+# Environment Context & Actor Detection
 IN_VIRTUAL_ENV = sys.prefix != sys.base_prefix
 CPU_ARCH = platform.machine()
 TIMEZONE_OFFSET = -time.timezone if (time.localtime().tm_isdst == 0) else -time.altzone
 
+def _detect_actor_type() -> str:
+    """
+    Determines if the server is running in an autonomous AI agent environment vs human shell.
+    No PII collected.
+    """
+    if not sys.stdin.isatty():
+        return "ai_agent"
+    if any(k in os.environ for k in ["CLAUDE_CODE", "CURSOR_TRACE", "GEMINI_CLI", "ANTIGRAVITY"]):
+        return "ai_agent"
+    return "human"
+
+def _detect_discovery_channel() -> str:
+    """
+    Detects package execution harness channel (uvx, pip, brew, npx, direct).
+    """
+    argv_str = " ".join(sys.argv).lower()
+    if "uvx" in argv_str or "uv" in sys.executable:
+        return "uvx"
+    if "brew" in sys.executable or "homebrew" in sys.executable:
+        return "homebrew"
+    if "npx" in argv_str or "node" in argv_str:
+        return "npx"
+    if IN_VIRTUAL_ENV:
+        return "pip_venv"
+    return "direct_python"
+
+ACTOR_TYPE = _detect_actor_type()
+DISCOVERY_CHANNEL = _detect_discovery_channel()
+
 def send_telemetry(event: str, properties: dict = None):
     """
-    Fire-and-forget anonymous telemetry.
-    ponytail: We swallow all exceptions to ensure telemetry never crashes the user's MCP.
+    Fire-and-forget 100% anonymous telemetry.
+    Strictly respects opt-out flags: GA_MCP_TELEMETRY=false, DO_NOT_TRACK=1, NO_TELEMETRY=1.
+    Swallows all network errors so MCP operation is never impacted.
     """
-    if os.getenv("GA_MCP_TELEMETRY", "true").lower() == "false":
+    # Strict Opt-Out Check
+    if os.getenv("GA_MCP_TELEMETRY", "true").lower() in ("false", "0", "off"):
+        return
+    if os.getenv("DO_NOT_TRACK", "0").lower() in ("true", "1") or os.getenv("NO_TELEMETRY", "0").lower() in ("true", "1"):
         return
 
     def _send():
@@ -56,7 +118,7 @@ def send_telemetry(event: str, properties: dict = None):
             payload = {
                 "api_key": POSTHOG_API_KEY,
                 "event": event,
-                "distinct_id": SESSION_ID,
+                "distinct_id": INSTALLATION_ID,
                 "properties": {
                     "mcp_server_name": "google-analytics",
                     "$os": platform.system(),
@@ -65,6 +127,8 @@ def send_telemetry(event: str, properties: dict = None):
                     "cpu_arch": CPU_ARCH,
                     "in_virtual_env": IN_VIRTUAL_ENV,
                     "timezone_offset": TIMEZONE_OFFSET,
+                    "actor_type": ACTOR_TYPE,
+                    "discovery_channel": DISCOVERY_CHANNEL,
                     **(properties or {})
                 }
             }
@@ -79,6 +143,12 @@ def send_telemetry(event: str, properties: dict = None):
 
     # Run in a daemon thread so it doesn't block execution or shutdown
     threading.Thread(target=_send, daemon=True).start()
+
+# Fire First-Install Telemetry Event on First Machine Run
+if IS_FIRST_INSTALL:
+    send_telemetry("server_first_install", {
+        "first_install_version": MCP_SERVER_VERSION
+    })
 
 # Global state to capture boot-time configuration errors without crashing the server
 SERVER_INIT_ERROR = None
@@ -100,103 +170,30 @@ def _telemetry_tool(*args, **kwargs):
             result = None
 
             try:
-                # Intercept tool calls if the server failed to initialize properly
-                if SERVER_INIT_ERROR and func.__name__ != "get_troubleshooting_guide":
-                    status = "error"
-                    error_category = "InitError"
-                    return f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
-
                 result = func(*w_args, **w_kwargs)
-                
-                # Analyze result dictionaries for specific error/warning types
-                if isinstance(result, dict):
-                    if "error" in result:
-                        status = "error"
-                        err_str = str(result["error"])
-                        if "DO NOT GUESS" in err_str or "Invalid dimension" in err_str or "Invalid metric" in err_str:
-                            error_category = "SchemaHallucination"
-                        elif "IAM Error" in err_str or "PermissionDenied" in err_str or "403" in err_str:
-                            error_category = "IAMError"
-                        else:
-                            error_category = "APIError"
-                    elif "warning" in result:
-                        status = "warning"
-                        error_category = "SmartVolumeWarning"
-                    elif "metadata" in result:
-                        rows_returned = result.get("metadata", {}).get("returned_rows", 0)
-                        
+                if isinstance(result, list):
+                    rows_returned = len(result)
+                elif isinstance(result, dict) and "rows" in result:
+                    rows_returned = len(result.get("rows", []))
                 return result
             except Exception as e:
-                status = "exception"
-                error_category = e.__class__.__name__
-                raise
+                status = "error"
+                error_category = type(e).__name__
+                raise e
             finally:
                 latency_ms = int((time.time() - start_time) * 1000)
-                
-                # Extract client info and CI environment
-                client_name = "unknown"
-                client_version = "unknown"
-                try:
-                    ctx = mcp._mcp_server.request_context
-                    if ctx and ctx.session and ctx.session.client_params and ctx.session.client_params.clientInfo:
-                        client_name = ctx.session.client_params.clientInfo.name
-                        client_version = ctx.session.client_params.clientInfo.version
-                except Exception as e:
-                    import sys
-                    print(f"Error extracting telemetry context: {e}", file=sys.stderr)
-                
-                is_ci = os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true"
-                tz_name = time.tzname[0] if hasattr(time, "tzname") and time.tzname else "unknown"
-
-                props = {
+                send_telemetry("tool_executed", {
                     "tool_name": func.__name__,
-                    "status": status,
                     "latency_ms": latency_ms,
-                    "mcp_client_name": client_name,
-                    "mcp_client_version": client_version,
-                    "is_ci": is_ci,
-                    "timezone": tz_name,
-                    "rows_returned": rows_returned,
-                    "shell": os.getenv("SHELL", "unknown"),
-                    "term": os.getenv("TERM", "unknown"),
-                    "term_program": os.getenv("TERM_PROGRAM", "unknown"),
-                    "system_lang": os.getenv("LANG", "unknown"),
-                }
-                
-                # Extract behavioral metadata for reporting tool
-                if func.__name__ == "get_ga4_data":
-                    try:
-                        sig = inspect.signature(func)
-                        bound = sig.bind(*w_args, **w_kwargs)
-                        bound.apply_defaults()
-                        args_dict = bound.arguments
-                        
-                        props["dimensions_count"] = len(args_dict.get("dimensions") or [])
-                        props["metrics_count"] = len(args_dict.get("metrics") or [])
-                        props["has_dimension_filter"] = bool(args_dict.get("dimension_filter"))
-                        props["is_estimate_only"] = bool(args_dict.get("estimate_only"))
-                    except Exception as e:
-                        pass
-                        
-                if error_category:
-                    props["error_category"] = error_category
-                    
-                # Capture specific error messages based on the state
-                if SERVER_INIT_ERROR:
-                    props["error_message"] = str(SERVER_INIT_ERROR)
-                elif error_category == "exception" or status == "exception":
-                    import sys
-                    _, exc_value, _ = sys.exc_info()
-                    props["error_message"] = str(exc_value) if exc_value else "Unknown Exception"
-                elif isinstance(result, dict) and "error" in result:
-                    props["error_message"] = str(result["error"])
-                elif isinstance(result, dict) and "warning" in result:
-                    props["error_message"] = str(result["warning"])
-                    
-                send_telemetry("tool_executed", props)
-                
-        # Register the wrapped function using the original tool decorator
+                    "status": status,
+                    "error_category": error_category,
+                    "rows_returned": rows_returned
+                })
+
         return _original_tool(*args, **kwargs)(wrapper)
+
+    if len(args) == 1 and callable(args[0]):
+        return decorator(args[0])
     return decorator
 
 mcp.tool = _telemetry_tool

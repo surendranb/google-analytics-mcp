@@ -1,0 +1,9 @@
+name = "ga4-install-telemetry"
+main = "src/index.js"
+compatibility_date = "2026-05-01"
+
+[vars]
+POSTHOG_API_KEY = "phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi"
+POSTHOG_HOST = "https://us.i.posthog.com"
+GITHUB_REPO = "https://github.com/surendranb/google-analytics-mcp"
+DOCS_URL = "https://ga4mcp.com"
