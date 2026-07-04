@@ -72,6 +72,41 @@ IN_VIRTUAL_ENV = sys.prefix != sys.base_prefix
 CPU_ARCH = platform.machine()
 TIMEZONE_OFFSET = -time.timezone if (time.localtime().tm_isdst == 0) else -time.altzone
 
+def _detect_agent_name() -> str:
+    """
+    Detects specific AI Agent client name from environment variables and parent process.
+    Zero PII collected.
+    """
+    env = os.environ
+    if "CLAUDE_CODE" in env or "CLAUDE_SESSION_ID" in env:
+        return "claude_code"
+    if "CURSOR_TRACE" in env or "CURSOR_VERSION" in env or "CURSOR_SESSION_ID" in env:
+        return "cursor"
+    if "GEMINI_CLI" in env or "GEMINI_EXTENSION" in env:
+        return "gemini_cli"
+    if "WINDSURF_VERSION" in env or any(k.startswith("CODEIUM_") for k in env):
+        return "windsurf"
+    if "ANTIGRAVITY" in env or "AGY_SESSION" in env:
+        return "antigravity"
+    if "VSCODE_PID" in env or "VSCODE_IPC_HOOK" in env:
+        return "vscode"
+    if "GITHUB_ACTIONS" in env or "CI" in env:
+        return "ci_runner"
+
+    try:
+        ppid = os.getppid()
+        import subprocess
+        if platform.system() in ("Darwin", "Linux"):
+            cmd = subprocess.check_output(["ps", "-p", str(ppid), "-o", "comm="], text=True, timeout=1).strip().lower()
+            if "claude" in cmd: return "claude_code"
+            if "cursor" in cmd: return "cursor"
+            if "gemini" in cmd: return "gemini_cli"
+            if "windsurf" in cmd: return "windsurf"
+    except Exception:
+        pass
+
+    return "generic_agent" if not sys.stdin.isatty() else "human_terminal"
+
 def _detect_actor_type() -> str:
     """
     Determines if the server is running in an autonomous AI agent environment vs human shell.
@@ -99,6 +134,7 @@ def _detect_discovery_channel() -> str:
     return "direct_python"
 
 ACTOR_TYPE = _detect_actor_type()
+AGENT_NAME = _detect_agent_name()
 DISCOVERY_CHANNEL = _detect_discovery_channel()
 
 def send_telemetry(event: str, properties: dict = None):
@@ -128,6 +164,7 @@ def send_telemetry(event: str, properties: dict = None):
                     "in_virtual_env": IN_VIRTUAL_ENV,
                     "timezone_offset": TIMEZONE_OFFSET,
                     "actor_type": ACTOR_TYPE,
+                    "agent_name": AGENT_NAME,
                     "discovery_channel": DISCOVERY_CHANNEL,
                     **(properties or {})
                 }
@@ -147,7 +184,8 @@ def send_telemetry(event: str, properties: dict = None):
 # Fire First-Install Telemetry Event on First Machine Run
 if IS_FIRST_INSTALL:
     send_telemetry("server_first_install", {
-        "first_install_version": MCP_SERVER_VERSION
+        "first_install_version": MCP_SERVER_VERSION,
+        "agent_name": AGENT_NAME
     })
 
 # Global state to capture boot-time configuration errors without crashing the server
@@ -187,7 +225,8 @@ def _telemetry_tool(*args, **kwargs):
                     "latency_ms": latency_ms,
                     "status": status,
                     "error_category": error_category,
-                    "rows_returned": rows_returned
+                    "rows_returned": rows_returned,
+                    "agent_name": AGENT_NAME
                 })
 
         return _original_tool(*args, **kwargs)(wrapper)
