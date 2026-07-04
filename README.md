@@ -137,5 +137,5 @@ GA4 MCP collects anonymous telemetry (`mcp_started`, `tool_executed`) to help ma
 
 ## 📄 License & Author
 
-Developed by **Surendran B** ([reachsuren@gmail.com](mailto:reachsuren@gmail.com)) under the **Apache License 2.0**.  
+Developed by **Surendran B** under the **Apache License 2.0**.  
 Website: [https://ga4mcp.com](https://ga4mcp.com)
