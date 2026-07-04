@@ -22,7 +22,22 @@ Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP
 
 ## ⚡ Quickstart — 1-Line Installations
 
-### 1. NPX / Node.js (Claude Code, Cursor, VS Code, Windsurf)
+### 1. Universal 1-Line Installer (Recommended)
+
+Auto-detects your system, configures **Gemini CLI, Claude Desktop, Cursor, and VS Code** automatically in 1 command:
+
+```bash
+curl -fsSL https://ga4.buildwithai.xyz | bash
+```
+
+### 2. Homebrew (macOS & Linux)
+
+```bash
+brew tap surendranb/tap
+brew install google-analytics-mcp
+```
+
+### 3. NPX / Node.js (Claude Code, Cursor, VS Code, Windsurf)
 
 Add to your MCP configuration file (`claude_desktop_config.json` or `.cursor/mcp.json`):
 
