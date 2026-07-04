@@ -1,0 +1,11 @@
+tools:
+  - name: get_ga4_data
+    description: "Run Google Analytics 4 report queries for dimensions, metrics, and date ranges."
+  - name: search_schema
+    description: "Search GA4 dimension and metric API names by keyword."
+  - name: get_property_schema
+    description: "Fetch all available dimensions and metrics for a GA4 property."
+  - name: list_metric_categories
+    description: "List metric categories in GA4."
+  - name: list_dimension_categories
+    description: "List dimension categories in GA4."

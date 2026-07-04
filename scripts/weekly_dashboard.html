@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GA4 MCP — Weekly Telemetry & Release Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0d1117;
+      --bg-card: #161b22;
+      --border: #30363d;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-purple: #bc8cff;
+      --accent-orange: #d29922;
+      --accent-red: #f85149;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    .badge {
+      background-color: rgba(56, 139, 253, 0.15);
+      color: var(--accent-blue);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 1px solid rgba(56, 139, 253, 0.4);
+    }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .card-metric { font-size: 1.875rem; font-weight: 700; color: #fff; }
+    .card-sub { font-size: 0.8rem; color: var(--accent-green); margin-top: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 0.5rem; }
+    th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-muted); font-weight: 500; }
+    tr:last-child td { border-bottom: none; }
+    .bar-container { width: 100%; background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .bar-fill { height: 100%; background-color: var(--accent-blue); border-radius: 4px; }
+    .bar-fill.green { background-color: var(--accent-green); }
+    .bar-fill.purple { background-color: var(--accent-purple); }
+    .bar-fill.orange { background-color: var(--accent-orange); }
+    .bar-fill.red { background-color: var(--accent-red); }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: rgba(255,255,255,0.08); padding: 0.1em 0.3em; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>GA4 MCP — Weekly Telemetry & Release Dashboard</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Period: Jun 28 – Jul 4, 2026 | Dataset: PostHog Project 489528</p>
+    </div>
+    <span class="badge">Active Version: 2.4.1 (87% Adoption)</span>
+  </header>
+
+  <!-- Key Metrics Grid -->
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-title">Total Server Boots</div>
+      <div class="card-metric">59,060</div>
+      <div class="card-sub">Peak: 13,349/day (Jul 3)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Success Rate</div>
+      <div class="card-metric">85.4%</div>
+      <div class="card-sub">↑ +21.4% since Jun 28 (64%)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Client</div>
+      <div class="card-metric">Claude Code</div>
+      <div class="card-sub">63.0% total tool calls (2,509)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Reach</div>
+      <div class="card-metric">15+ Countries</div>
+      <div class="card-sub">Top: UK, Portugal, US, Thailand, JP</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Daily Volume Sparkline Table -->
+    <div class="card">
+      <div class="card-title">Daily Server Boots & User Count</div>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Boots</th><th>Share</th><th>Visual</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2026-07-03</td><td>13,349</td><td>22.6%</td><td><div class="bar-container"><div class="bar-fill green" style="width: 100%;"></div></div></td></tr>
+          <tr><td>2026-07-02</td><td>12,556</td><td>21.3%</td><td><div class="bar-container"><div class="bar-fill green" style="width: 94%;"></div></div></td></tr>
+          <tr><td>2026-06-30</td><td>11,058</td><td>18.7%</td><td><div class="bar-container"><div class="bar-fill" style="width: 82%;"></div></div></td></tr>
+          <tr><td>2026-07-01</td><td>8,694</td><td>14.7%</td><td><div class="bar-container"><div class="bar-fill" style="width: 65%;"></div></div></td></tr>
+          <tr><td>2026-06-29</td><td>8,600</td><td>14.6%</td><td><div class="bar-container"><div class="bar-fill" style="width: 64%;"></div></div></td></tr>
+          <tr><td>2026-07-04 (Half)</td><td>3,682</td><td>6.2%</td><td><div class="bar-container"><div class="bar-fill purple" style="width: 27%;"></div></div></td></tr>
+          <tr><td>2026-06-28</td><td>1,121</td><td>1.9%</td><td><div class="bar-container"><div class="bar-fill" style="width: 8%;"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MCP Client Breakdown -->
+    <div class="card">
+      <div class="card-title">MCP Client Distribution (Tool Calls)</div>
+      <table>
+        <thead>
+          <tr><th>Client</th><th>Calls</th><th>Share</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>claude-code</code></td><td>2,509</td><td>63.0%</td></tr>
+          <tr><td><code>claude-ai</code></td><td>312</td><td>7.8%</td></tr>
+          <tr><td>Enterprise / Local Agent Modes</td><td>800+</td><td>20.1%</td></tr>
+          <tr><td><code>codex-mcp-client</code></td><td>144</td><td>3.6%</td></tr>
+          <tr><td><code>mcp</code> (generic)</td><td>92</td><td>2.3%</td></tr>
+          <tr><td><code>openclaw-bundle-mcp</code></td><td>52</td><td>1.3%</td></tr>
+          <tr><td><code>opencode</code> / <code>kiro</code> / <code>antigravity</code></td><td>89</td><td>2.2%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Tool Popularity -->
+    <div class="card">
+      <div class="card-title">Tool Popularity</div>
+      <table>
+        <thead>
+          <tr><th>Tool Name</th><th>Executions</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>get_ga4_data</code></td><td>3,229</td><td>Data Query</td></tr>
+          <tr><td><code>search_schema</code></td><td>395</td><td>Discovery</td></tr>
+          <tr><td><code>get_search_analytics</code></td><td>178</td><td>Search Console</td></tr>
+          <tr><td><code>list_metric_categories</code></td><td>78</td><td>Metadata</td></tr>
+          <tr><td><code>get_troubleshooting_guide</code></td><td>57</td><td>Self-Healing</td></tr>
+          <tr><td><code>list_dimension_categories</code></td><td>53</td><td>Metadata</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Health & Error Breakdown -->
+    <div class="card">
+      <div class="card-title">Error Categories & Self-Healing</div>
+      <table>
+        <thead>
+          <tr><th>Category</th><th>Count</th><th>Action / Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>SchemaHallucination</code></td><td>291</td><td>Defenses Active (Self-healing tool triggers)</td></tr>
+          <tr><td><code>InitError</code> (IAM / Env)</td><td>270</td><td>Troubleshooting guide self-heals 57+ sessions</td></tr>
+          <tr><td><code>APIError</code></td><td>117</td><td>Handled & wrapped in telemetry</td></tr>
+          <tr><td><code>TypeError</code> (list object)</td><td>25</td><td><span style="color:var(--accent-orange); font-weight:600;">Fixing in v2.5.0 (Saturday Release)</span></td></tr>
+          <tr><td><code>IAMError</code></td><td>2</td><td>Down from 35+ (94% reduction)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+    GA4 MCP Autonomous Analytics Pipeline • Built for Saturday Weekly Release Cycle
+  </footer>
+</body>
+</html>

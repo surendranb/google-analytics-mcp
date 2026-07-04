@@ -1,0 +1,21 @@
+# Smithery.ai Configuration Manifest for GA4 MCP
+startCommand:
+  type: stdio
+  command: "uvx"
+  args:
+    - "--from"
+    - "google-analytics-mcp"
+    - "ga4-mcp-server"
+
+configSchema:
+  type: object
+  required:
+    - GOOGLE_APPLICATION_CREDENTIALS
+    - GA4_PROPERTY_ID
+  properties:
+    GOOGLE_APPLICATION_CREDENTIALS:
+      type: string
+      description: "Absolute path to your Google Cloud service account JSON key file with GA4 Viewer access."
+    GA4_PROPERTY_ID:
+      type: string
+      description: "Numeric GA4 Property ID to query (e.g. 123456789)."

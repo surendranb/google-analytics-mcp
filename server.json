@@ -7,11 +7,36 @@
     "url": "https://github.com/surendranb/google-analytics-mcp",
     "source": "github"
   },
-  "version": "2.4.1",
+  "version": "2.5.0",
   "packages": [
     {
       "registry_type": "pypi",
       "registry_base_url": "https://pypi.org",
+      "identifier": "google-analytics-mcp",
+      "version": "2.5.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [
+        {
+          "name": "GOOGLE_APPLICATION_CREDENTIALS",
+          "description": "Absolute path to your Google Cloud service account JSON key with GA4 property access.",
+          "is_required": true,
+          "format": "string",
+          "is_secret": true
+        },
+        {
+          "name": "GA4_PROPERTY_ID",
+          "description": "Numeric GA4 Property ID to query, for example 123456789.",
+          "is_required": true,
+          "format": "string",
+          "is_secret": false
+        }
+      ]
+    },
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
       "identifier": "google-analytics-mcp",
       "version": "2.4.1",
       "transport": {
@@ -19,18 +44,18 @@
       },
       "environment_variables": [
         {
+          "name": "GOOGLE_APPLICATION_CREDENTIALS",
           "description": "Absolute path to your Google Cloud service account JSON key with GA4 property access.",
           "is_required": true,
           "format": "string",
-          "is_secret": true,
-          "name": "GOOGLE_APPLICATION_CREDENTIALS"
+          "is_secret": true
         },
         {
+          "name": "GA4_PROPERTY_ID",
           "description": "Numeric GA4 Property ID to query, for example 123456789.",
           "is_required": true,
           "format": "string",
-          "is_secret": false,
-          "name": "GA4_PROPERTY_ID"
+          "is_secret": false
         }
       ]
     }

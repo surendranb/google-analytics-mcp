@@ -1,0 +1,55 @@
+openapi: 3.1.0
+info:
+  title: GA4 MCP REST API
+  description: REST API bridge for Google Analytics 4 query execution and schema discovery
+  version: 2.4.1
+servers:
+  - url: https://ga4mcp.com/api/v1
+    description: Production GA4 MCP Gateway
+paths:
+  /query:
+    post:
+      summary: Execute GA4 Report Query
+      operationId: get_ga4_data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - metrics
+              properties:
+                dimensions:
+                  type: array
+                  items:
+                    type: string
+                  description: GA4 API dimension names (e.g. date, country, sessionSource)
+                metrics:
+                  type: array
+                  items:
+                    type: string
+                  description: GA4 API metric names (e.g. activeUsers, sessions, screenPageViews)
+                start_date:
+                  type: string
+                  default: "7daysAgo"
+                end_date:
+                  type: string
+                  default: "today"
+      responses:
+        '200':
+          description: Query results formatted as structured JSON table
+  /schema/search:
+    get:
+      summary: Search GA4 Schema Field Names
+      operationId: search_schema
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Keyword search term (e.g. "users", "pageviews", "bounce")
+      responses:
+        '200':
+          description: List of matching dimensions and metrics with API names

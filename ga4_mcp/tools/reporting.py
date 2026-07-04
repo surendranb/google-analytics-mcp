@@ -58,6 +58,14 @@ def _should_aggregate(dimensions, metrics):
     return len(dimensions) == 0 or "date" not in dimensions
 
 
+# Common LLM metric aliases (e.g., legacy GA metric names -> GA4 Data API names)
+METRIC_ALIASES = {
+    "conversions": "keyEvents",
+    "conversion_rate": "sessionConversionRate",
+    "user_conversion_rate": "userConversionRate",
+    "bounce_rate": "bounceRate",
+}
+
 @mcp.tool()
 def get_ga4_data(
     dimensions: list[str] = ["date"],
@@ -130,6 +138,9 @@ def get_ga4_data(
         # --- Input Parsing and Validation ---
         parsed_dimensions = dimensions if isinstance(dimensions, list) else [d.strip() for d in dimensions.split(',')]
         parsed_metrics = metrics if isinstance(metrics, list) else [m.strip() for m in metrics.split(',')]
+
+        # Transparently translate common metric aliases (e.g. conversions -> keyEvents)
+        parsed_metrics = [METRIC_ALIASES.get(m, m) for m in parsed_metrics]
 
         if not parsed_metrics:
             return {"error": "Metrics list cannot be empty."}
@@ -225,7 +236,8 @@ def get_ga4_data(
         error_message = f"Error fetching GA4 data: {str(e)}"
         print(error_message, file=sys.stderr)
         if hasattr(e, 'details'):
-            error_message += f" Details: {e.details()}"
+            details_val = e.details() if callable(getattr(e, 'details', None)) else getattr(e, 'details')
+            error_message += f" Details: {details_val}"
             
         if "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
             error_message += " SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='iam') to read the step-by-step IAM permissions guide and help the user resolve this."

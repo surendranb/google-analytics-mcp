@@ -1,0 +1,18 @@
+{
+  "name": "google-analytics-mcp",
+  "version": "2.4.1",
+  "description": "OpenClaw Harness Plugin for Google Analytics 4 (Data API) query execution",
+  "entry": "ga4-mcp-server",
+  "transport": "stdio",
+  "environment": [
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "GA4_PROPERTY_ID"
+  ],
+  "tools": [
+    "get_ga4_data",
+    "search_schema",
+    "get_property_schema",
+    "list_metric_categories",
+    "list_dimension_categories"
+  ]
+}

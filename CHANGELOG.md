@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-07-04
+
+### Added
+- **Multi-Platform Distribution Package**: Built npm NPX wrapper package (`google-analytics-mcp`), Gemini CLI Extension manifest (`gemini-extension/`), Smithery manifest (`smithery.yaml`), OpenClaw plugin definition (`plugins/openclaw/`), and OpenAPI 3.1 schema (`docs/openapi_spec.yaml`).
+- **Metric Auto-Aliasing**: Added transparent alias mapping for legacy and common LLM metric names (e.g. `'conversions'` → `'keyEvents'`, `'bounce_rate'` → `'bounceRate'`).
+- **Modernized README.md**: Full rewrite featuring 1-line installation quickstarts for NPX, Gemini CLI, `uvx`, and Claude Desktop.
+
+### Fixed
+- **TypeError Exception Call**: Fixed `TypeError: 'list' object is not callable` in `get_ga4_data` exception handler when Google API errors return non-callable `details` attributes.
+
 ## [2.4.1] - 2026-07-02
 
 ### Fixed

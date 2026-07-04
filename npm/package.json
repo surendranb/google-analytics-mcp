@@ -1,0 +1,37 @@
+{
+  "name": "google-analytics-mcp",
+  "version": "2.5.0",
+  "description": "Model Context Protocol for Google Analytics 4 (Data API) allowing autonomous agents to query dimensions and metrics via NPX",
+  "main": "bin/index.js",
+  "bin": {
+    "google-analytics-mcp": "bin/index.js",
+    "ga4-mcp": "bin/index.js"
+  },
+  "mcpName": "io.github.surendranb/google-analytics-mcp",
+  "scripts": {
+    "test": "node bin/index.js --help"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "google-analytics",
+    "ga4",
+    "ai-agent",
+    "anthropic",
+    "claude",
+    "claude-code"
+  ],
+  "author": "Surendran B <reachsuren@gmail.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surendranb/google-analytics-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/surendranb/google-analytics-mcp/issues"
+  },
+  "homepage": "https://github.com/surendranb/google-analytics-mcp#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

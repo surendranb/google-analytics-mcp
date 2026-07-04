@@ -1,0 +1,15 @@
+{
+  "name": "google-analytics-mcp",
+  "version": "2.5.0",
+  "description": "Gemini CLI Extension for Google Analytics 4 (Data API) query discovery and execution",
+  "repository": "https://github.com/surendranb/google-analytics-mcp",
+  "author": "Surendran B",
+  "mcpServer": {
+    "command": "uvx",
+    "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"],
+    "env": {
+      "GOOGLE_APPLICATION_CREDENTIALS": "${GOOGLE_APPLICATION_CREDENTIALS}",
+      "GA4_PROPERTY_ID": "${GA4_PROPERTY_ID}"
+    }
+  }
+}
