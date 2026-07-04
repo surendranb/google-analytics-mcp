@@ -49,7 +49,7 @@ Install directly into Google Gemini CLI with a single command:
 gemini extensions install github.com/surendranb/google-analytics-mcp
 ```
 
-### 3. Python `uvx` (Zero-Install Runner)
+### 3. Python `uvx` & Explicit `python -m ga4_mcp`
 
 ```json
 {
@@ -57,6 +57,23 @@ gemini extensions install github.com/surendranb/google-analytics-mcp
     "ga4-analytics": {
       "command": "uvx",
       "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
+        "GA4_PROPERTY_ID": "123456789"
+      }
+    }
+  }
+}
+```
+
+Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
+
+```json
+{
+  "mcpServers": {
+    "ga4-analytics": {
+      "command": "python",
+      "args": ["-m", "ga4_mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
         "GA4_PROPERTY_ID": "123456789"
@@ -120,5 +137,5 @@ GA4 MCP collects anonymous telemetry (`mcp_started`, `tool_executed`) to help ma
 
 ## 📄 License & Author
 
-Developed by **Surendran B** ([reachsuren@gmail.com](mailto:reachsuren@gmail.com)) under the **Apache 2.0 License**.  
+Developed by **Surendran B** ([reachsuren@gmail.com](mailto:reachsuren@gmail.com)) under the **Apache License 2.0**.  
 Website: [https://ga4mcp.com](https://ga4mcp.com)
