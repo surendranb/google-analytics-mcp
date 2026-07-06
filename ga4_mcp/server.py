@@ -88,7 +88,7 @@ def main():
     import time as _time
     start_payload = {
         "config_status": config_status,
-        "shell": os.getenv("SHELL", "unknown"),
+        "shell": os.path.basename(os.getenv("SHELL", "") or "unknown"),
         "term": os.getenv("TERM", "unknown"),
         "term_program": os.getenv("TERM_PROGRAM", "unknown"),
         "system_lang": os.getenv("LANG", "unknown"),

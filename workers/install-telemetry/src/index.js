@@ -11,6 +11,9 @@ export default {
     const clientIp = request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip") || "";
     const isCurl = userAgent.toLowerCase().includes("curl") || userAgent.toLowerCase().includes("wget");
 
+    // Honor the Do-Not-Track convention (consoledonottrack.com / Scarf precedent)
+    const dnt = request.headers.get("dnt") === "1" || request.headers.get("sec-gpc") === "1";
+
     const cf = request.cf || {};
     const country = cf.country || "unknown";
     const city = cf.city || "unknown";
@@ -26,6 +29,11 @@ export default {
     if (request.method === "POST" && pathname === "/telemetry") {
       try {
         const body = await request.json();
+        if (dnt) {
+          return new Response(JSON.stringify({ recorded: false, reason: "dnt" }), {
+            headers: { "content-type": "application/json" }
+          });
+        }
         ctx.waitUntil(
           sendPostHogEvent(env, {
             event: "install_completed",
@@ -61,8 +69,8 @@ export default {
       }
     }
 
-    // Edge Intent Telemetry (Captured immediately on request)
-    ctx.waitUntil(
+    // Edge Intent Telemetry (Captured immediately on request; skipped for DNT)
+    if (!dnt) ctx.waitUntil(
       sendPostHogEvent(env, {
         event: "install_intent",
         distinct_id: `anon_${crypto.randomUUID()}`,
@@ -192,7 +200,7 @@ function getHomebrewFormula() {
   return `class GoogleAnalyticsMcp < Formula
   desc "Google Analytics 4 MCP server for AI agents and agentic workflows"
   homepage "https://ga4mcp.com"
-  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.5.2.tar.gz"
+  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.5.3.tar.gz"
   license "Apache-2.0"
 
   depends_on "python@3.12"
@@ -249,7 +257,22 @@ done
 OS="$(uname -s 2>/dev/null || echo 'Unknown')"
 ARCH="$(uname -m 2>/dev/null || echo 'Unknown')"
 TERM_APP="\${TERM_PROGRAM:-terminal}"
-SHELL_TYPE="\${SHELL:-bash}"
+SHELL_TYPE="$(basename "\${SHELL:-bash}")"
+
+# Anonymous installation ID: pre-seed the SAME random ID the MCP server uses,
+# so install -> first run -> usage is one anonymous journey. No PII.
+ANON_ID=""
+if [ -z "\${DO_NOT_TRACK:-}" ] && [ -z "\${DISABLE_TELEMETRY:-}" ] && [ -z "\${NO_TELEMETRY:-}" ]; then
+  ID_DIR="$HOME/.ga4_mcp"
+  mkdir -p "$ID_DIR" 2>/dev/null || true
+  if [ -f "$ID_DIR/installation_id" ]; then
+    ANON_ID="$(cat "$ID_DIR/installation_id" 2>/dev/null || true)"
+  else
+    RAW_UUID="$(uuidgen 2>/dev/null || cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "$(date +%s)-$RANDOM")"
+    ANON_ID="inst_$(echo "$RAW_UUID" | tr '[:upper:]' '[:lower:]')"
+    printf '%s' "$ANON_ID" > "$ID_DIR/installation_id" 2>/dev/null || ANON_ID=""
+  fi
+fi
 
 HAS_GEMINI=false
 HAS_CLAUDE=false
@@ -307,17 +330,20 @@ if [ "$TARGET_OVERRIDE" = "claude" ] || [ "$TARGET_OVERRIDE" = "cursor" ] || ([ 
   CLAUDE_CONFIG_DIR="$HOME/Library/Application Support/Claude"
   if [[ "$OS" == "Linux"* ]]; then CLAUDE_CONFIG_DIR="$HOME/.config/Claude"; fi
   CLAUDE_CONFIG_FILE="$CLAUDE_CONFIG_DIR/claude_desktop_config.json"
-  mkdir -p "$CLAUDE_CONFIG_DIR"
 
-  CONFIGURED+=("claude_desktop")
-  echo -e "\${GREEN}✅ Configured Claude Desktop / Cursor MCP JSON at $CLAUDE_CONFIG_FILE\${NC}"
+  CONFIGURED+=("claude_desktop_manual")
+  echo -e "\${YELLOW}➡ Claude/Cursor detected. Add this to $CLAUDE_CONFIG_FILE under \\"mcpServers\\":\${NC}"
+  echo '  "ga4-analytics": { "command": "uvx", "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"], "env": { "GA4_PROPERTY_ID": "<your-property-id>", "GOOGLE_APPLICATION_CREDENTIALS": "<path-to-service-account.json>" } }'
+  echo -e "\${CYAN}Full guide: https://${host}/setup\${NC}"
 fi
 
-# Non-blocking Execution Telemetry Ping back to Cloudflare Worker
+# Non-blocking Execution Telemetry Ping back to Cloudflare Worker (skipped on opt-out)
+if [ -n "$ANON_ID" ]; then
 (
   curl -s -X POST "https://${host}/telemetry" \\
     -H "Content-Type: application/json" \\
     -d "{
+      \"anonymous_id\": \"$ANON_ID\",
       \"execution_mode\": \"$EXEC_MODE\",
       \"harnesses_detected\": [$(printf '"%s",' "\${HARNESSES[@]}" | sed 's/,$//')],
       \"configured_harnesses\": [$(printf '"%s",' "\${CONFIGURED[@]}" | sed 's/,$//')],
@@ -333,6 +359,7 @@ fi
       \"target_override\": \"$TARGET_OVERRIDE\"
     }" &> /dev/null &
 ) || true
+fi
 
 if [ "$IS_INTERACTIVE" = true ]; then
   echo -e "\${BLUE}=====================================================\${NC}"
