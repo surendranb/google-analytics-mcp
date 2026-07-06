@@ -69,8 +69,11 @@ export default {
       }
     }
 
-    // Edge Intent Telemetry (Captured immediately on request; skipped for DNT)
-    if (!dnt) ctx.waitUntil(
+    // Edge Intent Telemetry — only for installer-shaped requests (skipped for DNT).
+    // Browser hits on "/" and unknown paths are overwhelmingly scanners/bots.
+    const intentPaths = ["/install", "/setup", "/guide", "/brew", "/formula.rb", "/gemini", "/claude", "/cursor", "/npx", "/chatgpt"];
+    const isInstallerRequest = isCurl || intentPaths.includes(pathname) || pathname.endsWith(".sh");
+    if (!dnt && isInstallerRequest) ctx.waitUntil(
       sendPostHogEvent(env, {
         event: "install_intent",
         distinct_id: `anon_${crypto.randomUUID()}`,
