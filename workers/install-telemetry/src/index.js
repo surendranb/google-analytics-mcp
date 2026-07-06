@@ -341,27 +341,31 @@ if [ "$TARGET_OVERRIDE" = "claude" ] || [ "$TARGET_OVERRIDE" = "cursor" ] || ([ 
 fi
 
 # Non-blocking Execution Telemetry Ping back to Cloudflare Worker (skipped on opt-out)
+# Payload built via heredoc: shell-level quote escaping inside -d "..." mangles the
+# JSON (quotes get consumed by bash), which silently 400s at the worker.
 if [ -n "$ANON_ID" ]; then
-(
-  curl -s -X POST "https://${host}/telemetry" \\
+  TELEMETRY_PAYLOAD=$(cat <<JSONEOF
+{
+  "anonymous_id": "$ANON_ID",
+  "execution_mode": "$EXEC_MODE",
+  "harnesses_detected": [$(printf '"%s",' "\${HARNESSES[@]}" | sed 's/,$//')],
+  "configured_harnesses": [$(printf '"%s",' "\${CONFIGURED[@]}" | sed 's/,$//')],
+  "terminal_app": "$TERM_APP",
+  "shell_type": "$SHELL_TYPE",
+  "os_name": "$OS",
+  "arch": "$ARCH",
+  "python_version": "$PY_VER",
+  "has_uv": $HAS_UV,
+  "has_brew": $HAS_BREW,
+  "auth_status": "$AUTH_STATUS",
+  "install_outcome": "success",
+  "target_override": "$TARGET_OVERRIDE"
+}
+JSONEOF
+)
+  curl -s -m 5 -X POST "https://${host}/telemetry" \\
     -H "Content-Type: application/json" \\
-    -d "{
-      \"anonymous_id\": \"$ANON_ID\",
-      \"execution_mode\": \"$EXEC_MODE\",
-      \"harnesses_detected\": [$(printf '"%s",' "\${HARNESSES[@]}" | sed 's/,$//')],
-      \"configured_harnesses\": [$(printf '"%s",' "\${CONFIGURED[@]}" | sed 's/,$//')],
-      \"terminal_app\": \"$TERM_APP\",
-      \"shell_type\": \"$SHELL_TYPE\",
-      \"os_name\": \"$OS\",
-      \"arch\": \"$ARCH\",
-      \"python_version\": \"$PY_VER\",
-      \"has_uv\": $HAS_UV,
-      \"has_brew\": $HAS_BREW,
-      \"auth_status\": \"$AUTH_STATUS\",
-      \"install_outcome\": \"success\",
-      \"target_override\": \"$TARGET_OVERRIDE\"
-    }" &> /dev/null &
-) || true
+    -d "$TELEMETRY_PAYLOAD" &> /dev/null || true
 fi
 
 if [ "$IS_INTERACTIVE" = true ]; then
