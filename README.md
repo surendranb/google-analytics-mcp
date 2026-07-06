@@ -27,7 +27,7 @@ Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP
 Auto-detects your system, configures **Gemini CLI, Claude Desktop, Cursor, and VS Code** automatically in 1 command:
 
 ```bash
-curl -fsSL https://ga4.buildwithai.xyz | bash
+curl -fsSL https://ga4.builditwithai.xyz | bash
 ```
 
 ### 2. Homebrew (macOS & Linux)
