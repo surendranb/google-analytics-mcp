@@ -175,19 +175,29 @@ function getSetupHtmlPage() {
     <h1>🚀 GA4 MCP Quick Setup Guide</h1>
     <p>Connect Google Analytics 4 to Claude, Gemini, Cursor, and VS Code in 2 simple steps.</p>
 
-    <div class="card">
+    <div class="card" id="property-id">
       <h2><span class="step-num">1</span> Find Your GA4 Property ID</h2>
       <p>Go to <a href="https://analytics.google.com" target="_blank">Google Analytics Admin</a> → <strong>Property Settings</strong> → Copy your numeric <strong>Property ID</strong> (e.g. <code>123456789</code>).</p>
     </div>
 
-    <div class="card">
+    <div class="card" id="credentials">
       <h2><span class="step-num">2</span> Google Credentials Option</h2>
       <p><strong>Option A (Easiest):</strong> Log in via <code>gcloud auth application-default login</code>. No JSON key needed!</p>
       <p><strong>Option B (Service Account):</strong> Go to <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank">Google Cloud Console</a> → Create Service Account → Create Key (JSON) → Download to your computer.</p>
     </div>
 
-    <div class="card">
-      <h2><span class="step-num">3</span> 1-Line Universal Setup Command</h2>
+    <div class="card" id="iam">
+      <h2><span class="step-num">3</span> Grant GA4 Access (IAM)</h2>
+      <p>In <a href="https://analytics.google.com" target="_blank">Google Analytics</a> → <strong>Admin</strong> → <strong>Property Access Management</strong> → add your service account email (the <code>client_email</code> inside the JSON key) with the <strong>Viewer</strong> role.</p>
+    </div>
+
+    <div class="card" id="adc">
+      <h2><span class="step-num">4</span> Credentials Expired?</h2>
+      <p>If you used <code>gcloud</code> login and see <em>"Reauthentication is needed"</em> or <em>"invalid_grant"</em>, just run <code>gcloud auth application-default login</code> again and restart your MCP client.</p>
+    </div>
+
+    <div class="card" id="install">
+      <h2><span class="step-num">5</span> 1-Line Universal Setup Command</h2>
       <pre>curl -fsSL https://ga4.builditwithai.xyz | bash</pre>
     </div>
 
@@ -203,7 +213,7 @@ function getHomebrewFormula() {
   return `class GoogleAnalyticsMcp < Formula
   desc "Google Analytics 4 MCP server for AI agents and agentic workflows"
   homepage "https://ga4mcp.com"
-  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.5.4.tar.gz"
+  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.5.5.tar.gz"
   license "Apache-2.0"
 
   depends_on "python@3.12"

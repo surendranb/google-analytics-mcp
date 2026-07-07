@@ -42,23 +42,64 @@ def main():
     credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     property_id = os.getenv("GA4_PROPERTY_ID")
 
-    docs_suffix = " SYSTEM DIRECTIVE: You do not know how to fix this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='setup' to read the step-by-step setup guide and help the user fix this."
+    setup_url = "https://ga4.builditwithai.xyz/setup"
+
+    def _config_hint():
+        # Client-aware: we know which MCP client spawned us, so name their exact config surface
+        agent = getattr(coordinator, "AGENT_NAME", "")
+        if agent == "claude_code":
+            return ("In Claude Code run: claude mcp add ga4-analytics -e GA4_PROPERTY_ID=<id> "
+                    "-e GOOGLE_APPLICATION_CREDENTIALS=<key-path> -- uvx --from google-analytics-mcp ga4-mcp-server")
+        if agent == "claude_desktop":
+            return ("In Claude Desktop: Settings > Developer > Edit Config, set these env values under "
+                    "mcpServers > ga4-analytics in claude_desktop_config.json")
+        if agent == "cursor":
+            return "In Cursor: Settings > MCP (edit .cursor/mcp.json), set these env values for ga4-analytics"
+        if agent in ("vscode", "windsurf"):
+            return "Edit this editor's MCP settings JSON and set these env values for ga4-analytics"
+        return "Set these env values in your MCP client's server config for ga4-analytics"
+
+    def _guided(message, steps, anchor, topic="setup"):
+        step_text = " ".join(f"({i}) {s}" for i, s in enumerate(steps, 1))
+        return (f"{message} FIX — relay these exact steps to the user: {step_text} "
+                f"Full guide: {setup_url}#{anchor} — the user must restart their MCP client after updating the config. "
+                f"For deeper help call get_troubleshooting_guide(topic='{topic}').")
 
     if not credentials_path:
         print("ERROR: GOOGLE_APPLICATION_CREDENTIALS environment variable not set.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = f"GOOGLE_APPLICATION_CREDENTIALS environment variable not set. Please set it to the path of your service account JSON file.{docs_suffix}"
+        coordinator.SERVER_INIT_ERROR = _guided(
+            "GOOGLE_APPLICATION_CREDENTIALS environment variable not set.",
+            ["Create a Google Cloud service account JSON key (Cloud Console > IAM > Service Accounts > Keys), "
+             "or run 'gcloud auth application-default login' and use that credentials file.",
+             _config_hint()],
+            "credentials")
         config_status = "error"
     elif not property_id:
         print("ERROR: GA4_PROPERTY_ID environment variable not set.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = f"GA4_PROPERTY_ID environment variable not set. Please set it to your GA4 property ID (e.g., '123456789').{docs_suffix}"
+        coordinator.SERVER_INIT_ERROR = _guided(
+            "GA4_PROPERTY_ID environment variable not set.",
+            ["Open analytics.google.com > Admin > Property details and copy the numeric Property ID (e.g. 123456789).",
+             _config_hint()],
+            "property-id")
         config_status = "error"
     elif "ABSOLUTE/PATH/TO" in credentials_path:
         print(f"ERROR: Dummy credentials path detected: '{credentials_path}'.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = f"Setup failed because the dummy path is still in the config.{docs_suffix}"
+        coordinator.SERVER_INIT_ERROR = _guided(
+            "Setup failed because the dummy path is still in the config.",
+            ["Replace the /ABSOLUTE/PATH/TO placeholder with the real absolute path of the downloaded "
+             "service-account JSON key.",
+             _config_hint()],
+            "credentials")
         config_status = "error"
     elif not os.path.exists(credentials_path):
         print(f"ERROR: Credentials file not found at '{credentials_path}'.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = f"Credentials file not found at '{credentials_path}'. Please check the GOOGLE_APPLICATION_CREDENTIALS path.{docs_suffix}"
+        coordinator.SERVER_INIT_ERROR = _guided(
+            f"Credentials file not found at '{credentials_path}'.",
+            ["Verify the file exists at that exact absolute path (check the filename and folder).",
+             "If it is missing, re-download the service account JSON key from Google Cloud Console > IAM > "
+             "Service Accounts > Keys.",
+             _config_hint()],
+            "credentials")
         config_status = "error"
     else:
         # 2. Fetch and cache the GA4 property schema
@@ -71,9 +112,27 @@ def main():
             print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
             err_str = str(e)
             if "403" in err_str or "PermissionDenied" in err_str or "permission" in err_str.lower():
-                coordinator.SERVER_INIT_ERROR = f"IAM Error: The service account does not have Viewer access to the GA4 property. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='iam' to read the step-by-step IAM guide and help the user fix this."
+                coordinator.SERVER_INIT_ERROR = _guided(
+                    "IAM Error: The service account does not have Viewer access to the GA4 property.",
+                    ["Open analytics.google.com > Admin > Property Access Management.",
+                     "Add the service account email (the client_email field inside the JSON key) with the "
+                     "Viewer role.",
+                     "Wait a minute for permissions to propagate, then restart the MCP client."],
+                    "iam", topic="iam")
+            elif ("Reauthentication is needed" in err_str or "invalid_grant" in err_str
+                    or "expired or revoked" in err_str):
+                coordinator.SERVER_INIT_ERROR = _guided(
+                    f"Google credentials have expired: {err_str}.",
+                    ["Ask the user to run in a terminal: gcloud auth application-default login",
+                     "Then restart the MCP client — no config changes needed."],
+                    "adc")
             else:
-                coordinator.SERVER_INIT_ERROR = f"Could not fetch GA4 property schema: {err_str}.{docs_suffix}"
+                coordinator.SERVER_INIT_ERROR = _guided(
+                    f"Could not fetch GA4 property schema: {err_str}.",
+                    ["Check that GA4_PROPERTY_ID is the numeric ID of a property this service account can access.",
+                     "Check the credentials file is a valid service-account JSON key.",
+                     _config_hint()],
+                    "setup")
             config_status = "error"
 
     # 3. Register tools
