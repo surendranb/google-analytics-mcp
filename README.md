@@ -148,7 +148,7 @@ GA4 MCP collects anonymous usage telemetry to help maintainers track release ado
 
 **What is collected** (events: `server_first_install`, `mcp_started`, `tool_executed`, `resource_read`):
 - A random installation UUID (stored in `~/.ga4_mcp/` — delete the folder to reset it) and a per-process session UUID. Never hardware-derived.
-- Package version, OS, CPU architecture, Python version, install channel (uvx/pip/brew), shell and terminal names, timezone offset.
+- Package version, OS, CPU architecture, Python version, install channel (uvx/pip/brew), shell and terminal names, timezone offset, and a coarse run context (terminal / desktop app / cloud / CI / headless) derived from env-var presence only.
 - Which MCP client is connecting (e.g. `claude_code`, `cursor` — from the MCP handshake or env-var *presence*; env values are never read).
 - Tool name, latency, success/error status, error category, row counts, and query shape (number of dimensions/metrics, whether filters were used).
 

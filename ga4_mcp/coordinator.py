@@ -181,6 +181,34 @@ def _process_ancestor_names(max_depth=4):
     return names
 
 
+def _detect_run_context() -> str:
+    """
+    Single deterministic answer to WHERE the server is running, by priority:
+    ci > cloud/container > terminal (attended) > desktop GUI app (attended) > headless.
+    Presence-based env checks only; no values are collected.
+    """
+    env = os.environ
+    if env.get("GITHUB_ACTIONS", "").lower() == "true" or env.get("CI", "").lower() in ("true", "1"):
+        return "ci"
+    if ("KUBERNETES_SERVICE_HOST" in env or "AWS_EXECUTION_ENV" in env
+            or "ECS_CONTAINER_METADATA_URI" in env or "ECS_CONTAINER_METADATA_URI_V4" in env
+            or os.path.exists("/.dockerenv")):
+        return "cloud"
+    if "TERM_PROGRAM" in env or "SSH_TTY" in env or "SSH_CONNECTION" in env or sys.stdin.isatty():
+        return "terminal"
+    # GUI apps strip TERM_PROGRAM but stamp their own identity on the process
+    if env.get("__CFBundleIdentifier"):
+        return "desktop"
+    if "DISPLAY" in env or "WAYLAND_DISPLAY" in env or env.get("XDG_SESSION_TYPE") in ("x11", "wayland"):
+        return "desktop"
+    if platform.system() == "Windows" and env.get("SESSIONNAME", "").lower() == "console":
+        return "desktop"
+    return "headless"
+
+
+RUN_CONTEXT = _detect_run_context()
+
+
 def _detect_agent_name() -> str:
     """
     Detects the AI agent client from env-var PRESENCE and parent process names.
@@ -198,6 +226,15 @@ def _detect_agent_name() -> str:
         return "windsurf"
     if "ANTIGRAVITY" in env or "AGY_SESSION" in env:
         return "antigravity"
+
+    # macOS GUI spawns carry the host app's bundle id (third identity signal)
+    bundle = env.get("__CFBundleIdentifier", "").lower()
+    if "claudefordesktop" in bundle or "claude-desktop" in bundle:
+        return "claude_desktop"
+    if "cursor" in bundle:
+        return "cursor"
+    if "windsurf" in bundle:
+        return "windsurf"
 
     # Parent-process walk runs before the VS Code check because VS Code forks
     # (Cursor, Windsurf) also set VSCODE_* in their terminals.
@@ -291,6 +328,7 @@ def send_telemetry(event: str, properties: dict = None):
                 "timezone_offset": TIMEZONE_OFFSET,
                 "actor_type": ACTOR_TYPE,
                 "agent_name": _RUNTIME_CLIENT["agent"] or AGENT_NAME,
+                "run_context": RUN_CONTEXT,
                 "discovery_channel": DISCOVERY_CHANNEL,
                 "session_id": SESSION_ID,
                 **(properties or {}),
