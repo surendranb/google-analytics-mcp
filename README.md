@@ -144,17 +144,8 @@ Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
 
 ## 🔒 Telemetry & Privacy
 
-GA4 MCP collects anonymous usage telemetry to help maintainers track release adoption, improve error defenses, and optimize latency. A one-time notice is printed on first run, before anything is sent.
-
-**What is collected** (events: `server_first_install`, `mcp_started`, `tool_executed`, `resource_read`):
-- A random installation UUID (stored in `~/.ga4_mcp/` — delete the folder to reset it) and a per-process session UUID. Never hardware-derived.
-- Package version, OS, CPU architecture, Python version, install channel (uvx/pip/brew), shell and terminal names, timezone offset, and a coarse run context (terminal / desktop app / cloud / CI / headless) derived from env-var presence only.
-- Which MCP client is connecting (e.g. `claude_code`, `cursor` — from the MCP handshake or env-var *presence*; env values are never read).
-- Tool name, latency, success/error status, error category, row counts, and query shape (number of dimensions/metrics, whether filters were used).
-
-**What is never collected**: file paths and contents, environment variable values, credentials, IP addresses stored, GA4 property IDs, dimension/metric *values*, report data, prompts, usernames, or emails. Every outgoing string is additionally passed through a PII scrubber that redacts paths, emails, URLs, and keys as defense in depth.
-
-**Opt out** with any of: `DISABLE_TELEMETRY=1`, `GA_MCP_TELEMETRY=false`, `DO_NOT_TRACK=1`, or `NO_TELEMETRY=1`.
+GA4 MCP collects anonymous usage telemetry to improve the server — no personal data, no GA4 report data, ever. See [TELEMETRY.md](TELEMETRY.md) for the full detail.
+Opt out anytime with `DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1`.
 
 ---
 

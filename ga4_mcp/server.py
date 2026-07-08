@@ -119,6 +119,7 @@ def main():
                      "Viewer role.",
                      "Wait a minute for permissions to propagate, then restart the MCP client."],
                     "iam", topic="iam")
+                coordinator.SERVER_INIT_ERROR_CATEGORY = "IAMError"
             elif ("Reauthentication is needed" in err_str or "invalid_grant" in err_str
                     or "expired or revoked" in err_str):
                 coordinator.SERVER_INIT_ERROR = _guided(
@@ -126,6 +127,7 @@ def main():
                     ["Ask the user to run in a terminal: gcloud auth application-default login",
                      "Then restart the MCP client — no config changes needed."],
                     "adc")
+                coordinator.SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
             else:
                 coordinator.SERVER_INIT_ERROR = _guided(
                     f"Could not fetch GA4 property schema: {err_str}.",
@@ -154,6 +156,7 @@ def main():
     }
     if coordinator.SERVER_INIT_ERROR:
         start_payload["error_message"] = str(coordinator.SERVER_INIT_ERROR)
+        start_payload["error_category"] = coordinator.SERVER_INIT_ERROR_CATEGORY
     send_telemetry("mcp_started", start_payload)
     mcp.run(transport="stdio")
 

@@ -1,7 +1,34 @@
 /**
  * Cloudflare Worker: Universal AI Installer & Telemetry Gateway for GA4 MCP
  * Captures rich 2-phase telemetry (Edge Intent + Local Execution) to PostHog.
+ *
+ * /e is the central telemetry gateway (v2.6.0+ clients): capture-then-curate —
+ * every event is accepted and tagged, never dropped; curation happens at query
+ * time. IPs are stripped before forwarding; geo is stamped coarsely at the edge.
  */
+
+const GATEWAY_VERSION = "1";
+
+// Known event names — unknown events are ACCEPTED and tagged, never dropped.
+const KNOWN_EVENTS = new Set([
+  "mcp_started", "tool_executed", "server_first_install", "resource_read",
+  "package_download", "install_intent", "install_completed",
+]);
+
+// Bucket install sources for low-cardinality dashboarding; the RAW value is
+// always kept alongside (curation is a query, capture is a contract).
+const KNOWN_SRC = new Set([
+  "readme", "glama", "mcpso", "pulsemcp", "ga4mcp", "setup", "cursor_button",
+  "vscode_button", "installer",
+]);
+
+function bucketSrc(raw) {
+  if (!raw) return null;
+  const s = String(raw).toLowerCase().slice(0, 64);
+  return KNOWN_SRC.has(s) ? s : "other";
+}
+
+const MAX_PROPS_BYTES = 32768;
 
 export default {
   async fetch(request, env, ctx) {
@@ -25,6 +52,60 @@ export default {
     // Rich Edge User-Agent & Platform Parsing
     const edgeParsed = parseUserAgent(userAgent);
 
+    // Route 0: Central Telemetry Gateway (/e) — v2.6.0+ MCP clients.
+    // Accept everything, tag anomalies, strip IP, stamp coarse geo, forward.
+    if (request.method === "POST" && pathname === "/e") {
+      if (dnt) {
+        return new Response(JSON.stringify({ recorded: false, reason: "dnt" }), {
+          headers: { "content-type": "application/json" },
+        });
+      }
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return new Response(JSON.stringify({ recorded: false, reason: "invalid_json" }), {
+          status: 400, headers: { "content-type": "application/json" },
+        });
+      }
+
+      const eventName = typeof body.event === "string" && body.event ? body.event.slice(0, 200) : "malformed_event";
+      let props = (body.properties && typeof body.properties === "object") ? body.properties : {};
+
+      // Oversized payloads: truncate and tag rather than drop.
+      const propsSize = JSON.stringify(props).length;
+      if (propsSize > MAX_PROPS_BYTES) {
+        props = { payload_truncated: true, original_size_bytes: propsSize };
+      }
+
+      // Edge stamps. IP is used transiently for nothing and never forwarded;
+      // geo comes from Cloudflare's request metadata, coarse by design.
+      props.$ip = null;                // PostHog: do not record sender IP
+      props.$geoip_disable = true;     // PostHog: do not run server-side GeoIP
+      props.$geoip_country_name = country;
+      props.$geoip_country_code = cf.country || "unknown";
+      props.$geoip_continent_name = continent;
+      props.as_organization = asOrganization; // hosting-vs-residential sift signal
+      props.via_gateway = true;
+      props.gateway_version = GATEWAY_VERSION;
+      if (!KNOWN_EVENTS.has(eventName)) props.unregistered_event = true;
+      if (!body.distinct_id) props.missing_distinct_id = true;
+
+      // traffic_class: tag, never drop. Internal = our own CI/dev runs.
+      if (props.internal_run === true) props.traffic_class = "internal";
+      else if (props.run_context === "ci" || props.agent_name === "ci_runner") props.traffic_class = "ci";
+      else props.traffic_class = "standard";
+
+      ctx.waitUntil(sendPostHogEvent(env, {
+        event: eventName,
+        distinct_id: String(body.distinct_id || `anon_${crypto.randomUUID()}`).slice(0, 200),
+        properties: props,
+      }));
+      return new Response(JSON.stringify({ recorded: true }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+
     // Route 1: Post-Install Client Telemetry Ping (/telemetry)
     if (request.method === "POST" && pathname === "/telemetry") {
       try {
@@ -39,12 +120,17 @@ export default {
             event: "install_completed",
             distinct_id: body.anonymous_id || `anon_${crypto.randomUUID()}`,
             properties: {
-              $ip: clientIp,
+              $ip: null,               // never record sender IP
+              $geoip_disable: true,    // geo comes from edge metadata below
               $geoip_country_name: country,
-              $geoip_city_name: city,
+              $geoip_country_code: cf.country || "unknown",
               $geoip_continent_name: continent,
               $geoip_time_zone: timezone,
               as_organization: asOrganization,
+              via_gateway: true,
+              gateway_version: GATEWAY_VERSION,
+              install_source: bucketSrc(body.src),
+              install_source_raw: body.src ? String(body.src).slice(0, 64) : null,
               execution_mode: body.execution_mode || "unknown",
               harnesses_detected: body.harnesses_detected || [],
               configured_harnesses: body.configured_harnesses || [],
@@ -78,7 +164,12 @@ export default {
         event: "install_intent",
         distinct_id: `anon_${crypto.randomUUID()}`,
         properties: {
-          $ip: clientIp,
+          $ip: null,               // never record sender IP
+          $geoip_disable: true,
+          via_gateway: true,
+          gateway_version: GATEWAY_VERSION,
+          install_source: bucketSrc(url.searchParams.get("src")),
+          install_source_raw: url.searchParams.get("src") ? String(url.searchParams.get("src")).slice(0, 64) : null,
           path: pathname,
           is_curl: isCurl,
           user_agent: userAgent,
@@ -115,7 +206,7 @@ export default {
 
     // Route 4: 1-Line Universal Installer Script Generator
     if (isCurl || pathname.endsWith(".sh") || pathname === "/install" || (pathname === "/" && isCurl)) {
-      return new Response(getInstallerScript(url.hostname), {
+      return new Response(getInstallerScript(url.hostname, bucketSrc(url.searchParams.get("src"))), {
         headers: {
           "content-type": "text/plain; charset=utf-8",
           "cache-control": "no-cache"
@@ -213,7 +304,7 @@ function getHomebrewFormula() {
   return `class GoogleAnalyticsMcp < Formula
   desc "Google Analytics 4 MCP server for AI agents and agentic workflows"
   homepage "https://ga4mcp.com"
-  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.5.5.tar.gz"
+  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.6.0.tar.gz"
   license "Apache-2.0"
 
   depends_on "python@3.12"
@@ -229,10 +320,12 @@ end
 `;
 }
 
-function getInstallerScript(hostname) {
+function getInstallerScript(hostname, src) {
   const host = hostname || "ga4.builditwithai.xyz";
+  const srcValue = src || "installer";
   return `#!/usr/bin/env bash
 # GA4 MCP Universal AI Installer & Telemetry Collector
+GA4_MCP_SRC="${srcValue}"
 
 set -e
 
@@ -346,7 +439,7 @@ if [ "$TARGET_OVERRIDE" = "claude" ] || [ "$TARGET_OVERRIDE" = "cursor" ] || ([ 
 
   CONFIGURED+=("claude_desktop_manual")
   echo -e "\${YELLOW}➡ Claude/Cursor detected. Add this to $CLAUDE_CONFIG_FILE under \\"mcpServers\\":\${NC}"
-  echo '  "ga4-analytics": { "command": "uvx", "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"], "env": { "GA4_PROPERTY_ID": "<your-property-id>", "GOOGLE_APPLICATION_CREDENTIALS": "<path-to-service-account.json>" } }'
+  echo "  \\"ga4-analytics\\": { \\"command\\": \\"uvx\\", \\"args\\": [\\"--from\\", \\"google-analytics-mcp\\", \\"ga4-mcp-server\\"], \\"env\\": { \\"GA4_PROPERTY_ID\\": \\"<your-property-id>\\", \\"GOOGLE_APPLICATION_CREDENTIALS\\": \\"<path-to-service-account.json>\\", \\"GA4_MCP_SOURCE\\": \\"$GA4_MCP_SRC\\" } }"
   echo -e "\${CYAN}Full guide: https://${host}/setup\${NC}"
 fi
 
@@ -357,6 +450,7 @@ if [ -n "$ANON_ID" ]; then
   TELEMETRY_PAYLOAD=$(cat <<JSONEOF
 {
   "anonymous_id": "$ANON_ID",
+  "src": "$GA4_MCP_SRC",
   "execution_mode": "$EXEC_MODE",
   "harnesses_detected": [$(printf '"%s",' "\${HARNESSES[@]}" | sed 's/,$//')],
   "configured_harnesses": [$(printf '"%s",' "\${CONFIGURED[@]}" | sed 's/,$//')],

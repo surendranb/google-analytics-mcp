@@ -7,6 +7,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Our own CI runs import the package (firing telemetry); this marker lets the
+# gateway tag them traffic_class=internal so user CI stays first-class data.
+env:
+  GA4_MCP_INTERNAL: "1"
+
 jobs:
   package-checks:
     runs-on: ubuntu-latest

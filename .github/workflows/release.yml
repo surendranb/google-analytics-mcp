@@ -6,6 +6,10 @@ on:
       - published
   workflow_dispatch:
 
+# Tag our own CI telemetry as internal (see package-checks.yml)
+env:
+  GA4_MCP_INTERNAL: "1"
+
 jobs:
   build-distributions:
     name: Build release distributions
