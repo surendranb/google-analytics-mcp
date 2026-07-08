@@ -12,8 +12,14 @@ const GATEWAY_VERSION = "1";
 // Known event names — unknown events are ACCEPTED and tagged, never dropped.
 const KNOWN_EVENTS = new Set([
   "mcp_started", "tool_executed", "server_first_install", "resource_read",
-  "package_download", "install_intent", "install_completed",
+  "package_download", "install_intent", "install_completed", "surface_click",
 ]);
+
+// One-click install targets behind /go/<surface>: the click is recorded at
+// the edge (transient, nothing persisted in user config) and redirected.
+const GO_TARGETS = {
+  cursor: "cursor://anysphere.cursor-deeplink/mcp/install?name=ga4-analytics&config=eyJjb21tYW5kIjogInV2eCIsICJhcmdzIjogWyItLWZyb20iLCAiZ29vZ2xlLWFuYWx5dGljcy1tY3AiLCAiZ2E0LW1jcC1zZXJ2ZXIiXSwgImVudiI6IHsiR0E0X1BST1BFUlRZX0lEIjogIjx5b3VyLXByb3BlcnR5LWlkPiIsICJHT09HTEVfQVBQTElDQVRJT05fQ1JFREVOVElBTFMiOiAiL2Fic29sdXRlL3BhdGgvdG8va2V5Lmpzb24ifX0=",
+};
 
 // Bucket install sources for low-cardinality dashboarding; the RAW value is
 // always kept alongside (curation is a query, capture is a contract).
@@ -104,6 +110,31 @@ export default {
       return new Response(JSON.stringify({ recorded: true }), {
         headers: { "content-type": "application/json" },
       });
+    }
+
+    // Route 0.5: One-click install redirects (/go/<surface>) — record the
+    // click at the edge, then hand off to the client's install deeplink.
+    if (pathname.startsWith("/go/")) {
+      const surface = pathname.slice(4);
+      const target = GO_TARGETS[surface];
+      if (!dnt) ctx.waitUntil(sendPostHogEvent(env, {
+        event: "surface_click",
+        distinct_id: `anon_${crypto.randomUUID()}`,
+        properties: {
+          $ip: null,
+          $geoip_disable: true,
+          $geoip_country_name: country,
+          $geoip_country_code: cf.country || "unknown",
+          $geoip_continent_name: continent,
+          as_organization: asOrganization,
+          via_gateway: true,
+          gateway_version: GATEWAY_VERSION,
+          surface: surface.slice(0, 32),
+          known_surface: Boolean(target),
+          user_agent: userAgent,
+        },
+      }));
+      return Response.redirect(target || env.GITHUB_REPO, 302);
     }
 
     // Route 1: Post-Install Client Telemetry Ping (/telemetry)
@@ -439,7 +470,7 @@ if [ "$TARGET_OVERRIDE" = "claude" ] || [ "$TARGET_OVERRIDE" = "cursor" ] || ([ 
 
   CONFIGURED+=("claude_desktop_manual")
   echo -e "\${YELLOW}➡ Claude/Cursor detected. Add this to $CLAUDE_CONFIG_FILE under \\"mcpServers\\":\${NC}"
-  echo "  \\"ga4-analytics\\": { \\"command\\": \\"uvx\\", \\"args\\": [\\"--from\\", \\"google-analytics-mcp\\", \\"ga4-mcp-server\\"], \\"env\\": { \\"GA4_PROPERTY_ID\\": \\"<your-property-id>\\", \\"GOOGLE_APPLICATION_CREDENTIALS\\": \\"<path-to-service-account.json>\\", \\"GA4_MCP_SOURCE\\": \\"$GA4_MCP_SRC\\" } }"
+  echo "  \\"ga4-analytics\\": { \\"command\\": \\"uvx\\", \\"args\\": [\\"--from\\", \\"google-analytics-mcp\\", \\"ga4-mcp-server\\"], \\"env\\": { \\"GA4_PROPERTY_ID\\": \\"<your-property-id>\\", \\"GOOGLE_APPLICATION_CREDENTIALS\\": \\"<path-to-service-account.json>\\" } }"
   echo -e "\${CYAN}Full guide: https://${host}/setup\${NC}"
 fi
 

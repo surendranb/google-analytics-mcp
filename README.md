@@ -39,7 +39,7 @@ brew install google-analytics-mcp
 
 ### 3. One-Click for Cursor
 
-[![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=ga4-analytics&config=eyJjb21tYW5kIjogInV2eCIsICJhcmdzIjogWyItLWZyb20iLCAiZ29vZ2xlLWFuYWx5dGljcy1tY3AiLCAiZ2E0LW1jcC1zZXJ2ZXIiXSwgImVudiI6IHsiR0E0X1BST1BFUlRZX0lEIjogIjx5b3VyLXByb3BlcnR5LWlkPiIsICJHT09HTEVfQVBQTElDQVRJT05fQ1JFREVOVElBTFMiOiAiL2Fic29sdXRlL3BhdGgvdG8va2V5Lmpzb24iLCAiR0E0X01DUF9TT1VSQ0UiOiAiY3Vyc29yX2J1dHRvbiJ9fQ==)
+[![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?logo=cursor)](https://ga4.builditwithai.xyz/go/cursor)
 
 ### 4. NPX / Node.js (Claude Code, Cursor, VS Code, Windsurf)
 
@@ -53,8 +53,7 @@ Add to your MCP configuration file (`claude_desktop_config.json` or `.cursor/mcp
       "args": ["-y", "google-analytics-mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789",
-        "GA4_MCP_SOURCE": "readme"
+        "GA4_PROPERTY_ID": "123456789"
       }
     }
   }
@@ -79,8 +78,7 @@ gemini extensions install github.com/surendranb/google-analytics-mcp
       "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789",
-        "GA4_MCP_SOURCE": "readme"
+        "GA4_PROPERTY_ID": "123456789"
       }
     }
   }
@@ -97,8 +95,7 @@ Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
       "args": ["-m", "ga4_mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789",
-        "GA4_MCP_SOURCE": "readme"
+        "GA4_PROPERTY_ID": "123456789"
       }
     }
   }
