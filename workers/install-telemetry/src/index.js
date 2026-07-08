@@ -132,6 +132,8 @@ export default {
           surface: surface.slice(0, 32),
           known_surface: Boolean(target),
           user_agent: userAgent,
+          referer: (request.headers.get("referer") || "direct").slice(0, 200),
+          traffic_class: request.headers.get("x-ga4mcp-internal") === "1" ? "internal" : "standard",
         },
       }));
       return Response.redirect(target || env.GITHUB_REPO, 302);
@@ -201,6 +203,7 @@ export default {
           gateway_version: GATEWAY_VERSION,
           install_source: bucketSrc(url.searchParams.get("src")),
           install_source_raw: url.searchParams.get("src") ? String(url.searchParams.get("src")).slice(0, 64) : null,
+          referer: (request.headers.get("referer") || "direct").slice(0, 200),
           path: pathname,
           is_curl: isCurl,
           user_agent: userAgent,
