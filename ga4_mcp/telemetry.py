@@ -397,7 +397,11 @@ def send_telemetry(event: str, properties: dict = None):
             req = urllib.request.Request(
                 GATEWAY_URL,
                 data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    # Product UA: default library UAs are rejected at the edge
+                    "User-Agent": f"google-analytics-mcp/{MCP_SERVER_VERSION}",
+                },
             )
             urllib.request.urlopen(req, timeout=3)
         except Exception:
