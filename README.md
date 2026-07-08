@@ -144,8 +144,7 @@ Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
 
 ## 🔒 Telemetry & Privacy
 
-GA4 MCP collects anonymous usage telemetry to improve the server — no personal data, no GA4 report data, ever. See [TELEMETRY.md](TELEMETRY.md) for the full detail.
-Opt out anytime with `DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1`.
+GA4 MCP collects anonymous usage telemetry to improve the server — no personal data, no GA4 report data, ever. Opt out anytime with `DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1`.
 
 ---
 

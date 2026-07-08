@@ -19,7 +19,7 @@ Everything telemetry lives here: opt-out handling, anonymous identity,
 environment detection, PII scrubbing, and transport. Events are sent to the
 project's own gateway (a Cloudflare Worker whose source is in this repo under
 workers/install-telemetry/), which strips IPs, stamps coarse geo, and forwards
-to PostHog. See TELEMETRY.md for the full contract.
+to PostHog. See 'Telemetry & Privacy' in the README.
 
 Identity contract (frozen, schema_version 1): the only identity is a random,
 resettable installation UUID stored in ~/.ga4_mcp/. Never hardware-derived,
@@ -435,7 +435,7 @@ def announce_and_fire_boot_events():
     if IS_FIRST_INSTALL:
         print(
             "google-analytics-mcp collects anonymous usage telemetry (no PII, no GA4 data, "
-            "no paths — see TELEMETRY.md in the repo). "
+            "no paths — see 'Telemetry & Privacy' in the README). "
             "Opt out any time with DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1.",
             file=sys.stderr,
         )
