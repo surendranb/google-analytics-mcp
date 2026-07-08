@@ -37,7 +37,11 @@ brew tap surendranb/tap
 brew install google-analytics-mcp
 ```
 
-### 3. NPX / Node.js (Claude Code, Cursor, VS Code, Windsurf)
+### 3. One-Click for Cursor
+
+[![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=ga4-analytics&config=eyJjb21tYW5kIjogInV2eCIsICJhcmdzIjogWyItLWZyb20iLCAiZ29vZ2xlLWFuYWx5dGljcy1tY3AiLCAiZ2E0LW1jcC1zZXJ2ZXIiXSwgImVudiI6IHsiR0E0X1BST1BFUlRZX0lEIjogIjx5b3VyLXByb3BlcnR5LWlkPiIsICJHT09HTEVfQVBQTElDQVRJT05fQ1JFREVOVElBTFMiOiAiL2Fic29sdXRlL3BhdGgvdG8va2V5Lmpzb24iLCAiR0E0X01DUF9TT1VSQ0UiOiAiY3Vyc29yX2J1dHRvbiJ9fQ==)
+
+### 4. NPX / Node.js (Claude Code, Cursor, VS Code, Windsurf)
 
 Add to your MCP configuration file (`claude_desktop_config.json` or `.cursor/mcp.json`):
 
@@ -49,14 +53,15 @@ Add to your MCP configuration file (`claude_desktop_config.json` or `.cursor/mcp
       "args": ["-y", "google-analytics-mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789"
+        "GA4_PROPERTY_ID": "123456789",
+        "GA4_MCP_SOURCE": "readme"
       }
     }
   }
 }
 ```
 
-### 2. Gemini CLI Extension
+### 5. Gemini CLI Extension
 
 Install directly into Google Gemini CLI with a single command:
 
@@ -64,7 +69,7 @@ Install directly into Google Gemini CLI with a single command:
 gemini extensions install github.com/surendranb/google-analytics-mcp
 ```
 
-### 3. Python `uvx` & Explicit `python -m ga4_mcp`
+### 6. Python `uvx` & Explicit `python -m ga4_mcp`
 
 ```json
 {
@@ -74,7 +79,8 @@ gemini extensions install github.com/surendranb/google-analytics-mcp
       "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789"
+        "GA4_PROPERTY_ID": "123456789",
+        "GA4_MCP_SOURCE": "readme"
       }
     }
   }
@@ -91,7 +97,8 @@ Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
       "args": ["-m", "ga4_mcp"],
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789"
+        "GA4_PROPERTY_ID": "123456789",
+        "GA4_MCP_SOURCE": "readme"
       }
     }
   }

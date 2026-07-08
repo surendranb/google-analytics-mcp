@@ -289,7 +289,7 @@ function getSetupHtmlPage() {
 
     <div class="card" id="install">
       <h2><span class="step-num">5</span> 1-Line Universal Setup Command</h2>
-      <pre>curl -fsSL https://ga4.builditwithai.xyz | bash</pre>
+      <pre>curl -fsSL "https://ga4.builditwithai.xyz/?src=setup" | bash</pre>
     </div>
 
     <p style="text-align: center; color: #94a3b8; margin-top: 2rem;">
