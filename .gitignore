@@ -37,3 +37,8 @@ project.md
 
 # Telemetry
 telemetry_docs/
+
+# Local-only notes and tooling state (never publish)
+CHANGELOG.local.md
+.claude/
+workers/install-telemetry/.wrangler/
