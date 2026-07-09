@@ -40,5 +40,6 @@ telemetry_docs/
 
 # Local-only notes and tooling state (never publish)
 CHANGELOG.local.md
+CLAUDE.local.md
 .claude/
 workers/install-telemetry/.wrangler/
