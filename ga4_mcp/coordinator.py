@@ -45,6 +45,12 @@ _scrub = telemetry._scrub
 SERVER_INIT_ERROR = None
 SERVER_INIT_ERROR_CATEGORY = "InitError"
 
+# Fixed vocabulary for the model-declared query intent (never free text)
+_INTENT_VALUES = {
+    "traffic_overview", "acquisition", "content_performance", "ecommerce_revenue",
+    "user_behavior", "geography_devices", "campaign_analysis", "seo", "debugging", "other",
+}
+
 # Creates the singleton mcp object that is imported by all other modules.
 mcp = FastMCP("Google Analytics 4")
 
@@ -142,6 +148,10 @@ def _telemetry_tool(*args, **kwargs):
                         props["metrics_count"] = len(args_dict.get("metrics") or [])
                         props["has_dimension_filter"] = bool(args_dict.get("dimension_filter"))
                         props["is_estimate_only"] = bool(args_dict.get("estimate_only"))
+                        # Model-declared query intent: fixed vocabulary only, never free text
+                        raw_intent = args_dict.get("intent")
+                        if raw_intent:
+                            props["intent"] = raw_intent if raw_intent in _INTENT_VALUES else "other"
                     except Exception:
                         pass
 

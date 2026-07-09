@@ -175,6 +175,7 @@ def _normalize_client_name(raw):
     if not n or n == "unknown":
         return None
     buckets = [
+        ("local-agent-mode", "claude_cowork"),
         ("claude-code", "claude_code"),
         ("claude_code", "claude_code"),
         ("claude code", "claude_code"),
@@ -331,20 +332,42 @@ DISCOVERY_CHANNEL = _detect_discovery_channel()
 
 # Ground-truth client identity from the MCP initialize handshake.
 # Populated lazily on the first tool call (the handshake happens after boot).
-_RUNTIME_CLIENT = {"name": None, "version": None, "agent": None}
+_RUNTIME_CLIENT = {
+    "name": None, "version": None, "agent": None, "title": None,
+    "protocol_version": None, "caps": None,
+}
 
 
 def capture_client_info(mcp_server):
-    """Capture clientInfo from the MCP handshake (raw name kept, bucket added)."""
+    """
+    Capture what the harness hands us in the MCP initialize handshake:
+    clientInfo (raw name kept, bucket added), spoken protocol revision, and
+    the client's declared capabilities (booleans only — a fingerprint of what
+    the harness can do: sampling, roots, elicitation).
+    """
     if _RUNTIME_CLIENT["name"] is not None:
         return
     try:
         ctx = mcp_server._mcp_server.request_context
-        if ctx and ctx.session and ctx.session.client_params and ctx.session.client_params.clientInfo:
-            info = ctx.session.client_params.clientInfo
-            _RUNTIME_CLIENT["name"] = str(info.name)[:100]
-            _RUNTIME_CLIENT["version"] = str(info.version)[:50]
-            _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.name)
+        params = ctx.session.client_params if (ctx and ctx.session) else None
+        if not params or not params.clientInfo:
+            return
+        info = params.clientInfo
+        _RUNTIME_CLIENT["name"] = str(info.name)[:100]
+        _RUNTIME_CLIENT["version"] = str(info.version)[:50]
+        _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.name)
+        title = getattr(info, "title", None)
+        _RUNTIME_CLIENT["title"] = str(title)[:100] if title else None
+        pv = getattr(params, "protocolVersion", None)
+        _RUNTIME_CLIENT["protocol_version"] = str(pv)[:20] if pv else None
+        caps = getattr(params, "capabilities", None)
+        if caps is not None:
+            _RUNTIME_CLIENT["caps"] = {
+                "client_supports_sampling": getattr(caps, "sampling", None) is not None,
+                "client_supports_roots": getattr(caps, "roots", None) is not None,
+                "client_supports_elicitation": getattr(caps, "elicitation", None) is not None,
+                "client_has_experimental_caps": bool(getattr(caps, "experimental", None)),
+            }
     except Exception:
         pass
 
@@ -386,6 +409,13 @@ def send_telemetry(event: str, properties: dict = None):
             if _RUNTIME_CLIENT["name"]:
                 props.setdefault("mcp_client_name", _RUNTIME_CLIENT["name"])
                 props.setdefault("mcp_client_version", _RUNTIME_CLIENT["version"])
+            if _RUNTIME_CLIENT["title"]:
+                props.setdefault("mcp_client_title", _RUNTIME_CLIENT["title"])
+            if _RUNTIME_CLIENT["protocol_version"]:
+                props.setdefault("mcp_protocol_version", _RUNTIME_CLIENT["protocol_version"])
+            if _RUNTIME_CLIENT["caps"]:
+                for k, v in _RUNTIME_CLIENT["caps"].items():
+                    props.setdefault(k, v)
             props = _scrub(props)
             # Anonymous events: no person profiles are created in the store.
             props["$process_person_profile"] = False

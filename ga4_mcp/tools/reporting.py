@@ -59,12 +59,53 @@ def _should_aggregate(dimensions, metrics):
 
 
 # Common LLM metric aliases (e.g., legacy GA metric names -> GA4 Data API names)
+# Extend from telemetry: recurring SchemaHallucination field names get an alias.
 METRIC_ALIASES = {
     "conversions": "keyEvents",
     "conversion_rate": "sessionConversionRate",
     "user_conversion_rate": "userConversionRate",
     "bounce_rate": "bounceRate",
+    "users": "totalUsers",
+    "itemViews": "itemsViewed",
+    "purchases": "ecommercePurchases",
 }
+
+DIMENSION_ALIASES = {
+    "sessionDefaultChannelGrouping": "sessionDefaultChannelGroup",
+    "defaultChannelGrouping": "defaultChannelGroup",
+}
+
+# Filter-shape repairs for structures models actually send (from telemetry).
+# Applied AFTER camel->snake conversion; valid shapes pass through untouched.
+_FILTER_KEY_SYNONYMS = {
+    "or_filter": "or_group",
+    "and_filter": "and_group",
+    "not_filter": "not_expression",
+    "field": "field_name",
+    "filters": "expressions",
+}
+_FILTER_LEAF_KEYS = {"field_name", "string_filter", "in_list_filter", "numeric_filter", "between_filter"}
+
+
+def _repair_filter_shape(d, parent_key=None):
+    """
+    Map known wrong keys to proto names and wrap bare leaf filters that were
+    sent without their {"filter": {...}} wrapper. Dicts under a "filter" key
+    ARE the leaf (proto Filter), so they are never wrapped again.
+    """
+    if isinstance(d, list):
+        return [_repair_filter_shape(x, parent_key) for x in d]
+    if not isinstance(d, dict):
+        return d
+    repaired = {}
+    for k, v in d.items():
+        nk = _FILTER_KEY_SYNONYMS.get(k, k)
+        repaired[nk] = _repair_filter_shape(v, nk)
+    if (parent_key != "filter"
+            and repaired.keys() & _FILTER_LEAF_KEYS
+            and not (repaired.keys() - _FILTER_LEAF_KEYS)):
+        return {"filter": repaired}
+    return repaired
 
 @mcp.tool()
 def get_ga4_data(
@@ -76,7 +117,8 @@ def get_ga4_data(
     limit: int = 1000,
     estimate_only: bool = False,
     proceed_with_large_dataset: bool = False,
-    enable_aggregation: bool = True
+    enable_aggregation: bool = True,
+    intent: str = None
 ):
     """
     Retrieve GA4 data with built-in intelligence for better and safer results.
@@ -130,6 +172,17 @@ def get_ga4_data(
                                     warning and execute the query anyway.
         enable_aggregation: (Optional) If True, uses server-side aggregation when
                             beneficial. Defaults to True.
+        intent: (Optional) The category of question this query answers. Pick ONE from:
+                traffic_overview | acquisition | content_performance | ecommerce_revenue |
+                user_behavior | geography_devices | campaign_analysis | seo | debugging | other
+
+    COMMON MISTAKES (checked against real usage — read before guessing names):
+    - Metric is 'keyEvents', not 'conversions'. 'totalUsers', not 'users'.
+      'itemsViewed', not 'itemViews'. 'ecommercePurchases', not 'purchases'.
+    - Dimension is 'sessionDefaultChannelGroup', not 'sessionDefaultChannelGrouping'.
+    - A simple dimension_filter MUST nest inside a "filter" key:
+      {"filter": {"fieldName": ..., "stringFilter": {...}}} — not fieldName at the top level.
+    - Logical groups are "andGroup"/"orGroup"/"notExpression" — not and_filter/or_filter.
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded. Please check server startup logs."}
@@ -139,8 +192,9 @@ def get_ga4_data(
         parsed_dimensions = dimensions if isinstance(dimensions, list) else [d.strip() for d in dimensions.split(',')]
         parsed_metrics = metrics if isinstance(metrics, list) else [m.strip() for m in metrics.split(',')]
 
-        # Transparently translate common metric aliases (e.g. conversions -> keyEvents)
+        # Transparently translate common aliases (e.g. conversions -> keyEvents)
         parsed_metrics = [METRIC_ALIASES.get(m, m) for m in parsed_metrics]
+        parsed_dimensions = [DIMENSION_ALIASES.get(d, d) for d in parsed_dimensions]
 
         if not parsed_metrics:
             return {"error": "Metrics list cannot be empty."}
@@ -158,8 +212,9 @@ def get_ga4_data(
         filter_expression = None
         if dimension_filter:
             try:
-                # Recursively translate camelCase keys to snake_case for proto-plus compatibility
-                snake_filter = _convert_keys_to_snake(dimension_filter)
+                # Recursively translate camelCase keys to snake_case for proto-plus
+                # compatibility, then repair known wrong shapes models send
+                snake_filter = _repair_filter_shape(_convert_keys_to_snake(dimension_filter))
                 filter_expression = FilterExpression(snake_filter)
             except Exception as e:
                 return {"error": f"Invalid dimension_filter structure: {e}. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='schema') to learn the correct structure."}
