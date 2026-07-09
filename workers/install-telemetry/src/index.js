@@ -102,6 +102,9 @@ export default {
       else if (props.run_context === "ci" || props.agent_name === "ci_runner") props.traffic_class = "ci";
       else props.traffic_class = "standard";
 
+      // Managed-agent platforms, identified by egress network (tag-only)
+      if (asOrganization === "Anthropic, PBC") props.managed_agent = "claude_managed";
+
       ctx.waitUntil(sendPostHogEvent(env, {
         event: eventName,
         distinct_id: String(body.distinct_id || `anon_${crypto.randomUUID()}`).slice(0, 200),
