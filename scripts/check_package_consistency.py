@@ -55,7 +55,9 @@ else:
             f"server.json package version {package.get('version')} does not match pyproject.toml version {version}"
         )
     expected_env_names = ["GOOGLE_APPLICATION_CREDENTIALS", "GA4_PROPERTY_ID"]
-    actual_env_names = [item.get("name") for item in package.get("environment_variables", [])]
+    # Registry schema 2025-12-11 renamed environment_variables -> environmentVariables
+    env_entries = package.get("environmentVariables", package.get("environment_variables", []))
+    actual_env_names = [item.get("name") for item in env_entries]
     if actual_env_names != expected_env_names:
         errors.append(
             "server.json environment variables must be GOOGLE_APPLICATION_CREDENTIALS followed by GA4_PROPERTY_ID"
