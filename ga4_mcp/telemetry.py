@@ -320,6 +320,37 @@ def _detect_discovery_channel() -> str:
 ACTOR_TYPE = _detect_actor_type()
 DISCOVERY_CHANNEL = _detect_discovery_channel()
 
+
+def _raw_env_signals() -> dict:
+    """
+    The raw, non-PII clues the labels above are computed FROM — presence flags,
+    the terminal name, the GUI bundle id, parent-process command names. Sent
+    ALONGSIDE the computed run_context / agent_name so a mislabel can be
+    re-derived or corrected at query time without a client release. All values
+    are booleans or short non-PII identifiers; never paths, values, or argv.
+    """
+    env = os.environ
+    return {
+        "term_program": env.get("TERM_PROGRAM"),
+        "stdin_tty": sys.stdin.isatty(),
+        "has_ssh": ("SSH_TTY" in env or "SSH_CONNECTION" in env),
+        "cfbundle_id": env.get("__CFBundleIdentifier"),
+        "has_display": ("DISPLAY" in env or "WAYLAND_DISPLAY" in env),
+        "container": (os.path.exists("/.dockerenv") or "KUBERNETES_SERVICE_HOST" in env
+                      or "AWS_EXECUTION_ENV" in env or "ECS_CONTAINER_METADATA_URI" in env),
+        "ci": (env.get("CI", "").lower() in ("true", "1") or env.get("GITHUB_ACTIONS", "").lower() == "true"),
+        "has_claudecode": ("CLAUDECODE" in env or "CLAUDE_CODE" in env or any(k.startswith("CLAUDE_CODE_") for k in env)),
+        "has_cursor": any(k in env for k in ("CURSOR_TRACE_ID", "CURSOR_TRACE", "CURSOR_VERSION", "CURSOR_SESSION_ID")),
+        "has_gemini": ("GEMINI_CLI" in env or "GEMINI_EXTENSION" in env),
+        "has_windsurf": ("WINDSURF_VERSION" in env or any(k.startswith("CODEIUM_") for k in env)),
+        "has_antigravity": ("ANTIGRAVITY" in env or "AGY_SESSION" in env),
+        "has_vscode": ("VSCODE_PID" in env or "VSCODE_IPC_HOOK" in env or "VSCODE_CWD" in env),
+        "parent_procs": _process_ancestor_names(),
+    }
+
+
+ENV_SIGNALS = _raw_env_signals()
+
 # Ground-truth client identity from the MCP initialize handshake.
 # Populated lazily on the first tool call (the handshake happens after boot).
 _RUNTIME_CLIENT = {
@@ -388,6 +419,7 @@ def send_telemetry(event: str, properties: dict = None):
                 "agent_name": _RUNTIME_CLIENT["agent"] or AGENT_NAME,
                 "run_context": RUN_CONTEXT,
                 "discovery_channel": DISCOVERY_CHANNEL,
+                "raw_env": ENV_SIGNALS,  # the raw clues behind run_context/agent_name
                 "session_id": SESSION_ID,
                 **(properties or {}),
             }
