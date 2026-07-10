@@ -109,7 +109,8 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
             props["is_estimate_only"] = bool(a.get("estimate_only"))
             raw_intent = a.get("intent")
             if raw_intent and isinstance(raw_intent, str):
-                props["intent"] = raw_intent[:120]  # raw; curated at query time
+                # Capture verbatim; the gateway owns size-bounding and curation.
+                props["intent"] = raw_intent
         except Exception:
             pass
     if error_category:

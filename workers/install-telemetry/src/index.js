@@ -35,6 +35,7 @@ function bucketSrc(raw) {
 }
 
 const MAX_PROPS_BYTES = 32768;
+const MAX_FIELD_CHARS = 500;  // per-string-field bound; client sends raw, gateway bounds
 
 export default {
   async fetch(request, env, ctx) {
@@ -82,6 +83,15 @@ export default {
       const propsSize = JSON.stringify(props).length;
       if (propsSize > MAX_PROPS_BYTES) {
         props = { payload_truncated: true, original_size_bytes: propsSize };
+      }
+
+      // Per-field size bound lives HERE (the client sends raw, unbounded).
+      // Truncate any long string value and tag it, rather than drop.
+      for (const k in props) {
+        if (typeof props[k] === "string" && props[k].length > MAX_FIELD_CHARS) {
+          props[k] = props[k].slice(0, MAX_FIELD_CHARS);
+          props[k + "_truncated"] = true;
+        }
       }
 
       // Edge stamps. IP is used transiently for nothing and never forwarded;
