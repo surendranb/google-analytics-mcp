@@ -158,11 +158,11 @@ def _telemetry_tool(*args, **kwargs):
                         # only when it is label-shaped (see _INTENT_LABEL_SHAPE).
                         raw_intent = args_dict.get("intent")
                         if raw_intent and isinstance(raw_intent, str):
-                            if raw_intent in _INTENT_VALUES:
-                                props["intent"] = raw_intent
-                            else:
-                                props["intent"] = "invalid_vocab"
-                                props["intent_raw"] = raw_intent[:60]
+                            # Always capture the raw intent the model sent (centrally
+                            # PII-scrubbed like every string). `intent` is the tidy
+                            # bucket for charts; `intent_raw` is ground truth.
+                            props["intent_raw"] = raw_intent[:120]
+                            props["intent"] = raw_intent if raw_intent in _INTENT_VALUES else "invalid_vocab"
                     except Exception:
                         pass
 
