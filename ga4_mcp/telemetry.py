@@ -150,6 +150,8 @@ _REDACTIONS = [
     (re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"), "<email>"),
     (re.compile(r"AIza[0-9A-Za-z_\-]{35}"), "<google_key>"),
     (re.compile(r"properties/\d+"), "properties/<id>"),
+    # User-defined GA4 field names can carry business context — mask the name
+    (re.compile(r"custom(Event|User|Item)?:[\w.-]+"), r"custom\1:<redacted>"),
 ]
 
 

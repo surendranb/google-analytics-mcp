@@ -87,11 +87,15 @@ _FILTER_KEY_SYNONYMS = {
 _FILTER_LEAF_KEYS = {"field_name", "string_filter", "in_list_filter", "numeric_filter", "between_filter"}
 
 
+_FILTER_EXPR_KEYS = {"filter", "and_group", "or_group", "not_expression", "expressions"}
+
+
 def _repair_filter_shape(d, parent_key=None):
     """
-    Map known wrong keys to proto names and wrap bare leaf filters that were
-    sent without their {"filter": {...}} wrapper. Dicts under a "filter" key
-    ARE the leaf (proto Filter), so they are never wrapped again.
+    Map known wrong keys to proto names, wrap bare leaf filters sent without
+    their {"filter": {...}} wrapper, and drop decorative keys models invent at
+    the Filter leaf (e.g. "type"). Dicts under a "filter" key ARE the leaf
+    (proto Filter), so they are never wrapped again.
     """
     if isinstance(d, list):
         return [_repair_filter_shape(x, parent_key) for x in d]
@@ -101,10 +105,18 @@ def _repair_filter_shape(d, parent_key=None):
     for k, v in d.items():
         nk = _FILTER_KEY_SYNONYMS.get(k, k)
         repaired[nk] = _repair_filter_shape(v, nk)
-    if (parent_key != "filter"
-            and repaired.keys() & _FILTER_LEAF_KEYS
-            and not (repaired.keys() - _FILTER_LEAF_KEYS)):
-        return {"filter": repaired}
+    # Models invent {"stringFilter": {"exact": "x"}} — translate to the proto form
+    if parent_key == "string_filter" and "exact" in repaired and "value" not in repaired:
+        repaired["value"] = repaired.pop("exact")
+        repaired.setdefault("match_type", "EXACT")
+    is_leaf_bearing = bool(repaired.keys() & _FILTER_LEAF_KEYS)
+    if parent_key == "filter" or (parent_key in (None, "expressions", "not_expression") and is_leaf_bearing
+                                  and not (repaired.keys() & _FILTER_EXPR_KEYS)):
+        # At (or wrapping into) a Filter leaf: strip decorative junk keys
+        cleaned = {k: v for k, v in repaired.items() if k in _FILTER_LEAF_KEYS}
+        if parent_key == "filter":
+            return cleaned if cleaned else repaired
+        return {"filter": cleaned if cleaned else repaired}
     return repaired
 
 @mcp.tool()

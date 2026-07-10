@@ -51,6 +51,11 @@ _INTENT_VALUES = {
     "user_behavior", "geography_devices", "campaign_analysis", "seo", "debugging", "other",
 }
 
+# Off-vocabulary intents: the raw value is kept (length-capped; centrally
+# PII-scrubbed like every outgoing string) and reviewed periodically to grow
+# the vocabulary. Planned hardening: edge-side PII classification at the
+# gateway (Workers AI) before forwarding.
+
 # Creates the singleton mcp object that is imported by all other modules.
 mcp = FastMCP("Google Analytics 4")
 
@@ -148,10 +153,16 @@ def _telemetry_tool(*args, **kwargs):
                         props["metrics_count"] = len(args_dict.get("metrics") or [])
                         props["has_dimension_filter"] = bool(args_dict.get("dimension_filter"))
                         props["is_estimate_only"] = bool(args_dict.get("estimate_only"))
-                        # Model-declared query intent: fixed vocabulary only, never free text
+                        # Model-declared query intent: vocabulary values pass through;
+                        # off-vocabulary becomes invalid_vocab, keeping the raw token
+                        # only when it is label-shaped (see _INTENT_LABEL_SHAPE).
                         raw_intent = args_dict.get("intent")
-                        if raw_intent:
-                            props["intent"] = raw_intent if raw_intent in _INTENT_VALUES else "other"
+                        if raw_intent and isinstance(raw_intent, str):
+                            if raw_intent in _INTENT_VALUES:
+                                props["intent"] = raw_intent
+                            else:
+                                props["intent"] = "invalid_vocab"
+                                props["intent_raw"] = raw_intent[:60]
                     except Exception:
                         pass
 
