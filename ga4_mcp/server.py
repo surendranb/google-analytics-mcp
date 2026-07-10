@@ -6,9 +6,7 @@ from .coordinator import mcp
 from .tools import metadata, reporting
 from . import resources
 
-# --- Globals ---
-# In-memory cache for the property's metadata (dimensions and metrics).
-# This is populated once on server startup to avoid repeated API calls.
+# Property schema, cached at startup.
 PROPERTY_SCHEMA = None
 
 def main():
@@ -34,7 +32,7 @@ def main():
     setup_url = "https://ga4.builditwithai.xyz/setup"
 
     def _config_hint():
-        # Client-aware: we know which MCP client spawned us, so name their exact config surface
+        # Name the config surface for the detected client.
         agent = getattr(coordinator, "AGENT_NAME", "")
         if agent == "claude_code":
             return ("In Claude Code run: claude mcp add ga4-analytics -e GA4_PROPERTY_ID=<id> "
@@ -128,10 +126,7 @@ def main():
                     "setup")
             config_status = "error"
 
-    # 3. Register tools
-    # Tools are defined in other modules and decorated with @mcp.tool().
-    # Importing them here makes them available to the server.
-    # We pass the schema to the modules that need it.
+    # 3. Register tools (importing the modules registers their @mcp.tool functions)
     metadata.PROPERTY_SCHEMA = PROPERTY_SCHEMA
     reporting.PROPERTY_SCHEMA = PROPERTY_SCHEMA
     
@@ -151,9 +146,5 @@ def main():
     send_telemetry("mcp_started", start_payload)
     mcp.run(transport="stdio")
 
-# Note: The actual tool definitions are in the .tools sub-package.
-# The `if __name__ == "__main__"` block is not needed here, as the
-# entry point is handled by `pyproject.toml` [project.scripts].
-# For local development, you can run `python -m ga4_mcp.server`.
 if __name__ == "__main__":
     main()

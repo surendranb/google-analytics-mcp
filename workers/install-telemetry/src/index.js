@@ -1,28 +1,22 @@
 /**
- * Cloudflare Worker: Universal AI Installer & Telemetry Gateway for GA4 MCP
- * Captures rich 2-phase telemetry (Edge Intent + Local Execution) to PostHog.
- *
- * /e is the central telemetry gateway (v2.6.0+ clients): capture-then-curate —
- * every event is accepted and tagged, never dropped; curation happens at query
- * time. IPs are stripped before forwarding; geo is stamped coarsely at the edge.
+ * Installer + telemetry gateway for GA4 MCP.
+ * /e ingests events: accept all, strip IP, stamp coarse geo, tag, forward to PostHog.
  */
 
 const GATEWAY_VERSION = "1";
 
-// Known event names — unknown events are ACCEPTED and tagged, never dropped.
+// Unknown events are still forwarded, just tagged.
 const KNOWN_EVENTS = new Set([
   "mcp_started", "tool_executed", "server_first_install", "resource_read",
   "package_download", "install_intent", "install_completed", "surface_click",
 ]);
 
-// One-click install targets behind /go/<surface>: the click is recorded at
-// the edge (transient, nothing persisted in user config) and redirected.
+// /go/<surface> records a click, then redirects to the client install deeplink.
 const GO_TARGETS = {
   cursor: "cursor://anysphere.cursor-deeplink/mcp/install?name=ga4-analytics&config=eyJjb21tYW5kIjogInV2eCIsICJhcmdzIjogWyItLWZyb20iLCAiZ29vZ2xlLWFuYWx5dGljcy1tY3AiLCAiZ2E0LW1jcC1zZXJ2ZXIiXSwgImVudiI6IHsiR0E0X1BST1BFUlRZX0lEIjogIjx5b3VyLXByb3BlcnR5LWlkPiIsICJHT09HTEVfQVBQTElDQVRJT05fQ1JFREVOVElBTFMiOiAiL2Fic29sdXRlL3BhdGgvdG8va2V5Lmpzb24ifX0=",
 };
 
-// Bucket install sources for low-cardinality dashboarding; the RAW value is
-// always kept alongside (curation is a query, capture is a contract).
+// Bucket the src marker; raw value kept alongside.
 const KNOWN_SRC = new Set([
   "readme", "glama", "mcpso", "pulsemcp", "ga4mcp", "setup", "cursor_button",
   "vscode_button", "installer",
@@ -34,7 +28,7 @@ function bucketSrc(raw) {
   return KNOWN_SRC.has(s) ? s : "other";
 }
 
-const MAX_PROPS_BYTES = 32768;
+const MAX_PROPS_BYTES = 32768;  // total-payload technical ceiling (ingestion safety); the only real bound
 
 export default {
   async fetch(request, env, ctx) {
@@ -58,8 +52,7 @@ export default {
     // Rich Edge User-Agent & Platform Parsing
     const edgeParsed = parseUserAgent(userAgent);
 
-    // Route 0: Central Telemetry Gateway (/e) — v2.6.0+ MCP clients.
-    // Accept everything, tag anomalies, strip IP, stamp coarse geo, forward.
+    // Route: /e telemetry ingest.
     if (request.method === "POST" && pathname === "/e") {
       if (dnt) {
         return new Response(JSON.stringify({ recorded: false, reason: "dnt" }), {
@@ -84,10 +77,10 @@ export default {
         props = { payload_truncated: true, original_size_bytes: propsSize };
       }
 
-      // Edge stamps. IP is used transiently for nothing and never forwarded;
-      // geo comes from Cloudflare's request metadata, coarse by design.
-      props.$ip = null;                // PostHog: do not record sender IP
-      props.$geoip_disable = true;     // PostHog: do not run server-side GeoIP
+
+      // Edge stamps: drop IP, add coarse geo from request metadata.
+      props.$ip = null;
+      props.$geoip_disable = true;
       props.$geoip_country_name = country;
       props.$geoip_country_code = cf.country || "unknown";
       props.$geoip_continent_name = continent;
@@ -97,12 +90,12 @@ export default {
       if (!KNOWN_EVENTS.has(eventName)) props.unregistered_event = true;
       if (!body.distinct_id) props.missing_distinct_id = true;
 
-      // traffic_class: tag, never drop. Internal = our own CI/dev runs.
+      // traffic_class: internal = our own CI/dev.
       if (props.internal_run === true) props.traffic_class = "internal";
       else if (props.run_context === "ci" || props.agent_name === "ci_runner") props.traffic_class = "ci";
       else props.traffic_class = "standard";
 
-      // Managed-agent platforms, identified by egress network (tag-only)
+      // Tag Anthropic-hosted agents by egress network.
       if (asOrganization === "Anthropic, PBC") props.managed_agent = "claude_managed";
 
       ctx.waitUntil(sendPostHogEvent(env, {
@@ -115,8 +108,7 @@ export default {
       });
     }
 
-    // Route 0.5: One-click install redirects (/go/<surface>) — record the
-    // click at the edge, then hand off to the client's install deeplink.
+    // Route: /go/<surface> click redirect.
     if (pathname.startsWith("/go/")) {
       const surface = pathname.slice(4);
       const target = GO_TARGETS[surface];
@@ -156,8 +148,8 @@ export default {
             event: "install_completed",
             distinct_id: body.anonymous_id || `anon_${crypto.randomUUID()}`,
             properties: {
-              $ip: null,               // never record sender IP
-              $geoip_disable: true,    // geo comes from edge metadata below
+              $ip: null,
+              $geoip_disable: true,
               $geoip_country_name: country,
               $geoip_country_code: cf.country || "unknown",
               $geoip_continent_name: continent,
@@ -341,7 +333,7 @@ function getHomebrewFormula() {
   return `class GoogleAnalyticsMcp < Formula
   desc "Google Analytics 4 MCP server for AI agents and agentic workflows"
   homepage "https://ga4mcp.com"
-  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.7.0.tar.gz"
+  url "https://files.pythonhosted.org/packages/source/g/google-analytics-mcp/google_analytics_mcp-2.7.1.tar.gz"
   license "Apache-2.0"
 
   depends_on "python@3.12"
