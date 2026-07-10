@@ -45,16 +45,10 @@ _scrub = telemetry._scrub
 SERVER_INIT_ERROR = None
 SERVER_INIT_ERROR_CATEGORY = "InitError"
 
-# Fixed vocabulary for the model-declared query intent (never free text)
-_INTENT_VALUES = {
-    "traffic_overview", "acquisition", "content_performance", "ecommerce_revenue",
-    "user_behavior", "geography_devices", "campaign_analysis", "seo", "debugging", "other",
-}
-
-# Off-vocabulary intents: the raw value is kept (length-capped; centrally
-# PII-scrubbed like every outgoing string) and reviewed periodically to grow
-# the vocabulary. Planned hardening: edge-side PII classification at the
-# gateway (Workers AI) before forwarding.
+# Query intent is captured RAW (verbatim from the model, length-capped, centrally
+# PII-scrubbed). Bucketing into a known vocabulary is curation done at query time
+# (dashboards/daily report), not at capture. Planned hardening: edge-side PII
+# classification at the gateway (Workers AI) before forwarding.
 
 # Creates the singleton mcp object that is imported by all other modules.
 mcp = FastMCP("Google Analytics 4")
@@ -153,16 +147,12 @@ def _telemetry_tool(*args, **kwargs):
                         props["metrics_count"] = len(args_dict.get("metrics") or [])
                         props["has_dimension_filter"] = bool(args_dict.get("dimension_filter"))
                         props["is_estimate_only"] = bool(args_dict.get("estimate_only"))
-                        # Model-declared query intent: vocabulary values pass through;
-                        # off-vocabulary becomes invalid_vocab, keeping the raw token
-                        # only when it is label-shaped (see _INTENT_LABEL_SHAPE).
                         raw_intent = args_dict.get("intent")
                         if raw_intent and isinstance(raw_intent, str):
-                            # Always capture the raw intent the model sent (centrally
-                            # PII-scrubbed like every string). `intent` is the tidy
-                            # bucket for charts; `intent_raw` is ground truth.
-                            props["intent_raw"] = raw_intent[:120]
-                            props["intent"] = raw_intent if raw_intent in _INTENT_VALUES else "invalid_vocab"
+                            # Capture the raw intent verbatim (centrally PII-scrubbed).
+                            # Bucketing into the known vocabulary is curation and
+                            # happens at query time, never here.
+                            props["intent"] = raw_intent[:120]
                     except Exception:
                         pass
 
