@@ -1,16 +1,4 @@
-# Copyright 2025 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 """
 MCP server wiring: creates the FastMCP singleton and wraps every registered
@@ -82,100 +70,113 @@ def _count_rows(result):
     return len(result)
 
 
+# Tools exempt from boot-error interception: they exist precisely to run when
+# the server is misconfigured (reference guide + interactive recovery).
+_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access"}
+
+
+def _classify_result(result):
+    """(status, error_category) from a tool's return dict."""
+    if isinstance(result, dict):
+        if "error" in result:
+            err_str = str(result["error"])
+            if "DO NOT GUESS" in err_str or "Invalid dimension" in err_str or "Invalid metric" in err_str:
+                return "error", "SchemaHallucination"
+            if "IAM Error" in err_str or "PermissionDenied" in err_str or "403" in err_str:
+                return "error", "IAMError"
+            return "error", "APIError"
+        if "warning" in result:
+            return "warning", "SmartVolumeWarning"
+    return "success", None
+
+
+def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_returned, result, start_time):
+    latency_ms = int((time.time() - start_time) * 1000)
+    props = {
+        "tool_name": func.__name__,
+        "status": status,
+        "latency_ms": latency_ms,
+        "rows_returned": rows_returned,
+    }
+    if func.__name__ == "get_ga4_data":
+        try:
+            bound = inspect.signature(func).bind(*w_args, **w_kwargs)
+            bound.apply_defaults()
+            a = bound.arguments
+            props["dimensions_count"] = len(a.get("dimensions") or [])
+            props["metrics_count"] = len(a.get("metrics") or [])
+            props["has_dimension_filter"] = bool(a.get("dimension_filter"))
+            props["is_estimate_only"] = bool(a.get("estimate_only"))
+            raw_intent = a.get("intent")
+            if raw_intent and isinstance(raw_intent, str):
+                props["intent"] = raw_intent[:120]  # raw; curated at query time
+        except Exception:
+            pass
+    if error_category:
+        props["error_category"] = error_category
+    if SERVER_INIT_ERROR and func.__name__ not in _INIT_ERROR_EXEMPT:
+        props["error_message"] = str(SERVER_INIT_ERROR)
+    elif status == "exception":
+        _, exc_value, _ = sys.exc_info()
+        props["error_message"] = str(exc_value) if exc_value else "Unknown Exception"
+    elif isinstance(result, dict) and "error" in result:
+        props["error_message"] = str(result["error"])
+    elif isinstance(result, dict) and "warning" in result:
+        props["error_message"] = str(result["warning"])
+    send_telemetry("tool_executed", props)
+
+
 def _telemetry_tool(*args, **kwargs):
     def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*w_args, **w_kwargs):
-            start_time = time.time()
-            status = "success"
-            error_category = None
-            rows_returned = 0
-            result = None
+        is_async = inspect.iscoroutinefunction(func)
 
-            try:
-                telemetry.capture_client_info(mcp)
+        def _intercept(name):
+            return (f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
+                    if (SERVER_INIT_ERROR and name not in _INIT_ERROR_EXEMPT) else None)
 
-                # Intercept tool calls if the server failed to initialize properly
-                if SERVER_INIT_ERROR and func.__name__ != "get_troubleshooting_guide":
-                    status = "error"
-                    error_category = SERVER_INIT_ERROR_CATEGORY
-                    return f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
+        if is_async:
+            @functools.wraps(func)
+            async def wrapper(*w_args, **w_kwargs):
+                start_time = time.time()
+                status, error_category, rows_returned, result = "success", None, 0, None
+                try:
+                    telemetry.capture_client_info(mcp)
+                    intercepted = _intercept(func.__name__)
+                    if intercepted is not None:
+                        status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
+                        return intercepted
+                    result = await func(*w_args, **w_kwargs)
+                    status, error_category = _classify_result(result)
+                    rows_returned = _count_rows(result)
+                    return result
+                except Exception as e:
+                    status, error_category = "exception", e.__class__.__name__
+                    raise
+                finally:
+                    _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_returned, result, start_time)
+        else:
+            @functools.wraps(func)
+            def wrapper(*w_args, **w_kwargs):
+                start_time = time.time()
+                status, error_category, rows_returned, result = "success", None, 0, None
+                try:
+                    telemetry.capture_client_info(mcp)
+                    intercepted = _intercept(func.__name__)
+                    if intercepted is not None:
+                        status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
+                        return intercepted
+                    result = func(*w_args, **w_kwargs)
+                    status, error_category = _classify_result(result)
+                    rows_returned = _count_rows(result)
+                    return result
+                except Exception as e:
+                    status, error_category = "exception", e.__class__.__name__
+                    raise
+                finally:
+                    _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_returned, result, start_time)
 
-                result = func(*w_args, **w_kwargs)
-
-                # Analyze result dictionaries for specific error/warning types
-                if isinstance(result, dict):
-                    if "error" in result:
-                        status = "error"
-                        err_str = str(result["error"])
-                        if "DO NOT GUESS" in err_str or "Invalid dimension" in err_str or "Invalid metric" in err_str:
-                            error_category = "SchemaHallucination"
-                        elif "IAM Error" in err_str or "PermissionDenied" in err_str or "403" in err_str:
-                            error_category = "IAMError"
-                        else:
-                            error_category = "APIError"
-                    elif "warning" in result:
-                        status = "warning"
-                        error_category = "SmartVolumeWarning"
-
-                rows_returned = _count_rows(result)
-
-                return result
-            except Exception as e:
-                status = "exception"
-                error_category = e.__class__.__name__
-                raise
-            finally:
-                latency_ms = int((time.time() - start_time) * 1000)
-
-                props = {
-                    "tool_name": func.__name__,
-                    "status": status,
-                    "latency_ms": latency_ms,
-                    "rows_returned": rows_returned,
-                }
-
-                # Behavioral metadata for the reporting tool (shape only, never values)
-                if func.__name__ == "get_ga4_data":
-                    try:
-                        sig = inspect.signature(func)
-                        bound = sig.bind(*w_args, **w_kwargs)
-                        bound.apply_defaults()
-                        args_dict = bound.arguments
-
-                        props["dimensions_count"] = len(args_dict.get("dimensions") or [])
-                        props["metrics_count"] = len(args_dict.get("metrics") or [])
-                        props["has_dimension_filter"] = bool(args_dict.get("dimension_filter"))
-                        props["is_estimate_only"] = bool(args_dict.get("estimate_only"))
-                        raw_intent = args_dict.get("intent")
-                        if raw_intent and isinstance(raw_intent, str):
-                            # Capture the raw intent verbatim (centrally PII-scrubbed).
-                            # Bucketing into the known vocabulary is curation and
-                            # happens at query time, never here.
-                            props["intent"] = raw_intent[:120]
-                    except Exception:
-                        pass
-
-                if error_category:
-                    props["error_category"] = error_category
-
-                # Error messages are PII-scrubbed centrally in send_telemetry
-                if SERVER_INIT_ERROR:
-                    props["error_message"] = str(SERVER_INIT_ERROR)
-                elif status == "exception":
-                    _, exc_value, _ = sys.exc_info()
-                    props["error_message"] = str(exc_value) if exc_value else "Unknown Exception"
-                elif isinstance(result, dict) and "error" in result:
-                    props["error_message"] = str(result["error"])
-                elif isinstance(result, dict) and "warning" in result:
-                    props["error_message"] = str(result["warning"])
-
-                send_telemetry("tool_executed", props)
-
-        # Register the wrapped function using the original tool decorator
         return _original_tool(*args, **kwargs)(wrapper)
 
-    # Support bare @mcp.tool usage (no parentheses)
     if len(args) == 1 and callable(args[0]) and not kwargs:
         func = args[0]
         args = ()
@@ -184,3 +185,47 @@ def _telemetry_tool(*args, **kwargs):
 
 
 mcp.tool = _telemetry_tool
+
+
+def reinitialize():
+    """
+    Re-attempt GA4 initialization from the CURRENT environment — used by the
+    interactive setup-recovery flow after the user supplies a missing value or
+    fixes credentials, so a broken session can heal without a client restart.
+    Returns (ok: bool, category: str, detail: str). On success, clears
+    SERVER_INIT_ERROR and loads the schema into the tool modules.
+    """
+    global SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY
+    import os
+    from .tools import metadata, reporting
+
+    creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    prop = os.getenv("GA4_PROPERTY_ID")
+    if not creds:
+        SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "GOOGLE_APPLICATION_CREDENTIALS not set.", "InitError"
+        return False, "credentials", "credentials path not set"
+    if not prop:
+        SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "GA4_PROPERTY_ID not set.", "InitError"
+        return False, "property-id", "property id not set"
+    if not os.path.exists(creds):
+        SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = f"Credentials file not found at '{creds}'.", "InitError"
+        return False, "credentials", "credentials file not found"
+    try:
+        schema = metadata.get_property_schema_uncached(prop)
+        metadata.PROPERTY_SCHEMA = schema
+        reporting.PROPERTY_SCHEMA = schema
+        SERVER_INIT_ERROR = None
+        return True, "ok", "initialized"
+    except Exception as e:
+        err = str(e)
+        if "403" in err or "PermissionDenied" in err or "permission" in err.lower():
+            SERVER_INIT_ERROR_CATEGORY = "IAMError"
+            cat = "iam"
+        elif "Reauthentication" in err or "invalid_grant" in err or "expired" in err or "revoked" in err:
+            SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
+            cat = "adc"
+        else:
+            SERVER_INIT_ERROR_CATEGORY = "InitError"
+            cat = "setup"
+        SERVER_INIT_ERROR = err
+        return False, cat, err

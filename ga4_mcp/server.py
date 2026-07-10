@@ -1,16 +1,4 @@
-# Copyright 2025 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 import os
 import sys
@@ -36,6 +24,7 @@ def main():
     print("Starting GA4 MCP server...", file=sys.stderr)
     import ga4_mcp.coordinator as coordinator
     import ga4_mcp.tools.troubleshooting  # Register the OTA tool
+    import ga4_mcp.setup_flow  # Register the interactive setup-recovery tool
     config_status = "valid"
 
     # 1. Validate environment variables
@@ -61,9 +50,11 @@ def main():
 
     def _guided(message, steps, anchor, topic="setup"):
         step_text = " ".join(f"({i}) {s}" for i, s in enumerate(steps, 1))
-        return (f"{message} FIX — relay these exact steps to the user: {step_text} "
-                f"Full guide: {setup_url}#{anchor} — the user must restart their MCP client after updating the config. "
-                f"For deeper help call get_troubleshooting_guide(topic='{topic}').")
+        return (f"{message} FASTEST FIX — call the setup_ga4_access tool now: it walks the user through "
+                f"fixing this interactively and reconnects without a restart. "
+                f"Or relay these steps manually: {step_text} "
+                f"Full guide: {setup_url}#{anchor}. "
+                f"For deeper reference call get_troubleshooting_guide(topic='{topic}').")
 
     if not credentials_path:
         print("ERROR: GOOGLE_APPLICATION_CREDENTIALS environment variable not set.", file=sys.stderr)
