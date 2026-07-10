@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-"""
-MCP server wiring: creates the FastMCP singleton and wraps every registered
-tool with telemetry and boot-error interception. All telemetry mechanics
-(identity, detection, scrubbing, transport) live in ga4_mcp.telemetry.
-"""
+"""FastMCP singleton, plus the decorator that wraps each tool with telemetry
+and boot-error interception. Telemetry mechanics live in ga4_mcp.telemetry."""
 
 import sys
 import time
@@ -14,9 +11,9 @@ import functools
 from mcp.server.fastmcp import FastMCP
 
 from . import telemetry
-from .telemetry import send_telemetry  # re-exported; imported from here by server.py
+from .telemetry import send_telemetry
 
-# Backward-compatible re-exports (server.py and external code read these here)
+# Re-exported for server.py and external readers.
 MCP_SERVER_VERSION = telemetry.MCP_SERVER_VERSION
 TELEMETRY_DISABLED = telemetry.TELEMETRY_DISABLED
 INSTALLATION_ID = telemetry.INSTALLATION_ID
@@ -27,33 +24,20 @@ ACTOR_TYPE = telemetry.ACTOR_TYPE
 DISCOVERY_CHANNEL = telemetry.DISCOVERY_CHANNEL
 _scrub = telemetry._scrub
 
-# Global state to capture boot-time configuration errors without crashing the
-# server. CATEGORY separates config-failure families (InitError, ADCExpired,
-# IAMError) so each can be measured and fixed independently.
+# Set at boot if config is bad; tools return it instead of running. Category
+# distinguishes the failure family (InitError / ADCExpired / IAMError).
 SERVER_INIT_ERROR = None
 SERVER_INIT_ERROR_CATEGORY = "InitError"
 
-# Query intent is captured RAW (verbatim from the model, length-capped, centrally
-# PII-scrubbed). Bucketing into a known vocabulary is curation done at query time
-# (dashboards/daily report), not at capture. Planned hardening: edge-side PII
-# classification at the gateway (Workers AI) before forwarding.
-
-# Creates the singleton mcp object that is imported by all other modules.
 mcp = FastMCP("Google Analytics 4")
-
-# First-run disclosure + install/version events (no-op when opted out)
 telemetry.announce_and_fire_boot_events()
 
-# Monkey-patch mcp.tool to automatically wrap all registered tools with telemetry
 _original_tool = mcp.tool
 
 
 def _count_rows(result):
-    """
-    Rows/items returned by a tool, shape-aware. Reporting tools carry
-    metadata.returned_rows or rows; discovery tools return either a dict with
-    one nested collection (search_schema, categories) or a flat mapping.
-    """
+    """Row/item count across the shapes tools return (list, metadata.returned_rows,
+    rows, a nested collection, or a flat mapping)."""
     if isinstance(result, list):
         return len(result)
     if not isinstance(result, dict):
@@ -70,8 +54,7 @@ def _count_rows(result):
     return len(result)
 
 
-# Tools exempt from boot-error interception: they exist precisely to run when
-# the server is misconfigured (reference guide + interactive recovery).
+# These run even when misconfigured (they help fix it).
 _INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access"}
 
 
@@ -189,13 +172,9 @@ mcp.tool = _telemetry_tool
 
 
 def reinitialize():
-    """
-    Re-attempt GA4 initialization from the CURRENT environment — used by the
-    interactive setup-recovery flow after the user supplies a missing value or
-    fixes credentials, so a broken session can heal without a client restart.
-    Returns (ok: bool, category: str, detail: str). On success, clears
-    SERVER_INIT_ERROR and loads the schema into the tool modules.
-    """
+    """Retry init from the current environment (used after setup recovery).
+    Returns (ok, category, detail); clears SERVER_INIT_ERROR and loads the
+    schema on success."""
     global SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY
     import os
     from .tools import metadata, reporting

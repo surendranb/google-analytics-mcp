@@ -1,18 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-"""
-Anonymous usage telemetry for google-analytics-mcp.
-
-Everything telemetry lives here: opt-out handling, anonymous identity,
-environment detection, PII scrubbing, and transport. Events are sent to the
-project's own gateway (a Cloudflare Worker whose source is in this repo under
-workers/install-telemetry/), which strips IPs, stamps coarse geo, and forwards
-to PostHog. See 'Telemetry & Privacy' in the README.
-
-Identity contract (frozen, schema_version 1): the only identity is a random,
-resettable installation UUID stored in ~/.ga4_mcp/. Never hardware-derived,
-never fingerprinted. Deleting ~/.ga4_mcp resets it entirely.
-"""
+"""Anonymous usage telemetry: identity, environment signals, and transport to
+the gateway (workers/install-telemetry/). Opt-out and privacy: see README."""
 
 import os
 import re
@@ -26,17 +15,9 @@ import subprocess
 import urllib.request
 from pathlib import Path
 
-# Central gateway (source: workers/install-telemetry/ in this repo).
-# The gateway strips IPs, stamps coarse geo, and forwards to the analytics
-# store. No vendor keys ship in this client.
 GATEWAY_URL = "https://ga4.builditwithai.xyz/e"
-
-# Version of the telemetry event contract. Additive-only evolution: properties
-# may be added under the same version; renames/removals require a bump and a
-# deprecation window where both shapes are emitted.
 SCHEMA_VERSION = 1
 
-# Extract the package version so it can be stamped on all telemetry
 try:
     import importlib.metadata
     MCP_SERVER_VERSION = importlib.metadata.version("google-analytics-mcp")
@@ -44,11 +25,7 @@ except Exception:
     MCP_SERVER_VERSION = "unknown"
 
 
-# Telemetry Opt-Out
-# Honors every flag we have ever documented (README used to say DISABLE_TELEMETRY)
-# plus the cross-tool DO_NOT_TRACK convention (consoledonottrack.com).
-# Precedence: any disable flag wins over any enable value — the most
-# privacy-protective signal always takes priority.
+# Any disable flag wins over GA_MCP_TELEMETRY=true.
 def _telemetry_disabled() -> bool:
     if os.getenv("GA_MCP_TELEMETRY", "true").lower() in ("false", "0", "off"):
         return True
@@ -60,19 +37,13 @@ def _telemetry_disabled() -> bool:
 
 TELEMETRY_DISABLED = _telemetry_disabled()
 
-# Marker set by this project's own CI/dev environments so our runs can be
-# tagged (traffic_class=internal) instead of polluting adoption metrics.
-# User CI stays first-class data — only OUR runs carry this.
+# Set only by our own CI/dev runs, to tag them traffic_class=internal.
 INTERNAL_RUN = os.getenv("GA4_MCP_INTERNAL", "").lower() in ("1", "true", "yes")
 
 
-# Persistent Anonymous Installation ID & First-Run Detection
 def _init_anonymous_identity():
-    """
-    Manages a purely random anonymous installation UUID stored locally.
-    Contains NO PII (no usernames, hostnames, IP addresses, or path names).
-    Deleting ~/.ga4_mcp resets the identity entirely.
-    """
+    """Random installation UUID in ~/.ga4_mcp/; created on first run, reset by
+    deleting the folder. Returns (installation_id, is_first_install)."""
     try:
         config_dir = Path.home() / ".ga4_mcp"
         config_dir.mkdir(parents=True, exist_ok=True)
@@ -93,24 +64,19 @@ def _init_anonymous_identity():
 
         return installation_id, is_first_install
     except Exception:
-        # Fallback to random session ID if filesystem access is restricted
+        # filesystem not writable: fall back to a non-persistent id
         return f"anon_{uuid.uuid4()}", False
 
 
 INSTALLATION_ID, IS_FIRST_INSTALL = _init_anonymous_identity()
+SESSION_ID = f"sess_{uuid.uuid4()}"  # one per process
 
-# Per-process session ID: one server process == one agent session (stdio transport)
-SESSION_ID = f"sess_{uuid.uuid4()}"
-
-# Environment Context
 IN_VIRTUAL_ENV = sys.prefix != sys.base_prefix
 CPU_ARCH = platform.machine()
 TIMEZONE_OFFSET = -time.timezone if (time.localtime().tm_isdst == 0) else -time.altzone
 
 
-# Install-source attribution: self-declared channel marker baked into install
-# snippets (e.g. the 1-line installer writes GA4_MCP_SOURCE into the config).
-# Raw value is kept (capture), a low-cardinality bucket is added (curation).
+# GA4_MCP_SOURCE, set in install snippets; raw value + low-cardinality bucket.
 _KNOWN_SOURCES = {
     "readme", "glama", "mcpso", "pulsemcp", "ga4mcp", "setup",
     "cursor_button", "vscode_button", "installer",
@@ -127,9 +93,7 @@ def _install_source():
 INSTALL_SOURCE_RAW, INSTALL_SOURCE = _install_source()
 
 
-# PII Scrubbing
-# Every outgoing string property passes through this, so no call site can leak
-# paths, emails, keys, or GA4 property IDs — including future call sites.
+# Redaction applied to every outgoing string.
 _REDACTIONS = [
     (re.compile(r"\bhttps?://\S+"), "<url>"),
     (re.compile(r"(?:file://)?[A-Za-z]:[\\/](?:[^\\/:*?\"<>|\r\n]+[\\/])+[^\\/:*?\"<>|\r\n ]*"), "<path>"),
@@ -156,10 +120,7 @@ def _scrub(value):
     return value
 
 
-# Agent Identity
-# Ground truth is the MCP handshake clientInfo (captured on first tool call).
-# Env-var detection is only a fallback for events fired before the handshake
-# (server_first_install, mcp_started). Env var VALUES are never collected.
+# Map a handshake clientInfo.name to a known bucket.
 def _normalize_client_name(raw):
     n = (raw or "").strip().lower()
     if not n or n == "unknown":
@@ -193,7 +154,7 @@ def _normalize_client_name(raw):
 
 
 def _process_ancestor_names(max_depth=4):
-    """Command names of parent processes (uvx sits between the agent and us)."""
+    """Parent-process command names (the agent sits above uvx/python)."""
     names = []
     try:
         if platform.system() not in ("Darwin", "Linux"):
@@ -216,11 +177,7 @@ def _process_ancestor_names(max_depth=4):
 
 
 def _detect_run_context() -> str:
-    """
-    Single deterministic answer to WHERE the server is running, by priority:
-    ci > cloud/container > terminal (attended) > desktop GUI app (attended) > headless.
-    Presence-based env checks only; no values are collected.
-    """
+    """Where the server runs, by priority: ci > cloud > terminal > desktop > headless."""
     env = os.environ
     if env.get("GITHUB_ACTIONS", "").lower() == "true" or env.get("CI", "").lower() in ("true", "1"):
         return "ci"
@@ -230,7 +187,7 @@ def _detect_run_context() -> str:
         return "cloud"
     if "TERM_PROGRAM" in env or "SSH_TTY" in env or "SSH_CONNECTION" in env or sys.stdin.isatty():
         return "terminal"
-    # GUI apps strip TERM_PROGRAM but stamp their own identity on the process
+    # macOS GUI apps strip TERM_PROGRAM but set a bundle id
     if env.get("__CFBundleIdentifier"):
         return "desktop"
     if "DISPLAY" in env or "WAYLAND_DISPLAY" in env or env.get("XDG_SESSION_TYPE") in ("x11", "wayland"):
@@ -244,11 +201,8 @@ RUN_CONTEXT = _detect_run_context()
 
 
 def _detect_agent_name() -> str:
-    """
-    Detects the AI agent client from env-var PRESENCE and parent process names.
-    Claude Code sets CLAUDECODE / CLAUDE_CODE_* (verified); Cursor sets
-    CURSOR_TRACE_ID. Zero PII collected — values are never read except CI/GITHUB_ACTIONS booleans.
-    """
+    """Best-effort agent from env-var presence, bundle id, and parent processes;
+    used before the handshake clientInfo is available."""
     env = os.environ
     if "CLAUDECODE" in env or "CLAUDE_CODE" in env or any(k.startswith("CLAUDE_CODE_") for k in env):
         return "claude_code"
@@ -261,7 +215,6 @@ def _detect_agent_name() -> str:
     if "ANTIGRAVITY" in env or "AGY_SESSION" in env:
         return "antigravity"
 
-    # macOS GUI spawns carry the host app's bundle id (third identity signal)
     bundle = env.get("__CFBundleIdentifier", "").lower()
     if "claudefordesktop" in bundle or "claude-desktop" in bundle:
         return "claude_desktop"
@@ -270,8 +223,7 @@ def _detect_agent_name() -> str:
     if "windsurf" in bundle:
         return "windsurf"
 
-    # Parent-process walk runs before the VS Code check because VS Code forks
-    # (Cursor, Windsurf) also set VSCODE_* in their terminals.
+    # Before the VSCODE_* check: Cursor/Windsurf also set those vars.
     for comm in _process_ancestor_names():
         for needle, bucket in (
             ("claude", "claude_code"),
@@ -295,7 +247,7 @@ AGENT_NAME = _detect_agent_name()
 
 
 def _detect_actor_type() -> str:
-    """Autonomous AI agent environment vs human shell. No PII collected."""
+    """agent vs human shell."""
     if not sys.stdin.isatty():
         return "ai_agent"
     if AGENT_NAME not in ("human_terminal", "generic_agent", "ci_runner"):
@@ -304,7 +256,7 @@ def _detect_actor_type() -> str:
 
 
 def _detect_discovery_channel() -> str:
-    """Detects package execution harness channel (uvx, pip, brew, npx, direct)."""
+    """How the package was launched: uvx / homebrew / npx / pip_venv / direct_python."""
     argv_str = " ".join(sys.argv).lower()
     if "uvx" in argv_str or "uv" in sys.executable:
         return "uvx"
@@ -322,13 +274,8 @@ DISCOVERY_CHANNEL = _detect_discovery_channel()
 
 
 def _raw_env_signals() -> dict:
-    """
-    The raw, non-PII clues the labels above are computed FROM — presence flags,
-    the terminal name, the GUI bundle id, parent-process command names. Sent
-    ALONGSIDE the computed run_context / agent_name so a mislabel can be
-    re-derived or corrected at query time without a client release. All values
-    are booleans or short non-PII identifiers; never paths, values, or argv.
-    """
+    """The raw signals run_context/agent_name are derived from, sent alongside
+    the labels so they can be re-derived in a query. Flags and short ids only."""
     env = os.environ
     return {
         "term_program": env.get("TERM_PROGRAM"),
@@ -351,8 +298,7 @@ def _raw_env_signals() -> dict:
 
 ENV_SIGNALS = _raw_env_signals()
 
-# Ground-truth client identity from the MCP initialize handshake.
-# Populated lazily on the first tool call (the handshake happens after boot).
+# Handshake clientInfo, populated on the first tool call (handshake is post-boot).
 _RUNTIME_CLIENT = {
     "name": None, "version": None, "agent": None, "title": None,
     "protocol_version": None, "caps": None,
@@ -360,12 +306,7 @@ _RUNTIME_CLIENT = {
 
 
 def capture_client_info(mcp_server):
-    """
-    Capture what the harness hands us in the MCP initialize handshake:
-    clientInfo (raw name kept, bucket added), spoken protocol revision, and
-    the client's declared capabilities (booleans only — a fingerprint of what
-    the harness can do: sampling, roots, elicitation).
-    """
+    """Read clientInfo, protocol version, and capability flags from the handshake."""
     if _RUNTIME_CLIENT["name"] is not None:
         return
     try:
@@ -394,13 +335,8 @@ def capture_client_info(mcp_server):
 
 
 def send_telemetry(event: str, properties: dict = None):
-    """
-    Fire-and-forget 100% anonymous telemetry via the project gateway.
-    Respects opt-out flags: GA_MCP_TELEMETRY=false, DISABLE_TELEMETRY=1,
-    DO_NOT_TRACK=1, NO_TELEMETRY=1 — nothing is sent anywhere when set.
-    All string properties are PII-scrubbed centrally before sending.
-    Swallows all network errors so MCP operation is never impacted.
-    """
+    """Fire-and-forget event to the gateway on a daemon thread. No-op when
+    opted out; never raises."""
     if TELEMETRY_DISABLED:
         return
 
@@ -439,8 +375,7 @@ def send_telemetry(event: str, properties: dict = None):
                 for k, v in _RUNTIME_CLIENT["caps"].items():
                     props.setdefault(k, v)
             props = _scrub(props)
-            # Anonymous events: no person profiles are created in the store.
-            props["$process_person_profile"] = False
+            props["$process_person_profile"] = False  # no person profiles
             payload = {
                 "event": event,
                 "distinct_id": INSTALLATION_ID,
@@ -457,18 +392,13 @@ def send_telemetry(event: str, properties: dict = None):
             )
             urllib.request.urlopen(req, timeout=3)
         except Exception:
-            pass  # Silently fail on network issues or timeouts
+            pass
 
-    # Run in a daemon thread so it doesn't block execution or shutdown
     threading.Thread(target=_send, daemon=True).start()
 
 
 def _track_version_change():
-    """
-    Emit package_download on the first run of each new version — PyPI has no
-    install hooks, so this is the install/upgrade funnel signal (one event per
-    version per installation).
-    """
+    """Emit package_download once per version (PyPI has no install hook)."""
     try:
         version_file = Path.home() / ".ga4_mcp" / "last_run_version"
         previous = version_file.read_text(encoding="utf-8").strip() if version_file.exists() else None

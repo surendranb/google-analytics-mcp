@@ -1,20 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
-"""
-Interactive setup recovery via MCP elicitation.
-
-When the server boots misconfigured (the #1 real failure — auth/config, not
-model mistakes), the classic path returns a guided error and the human has to
-edit config + restart the client. This tool instead uses the MCP elicitation
-capability to fix the problem *in-session*: it asks the user for the missing
-piece (or confirmation that they ran a terminal fix) through the client's own
-UI, applies it, and re-initializes — so a broken session heals without a
-restart. Sensitive values never pass through the LLM context (elicitation is
-out-of-band) and no model tokens are spent.
-
-Falls back to guided text if the connecting client does not support
-elicitation (~13% of clients as of 2026-07).
-"""
+"""Interactive setup recovery. When config is broken, uses MCP elicitation to
+collect the missing value (or confirm a terminal fix) and re-initialize in
+session, avoiding a client restart. Falls back to guided text if the client
+doesn't support elicitation."""
 
 import os
 
@@ -58,7 +47,7 @@ async def setup_ga4_access(ctx: Context) -> str:
     prop = os.getenv("GA4_PROPERTY_ID")
 
     try:
-        # 1) Missing numeric Property ID — collect it directly (not sensitive).
+        # Missing Property ID — collect it.
         if not prop:
             r = await ctx.elicit(
                 "What is your GA4 Property ID? Find it at analytics.google.com > Admin > "
@@ -69,7 +58,7 @@ async def setup_ga4_access(ctx: Context) -> str:
                 return "Setup paused — no Property ID provided. Re-run setup_ga4_access when ready."
             os.environ["GA4_PROPERTY_ID"] = r.data.property_id.strip()
 
-        # 2) Missing credentials path — collect it (a local path, not a secret).
+        # Missing/invalid credentials path — collect it.
         elif not creds or (creds and not os.path.exists(creds)):
             r = await ctx.elicit(
                 "Where is your Google service-account JSON key on this machine? "
@@ -83,7 +72,7 @@ async def setup_ga4_access(ctx: Context) -> str:
             if path.lower() != "adc":
                 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
 
-        # 3) Expired Google login (ADC) — a terminal fix; confirm then retry.
+        # Expired credentials (ADC) — confirm the terminal fix.
         elif category == "ADCExpired":
             r = await ctx.elicit(
                 "Your Google credentials have expired. In a terminal run:\n\n"
@@ -94,7 +83,7 @@ async def setup_ga4_access(ctx: Context) -> str:
             if r.action != "accept" or not r.data or not r.data.done:
                 return "Setup paused — run 'gcloud auth application-default login', then re-run setup_ga4_access."
 
-        # 4) Missing GA4 access (IAM) — a console fix; confirm then retry.
+        # Missing GA4 access (IAM) — confirm the console fix.
         elif category == "IAMError":
             sa_hint = "the service account email (the client_email inside your JSON key)"
             r = await ctx.elicit(
@@ -107,7 +96,7 @@ async def setup_ga4_access(ctx: Context) -> str:
                 return "Setup paused — grant Viewer access, then re-run setup_ga4_access."
 
         else:
-            # Unknown/other init error — confirm-and-retry.
+            # Other init error — confirm and retry.
             r = await ctx.elicit(
                 f"Setup issue: {coordinator.SERVER_INIT_ERROR}. Fix it, then set 'done' to true to retry.",
                 _Confirm,
@@ -116,11 +105,11 @@ async def setup_ga4_access(ctx: Context) -> str:
                 return "Setup paused. Re-run setup_ga4_access after fixing the issue above."
 
     except Exception:
-        # Client does not support elicitation (or it failed) — fall back to guided text.
+        # Client lacks elicitation — fall back to guided text.
         return (f"This client can't prompt interactively. To fix setup manually: {coordinator.SERVER_INIT_ERROR} "
                 "See https://ga4.builditwithai.xyz/setup, then restart your MCP client.")
 
-    # Re-initialize from the now-updated environment.
+    # Retry init with the updated environment.
     ok, cat, detail = coordinator.reinitialize()
     if ok:
         msg = "✅ GA4 access is now working — you can query your analytics. "
