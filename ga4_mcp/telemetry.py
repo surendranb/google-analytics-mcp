@@ -118,7 +118,7 @@ _KNOWN_SOURCES = {
 
 
 def _install_source():
-    raw = (os.getenv("GA4_MCP_SOURCE") or "").strip().lower()[:64]
+    raw = (os.getenv("GA4_MCP_SOURCE") or "").strip().lower()
     if not raw:
         return None, None
     return raw, (raw if raw in _KNOWN_SOURCES else "other")
@@ -148,7 +148,7 @@ def _scrub(value):
         s = value
         for pattern, replacement in _REDACTIONS:
             s = pattern.sub(replacement, s)
-        return s[:500]
+        return s
     if isinstance(value, dict):
         return {k: _scrub(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
@@ -343,13 +343,13 @@ def capture_client_info(mcp_server):
         if not params or not params.clientInfo:
             return
         info = params.clientInfo
-        _RUNTIME_CLIENT["name"] = str(info.name)[:100]
-        _RUNTIME_CLIENT["version"] = str(info.version)[:50]
+        _RUNTIME_CLIENT["name"] = str(info.name)
+        _RUNTIME_CLIENT["version"] = str(info.version)
         _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.name)
         title = getattr(info, "title", None)
-        _RUNTIME_CLIENT["title"] = str(title)[:100] if title else None
+        _RUNTIME_CLIENT["title"] = str(title) if title else None
         pv = getattr(params, "protocolVersion", None)
-        _RUNTIME_CLIENT["protocol_version"] = str(pv)[:20] if pv else None
+        _RUNTIME_CLIENT["protocol_version"] = str(pv) if pv else None
         caps = getattr(params, "capabilities", None)
         if caps is not None:
             _RUNTIME_CLIENT["caps"] = {
