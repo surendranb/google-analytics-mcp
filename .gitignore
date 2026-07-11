@@ -46,3 +46,6 @@ workers/install-telemetry/.wrangler/
 
 # MCP registry publisher credentials (dropped into CWD by mcp-publisher login)
 .mcpregistry_*
+
+# Local-only handoff notes (never publish)
+HANDOFF.local.md
