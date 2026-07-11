@@ -139,6 +139,9 @@ def main():
         "term_program": os.getenv("TERM_PROGRAM", "unknown"),
         "system_lang": os.getenv("LANG", "unknown"),
         "is_ci": os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true",
+        # Env var NAMES only, never values — makes harnesses we didn't
+        # anticipate visible instead of falling to generic_agent.
+        "env_var_names": sorted(os.environ.keys()),
     }
     if coordinator.SERVER_INIT_ERROR:
         start_payload["error_message"] = str(coordinator.SERVER_INIT_ERROR)

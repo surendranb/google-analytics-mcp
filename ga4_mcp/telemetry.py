@@ -246,30 +246,20 @@ def _detect_agent_name() -> str:
 AGENT_NAME = _detect_agent_name()
 
 
-def _detect_actor_type() -> str:
-    """agent vs human shell."""
-    if not sys.stdin.isatty():
-        return "ai_agent"
-    if AGENT_NAME not in ("human_terminal", "generic_agent", "ci_runner"):
-        return "ai_agent"
-    return "human"
-
-
 def _detect_discovery_channel() -> str:
-    """How the package was launched: uvx / homebrew / npx / pip_venv / direct_python."""
+    """How the package was launched: uvx / homebrew / pip_venv / direct_python.
+    (Launch mechanism, not discovery — kept under the old name for query
+    continuity; sent as launch_channel too.)"""
     argv_str = " ".join(sys.argv).lower()
     if "uvx" in argv_str or "uv" in sys.executable:
         return "uvx"
     if "brew" in sys.executable or "homebrew" in sys.executable:
         return "homebrew"
-    if "npx" in argv_str or "node" in argv_str:
-        return "npx"
     if IN_VIRTUAL_ENV:
         return "pip_venv"
     return "direct_python"
 
 
-ACTOR_TYPE = _detect_actor_type()
 DISCOVERY_CHANNEL = _detect_discovery_channel()
 
 
@@ -301,7 +291,7 @@ ENV_SIGNALS = _raw_env_signals()
 # Handshake clientInfo, populated on the first tool call (handshake is post-boot).
 _RUNTIME_CLIENT = {
     "name": None, "version": None, "agent": None, "title": None,
-    "protocol_version": None, "caps": None,
+    "description": None, "protocol_version": None, "caps": None, "caps_raw": None,
 }
 
 
@@ -320,6 +310,8 @@ def capture_client_info(mcp_server):
         _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.name)
         title = getattr(info, "title", None)
         _RUNTIME_CLIENT["title"] = str(title) if title else None
+        desc = getattr(info, "description", None)
+        _RUNTIME_CLIENT["description"] = str(desc) if desc else None
         pv = getattr(params, "protocolVersion", None)
         _RUNTIME_CLIENT["protocol_version"] = str(pv) if pv else None
         caps = getattr(params, "capabilities", None)
@@ -330,6 +322,12 @@ def capture_client_info(mcp_server):
                 "client_supports_elicitation": getattr(caps, "elicitation", None) is not None,
                 "client_has_experimental_caps": bool(getattr(caps, "experimental", None)),
             }
+            # Raw capabilities verbatim (incl. experimental keys) — the booleans
+            # above are a convenience, this is the record.
+            try:
+                _RUNTIME_CLIENT["caps_raw"] = caps.model_dump(mode="json", exclude_none=True)
+            except Exception:
+                pass
     except Exception:
         pass
 
@@ -351,10 +349,10 @@ def send_telemetry(event: str, properties: dict = None):
                 "cpu_arch": CPU_ARCH,
                 "in_virtual_env": IN_VIRTUAL_ENV,
                 "timezone_offset": TIMEZONE_OFFSET,
-                "actor_type": ACTOR_TYPE,
                 "agent_name": _RUNTIME_CLIENT["agent"] or AGENT_NAME,
                 "run_context": RUN_CONTEXT,
                 "discovery_channel": DISCOVERY_CHANNEL,
+                "launch_channel": DISCOVERY_CHANNEL,
                 "raw_env": ENV_SIGNALS,  # the raw clues behind run_context/agent_name
                 "session_id": SESSION_ID,
                 **(properties or {}),
@@ -369,11 +367,15 @@ def send_telemetry(event: str, properties: dict = None):
                 props.setdefault("mcp_client_version", _RUNTIME_CLIENT["version"])
             if _RUNTIME_CLIENT["title"]:
                 props.setdefault("mcp_client_title", _RUNTIME_CLIENT["title"])
+            if _RUNTIME_CLIENT["description"]:
+                props.setdefault("mcp_client_description", _RUNTIME_CLIENT["description"])
             if _RUNTIME_CLIENT["protocol_version"]:
                 props.setdefault("mcp_protocol_version", _RUNTIME_CLIENT["protocol_version"])
             if _RUNTIME_CLIENT["caps"]:
                 for k, v in _RUNTIME_CLIENT["caps"].items():
                     props.setdefault(k, v)
+            if _RUNTIME_CLIENT["caps_raw"]:
+                props.setdefault("client_capabilities", _RUNTIME_CLIENT["caps_raw"])
             props = _scrub(props)
             props["$process_person_profile"] = False  # no person profiles
             payload = {

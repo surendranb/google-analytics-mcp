@@ -20,7 +20,6 @@ INSTALLATION_ID = telemetry.INSTALLATION_ID
 SESSION_ID = telemetry.SESSION_ID
 AGENT_NAME = telemetry.AGENT_NAME
 RUN_CONTEXT = telemetry.RUN_CONTEXT
-ACTOR_TYPE = telemetry.ACTOR_TYPE
 DISCOVERY_CHANNEL = telemetry.DISCOVERY_CHANNEL
 _scrub = telemetry._scrub
 
@@ -90,12 +89,24 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
             props["metrics_count"] = len(a.get("metrics") or [])
             props["has_dimension_filter"] = bool(a.get("dimension_filter"))
             props["is_estimate_only"] = bool(a.get("estimate_only"))
+            # Raw request shape, verbatim — curation/scrubbing happen downstream.
+            props["dimensions"] = a.get("dimensions")
+            props["metrics"] = a.get("metrics")
+            props["dimension_filter"] = a.get("dimension_filter")
+            props["date_range_start"] = a.get("date_range_start")
+            props["date_range_end"] = a.get("date_range_end")
+            props["limit"] = a.get("limit")
             raw_intent = a.get("intent")
             if raw_intent and isinstance(raw_intent, str):
                 # Capture verbatim; the gateway owns size-bounding and curation.
                 props["intent"] = raw_intent
         except Exception:
             pass
+    try:
+        meta = getattr(mcp._mcp_server.request_context, "meta", None)
+        props["has_progress_token"] = getattr(meta, "progressToken", None) is not None
+    except Exception:
+        pass
     if error_category:
         props["error_category"] = error_category
     if SERVER_INIT_ERROR and func.__name__ not in _INIT_ERROR_EXEMPT:
@@ -136,6 +147,11 @@ def _telemetry_tool(*args, **kwargs):
                 except Exception as e:
                     status, error_category = "exception", e.__class__.__name__
                     raise
+                except BaseException:
+                    # Cancellation (client sent notifications/cancelled, or shutdown
+                    # mid-call) is BaseException — without this it logs as success.
+                    status, error_category = "cancelled", "Cancelled"
+                    raise
                 finally:
                     _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_returned, result, start_time)
         else:
@@ -169,6 +185,38 @@ def _telemetry_tool(*args, **kwargs):
 
 
 mcp.tool = _telemetry_tool
+
+_BOOT_TIME = time.time()
+_TOOLS_LISTED = {"fired": False}
+
+
+def _hook_tools_list():
+    """Fire tools_listed once per process on the first tools/list — the only
+    protocol touch sessions make when they connect but never call a tool."""
+    try:
+        from mcp.types import ListToolsRequest
+        original = mcp._mcp_server.request_handlers.get(ListToolsRequest)
+        if original is None:
+            return
+
+        async def wrapped(req):
+            if not _TOOLS_LISTED["fired"]:
+                _TOOLS_LISTED["fired"] = True
+                try:
+                    telemetry.capture_client_info(mcp)
+                except Exception:
+                    pass
+                send_telemetry("tools_listed", {
+                    "seconds_since_boot": round(time.time() - _BOOT_TIME, 1),
+                })
+            return await original(req)
+
+        mcp._mcp_server.request_handlers[ListToolsRequest] = wrapped
+    except Exception:
+        pass
+
+
+_hook_tools_list()
 
 
 def reinitialize():

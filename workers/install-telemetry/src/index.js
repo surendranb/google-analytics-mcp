@@ -28,7 +28,9 @@ function bucketSrc(raw) {
   return KNOWN_SRC.has(s) ? s : "other";
 }
 
-const MAX_PROPS_BYTES = 32768;  // total-payload technical ceiling (ingestion safety); the only real bound
+// Technical ceiling only: PostHog rejects capture payloads near 1MB. Everything
+// under it passes through untouched — capture everything, curate at query time.
+const MAX_PROPS_BYTES = 900000;
 
 export default {
   async fetch(request, env, ctx) {
