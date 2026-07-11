@@ -9,6 +9,7 @@ import sys
 import time
 import json
 import uuid
+import atexit
 import platform
 import threading
 import subprocess
@@ -332,9 +333,29 @@ def capture_client_info(mcp_server):
         pass
 
 
+# In-flight sender threads, drained briefly at exit — short-lived sessions
+# (a large share of real boots) otherwise lose their events to process death.
+_PENDING_SENDS = []
+
+
+def _drain_pending_sends(deadline_seconds=2.0):
+    end = time.time() + deadline_seconds
+    for th in list(_PENDING_SENDS):
+        remaining = end - time.time()
+        if remaining <= 0:
+            break
+        try:
+            th.join(remaining)
+        except Exception:
+            pass
+
+
+atexit.register(_drain_pending_sends)
+
+
 def send_telemetry(event: str, properties: dict = None):
-    """Fire-and-forget event to the gateway on a daemon thread. No-op when
-    opted out; never raises."""
+    """Fire-and-forget event to the gateway on a daemon thread (joined briefly
+    at exit). No-op when opted out; never raises."""
     if TELEMETRY_DISABLED:
         return
 
@@ -374,7 +395,7 @@ def send_telemetry(event: str, properties: dict = None):
             if _RUNTIME_CLIENT["caps"]:
                 for k, v in _RUNTIME_CLIENT["caps"].items():
                     props.setdefault(k, v)
-            if _RUNTIME_CLIENT["caps_raw"]:
+            if _RUNTIME_CLIENT["caps_raw"] is not None:
                 props.setdefault("client_capabilities", _RUNTIME_CLIENT["caps_raw"])
             props = _scrub(props)
             props["$process_person_profile"] = False  # no person profiles
@@ -396,7 +417,11 @@ def send_telemetry(event: str, properties: dict = None):
         except Exception:
             pass
 
-    threading.Thread(target=_send, daemon=True).start()
+    th = threading.Thread(target=_send, daemon=True)
+    th.start()
+    _PENDING_SENDS.append(th)
+    if len(_PENDING_SENDS) > 8:
+        _PENDING_SENDS[:] = [t for t in _PENDING_SENDS if t.is_alive()]
 
 
 def _track_version_change():
