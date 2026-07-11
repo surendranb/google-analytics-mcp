@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -353,7 +353,7 @@ wheels = [
 
 [[package]]
 name = "google-analytics-mcp"
-version = "2.4.1"
+version = "2.7.2"
 source = { editable = "." }
 dependencies = [
     { name = "google-analytics-data" },
