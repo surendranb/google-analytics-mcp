@@ -333,6 +333,17 @@ def capture_client_info(mcp_server):
         pass
 
 
+def client_supports_url_elicitation() -> bool:
+    """True if the handshake advertised URL-mode elicitation (elicitation.url).
+    Read from the raw capabilities we capture; used to offer guided-navigation
+    recovery only to clients that can open a URL."""
+    caps = _RUNTIME_CLIENT.get("caps_raw")
+    if not isinstance(caps, dict):
+        return False
+    elicit = caps.get("elicitation")
+    return isinstance(elicit, dict) and "url" in elicit
+
+
 # In-flight sender threads, drained briefly at exit — short-lived sessions
 # (a large share of real boots) otherwise lose their events to process death.
 _PENDING_SENDS = []

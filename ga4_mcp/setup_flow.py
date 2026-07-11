@@ -6,13 +6,43 @@ session, avoiding a client restart. Falls back to guided text if the client
 doesn't support elicitation."""
 
 import os
+import uuid
 
 from pydantic import BaseModel, Field
 from mcp.server.fastmcp import Context
 
 from .coordinator import mcp
-from .telemetry import send_telemetry
+from .telemetry import send_telemetry, client_supports_url_elicitation
 from . import coordinator
+
+# Pages we own or that land the user exactly where the fix happens. URL-mode
+# elicitation opens these at the client; no OAuth, no secrets — guided navigation.
+_GA4_ADMIN_URL = "https://analytics.google.com/analytics/web/#/admin"
+_SETUP_PAGE_URL = "https://ga4.builditwithai.xyz/setup"
+
+
+async def _offer_page(ctx, message, url, branch):
+    """URL-mode elicitation: ask the client to open a helpful page before we
+    collect the value. No-op on clients without URL elicitation (falls through
+    to the existing form/text). Records whether the offer was accepted."""
+    if not client_supports_url_elicitation():
+        return None
+    try:
+        r = await ctx.request_context.session.elicit_url(
+            message=message,
+            url=url,
+            elicitation_id=f"setup_{uuid.uuid4().hex[:12]}",
+            related_request_id=ctx.request_id,
+        )
+        action = str(getattr(r, "action", None))
+        send_telemetry("setup_flow", {
+            "flow_branch": branch, "flow_outcome": "url_offered",
+            "url_elicit_action": action,
+            "error_category_at_entry": coordinator.SERVER_INIT_ERROR_CATEGORY,
+        })
+        return action
+    except Exception:
+        return None
 
 
 class _PropertyId(BaseModel):
@@ -62,9 +92,15 @@ async def setup_ga4_access(ctx: Context) -> str:
     branch = "other"
 
     try:
-        # Missing Property ID — collect it.
+        # Missing Property ID — offer to open GA4 Admin, then collect it.
         if not prop:
             branch = "property_id"
+            await _offer_page(
+                ctx,
+                "I'll open Google Analytics Admin so you can copy your Property ID "
+                "(Admin > Property details, a numeric id like 123456789).",
+                _GA4_ADMIN_URL, "property_id_open_admin",
+            )
             r = await ctx.elicit(
                 "What is your GA4 Property ID? Find it at analytics.google.com > Admin > "
                 "Property details (a numeric id like 123456789).",
@@ -75,9 +111,15 @@ async def setup_ga4_access(ctx: Context) -> str:
                 return "Setup paused — no Property ID provided. Re-run setup_ga4_access when ready."
             os.environ["GA4_PROPERTY_ID"] = r.data.property_id.strip()
 
-        # Missing/invalid credentials path — collect it.
+        # Missing/invalid credentials path — offer the setup page, then collect.
         elif not creds or (creds and not os.path.exists(creds)):
             branch = "credentials"
+            await _offer_page(
+                ctx,
+                "I'll open the setup guide — it walks through creating a service-account "
+                "key or using gcloud, with the exact steps.",
+                _SETUP_PAGE_URL, "credentials_open_setup",
+            )
             r = await ctx.elicit(
                 "Where is your Google service-account JSON key on this machine? "
                 "Paste its absolute path. (Or, to use gcloud instead, run "
