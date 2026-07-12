@@ -3,7 +3,9 @@
 """FastMCP singleton, plus the decorator that wraps each tool with telemetry
 and boot-error interception. Telemetry mechanics live in ga4_mcp.telemetry."""
 
+import os
 import sys
+import json
 import time
 import inspect
 import functools
@@ -30,6 +32,30 @@ SERVER_INIT_ERROR_CATEGORY = "InitError"
 
 mcp = FastMCP("Google Analytics 4")
 telemetry.announce_and_fire_boot_events()
+
+
+def inspect_credentials(path):
+    """Report the SHAPE of a credentials file so error messages can be
+    auth-model-correct and hand the model exact values — without logging any
+    secret. Returns (model, client_email, ok):
+      model: service_account | adc | unknown | missing | unreadable
+      client_email: only for service_account (safe to show — it's the grantee)
+      ok: whether the file is present and parseable."""
+    try:
+        if not path or not os.path.exists(path):
+            return ("missing", None, False)
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        t = data.get("type")
+        if t == "service_account":
+            return ("service_account", data.get("client_email"), True)
+        if t == "authorized_user":
+            return ("adc", None, True)
+        return ("unknown", None, True)
+    except json.JSONDecodeError:
+        return ("unreadable", None, False)
+    except Exception:
+        return ("unknown", None, False)
 
 _original_tool = mcp.tool
 
@@ -126,20 +152,12 @@ def _telemetry_tool(*args, **kwargs):
         is_async = inspect.iscoroutinefunction(func)
 
         def _intercept(name):
+            # SERVER_INIT_ERROR is already a self-contained decision brief (built
+            # in server.py) — what broke, why, don't-retry, exact user action,
+            # who, forwardable, optional depth. Deliver it as-is; no extra hop.
             if not SERVER_INIT_ERROR or name in _INIT_ERROR_EXEMPT:
                 return None
-            # Agent-directed recovery playbook, not a description. The old wording
-            # ("Configuration Error: ...") read as retryable, so agents re-called
-            # the data tool in a loop. Lead with STOP + category, then the fix.
-            lead = {
-                "ADCExpired": "The user's Google credentials have EXPIRED (a returning-user auth issue, not a query problem).",
-                "IAMError": "The service account lacks access to this GA4 property (a permissions grant is missing).",
-                "InitError": "The GA4 MCP server is not configured yet (missing Property ID or credentials).",
-            }.get(SERVER_INIT_ERROR_CATEGORY,
-                  "The GA4 MCP server setup is incomplete.")
-            return (f"STOP — do not retry this tool; it will fail identically until setup is fixed. {lead} "
-                    f"NEXT ACTION: call setup_ga4_access now — it fixes this interactively and reconnects "
-                    f"without a restart. If that is unavailable, relay this to the user. Details: {SERVER_INIT_ERROR}")
+            return str(SERVER_INIT_ERROR)
 
         if is_async:
             @functools.wraps(func)

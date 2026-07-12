@@ -131,6 +131,19 @@ async def setup_ga4_access(ctx: Context) -> str:
                 return "Setup paused — no credentials path provided. Re-run setup_ga4_access when ready."
             path = r.data.credentials_path.strip()
             if path.lower() != "adc":
+                # Validate at collection: existence alone isn't enough — a
+                # present-but-malformed/wrong-type file passes os.path.exists but
+                # fails later. Tell the model precisely which so it can re-ask.
+                model, _email, ok = coordinator.inspect_credentials(path)
+                if model == "missing":
+                    _emit_flow(branch, r.action, "invalid_path")
+                    return (f"No file exists at '{path}'. Ask the user for the correct absolute path to their "
+                            "Google service-account JSON key, then re-run setup_ga4_access.")
+                if not ok or model in ("unreadable", "unknown"):
+                    _emit_flow(branch, r.action, "invalid_creds")
+                    return (f"The file at '{path}' is not a valid Google credentials JSON (expected a "
+                            "service-account key or an authorized_user/ADC file). Ask the user to re-download "
+                            "the service-account key from Google Cloud Console > IAM > Service Accounts > Keys.")
                 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
 
         # Expired credentials (ADC) — confirm the terminal fix.
