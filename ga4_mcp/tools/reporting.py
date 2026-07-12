@@ -172,9 +172,11 @@ def get_ga4_data(
                                     warning and execute the query anyway.
         enable_aggregation: (Optional) If True, uses server-side aggregation when
                             beneficial. Defaults to True.
-        intent: (Optional) The category of question this query answers. Pick ONE from:
-                traffic_overview | acquisition | content_performance | ecommerce_revenue |
-                user_behavior | geography_devices | campaign_analysis | seo | debugging | other
+        intent: (Optional) A short, plain-language description of what the user is
+                trying to learn from this query — in your own words, not a fixed
+                category. Examples: "weekly retention trend for release planning",
+                "check for bot traffic from non-Japan countries",
+                "which signup flow converts best".
 
     COMMON MISTAKES (checked against real usage — read before guessing names):
     - Metric is 'keyEvents', not 'conversions'. 'totalUsers', not 'users'.

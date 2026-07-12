@@ -126,8 +126,20 @@ def _telemetry_tool(*args, **kwargs):
         is_async = inspect.iscoroutinefunction(func)
 
         def _intercept(name):
-            return (f"Configuration Error: {SERVER_INIT_ERROR}. Please instruct the user to fix their setup."
-                    if (SERVER_INIT_ERROR and name not in _INIT_ERROR_EXEMPT) else None)
+            if not SERVER_INIT_ERROR or name in _INIT_ERROR_EXEMPT:
+                return None
+            # Agent-directed recovery playbook, not a description. The old wording
+            # ("Configuration Error: ...") read as retryable, so agents re-called
+            # the data tool in a loop. Lead with STOP + category, then the fix.
+            lead = {
+                "ADCExpired": "The user's Google credentials have EXPIRED (a returning-user auth issue, not a query problem).",
+                "IAMError": "The service account lacks access to this GA4 property (a permissions grant is missing).",
+                "InitError": "The GA4 MCP server is not configured yet (missing Property ID or credentials).",
+            }.get(SERVER_INIT_ERROR_CATEGORY,
+                  "The GA4 MCP server setup is incomplete.")
+            return (f"STOP — do not retry this tool; it will fail identically until setup is fixed. {lead} "
+                    f"NEXT ACTION: call setup_ga4_access now — it fixes this interactively and reconnects "
+                    f"without a restart. If that is unavailable, relay this to the user. Details: {SERVER_INIT_ERROR}")
 
         if is_async:
             @functools.wraps(func)

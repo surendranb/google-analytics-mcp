@@ -1,28 +1,73 @@
-import urllib.request
-import urllib.error
+# SPDX-License-Identifier: Apache-2.0
+
+"""In-server troubleshooting guides. Content lives with the code (bundled at
+release), NOT fetched from the web — instant, offline-safe, and versioned with
+the package. Written for the AI agent to act on and relay to the user."""
+
 from ga4_mcp.coordinator import mcp
 
-# Fetches troubleshooting guides directly from the documentation site.
-OTA_BASE_URL = "https://ga4mcp.com"
+_SETUP_GUIDE = """--- SETUP GUIDE ---
+
+The GA4 MCP server needs two things to work: a Property ID and Google credentials.
+
+1. GA4_PROPERTY_ID — the numeric Property ID (e.g. 123456789), NOT the
+   Measurement ID that starts with 'G-'. Find it at analytics.google.com >
+   Admin > Property details.
+2. GOOGLE_APPLICATION_CREDENTIALS — the absolute path to a Google Cloud
+   service-account JSON key, OR run 'gcloud auth application-default login'
+   and use that credentials file.
+
+Set both in the env block of this server in the MCP client config, e.g.:
+   "env": {
+     "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json",
+     "GA4_PROPERTY_ID": "123456789"
+   }
+
+FASTEST PATH: call setup_ga4_access — it collects the missing value
+interactively and reconnects without a restart."""
+
+_IAM_GUIDE = """--- IAM / 403 PERMISSION GUIDE ---
+
+A 403 / PermissionDenied means the credentials are valid but the service
+account has no access to the GA4 property. Grant it:
+
+1. Open analytics.google.com > Admin > Property Access Management.
+2. Click '+' > Add users.
+3. Enter the service account email — it is the 'client_email' field inside
+   the JSON key file.
+4. Assign the 'Viewer' role and save.
+5. Wait a minute for permissions to propagate, then retry.
+
+If credentials instead need re-authentication (a 'Reauthentication is needed'
+or invalid_grant / expired error), the user's Application Default Credentials
+have expired — have them run: gcloud auth application-default login"""
+
+_SCHEMA_GUIDE = """--- SCHEMA GUIDE ---
+
+Do not guess dimension/metric names — use search_schema first. Common fixes
+(verified against real usage):
+- Metric is 'keyEvents', not 'conversions'. 'totalUsers', not 'users'.
+  'itemsViewed', not 'itemViews'. 'ecommercePurchases', not 'purchases'.
+- Dimension is 'sessionDefaultChannelGroup', not 'sessionDefaultChannelGrouping'.
+- A simple dimension_filter MUST nest inside a "filter" key:
+  {"filter": {"fieldName": ..., "stringFilter": {...}}} — not fieldName at top level.
+- Logical groups are "andGroup"/"orGroup"/"notExpression" — not and_filter/or_filter."""
+
+_GUIDES = {"setup": _SETUP_GUIDE, "iam": _IAM_GUIDE, "schema": _SCHEMA_GUIDE}
+
 
 @mcp.tool()
 def get_troubleshooting_guide(topic: str) -> str:
     """
-    Fetches the latest troubleshooting and setup guides Over-The-Air (OTA) from ga4mcp.com.
-    Use this tool whenever you encounter a schema error, dimension_filter parse error,
-    IAM / 403 authorization error, or boot-time setup error.
-    
-    Args:
-        topic: The topic of the guide to fetch. Valid options are "setup", "iam", or "schema".
-    """
-    if topic not in ["setup", "iam", "schema"]:
-        return "Invalid topic. Please choose 'setup', 'iam', or 'schema'."
+    Returns the troubleshooting/setup guide for a topic, served from inside the
+    server (no network needed). Use whenever you hit a schema error,
+    dimension_filter parse error, IAM / 403 authorization error, or a
+    boot-time setup error.
 
-    url = f"{OTA_BASE_URL}/{topic}.md"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            content = response.read().decode('utf-8')
-            return f"--- {topic.upper()} GUIDE ---\n\n{content}"
-    except urllib.error.URLError as e:
-        # Fallback if network is completely unreachable (rare, since GA4 needs network anyway)
-        return f"Warning: Could not fetch OTA guide for '{topic}' due to network error: {e}. Please use your best judgment based on generic GA4 API documentation."
+    Args:
+        topic: One of "setup", "iam", or "schema".
+    """
+    guide = _GUIDES.get((topic or "").strip().lower())
+    if guide is None:
+        return "Invalid topic. Choose 'setup', 'iam', or 'schema'."
+    return guide
