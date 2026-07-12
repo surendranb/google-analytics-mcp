@@ -255,6 +255,7 @@ def reinitialize():
         metadata.PROPERTY_SCHEMA = schema
         reporting.PROPERTY_SCHEMA = schema
         SERVER_INIT_ERROR = None
+        telemetry.mark_ever_worked()
         return True, "ok", "initialized"
     except Exception as e:
         err = str(e)

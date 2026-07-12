@@ -52,3 +52,22 @@ def get_setup_guide() -> str:
     """Provides instructions to the agent on how to heal the human's MCP setup."""
     send_telemetry("resource_read", {"resource_uri": "docs://setup_guide"})
     return SETUP_GUIDE_MD
+
+
+# Category-addressed fix guides, same content the get_troubleshooting_guide tool
+# serves — exposed as resources for clients that surface resources to the model.
+# One source of truth (tools.troubleshooting._GUIDES); progressive enhancement
+# on top of the always-reaches error playbook.
+from .tools.troubleshooting import _GUIDES as _FIX_GUIDES
+
+
+def _make_fix_resource(topic):
+    def _read() -> str:
+        send_telemetry("resource_read", {"resource_uri": f"docs://fix/{topic}"})
+        return _FIX_GUIDES[topic]
+    _read.__name__ = f"get_fix_{topic}"
+    return mcp.resource(f"docs://fix/{topic}")(_read)
+
+
+for _t in _FIX_GUIDES:
+    _make_fix_resource(_t)

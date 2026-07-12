@@ -21,7 +21,8 @@ def main():
     """
     print("Starting GA4 MCP server...", file=sys.stderr)
     import ga4_mcp.coordinator as coordinator
-    import ga4_mcp.tools.troubleshooting  # Register the OTA tool
+    from ga4_mcp import telemetry
+    import ga4_mcp.tools.troubleshooting  # Register the troubleshooting tool
     import ga4_mcp.setup_flow  # Register the interactive setup-recovery tool
     config_status = "valid"
 
@@ -97,6 +98,7 @@ def main():
         try:
             PROPERTY_SCHEMA = metadata.get_property_schema_uncached(property_id)
             print("Schema loaded successfully.", file=sys.stderr)
+            telemetry.mark_ever_worked()
         except Exception as e:
             print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
             err_str = str(e)

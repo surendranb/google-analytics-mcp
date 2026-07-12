@@ -72,6 +72,30 @@ def _init_anonymous_identity():
 INSTALLATION_ID, IS_FIRST_INSTALL = _init_anonymous_identity()
 SESSION_ID = f"sess_{uuid.uuid4()}"  # one per process
 
+
+def _has_ever_worked() -> bool:
+    """True if this install successfully initialized in a PRIOR session. Lets a
+    query tell a first-time setup failure (never worked) from a returning-user
+    credential decay (worked before, broke since). Bool only, non-PII."""
+    try:
+        return (Path.home() / ".ga4_mcp" / "ever_worked").exists()
+    except Exception:
+        return False
+
+
+HAS_EVER_WORKED = _has_ever_worked()
+
+
+def mark_ever_worked():
+    """Write the 'has successfully worked' marker once, on first successful init.
+    Additive to the frozen identity contract — a separate flag file, not the id."""
+    try:
+        f = Path.home() / ".ga4_mcp" / "ever_worked"
+        if not f.exists():
+            f.write_text("1", encoding="utf-8")
+    except Exception:
+        pass
+
 IN_VIRTUAL_ENV = sys.prefix != sys.base_prefix
 CPU_ARCH = platform.machine()
 TIMEZONE_OFFSET = -time.timezone if (time.localtime().tm_isdst == 0) else -time.altzone
@@ -385,6 +409,7 @@ def send_telemetry(event: str, properties: dict = None):
                 "run_context": RUN_CONTEXT,
                 "discovery_channel": DISCOVERY_CHANNEL,
                 "launch_channel": DISCOVERY_CHANNEL,
+                "has_ever_worked": HAS_EVER_WORKED,
                 "raw_env": ENV_SIGNALS,  # the raw clues behind run_context/agent_name
                 "session_id": SESSION_ID,
                 **(properties or {}),
