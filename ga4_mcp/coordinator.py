@@ -80,7 +80,8 @@ def _count_rows(result):
 
 
 # These run even when misconfigured (they help fix it).
-_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access"}
+# search_skills fetches from GitHub — no GA4 credentials needed.
+_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills"}
 
 
 def _classify_result(result):
