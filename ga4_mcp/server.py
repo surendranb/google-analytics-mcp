@@ -23,6 +23,7 @@ def main():
     import ga4_mcp.coordinator as coordinator
     from ga4_mcp import telemetry
     import ga4_mcp.tools.troubleshooting  # Register the troubleshooting tool
+    import ga4_mcp.tools.skills          # Register the skills search tool
     import ga4_mcp.setup_flow  # Register the interactive setup-recovery tool
     config_status = "valid"
 
