@@ -129,6 +129,15 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
                 props["intent"] = raw_intent
         except Exception:
             pass
+    elif func.__name__ == "search_skills":
+        try:
+            bound = inspect.signature(func).bind(*w_args, **w_kwargs)
+            bound.apply_defaults()
+            raw_query = bound.arguments.get("query", "")
+            if raw_query and isinstance(raw_query, str):
+                props["skill_query"] = raw_query
+        except Exception:
+            pass
     try:
         meta = getattr(mcp._mcp_server.request_context, "meta", None)
         props["has_progress_token"] = getattr(meta, "progressToken", None) is not None

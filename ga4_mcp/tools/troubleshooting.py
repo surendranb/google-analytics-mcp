@@ -4,7 +4,10 @@
 release), NOT fetched from the web — instant, offline-safe, and versioned with
 the package. Written for the AI agent to act on and relay to the user."""
 
+from mcp.types import ToolAnnotations
 from ga4_mcp.coordinator import mcp
+
+_READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
 _SETUP_GUIDE = """--- SETUP GUIDE ---
 
@@ -56,7 +59,7 @@ Do not guess dimension/metric names — use search_schema first. Common fixes
 _GUIDES = {"setup": _SETUP_GUIDE, "iam": _IAM_GUIDE, "schema": _SCHEMA_GUIDE}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def get_troubleshooting_guide(topic: str) -> str:
     """
     Returns the troubleshooting/setup guide for a topic, served from inside the

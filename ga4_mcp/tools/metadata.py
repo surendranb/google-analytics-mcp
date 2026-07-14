@@ -3,7 +3,10 @@
 """Tools for fetching and exploring GA4 property metadata."""
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
+from mcp.types import ToolAnnotations
 from ga4_mcp.coordinator import mcp
+
+_READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
 # This global variable will be populated by the server on startup.
 PROPERTY_SCHEMA = None
@@ -36,12 +39,18 @@ def get_property_schema_uncached(property_id: str) -> dict:
         }
     return schema
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def search_schema(keyword: str):
     """
-    Searches for a keyword across all available dimensions and metrics for the property.
-    Returns a short, ranked list of the most relevant fields. This is the most
-    efficient way to discover dimensions and metrics for a specific query.
+    Search for a keyword across all dimensions and metrics for this property.
+    Returns a ranked list of up to 10 matching fields scored by relevance.
+
+    Returns: {"top_results": {"DIMENSION: api_name": score, "METRIC: api_name": score, ...}}
+
+    Use this to verify exact API names before calling get_ga4_data — fastest path
+    from a concept ("engagement", "revenue", "channel") to the correct field name.
+    Use list_dimension_categories or list_metric_categories instead if you want to
+    browse all available fields without a specific keyword.
 
     Args:
         keyword: One or more keywords to search for (e.g., "user", "campaign revenue").
@@ -82,7 +91,7 @@ def search_schema(keyword: str):
     return {"top_results": dict(sorted_results[:10])}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def get_property_schema():
     """
     Returns the complete schema for the configured GA4 property, including all
@@ -93,11 +102,17 @@ def get_property_schema():
         return {"error": "Schema not loaded. Please check server startup logs."}
     return PROPERTY_SCHEMA
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def list_dimension_categories():
     """
-    List all available GA4 dimension categories based on the property's schema.
-    This is a low-cost way to begin exploring the schema.
+    List all dimension categories for this GA4 property, with a count of
+    dimensions in each category.
+
+    Returns: {"dimension_categories": {"Category Name": count, ...}}
+
+    Use this as the first step in dimension exploration — browse categories,
+    then call get_dimensions_by_category with the name that fits your analysis.
+    Use search_schema instead if you already have a keyword to search for.
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded."}
@@ -111,11 +126,17 @@ def list_dimension_categories():
         
     return {"dimension_categories": categories}
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def list_metric_categories():
     """
-    List all available GA4 metric categories based on the property's schema.
-    This is a low-cost way to begin exploring the schema.
+    List all metric categories for this GA4 property, with a count of
+    metrics in each category.
+
+    Returns: {"metric_categories": {"Category Name": count, ...}}
+
+    Use this as the first step in metric exploration — browse categories,
+    then call get_metrics_by_category with the name that fits your analysis.
+    Use search_schema instead if you already have a keyword to search for.
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded."}
@@ -129,13 +150,19 @@ def list_metric_categories():
 
     return {"metric_categories": categories}
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def get_dimensions_by_category(category: str):
     """
-    Get all dimensions in a specific category with their descriptions.
-    
+    Return all dimensions in a specific category with their API names and descriptions.
+
+    Returns: {"dimension_api_name": "description", ...}
+
+    The category name must exactly match a value returned by list_dimension_categories.
+    Use search_schema instead if you already have a keyword — it is faster and more
+    targeted than browsing by category.
+
     Args:
-        category: The category name to retrieve dimensions for.
+        category: Exact category name from list_dimension_categories (case-insensitive).
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded."}
@@ -150,13 +177,19 @@ def get_dimensions_by_category(category: str):
         
     return dimensions_in_category
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def get_metrics_by_category(category: str):
     """
-    Get all metrics in a specific category with their descriptions.
-    
+    Return all metrics in a specific category with their API names and descriptions.
+
+    Returns: {"metric_api_name": "description", ...}
+
+    The category name must exactly match a value returned by list_metric_categories.
+    Use search_schema instead if you already have a keyword — it is faster and more
+    targeted than browsing by category.
+
     Args:
-        category: The category name to retrieve metrics for.
+        category: Exact category name from list_metric_categories (case-insensitive).
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded."}

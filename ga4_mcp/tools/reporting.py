@@ -10,7 +10,10 @@ from google.analytics.data_v1beta.types import (
     DateRange, Dimension, Metric, RunReportRequest, Filter, FilterExpression, FilterExpressionList,
     OrderBy, MetricAggregation
 )
+from mcp.types import ToolAnnotations
 from ga4_mcp.coordinator import mcp
+
+_READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
 # This global variable will be populated by the server on startup.
 PROPERTY_SCHEMA = None
@@ -107,7 +110,7 @@ def _repair_filter_shape(d, parent_key=None):
         return {"filter": cleaned if cleaned else repaired}
     return repaired
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def get_ga4_data(
     dimensions: list[str] = ["date"],
     metrics: list[str] = ["totalUsers", "newUsers", "sessions"],
@@ -123,11 +126,21 @@ def get_ga4_data(
     """
     Retrieve GA4 data with built-in intelligence for better and safer results.
 
+    Returns on success: {"data": [{"dimension_name": value, "metric_name": value, ...}, ...],
+                         "metadata": {"total_rows_in_source": N, "returned_rows": N}}
+    Returns on volume warning: {"warning": "...", "estimated_rows": N, "suggestions": [...]}
+    Returns on error: {"error": "..."}
+
     CRITICAL WORKFLOW INSTRUCTIONS FOR AI AGENTS:
     To ensure deterministic and successful data retrieval, you MUST follow this sequence:
-    1. DISCOVER: NEVER guess dimension or metric names. Always call `search_schema`, `list_dimension_categories`, or `list_metric_categories` FIRST to verify the exact API names available for this property.
+    1. DISCOVER: NEVER guess dimension or metric names. Always call `search_schema`,
+       `list_dimension_categories`, or `list_metric_categories` FIRST to verify the exact
+       API names available for this property.
     2. RETRIEVE: Call this tool (`get_ga4_data`) using the verified dimensions and metrics.
-    3. TROUBLESHOOT: If you receive a SchemaError, an Invalid Dimension/Metric error, or an error about `dimension_filter` structure, DO NOT RETRY BY GUESSING. You MUST immediately call `get_troubleshooting_guide(topic='schema')` to learn the correct structure and available fields.
+    3. TROUBLESHOOT: If you receive a SchemaError, an Invalid Dimension/Metric error, or
+       an error about `dimension_filter` structure, DO NOT RETRY BY GUESSING. You MUST
+       immediately call `get_troubleshooting_guide(topic='schema')` to learn the correct
+       structure and available fields.
 
     **Smart Features:**
     - **Data Volume Protection:** Before running a query that could produce a huge

@@ -8,7 +8,10 @@ call time. Adding a new skill requires no PyPI release — just a commit."""
 import urllib.request
 import urllib.error
 
+from mcp.types import ToolAnnotations
 from ga4_mcp.coordinator import mcp
+
+_READ_ONLY_EXTERNAL = ToolAnnotations(readOnlyHint=True, openWorldHint=True)
 
 _SKILLS_BASE = "https://raw.githubusercontent.com/surendranb/google-analytics-mcp/main/skills"
 _TIMEOUT = 8
@@ -20,7 +23,7 @@ def _fetch(url: str) -> str:
         return resp.read().decode("utf-8")
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY_EXTERNAL)
 def search_skills(query: str) -> str:
     """
     Search the GA4 skills library for analytical recipes and how-to guides.
