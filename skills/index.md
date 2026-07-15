@@ -19,3 +19,5 @@ To use a skill: call `search_skills("skill-name")` to fetch the full instruction
 | `channel-acquisition` | Session and user breakdown by traffic source, medium, and channel group | You want to know where users come from and which channels perform best |
 | `content-performance` | Which pages drive engagement, scroll depth, and return visits | You want to identify top content and find underperforming pages |
 | `geo-device-segmentation` | User behaviour split by country, city, device type, and OS | You want to understand regional or device-specific patterns |
+| `custom-dimensions` | How to find and query property-specific custom dimensions and event parameters | You need `customEvent:*` or `customUser:*` fields, or get an "Invalid dimension" error on a custom field |
+| `compatible-combinations` | Which dimension/metric combinations GA4 accepts — and which cause 400 errors | You get "dimensions & metrics are incompatible" or want to avoid it before querying |

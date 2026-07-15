@@ -258,7 +258,7 @@ def get_ga4_data(
                 if estimate_only:
                     return {"estimated_rows": estimated_rows}
 
-                if estimated_rows > 2500:
+                if int(estimated_rows or 0) > 2500:
                     return {
                         "warning": "Query will return a large dataset.",
                         "estimated_rows": estimated_rows,

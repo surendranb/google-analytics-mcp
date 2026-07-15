@@ -136,6 +136,22 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
             raw_query = bound.arguments.get("query", "")
             if raw_query and isinstance(raw_query, str):
                 props["skill_query"] = raw_query
+            if result and isinstance(result, str):
+                if result.strip().startswith("# GA4 MCP Skills Library"):
+                    props["skill_served"] = "index"
+                elif result.strip().startswith("Skills library unavailable") or result.strip().startswith("Could not load"):
+                    props["skill_served"] = "error"
+                else:
+                    props["skill_served"] = "skill"
+        except Exception:
+            pass
+    elif func.__name__ == "get_troubleshooting_guide":
+        try:
+            bound = inspect.signature(func).bind(*w_args, **w_kwargs)
+            bound.apply_defaults()
+            topic = bound.arguments.get("topic", "")
+            if topic and isinstance(topic, str):
+                props["guide_topic"] = topic.strip().lower()
         except Exception:
             pass
     try:

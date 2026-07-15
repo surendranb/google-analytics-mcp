@@ -94,6 +94,20 @@ Every leaf filter **must** be wrapped in a `"filter"` key. `fieldName` never app
 | `field` | `fieldName` |
 | `stringFilter.exact` | `stringFilter.value` |
 
+## Field names are always camelCase
+
+GA4 dimension and metric names are camelCase — never snake_case.
+
+| Wrong (snake_case) | Correct (camelCase) |
+|---|---|
+| `page_path` | `pagePath` |
+| `session_source` | `sessionSource` |
+| `session_campaign_name` | `sessionCampaignName` |
+| `device_category` | `deviceCategory` |
+| `event_name` | `eventName` |
+
+If you use snake_case in `fieldName`, the filter will fail with an "Unknown field" error.
+
 ## Note
 
 Only dimensions can be filtered with `dimension_filter`. To filter on metric

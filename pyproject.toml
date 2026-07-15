@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "google-analytics-mcp"
-version = "2.7.6"
+version = "2.7.7"
 description = "Model Context Protocol for Google Analytics 4 (Data API) allowing autonomous agents to query dimensions and metrics. Gives agents analysis-ready GA4 access with schema discovery, server-side aggregation, and smart defaults."
 readme = "README.md"
 license = "Apache-2.0"
