@@ -275,6 +275,40 @@ def _hook_tools_list():
 _hook_tools_list()
 
 
+_PROACTIVE_TRIGGERS = {"field_discovery", "pre_query", "category_browse"}
+
+
+def fire_skill_tip(ctx, message: str, skill: str | None, trigger: str, tool_name: str = "") -> None:
+    """Emit a Channel 2 log message and record a skill_tip_shown telemetry event.
+
+    Args:
+        ctx: FastMCP Context — if None the log is skipped but telemetry still fires.
+        message: The human-readable tip text sent to the client via ctx.info().
+        skill: Skill slug suggested (e.g. 'channel-acquisition'), or None for generic.
+        trigger: What caused the tip — one of:
+                 'field_discovery'   search_schema proactive
+                 'category_browse'   list_dimension/metric_categories proactive
+                 'pre_query'         get_ga4_data proactive (before API call)
+                 'error_schema'      invalid dimension/metric
+                 'error_filter'      filter parse failure
+                 'error_iam'         403/permission denied
+                 'error_incompatible' incompatible dim/metric combination
+                 'error_generic'     other API error
+                 'skill_index'       search_skills index served
+                 'skill_fetched'     search_skills specific skill served
+        tool_name: Tool that fired the tip.
+    """
+    if ctx:
+        ctx.info(message)
+    send_telemetry("skill_tip_shown", {
+        "tool_name": tool_name,
+        "tip_type": "proactive" if trigger in _PROACTIVE_TRIGGERS else "reactive",
+        "skill_suggested": skill or "generic",
+        "trigger": trigger,
+        "ctx_available": ctx is not None,
+    })
+
+
 def reinitialize():
     """Retry init from the current environment (used after setup recovery).
     Returns (ok, category, detail); clears SERVER_INIT_ERROR and loads the

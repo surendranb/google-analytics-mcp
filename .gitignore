@@ -49,3 +49,6 @@ workers/install-telemetry/.wrangler/
 
 # Local-only handoff notes (never publish)
 HANDOFF.local.md
+
+# Cross-project MCP playbook (internal, never publish)
+MCP_PLAYBOOK.local.md

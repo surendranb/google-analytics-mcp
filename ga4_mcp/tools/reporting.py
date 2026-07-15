@@ -11,7 +11,8 @@ from google.analytics.data_v1beta.types import (
     OrderBy, MetricAggregation
 )
 from mcp.types import ToolAnnotations
-from ga4_mcp.coordinator import mcp
+from mcp.server.fastmcp import Context
+from ga4_mcp.coordinator import mcp, fire_skill_tip
 
 _READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
@@ -47,6 +48,30 @@ def _get_smart_sorting(dimensions, metrics):
 def _should_aggregate(dimensions, metrics):
     """Detect when server-side aggregation would be beneficial."""
     return len(dimensions) == 0 or "date" not in dimensions
+
+
+_SKILL_HINTS = [
+    (["chatgpt", "claude", "perplexity", "gemini", "openai", "ai referral", "ai traffic", "llm"], "ai-referral-analysis"),
+    (["bot", "spam", "scraper", "crawler", "fake traffic"], "bot-traffic-detection"),
+    (["purchase", "revenue", "ecommerce", "cart", "checkout", "transaction", "ecommercepurchases"], "ecommerce-analysis"),
+    (["firstusersource", "firstusermedium", "firstuser", "attribution", "first touch", "last click", "user acquisition"], "attribution-scope"),
+    (["sessiondefaultchannelgroup", "sessionsource", "sessionmedium", "sessioncampaignname", "channel acquisition", "where users come from"], "channel-acquisition"),
+    (["pagepath", "pagetitle", "content performance", "top pages", "blog", "article", "landing page", "scroll"], "content-performance"),
+    (["country", "city", "region", "devicecategory", "geo", "mobile vs", "by device", "by country"], "geo-device-segmentation"),
+    (["spike", "drop", "anomaly", "why did", "traffic fell", "traffic rose", "diagnos", "investigate"], "traffic-diagnosis"),
+    (["customevent:", "customuser:", "custom dimension", "custom event", "event parameter"], "custom-dimensions"),
+    (["incompatible", "compatible", "scope", "session metric", "event metric", "dimensions & metrics"], "compatible-combinations"),
+]
+
+def _suggest_skill(dimensions: list, metrics: list, intent: str | None) -> str | None:
+    """Return the most relevant skill slug for this query context, or None."""
+    dims = [d.lower() for d in (dimensions or [])]
+    mets = [m.lower() for m in (metrics or [])]
+    all_text = " ".join(dims + mets + [(intent or "").lower()])
+    for keywords, skill in _SKILL_HINTS:
+        if any(kw in all_text for kw in keywords):
+            return skill
+    return None
 
 
 # Common LLM metric aliases (e.g., legacy GA metric names -> GA4 Data API names)
@@ -121,83 +146,80 @@ def get_ga4_data(
     estimate_only: bool = False,
     proceed_with_large_dataset: bool = False,
     enable_aggregation: bool = True,
-    intent: str = None
+    intent: str = None,
+    ctx: Context = None,
 ):
     """
     Retrieve GA4 data with built-in intelligence for better and safer results.
 
-    Returns on success: {"data": [{"dimension_name": value, "metric_name": value, ...}, ...],
-                         "metadata": {"total_rows_in_source": N, "returned_rows": N}}
+    Returns on success: {"data": [...], "metadata": {...}, "_skills_tip": "..."}
     Returns on volume warning: {"warning": "...", "estimated_rows": N, "suggestions": [...]}
     Returns on error: {"error": "..."}
 
-    CRITICAL WORKFLOW INSTRUCTIONS FOR AI AGENTS:
-    To ensure deterministic and successful data retrieval, you MUST follow this sequence:
-    1. DISCOVER: NEVER guess dimension or metric names. Always call `search_schema`,
-       `list_dimension_categories`, or `list_metric_categories` FIRST to verify the exact
-       API names available for this property.
-    2. RETRIEVE: Call this tool (`get_ga4_data`) using the verified dimensions and metrics.
-    3. TROUBLESHOOT: If you receive a SchemaError, an Invalid Dimension/Metric error, or
-       an error about `dimension_filter` structure, DO NOT RETRY BY GUESSING. You MUST
-       immediately call `get_troubleshooting_guide(topic='schema')` to learn the correct
-       structure and available fields.
+    CRITICAL WORKFLOW — follow this sequence every time:
 
-    **Smart Features:**
-    - **Data Volume Protection:** Before running a query that could produce a huge
-      number of rows, the tool runs a quick estimate. If the row count exceeds a
-      safe threshold (2500 rows), it will return a warning with suggestions instead
-      of the data. You can override this by setting `proceed_with_large_dataset=True`.
-    - **Automatic Server-Side Aggregation:** If your query does not involve a time
-      dimension (like 'date'), the tool automatically asks the GA4 API to return
-      aggregated totals. This is more efficient and provides cleaner results. You
-      can disable this by setting `enable_aggregation=False`.
-    - **Intelligent Sorting:** Results are automatically sorted by date (most recent
-      first) and the primary metric (highest value first) to show the most
-      relevant data at the top.
+    1. DISCOVER FIELDS: NEVER guess dimension or metric names. Call `search_schema`,
+       `list_dimension_categories`, or `list_metric_categories` FIRST to verify exact
+       API names for this property. Guessing costs you a failed round-trip.
+
+    2. DISCOVER PATTERN: For any domain-specific analysis, call `search_skills('<topic>')`
+       BEFORE querying to get the proven methodology — correct dimensions, metrics,
+       filters, and how to interpret the result. One extra call prevents multiple failures.
+       Use for: traffic diagnosis, attribution, ecommerce, channel acquisition, content
+       performance, geo/device segmentation, AI referrals, bot detection.
+
+    3. RETRIEVE: Call get_ga4_data with the verified fields and the skill's pattern.
+
+    4. TROUBLESHOOT: On schema error, invalid field, or filter parse error — call
+       `get_troubleshooting_guide(topic='schema')` immediately. Do not retry by guessing.
+
+    FIELD NAMES — GA4 API names vs common wrong guesses:
+    - 'screenPageViews'       not 'uniquePageviews' or 'pageViews'
+    - 'totalUsers'            not 'users'
+    - 'keyEvents'             not 'conversions' or 'goalCompletionsAll'
+    - 'sessionConversionRate' not 'conversionRate'
+    - 'userEngagementDuration' not 'timeOnPage' or 'avgTimeOnPage'
+    - 'averageSessionDuration' not 'avgSessionDuration'
+    - 'itemsViewed'           not 'itemViews'
+    - 'ecommercePurchases'    not 'purchases'
+    - 'sessionDefaultChannelGroup'  not 'sessionDefaultChannelGrouping'
+    - 'sessionSource'/'sessionMedium'  not 'source'/'medium'
+    - All names are camelCase — never snake_case (page_path → pagePath, event_name → eventName)
+    - 'bounceRate' and 'newUsers' are correct as-is
+
+    DATE RANGES:
+    - Format: 'YYYY-MM-DD' or relative strings: '7daysAgo', '30daysAgo', 'yesterday', 'today'
+    - 'NdaysAgo' counts back from today, excluding today. 'yesterday' = last complete day.
+    - Period comparison (YoY, WoW): run two separate queries with different date ranges,
+      then compare the results. The API does not support multi-period in one call.
+
+    SCOPE RULES — incompatible combinations return a 400 error:
+    - Session dims (sessionSource, sessionMedium, sessionCampaignName) → use with
+      sessions, bounceRate, sessionConversionRate. NOT with eventCount.
+    - Event dims (eventName) → use with eventCount. NOT with sessions.
+    - User dims (firstUserSource, firstUserMedium) → use with totalUsers, newUsers. NOT sessions.
+    - Safe with any metric: date, deviceCategory, country, city, pagePath, pageTitle.
+
+    FILTER STRUCTURE:
+    - Simple: {"filter": {"fieldName": "sessionSource", "stringFilter": {"value": "google", "matchType": "CONTAINS"}}}
+    - AND:    {"andGroup": {"expressions": [{"filter": {...}}, {"filter": {...}}]}}
+    - OR:     {"orGroup":  {"expressions": [{"filter": {...}}, {"filter": {...}}]}}
+    - NOT:    {"notExpression": {"filter": {...}}}
+    - Wrong keys that break filters: and_filter→andGroup, or_filter→orGroup,
+      not_filter→notExpression, filters→expressions, field→fieldName
 
     Args:
-        dimensions: List of GA4 dimensions (e.g., ["date", "city"]). MUST be verified via schema tools.
-        metrics: List of GA4 metrics (e.g., ["totalUsers", "sessions"]). MUST be verified via schema tools.
-        date_range_start: Start date in YYYY-MM-DD format or relative date ('7daysAgo').
-        date_range_end: End date in YYYY-MM-DD format or relative date ('yesterday').
-        dimension_filter: (Optional) A GA4 FilterExpression dictionary. Both camelCase and snake_case
-                          keys are transparently auto-translated and supported.
-                          Example simple filter structure:
-                          {
-                              "filter": {
-                                  "fieldName": "sessionSource",
-                                  "stringFilter": {"value": "google", "matchType": "CONTAINS"}
-                              }
-                          }
-                          Example logical group (andGroup, orGroup, notExpression):
-                          {
-                              "andGroup": {
-                                  "expressions": [
-                                      {"filter": {"fieldName": "deviceCategory", "stringFilter": {"value": "mobile"}}},
-                                      {"filter": {"fieldName": "country", "stringFilter": {"value": "United States"}}}
-                                  ]
-                              }
-                          }
-        limit: (Optional) Maximum number of rows to return. Defaults to 1000.
-        estimate_only: (Optional) If True, returns only the estimated row count
-                       without fetching the full dataset.
-        proceed_with_large_dataset: (Optional) Set to True to bypass the data volume
-                                    warning and execute the query anyway.
-        enable_aggregation: (Optional) If True, uses server-side aggregation when
-                            beneficial. Defaults to True.
-        intent: (Optional) A short, plain-language description of what the user is
-                trying to learn from this query — in your own words, not a fixed
-                category. Examples: "weekly retention trend for release planning",
-                "check for bot traffic from non-Japan countries",
-                "which signup flow converts best".
-
-    COMMON MISTAKES (checked against real usage — read before guessing names):
-    - Metric is 'keyEvents', not 'conversions'. 'totalUsers', not 'users'.
-      'itemsViewed', not 'itemViews'. 'ecommercePurchases', not 'purchases'.
-    - Dimension is 'sessionDefaultChannelGroup', not 'sessionDefaultChannelGrouping'.
-    - A simple dimension_filter MUST nest inside a "filter" key:
-      {"filter": {"fieldName": ..., "stringFilter": {...}}} — not fieldName at the top level.
-    - Logical groups are "andGroup"/"orGroup"/"notExpression" — not and_filter/or_filter.
+        dimensions: GA4 dimension names (verified via schema tools, e.g. ["date", "city"]).
+        metrics: GA4 metric names (verified via schema tools, e.g. ["totalUsers", "sessions"]).
+        date_range_start: Start date — 'YYYY-MM-DD' or '7daysAgo', '30daysAgo', 'yesterday'.
+        date_range_end: End date — 'YYYY-MM-DD' or 'yesterday', 'today'.
+        dimension_filter: Optional FilterExpression dict. camelCase and snake_case both accepted.
+        limit: Max rows to return. Defaults to 1000.
+        estimate_only: If True, returns only estimated row count without fetching data.
+        proceed_with_large_dataset: Set True to bypass the 2500-row volume warning.
+        enable_aggregation: If True, uses server-side aggregation when no date dimension. Default True.
+        intent: Short plain-English description of what the user is trying to learn.
+                E.g. "which channels drive most signups", "bot traffic audit for last month".
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded. Please check server startup logs."}
@@ -218,9 +240,11 @@ def get_ga4_data(
         valid_mets = PROPERTY_SCHEMA["metrics"].keys()
         for dim in parsed_dimensions:
             if dim not in valid_dims:
+                fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 field names and UA→GA4 name mapping. search_skills('custom-dimensions') covers customEvent:/customUser: syntax.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
                 return {"error": f"Invalid dimension: '{dim}'. DO NOT GUESS DIMENSIONS. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid dimensions."}
         for met in parsed_metrics:
             if met not in valid_mets:
+                fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 metric names. Common wrong guesses: 'conversions'→'keyEvents', 'users'→'totalUsers', 'uniquePageviews'→'screenPageViews'.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
                 return {"error": f"Invalid metric: '{met}'. DO NOT GUESS METRICS. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid metrics."}
 
         # --- Filter Expression Building ---
@@ -232,7 +256,15 @@ def get_ga4_data(
                 snake_filter = _repair_filter_shape(_convert_keys_to_snake(dimension_filter))
                 filter_expression = FilterExpression(snake_filter)
             except Exception as e:
+                fire_skill_tip(ctx, "💡 Skill tip: search_skills('filter-structures') has copy-paste templates for every filter type — single field, AND, OR, NOT, IN LIST.", skill="filter-structures", trigger="error_filter", tool_name="get_ga4_data")
                 return {"error": f"Invalid dimension_filter structure: {e}. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='schema') to learn the correct structure."}
+
+        # Channel 2: proactive — fires before the API call, while query is in-flight
+        skill = _suggest_skill(parsed_dimensions, parsed_metrics, intent)
+        if skill:
+            fire_skill_tip(ctx, f"💡 Skill available: search_skills('{skill}') has the full analytical methodology for this query type — proven field combinations, filters, and interpretation guidance.", skill=skill, trigger="pre_query", tool_name="get_ga4_data")
+        else:
+            fire_skill_tip(ctx, "💡 GA4 Skills: 15 analytical recipes available. Call search_skills() to find the proven pattern for traffic, ecommerce, attribution, content, geo, and more.", skill=None, trigger="pre_query", tool_name="get_ga4_data")
 
         # --- API Client and Request Objects ---
         client = BetaAnalyticsDataClient()
@@ -295,21 +327,37 @@ def get_ga4_data(
                 data_row[met_header.name] = row.metric_values[i].value
             result.append(data_row)
 
-        return {
+        # Channel 3: embed skill tip in response for model to relay to user
+        response_payload = {
             "data": result,
             "metadata": {
                 "total_rows_in_source": response.row_count,
                 "returned_rows": len(result),
-            }
+            },
         }
+        if skill:
+            response_payload["_skills_tip"] = f"For deeper analysis, call search_skills('{skill}') — it has the full pattern for this query type including interpretation guidance."
+        else:
+            response_payload["_skills_tip"] = "Call search_skills() to explore 15 analytical recipes that provide proven query patterns and interpretation guidance."
+
+        return response_payload
+
     except Exception as e:
         error_message = f"Error fetching GA4 data: {str(e)}"
         print(error_message, file=sys.stderr)
         if hasattr(e, 'details'):
             details_val = e.details() if callable(getattr(e, 'details', None)) else getattr(e, 'details')
             error_message += f" Details: {details_val}"
-            
-        if "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
+
+        if "incompatible" in error_message.lower() or "dimensions & metrics" in error_message.lower():
+            fire_skill_tip(ctx, "💡 Skill tip: search_skills('compatible-combinations') explains which dimension/metric scopes can be paired. Session dims need session metrics; event dims need event metrics.", skill="compatible-combinations", trigger="error_incompatible", tool_name="get_ga4_data")
+            error_message += " SYSTEM DIRECTIVE: Call search_skills('compatible-combinations') to learn which dimensions and metrics can be combined."
+
+        elif "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
+            fire_skill_tip(ctx, "💡 Permission error detected. Call get_troubleshooting_guide(topic='iam') for the exact steps to grant GA4 Viewer access to your service account.", skill=None, trigger="error_iam", tool_name="get_ga4_data")
             error_message += " SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='iam') to read the step-by-step IAM permissions guide and help the user resolve this."
-            
+
+        else:
+            fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures') for correct patterns.", skill=None, trigger="error_generic", tool_name="get_ga4_data")
+
         return {"error": error_message}

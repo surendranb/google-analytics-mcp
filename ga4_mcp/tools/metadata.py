@@ -4,7 +4,27 @@
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from mcp.types import ToolAnnotations
-from ga4_mcp.coordinator import mcp
+from mcp.server.fastmcp import Context
+from ga4_mcp.coordinator import mcp, fire_skill_tip
+
+_SCHEMA_SKILL_HINTS = [
+    (["channel", "source", "medium", "campaign", "acquisition"], "channel-acquisition"),
+    (["revenue", "purchase", "ecommerce", "transaction", "cart", "checkout"], "ecommerce-analysis"),
+    (["page", "content", "scroll", "landing", "article", "blog"], "content-performance"),
+    (["country", "city", "device", "geo", "region", "mobile"], "geo-device-segmentation"),
+    (["bot", "spam", "scraper", "crawler"], "bot-traffic-detection"),
+    (["attribution", "firstuser", "first user", "last click"], "attribution-scope"),
+    (["ai", "chatgpt", "claude", "perplexity", "gemini", "openai"], "ai-referral-analysis"),
+    (["custom", "event parameter", "customevent"], "custom-dimensions"),
+    (["conversion", "keyevent", "goal"], "ecommerce-analysis"),
+]
+
+def _hint_from_keyword(keyword: str) -> str | None:
+    kw = keyword.lower()
+    for terms, skill in _SCHEMA_SKILL_HINTS:
+        if any(t in kw for t in terms):
+            return skill
+    return None
 
 _READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
@@ -40,7 +60,7 @@ def get_property_schema_uncached(property_id: str) -> dict:
     return schema
 
 @mcp.tool(annotations=_READ_ONLY)
-def search_schema(keyword: str):
+def search_schema(keyword: str, ctx: Context = None):
     """
     Search for a keyword across all dimensions and metrics for this property.
     Returns a ranked list of up to 10 matching fields scored by relevance.
@@ -57,6 +77,13 @@ def search_schema(keyword: str):
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded. Please check server startup logs."}
+
+    # Proactive Channel 2: fire before returning results, while model is still in discovery mode
+    skill = _hint_from_keyword(keyword)
+    if skill:
+        fire_skill_tip(ctx, f"💡 Skill match: search_skills('{skill}') has the full analytical pattern for '{keyword}' analysis — proven dimensions, metrics, filters, and how to interpret the result. Call it before get_ga4_data.", skill=skill, trigger="field_discovery", tool_name="search_schema")
+    else:
+        fire_skill_tip(ctx, "💡 GA4 Skills library has 15 analytical recipes. Call search_skills() to find the proven query pattern for your analysis before calling get_ga4_data.", skill=None, trigger="field_discovery", tool_name="search_schema")
 
     scores = {}
     search_terms = keyword.lower().split()
@@ -103,7 +130,7 @@ def get_property_schema():
     return PROPERTY_SCHEMA
 
 @mcp.tool(annotations=_READ_ONLY)
-def list_dimension_categories():
+def list_dimension_categories(ctx: Context = None):
     """
     List all dimension categories for this GA4 property, with a count of
     dimensions in each category.
@@ -116,18 +143,20 @@ def list_dimension_categories():
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded."}
-    
+
+    fire_skill_tip(ctx, "💡 While you explore dimensions: search_skills() has 15 analytical recipes with proven dimension+metric combinations ready to use. Call search_skills('<topic>') before get_ga4_data to skip the guesswork.", skill=None, trigger="category_browse", tool_name="list_dimension_categories")
+
     categories = {}
     for dim_info in PROPERTY_SCHEMA["dimensions"].values():
         category = dim_info.get("category", "Uncategorized")
         if category not in categories:
             categories[category] = 0
         categories[category] += 1
-        
+
     return {"dimension_categories": categories}
 
 @mcp.tool(annotations=_READ_ONLY)
-def list_metric_categories():
+def list_metric_categories(ctx: Context = None):
     """
     List all metric categories for this GA4 property, with a count of
     metrics in each category.
@@ -140,6 +169,8 @@ def list_metric_categories():
     """
     if not PROPERTY_SCHEMA:
         return {"error": "Schema not loaded."}
+
+    fire_skill_tip(ctx, "💡 While you explore metrics: search_skills() has 15 analytical recipes with proven dimension+metric combinations ready to use. Call search_skills('<topic>') before get_ga4_data to skip the guesswork.", skill=None, trigger="category_browse", tool_name="list_metric_categories")
 
     categories = {}
     for met_info in PROPERTY_SCHEMA["metrics"].values():

@@ -9,6 +9,7 @@ const GATEWAY_VERSION = "1";
 const KNOWN_EVENTS = new Set([
   "mcp_started", "tool_executed", "server_first_install", "resource_read",
   "package_download", "install_intent", "install_completed", "surface_click",
+  "skill_tip_shown", "tools_listed",
 ]);
 
 // /go/<surface> records a click, then redirects to the client install deeplink.
