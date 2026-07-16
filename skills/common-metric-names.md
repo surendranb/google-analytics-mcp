@@ -9,7 +9,10 @@ Use these before calling `get_ga4_data` — wrong names return a hard error.
 |---|---|---|
 | Goal completions / conversions | `conversions`, `goals` | `keyEvents` |
 | Total users | `users`, `totalVisitors` | `totalUsers` |
-| Active users (30-day) | `activeVisitors` | `active28DayUsers` |
+| Active users (rolling 30-day ≈ MAU) | `MAU`, `monthlyActiveUsers`, `activeVisitors` | `active28DayUsers` |
+| Active users (rolling 7-day ≈ WAU) | `WAU`, `weeklyActiveUsers` | `active7DayUsers` |
+| Active users (rolling 1-day ≈ DAU) | `DAU`, `dailyActiveUsers` | `active1DayUsers` |
+| Distinct users in the queried range | `uniqueUsers` | `activeUsers` |
 | Page views | `pageViews`, `pageviews`, `page_views` | `screenPageViews` |
 | E-commerce purchases | `purchases`, `transactions` | `ecommercePurchases` |
 | Product views | `itemViews`, `productViews` | `itemsViewed` |
@@ -35,6 +38,18 @@ Use these before calling `get_ga4_data` — wrong names return a hard error.
 | Operating system | `os` | `operatingSystem` |
 | Browser | `userAgent` | `browser` |
 | Week of year | `week`, `weekNumber` | `week` (this one IS correct) |
+
+## Note on active users (MAU / WAU / DAU)
+
+GA4 has no `MAU`, `WAU`, `DAU`, `monthlyActiveUsers`, or `dailyActiveUsers` metric —
+these hard-error. Use the rolling n-day metrics: `active1DayUsers` (≈ DAU),
+`active7DayUsers` (≈ WAU), `active28DayUsers` (≈ MAU). Each counts distinct users
+active in the N days *ending on that date* (a rolling window, not a calendar bucket).
+`activeUsers` = distinct users in the queried range. Never sum daily `activeUsers`
+across rows to get a period total — it double-counts users active on multiple days.
+For a monthly total, query `activeUsers` once over the whole range (no date dimension),
+or use `active28DayUsers` for a rolling month. Stickiness ratios `dauPerMau`,
+`dauPerWau`, `wauPerMau` are also available as metrics.
 
 ## Note on bounce rate
 

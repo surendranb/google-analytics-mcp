@@ -9,7 +9,7 @@ To browse: call `search_skills("")` to see this index.
 
 | Skill | What it answers | Use when |
 |---|---|---|
-| `common-metric-names` | Correct GA4 API names for metrics and dimensions — the exact fields to use | You're unsure of a field name, or hit an "Invalid metric/dimension" error |
+| `common-metric-names` | Correct GA4 API names for metrics and dimensions — the exact fields to use, incl. active users (MAU/WAU/DAU) | You're unsure of a field name, need MAU/DAU/active-user metrics, or hit an "Invalid metric/dimension" error |
 | `ua-to-ga4` ✨ | Universal Analytics → GA4 field name mapping — every common UA name and its GA4 equivalent | You or the model used a UA field name (users, uniquePageviews, conversions, avgSessionDuration, etc.) |
 | `date-ranges` ✨ | Correct date syntax, relative dates, and how to structure period-over-period comparisons | You need NdaysAgo syntax, week-over-week, YoY, or want to avoid partial-day errors |
 | `filter-structures` | Correct JSON shape for `dimension_filter` — templates for AND, OR, NOT, IN LIST | You hit an "Invalid dimension_filter" error or need to filter by a field value |
