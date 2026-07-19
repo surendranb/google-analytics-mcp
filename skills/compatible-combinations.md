@@ -12,7 +12,7 @@ Mixing dimensions and metrics from incompatible scopes causes errors.
 | Scope | Example dimensions | Example metrics |
 |---|---|---|
 | Event | `eventName`, `customEvent:*` | `eventCount` |
-| Session | `sessionDefaultChannelGroup`, `sessionSource`, `sessionCampaignName` | `sessions`, `bounceRate`, `sessionConversionRate` |
+| Session | `sessionDefaultChannelGroup`, `sessionSource`, `sessionCampaignName` | `sessions`, `bounceRate`, `sessionKeyEventRate` |
 | User | `firstUserDefaultChannelGroup`, `firstUserSource` | `totalUsers`, `newUsers` |
 
 ## Most common incompatible pairs

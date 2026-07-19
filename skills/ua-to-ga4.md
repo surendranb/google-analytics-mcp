@@ -1,8 +1,12 @@
 # UA to GA4 Field Name Mapping
 
 Universal Analytics (UA) and GA4 use different names for equivalent concepts.
-Models trained on UA documentation will guess the wrong field names. This skill
-gives the correct GA4 Data API name for every common UA metric and dimension.
+UA was sunset on 2023-07-01; models trained before or around then guess UA field
+names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed
+"conversions" to "key events" (see the conversions rows below). If a name feels
+obviously right but returns "Invalid metric/dimension", assume your training
+predates the change and verify with `search_schema`. This skill gives the correct
+GA4 Data API name for every common UA metric and dimension.
 
 ## Metrics
 
@@ -14,7 +18,8 @@ gives the correct GA4 Data API name for every common UA metric and dimension.
 | `avgSessionDuration` | `averageSessionDuration` |
 | `timeOnPage` / `avgTimeOnPage` | `userEngagementDuration` |
 | `goalCompletionsAll` / `conversions` | `keyEvents` |
-| `goalConversionRateAll` / `conversionRate` | `sessionConversionRate` |
+| `goalConversionRateAll` / `conversionRate` / `sessionConversionRate` | `sessionKeyEventRate` |
+| `userConversionRate` | `userKeyEventRate` |
 | `transactions` / `purchases` | `ecommercePurchases` |
 | `transactionRevenue` / `revenue` | `purchaseRevenue` |
 | `revenuePerTransaction` | `averagePurchaseRevenue` |

@@ -78,8 +78,8 @@ def _suggest_skill(dimensions: list, metrics: list, intent: str | None) -> str |
 # Extend from telemetry: recurring SchemaHallucination field names get an alias.
 METRIC_ALIASES = {
     "conversions": "keyEvents",
-    "conversion_rate": "sessionConversionRate",
-    "user_conversion_rate": "userConversionRate",
+    "conversion_rate": "sessionKeyEventRate",
+    "user_conversion_rate": "userKeyEventRate",
     "bounce_rate": "bounceRate",
     "users": "totalUsers",
     "itemViews": "itemsViewed",
@@ -170,14 +170,17 @@ def get_ga4_data(
 
     3. RETRIEVE: Call get_ga4_data with the verified fields and the skill's pattern.
 
-    4. TROUBLESHOOT: On schema error, invalid field, or filter parse error — call
-       `get_troubleshooting_guide(topic='schema')` immediately. Do not retry by guessing.
+    4. TROUBLESHOOT: On schema error, invalid field, or filter parse error — do NOT
+       retry by guessing. Your training may predate current GA4 (UA was sunset
+       2023-07-01). Call `search_schema('<keyword>')` to find the current name in
+       THIS property, or `search_skills('ua-to-ga4' | 'common-metric-names' |
+       'filter-structures')` for the mapping.
 
     FIELD NAMES — GA4 API names vs common wrong guesses:
     - 'screenPageViews'       not 'uniquePageviews' or 'pageViews'
     - 'totalUsers'            not 'users'
     - 'keyEvents'             not 'conversions' or 'goalCompletionsAll'
-    - 'sessionConversionRate' not 'conversionRate'
+    - 'sessionKeyEventRate'   not 'sessionConversionRate' or 'conversionRate' (GA4 renamed conversions→key events, 2024)
     - 'userEngagementDuration' not 'timeOnPage' or 'avgTimeOnPage'
     - 'averageSessionDuration' not 'avgSessionDuration'
     - 'itemsViewed'           not 'itemViews'
@@ -195,7 +198,7 @@ def get_ga4_data(
 
     SCOPE RULES — incompatible combinations return a 400 error:
     - Session dims (sessionSource, sessionMedium, sessionCampaignName) → use with
-      sessions, bounceRate, sessionConversionRate. NOT with eventCount.
+      sessions, bounceRate, sessionKeyEventRate. NOT with eventCount.
     - Event dims (eventName) → use with eventCount. NOT with sessions.
     - User dims (firstUserSource, firstUserMedium) → use with totalUsers, newUsers. NOT sessions.
     - Safe with any metric: date, deviceCategory, country, city, pagePath, pageTitle.
@@ -241,11 +244,11 @@ def get_ga4_data(
         for dim in parsed_dimensions:
             if dim not in valid_dims:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 field names and UA→GA4 name mapping. search_skills('custom-dimensions') covers customEvent:/customUser: syntax.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
-                return {"error": f"Invalid dimension: '{dim}'. DO NOT GUESS DIMENSIONS. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid dimensions."}
+                return {"error": f"Invalid dimension: '{dim}' — not present in this property's live GA4 schema. WHY: GA4 Data API field names often differ from names in model training data — many are Universal Analytics (sunset 2023-07-01) or older-GA4 artifacts that no longer exist — so a name you are confident about can be out of date. The current names live outside your training: call search_schema('<keyword>') to read THIS property's live schema (also finds custom dimensions), or search_skills('ua-to-ga4') for the maintained UA→GA4 name mapping. Do NOT retry '{dim}' or guess a variant."}
         for met in parsed_metrics:
             if met not in valid_mets:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 metric names. Common wrong guesses: 'conversions'→'keyEvents', 'users'→'totalUsers', 'uniquePageviews'→'screenPageViews'.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
-                return {"error": f"Invalid metric: '{met}'. DO NOT GUESS METRICS. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call the 'get_troubleshooting_guide' tool with topic='schema' to learn how to find valid metrics."}
+                return {"error": f"Invalid metric: '{met}' — not present in this property's live GA4 schema. WHY: GA4 Data API metric names often differ from names in model training data — many are Universal Analytics (sunset 2023-07-01) or metrics renamed since your training, so a name you are confident about can be out of date. The current names live outside your training: call search_schema('<keyword>') to read THIS property's live schema, or search_skills('common-metric-names') for the maintained name mapping. Do NOT retry '{met}' or guess a variant."}
 
         # --- Filter Expression Building ---
         filter_expression = None
@@ -257,7 +260,7 @@ def get_ga4_data(
                 filter_expression = FilterExpression(snake_filter)
             except Exception as e:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('filter-structures') has copy-paste templates for every filter type — single field, AND, OR, NOT, IN LIST.", skill="filter-structures", trigger="error_filter", tool_name="get_ga4_data")
-                return {"error": f"Invalid dimension_filter structure: {e}. SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='schema') to learn the correct structure."}
+                return {"error": f"Invalid dimension_filter structure: {e}. WHY: the GA4 filter shape and field names often differ from filter formats in model training data — field names are camelCase (eventName, not event_name) inside a specific nested structure. The current templates live outside your training: call search_skills('filter-structures') for copy-paste examples of every filter type, or search_schema to confirm a field name. Do NOT retry the same shape."}
 
         # Channel 2: proactive — fires before the API call, while query is in-flight
         skill = _suggest_skill(parsed_dimensions, parsed_metrics, intent)
