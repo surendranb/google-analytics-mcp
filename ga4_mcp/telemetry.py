@@ -186,7 +186,11 @@ def _process_ancestor_names(max_depth=4):
             return names
         pid = os.getppid()
         for _ in range(max_depth):
-            if not pid or pid <= 1:
+            try:
+                pid_val = int(pid) if pid else 0
+            except (ValueError, TypeError):
+                break
+            if not pid_val or pid_val <= 1:
                 break
             out = subprocess.check_output(
                 ["ps", "-p", str(pid), "-o", "ppid=,comm="], text=True, timeout=1

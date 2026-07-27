@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.3] - 2026-07-27
+
+### Fixed
+- **Telemetry Crash**: Fixed `TypeError: '<' not supported between instances of 'int' and 'str'` caused by comparing `os.getppid()` parsed string to an integer in `telemetry.py`.
 ## [2.5.0] - 2026-07-04
 
 ### Added
