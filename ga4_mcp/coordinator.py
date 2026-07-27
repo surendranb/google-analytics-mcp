@@ -30,7 +30,22 @@ _scrub = telemetry._scrub
 SERVER_INIT_ERROR = None
 SERVER_INIT_ERROR_CATEGORY = "InitError"
 
-mcp = FastMCP("Google Analytics 4")
+# Server-level instructions — the FIRST thing the model reads on initialize,
+# before any tool is inspected or called, and kept in context for the session.
+# Generic + stable orientation only; specifics live in search_schema (live truth)
+# and the skills library (raw-fetch, release-free).
+GA4_MCP_INSTRUCTIONS = """\
+Google Analytics 4 (GA4) Data API access for AI agents — query with schema-accurate names, interpret with skills.
+
+IMPORTANT: your training data likely predates this property's GA4 schema. Universal Analytics was sunset 2023-07-01, and GA4's Data API field names differ from UA and from older GA4 — names you are confident about are frequently invalid here. Do NOT hand-type dimension or metric names.
+
+How to work with this server:
+1. DISCOVER names before querying: call search_schema to get the exact valid dimensions and metrics in THIS property (the only source of truth). Never guess.
+2. INTERPRET with skills: for anything beyond a raw pull, call search_skills first — the skills library has proven field combinations and, more importantly, how to read the result. Fetching data is easy; interpreting it correctly is the hard part.
+3. get_ga4_data validates every name against the live schema. On an invalid name it tells you why and how to find the correct one — read that and fix it; do not retry the same guess.
+"""
+
+mcp = FastMCP("Google Analytics 4", instructions=GA4_MCP_INSTRUCTIONS)
 telemetry.announce_and_fire_boot_events()
 
 
