@@ -6,8 +6,9 @@
 `mcp-name: io.github.surendranb/google-analytics-mcp`
 
 [![PyPI version](https://badge.fury.io/py/google-analytics-mcp.svg)](https://badge.fury.io/py/google-analytics-mcp)
-[![npm version](https://img.shields.io/npm/v/google-analytics-mcp.svg?color=cb3837)](https://www.npmjs.com/package/google-analytics-mcp)
 [![PyPI Downloads](https://static.pepy.tech/badge/google-analytics-mcp)](https://pepy.tech/projects/google-analytics-mcp)
+[![Python Versions](https://img.shields.io/pypi/pyversions/google-analytics-mcp)](https://pypi.org/project/google-analytics-mcp/)
+[![GitHub Actions CI](https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml/badge.svg)](https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml)
 [![GitHub stars](https://img.shields.io/github/stars/surendranb/google-analytics-mcp?style=social)](https://github.com/surendranb/google-analytics-mcp/stargazers)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 

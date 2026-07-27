@@ -44,6 +44,9 @@ jobs:
       - name: Smoke test imports
         run: python -c "import ga4_mcp; import ga4_mcp.server; import ga4_mcp.tools.metadata; import ga4_mcp.tools.reporting"
 
+      - name: Integration test MCP Server Connection
+        run: python tests/test_mcp_connection.py
+
       - name: Validate installed entry point
         run: |
           python - <<'PY'
