@@ -1,5 +1,6 @@
 <p align="center">
   <img src="logo.png" alt="Google Analytics MCP Logo" width="120" />
+</p>
 
 # Google Analytics 4 MCP Server
 
@@ -11,8 +12,6 @@ Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP
 
 🌐 **Website & Documentation:** [https://ga4mcp.com](https://ga4mcp.com)  
 🔗 **Sister Project:** [Google Search Console MCP](https://github.com/surendranb/google-search-console-mcp)
-
-</p>
 
 <p align="center">
   <img src="assets/downloads-banner.png" alt="PyPI Downloads Breakdown and Trend" width="800" />
