@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ga-mcp — 101,682</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js">
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  margin: 0; padding: 0;
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #FDE047; /* Bright yellow */
+  background-image: radial-gradient(#000000 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  display: flex; align-items: center; justify-content: center;
+  color: #000000;
+}
+.frame {
+  width: 1080px; height: 1080px;
+  background: #ffffff;
+  border: 8px solid #000000;
+  border-radius: 24px;
+  padding: 64px;
+  display: flex; flex-direction: column;
+  transform-origin: center center;
+  box-shadow: 24px 24px 0px #000000;
+}
+.header {
+  margin-bottom: 24px;
+}
+.hero-number {
+  font-family: 'Poppins', sans-serif;
+  font-size: 112px;
+  font-weight: 900;
+  letter-spacing: -4px;
+  line-height: 1;
+  color: #000000;
+  text-shadow: 8px 8px 0px #EC4899;
+}
+.hero-sub {
+  font-size: 26px;
+  font-weight: 700;
+  color: #000000;
+  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+.hero-sub strong {
+  background: #000000;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+.links-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #000000;
+}
+.link-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 3px solid #000;
+}
+.link-dot.indigo { background: #A855F7; }
+.link-dot.amber { background: #34D399; }
+.link-sep {
+  color: #000000;
+  font-weight: 900;
+}
+.link-highlight {
+  color: #000000;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+.chart-wrap {
+  flex: 1;
+  position: relative;
+  margin-top: 40px;
+  min-height: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 6px solid #000000;
+  box-shadow: 12px 12px 0px #000000;
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 40px;
+  margin-top: 16px;
+}
+.install-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #A855F7;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+}
+.install-label {
+  font-size: 15px;
+  font-weight: 900;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.install-prompt {
+  font-family: 'Inter', monospace;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.install-prompt span {
+  color: #FDE047;
+}
+.source-line {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 8px 16px;
+  border: 3px solid #000;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0px #000;
+}
+</style>
+</head>
+<body>
+<div class="frame" id="frame" style="position: relative;">
+  <!-- Top Right: Package name and Timestamp (Quiet, absolutely positioned) -->
+  <div style="position: absolute; top: 48px; right: 48px; text-align: right; z-index: 10;">
+    <div style="font-weight: 700; font-size: 18px; color: #666; margin-bottom: 4px;">google-analytics-mcp</div>
+    <div style="font-weight: 600; font-size: 14px; color: #999;">{{TIMESTAMP}}</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; margin-bottom: 24px;">
+    <!-- Title and Subtitle -->
+    <div class="hero-number">{{HERO_NUMBER}}</div>
+    <div class="hero-sub" style="margin-bottom: 32px;">Downloads in <strong>{{DAYS}} Days</strong></div>
+    
+    <!-- Stacked Bar Graph -->
+    <div style="width: 100%; border: 3px solid #000; border-radius: 12px; overflow: hidden; display: flex; height: 48px; box-shadow: 4px 4px 0px #000; margin-bottom: 12px;">
+      <div style="width: {{BOT_PERCENT}}%; background: #EC4899; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; overflow: hidden; white-space: nowrap; border-right: 3px solid #000;">
+        {{BOT_PERCENT}}%
+      </div>
+      <div style="width: {{AMBIG_PERCENT}}%; background: #FCD34D; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; border-right: 3px solid #000; overflow: hidden; white-space: nowrap;">
+        {{AMBIG_PERCENT}}%
+      </div>
+      <div style="width: {{HUMAN_PERCENT}}%; background: #34D399; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; overflow: hidden; white-space: nowrap;">
+        {{HUMAN_PERCENT}}%
+      </div>
+    </div>
+    
+      <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 16px; color: #444; padding: 0 4px;">
+        <span>🤖 Known Bots & CI ({{BOT_COUNT}})</span>
+        <span>🤷 Ambiguous ({{AMBIG_COUNT}})</span>
+        <span>🧔 Likely Human ({{HUMAN_COUNT}})</span>
+      </div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="chart"></canvas>
+  </div>
+  <div class="footer">
+    <div class="install-row">
+      <span class="install-label">Install</span>
+      <span class="install-prompt"><span>uv</span> tool install google-analytics-mcp</span>
+    </div>
+    <div class="source-line" style="display: flex; align-items: center; gap: 8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span>Data: Google BigQuery</span>
+    </div>
+  </div>
+</div>
+<script>
+function scaleToFit() {
+  const f = document.getElementById('frame');
+  const sx = window.innerWidth / 1080;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy) * 0.9;
+  f.style.transform = `scale(${s})`;
+}
+scaleToFit();
+window.addEventListener('resize', scaleToFit);
+
+const ctx = document.getElementById('chart').getContext('2d');
+Chart.defaults.color = '#000000';
+Chart.defaults.font.family = 'Inter';
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: {{CHART_LABELS}},
+    datasets: [
+      {
+        label: 'Known Bots & CI',
+        data: {{CHART_BOT_DATA}},
+        borderColor: '#000000',
+        backgroundColor: '#EC4899',
+        borderWidth: 3,
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        tension: 0
+      },
+      {
+        label: 'Ambiguous',
+        data: {{CHART_AMBIG_DATA}},
+        borderColor: '#000000',
+        backgroundColor: '#FCD34D',
+        borderWidth: 3,
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        tension: 0
+      },
+      {
+        label: 'Likely Human',
+        data: {{CHART_HUMAN_DATA}},
+        borderColor: '#000000',
+        backgroundColor: '#34D399',
+        borderWidth: 3,
+        fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        tension: 0
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#000000',
+        titleColor: '#FDE047',
+        bodyColor: '#ffffff',
+        borderColor: '#EC4899',
+        borderWidth: 4,
+        cornerRadius: 0,
+        padding: 16,
+        titleFont: { size: 16, weight: '800' },
+        bodyFont: { size: 18, weight: '700' },
+        callbacks: { label: ctx => ctx.parsed.y.toLocaleString() + ' downloads' }
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'month', displayFormats: { month: 'MMM yyyy' } },
+        min: '2025-05-01',
+        max: '2026-08-15',
+        title: {
+          display: true,
+          text: 'Date',
+          color: '#000000',
+          font: { size: 16, weight: '900', family: 'Inter' },
+          padding: { top: 12 }
+        },
+        ticks: {
+          color: '#000000',
+          font: { size: 16, weight: '800' },
+          maxTicksLimit: 8,
+          padding: 12
+        },
+        grid: { color: '#000000', lineWidth: 3, drawBorder: true, tickLength: 8 }
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Total Downloads',
+          color: '#000000',
+          font: { size: 14, weight: '800' }
+        },
+        ticks: {
+          color: '#000000',
+          font: { size: 16, weight: '800' },
+          callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v,
+          padding: 12
+        },
+        grid: { color: '#000000', lineWidth: 3, drawBorder: true, tickLength: 8 }
+      }
+    },
+    interaction: { mode: 'index', intersect: false }
+  }
+});
+</script>
+</body>
+</html>

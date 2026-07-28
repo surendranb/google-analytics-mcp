@@ -52,3 +52,7 @@ HANDOFF.local.md
 
 # Cross-project MCP playbook (internal, never publish)
 MCP_PLAYBOOK.local.md
+
+# Generated HTML
+scripts/banner-rendered.html
+
