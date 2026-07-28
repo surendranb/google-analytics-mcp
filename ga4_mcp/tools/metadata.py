@@ -67,8 +67,8 @@ def search_schema(keyword: str, ctx: Context = None):
 
     Returns: {"top_results": {"DIMENSION: api_name": score, "METRIC: api_name": score, ...}}
 
-    Use this to verify exact API names before calling get_ga4_data — fastest path
-    from a concept ("engagement", "revenue", "channel") to the correct field name.
+    Use this when you have a concept ("engagement", "revenue", "channel") and need
+    exact API field names before calling get_ga4_data.
     Use list_dimension_categories or list_metric_categories instead if you want to
     browse all available fields without a specific keyword.
 
