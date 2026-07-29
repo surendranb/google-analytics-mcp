@@ -2,7 +2,7 @@ name: Update PyPI Downloads Banner
 
 on:
   schedule:
-    - cron: '30 0 * * *' # Run daily at 6:00 AM IST (00:30 UTC)
+    - cron: '30 14 * * *' # Run daily at 8:00 PM IST (14:30 UTC)
   workflow_dispatch: # Allow manual triggers
 
 permissions:
