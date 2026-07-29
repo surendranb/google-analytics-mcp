@@ -1,0 +1,24 @@
+- **Getting Started**
+  - [Home](/)
+  - [Setup Guide](/setup.md)
+  
+- **Reference**
+  - [MCP Schema & Capabilities](/schema.md)
+  - [IAM Requirements](/iam.md)
+
+- **Agent Skills**
+  - [AI Referral Analysis](/skills/ai-referral-analysis/SKILL.md)
+  - [Attribution Scope](/skills/attribution-scope/SKILL.md)
+  - [Bot Traffic Detection](/skills/bot-traffic-detection/SKILL.md)
+  - [Channel Acquisition](/skills/channel-acquisition/SKILL.md)
+  - [Common Metric Names](/skills/common-metric-names/SKILL.md)
+  - [Compatible Combinations](/skills/compatible-combinations/SKILL.md)
+  - [Content Performance](/skills/content-performance/SKILL.md)
+  - [Custom Dimensions](/skills/custom-dimensions/SKILL.md)
+  - [Date Ranges](/skills/date-ranges/SKILL.md)
+  - [Ecommerce Analysis](/skills/ecommerce-analysis/SKILL.md)
+  - [Filter Structures](/skills/filter-structures/SKILL.md)
+  - [GA4 Limitations](/skills/ga4-limitations/SKILL.md)
+  - [Geo Device Segmentation](/skills/geo-device-segmentation/SKILL.md)
+  - [Traffic Diagnosis](/skills/traffic-diagnosis/SKILL.md)
+  - [UA to GA4 Migration](/skills/ua-to-ga4/SKILL.md)

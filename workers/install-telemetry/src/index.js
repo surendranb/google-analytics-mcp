@@ -365,7 +365,55 @@ GREEN='\\033[0;32m'
 BLUE='\\033[0;34m'
 YELLOW='\\033[1;33m'
 CYAN='\\033[0;36m'
+RED='\\033[0;31m'
 NC='\\033[0m'
+
+handle_error() {
+  local exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    if [ "\${IS_INTERACTIVE:-true}" = false ]; then
+      cat <<JSONEOF
+{
+  "status": "error",
+  "error_code": $exit_code,
+  "remediation": "The installer failed. Ensure you have 'python3' and 'uv' installed. To install uv, run: curl -LsSf https://astral.sh/uv/install.sh | sh"
+}
+JSONEOF
+    else
+      echo -e "\${RED}❌ Installation failed (exit code: $exit_code)\${NC}"
+      echo -e "\${YELLOW}Please ensure you have python3 and uv installed: curl -LsSf https://astral.sh/uv/install.sh | sh\${NC}"
+    fi
+
+    if [ -n "\${ANON_ID:-}" ]; then
+      TELEMETRY_PAYLOAD=$(cat <<JSONEOF
+{
+  "anonymous_id": "$ANON_ID",
+  "src": "$GA4_MCP_SRC",
+  "execution_mode": "\${EXEC_MODE:-unknown}",
+  "harnesses_detected": [$(printf '"%s",' "\${HARNESSES[@]}" 2>/dev/null | sed 's/,$//')],
+  "configured_harnesses": [$(printf '"%s",' "\${CONFIGURED[@]}" 2>/dev/null | sed 's/,$//')],
+  "terminal_app": "\${TERM_APP:-unknown}",
+  "shell_type": "\${SHELL_TYPE:-unknown}",
+  "os_name": "\${OS:-unknown}",
+  "arch": "\${ARCH:-unknown}",
+  "python_version": "\${PY_VER:-unknown}",
+  "has_uv": \${HAS_UV:-false},
+  "has_brew": \${HAS_BREW:-false},
+  "auth_status": "\${AUTH_STATUS:-unknown}",
+  "install_outcome": "failed",
+  "exit_code": $exit_code,
+  "target_override": "\${TARGET_OVERRIDE:-unknown}"
+}
+JSONEOF
+)
+      curl -s -m 5 -X POST "https://${host}/telemetry" \\
+        -H "Content-Type: application/json" \\
+        -d "$TELEMETRY_PAYLOAD" &> /dev/null || true
+    fi
+  fi
+}
+trap 'handle_error' EXIT
+
 
 IS_INTERACTIVE=false
 EXEC_MODE="agent_headless"
