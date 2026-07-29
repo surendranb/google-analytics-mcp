@@ -96,17 +96,20 @@ Every leaf filter **must** be wrapped in a `"filter"` key. `fieldName` never app
 
 ## Field names are always camelCase
 
-GA4 dimension and metric names are camelCase — never snake_case.
+> ⚠️ **CRITICAL FILTER TRAP**: Field names in `dimension_filter` (inside `fieldName`) MUST be exact camelCase. Passing `page_path` or `session_default_channel_group` will fail with an `Unknown field for FilterExpression` error.
 
 | Wrong (snake_case) | Correct (camelCase) |
 |---|---|
 | `page_path` | `pagePath` |
+| `session_default_channel_group` | `sessionDefaultChannelGroup` |
 | `session_source` | `sessionSource` |
+| `session_source_medium` | `sessionSourceMedium` |
 | `session_campaign_name` | `sessionCampaignName` |
+| `landing_page` | `landingPage` |
 | `device_category` | `deviceCategory` |
 | `event_name` | `eventName` |
 
-If you use snake_case in `fieldName`, the filter will fail with an "Unknown field" error.
+If you use snake_case in `fieldName`, the filter will fail with an "Unknown field" error. Do NOT retry snake_case.
 
 ## Note
 

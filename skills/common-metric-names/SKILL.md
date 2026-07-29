@@ -7,17 +7,16 @@ description: "The correct GA4 Data API names for fields models most often get wr
 The correct GA4 Data API names for fields models most often get wrong.
 Use these before calling `get_ga4_data` — wrong names return a hard error.
 
-> ⚠️ **Your training data may predate current GA4.** Universal Analytics was sunset
-> 2023-07-01, and on 2024-05-06 the GA4 Data API renamed conversion metrics to "key
-> events" (`conversions`→`keyEvents`, `sessionConversionRate`→`sessionKeyEventRate`).
-> A name you recall confidently is often wrong now — when unsure, verify with
-> `search_schema` against the live property.
+> ⚠️ **YOUR TRAINING DATA IS OUTDATED**: Universal Analytics was sunset
+> 2023-07-01, and on 2024-05-06 Google Analytics 4 renamed all conversion metrics to **"key events"**
+> (`conversions` → `keyEvents`, `conversionRate` → `sessionKeyEventRate`).
+> Querying `conversions` will fail with an `Invalid metric` error. Always use `keyEvents`.
 
 ## Metrics — correct API names
 
 | What you mean | Wrong (will fail) | Correct API name |
 |---|---|---|
-| Goal completions / conversions | `conversions`, `goals` | `keyEvents` |
+| Goal completions / conversions (RENAMED 2024) | `conversions`, `goals`, `conversion` | `keyEvents` |
 | Total users | `users`, `totalVisitors` | `totalUsers` |
 | Active users (rolling 30-day ≈ MAU) | `MAU`, `monthlyActiveUsers`, `activeVisitors` | `active28DayUsers` |
 | Active users (rolling 7-day ≈ WAU) | `WAU`, `weeklyActiveUsers` | `active7DayUsers` |
