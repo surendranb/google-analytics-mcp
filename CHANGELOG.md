@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.4] - 2026-07-29
+
+### Improved
+- **Schema Search Tool Description**: Clarified `search_schema()` tool description in `ga4_mcp/tools/metadata.py` to guide models explicitly on when to use keyword discovery vs category browsing (#17).
+
 ## [2.8.3] - 2026-07-27
 
 ### Fixed
