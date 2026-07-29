@@ -20,9 +20,7 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          # You will need to configure these secrets in your repository settings
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
