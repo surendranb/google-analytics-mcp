@@ -8,7 +8,7 @@
 
 <p align="left">
   <a href="https://pypi.org/project/google-analytics-mcp/"><img src="https://img.shields.io/pypi/v/google-analytics-mcp?logo=pypi&logoColor=white&color=blue" alt="PyPI Version" /></a>
-  <a href="https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/surendranb/google-analytics-mcp/package-checks.yml?branch=main&label=CI&logo=github" alt="CI Status" /></a>
+  <a href="https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml"><img src="https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml/badge.svg?branch=main" alt="CI Status" /></a>
   <a href="https://github.com/surendranb/google-analytics-mcp/stargazers"><img src="https://img.shields.io/github/stars/surendranb/google-analytics-mcp?logo=github&color=gold" alt="GitHub Stars" /></a>
   <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License" /></a>
 </p>
