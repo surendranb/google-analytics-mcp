@@ -19,9 +19,8 @@ Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP
 🔗 **Sister Project:** [Google Search Console MCP](https://github.com/surendranb/google-search-console-mcp)
 
 <p align="center">
-  <a href="https://pypi.builditwithai.xyz">
-    <img src="https://pypi.builditwithai.xyz/api/v1/google-analytics-mcp/banner.svg" alt="PyPI Downloads Breakdown and Trend" width="800" />
-  </a>
+  <img src="https://pypi.builditwithai.xyz/api/v1/google-analytics-mcp/banner.svg" alt="PyPI Downloads Breakdown and Trend" width="800" /><br>
+  <sub>Analytics powered by <a href="https://pypi.builditwithai.xyz">pypi.builditwithai.xyz</a></sub>
 </p>
 
 ---
