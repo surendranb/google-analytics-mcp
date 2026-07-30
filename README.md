@@ -6,7 +6,12 @@
 
 `mcp-name: io.github.surendranb/google-analytics-mcp`
 
-[![PyPI Version](https://img.shields.io/pypi/v/google-analytics-mcp?logo=pypi&logoColor=white&color=blue)](https://pypi.org/project/google-analytics-mcp/) [![Python Versions](https://img.shields.io/pypi/pyversions/google-analytics-mcp?logo=python&logoColor=white)](https://pypi.org/project/google-analytics-mcp/) [![CI Status](https://img.shields.io/github/actions/workflow/status/surendranb/google-analytics-mcp/package-checks.yml?branch=main&label=CI&logo=github)](https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml) [![GitHub Stars](https://img.shields.io/github/stars/surendranb/google-analytics-mcp?logo=github&color=gold)](https://github.com/surendranb/google-analytics-mcp/stargazers) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+<p align="left">
+  <a href="https://pypi.org/project/google-analytics-mcp/"><img src="https://img.shields.io/pypi/v/google-analytics-mcp?logo=pypi&logoColor=white&color=blue" alt="PyPI Version" /></a>
+  <a href="https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/surendranb/google-analytics-mcp/package-checks.yml?branch=main&label=CI&logo=github" alt="CI Status" /></a>
+  <a href="https://github.com/surendranb/google-analytics-mcp/stargazers"><img src="https://img.shields.io/github/stars/surendranb/google-analytics-mcp?logo=github&color=gold" alt="GitHub Stars" /></a>
+  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License" /></a>
+</p>
 
 Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP runtimes across **Claude, ChatGPT, Gemini, Cursor, VS Code, and OpenClaw**. Gives models analysis-ready GA4 access with live schema discovery, metric auto-aliasing, server-side aggregation, and autonomous self-healing defenses.
 
