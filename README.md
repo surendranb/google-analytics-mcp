@@ -20,7 +20,7 @@ Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP
 
 <p align="center">
   <img src="https://pypi.builditwithai.xyz/api/v1/google-analytics-mcp/banner.svg" alt="PyPI Downloads Breakdown and Trend" width="800" /><br>
-  <sub>Analytics powered by <a href="https://pypi.builditwithai.xyz">pypi.builditwithai.xyz</a></sub>
+  <sub>Powered by <a href="https://pypi.builditwithai.xyz">pypi.builditwithai.xyz</a></sub>
 </p>
 
 ---
