@@ -9,7 +9,7 @@ import os
 import uuid
 
 from pydantic import BaseModel, Field
-from mcp.server.fastmcp import Context
+from mcp.server.mcpserver import Context
 
 from .coordinator import mcp
 from .telemetry import send_telemetry, client_supports_url_elicitation

@@ -9,8 +9,9 @@ import json
 import time
 import inspect
 import functools
+import contextvars
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from . import telemetry
 from .telemetry import send_telemetry
@@ -45,7 +46,7 @@ How to work with this server:
 3. get_ga4_data validates every name against the live schema. On an invalid name it tells you why and how to find the correct one — read that and fix it; do not retry the same guess.
 """
 
-mcp = FastMCP("Google Analytics 4", instructions=GA4_MCP_INSTRUCTIONS)
+mcp = MCPServer("Google Analytics 4", version=MCP_SERVER_VERSION, instructions=GA4_MCP_INSTRUCTIONS)
 telemetry.announce_and_fire_boot_events()
 
 
@@ -170,8 +171,14 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
         except Exception:
             pass
     try:
-        meta = getattr(mcp._mcp_server.request_context, "meta", None)
-        props["has_progress_token"] = getattr(meta, "progressToken", None) is not None
+        req = _CURRENT_REQUEST.get()
+        meta = getattr(req, "meta", None) if req is not None else None
+        token = None
+        if isinstance(meta, dict):
+            token = meta.get("progressToken") or meta.get("io.modelcontextprotocol/progressToken")
+        elif meta is not None:
+            token = getattr(meta, "progressToken", None)
+        props["has_progress_token"] = token is not None
     except Exception:
         pass
     if error_category:
@@ -206,7 +213,6 @@ def _telemetry_tool(*args, **kwargs):
                 start_time = time.time()
                 status, error_category, rows_returned, result = "success", None, 0, None
                 try:
-                    telemetry.capture_client_info(mcp)
                     intercepted = _intercept(func.__name__)
                     if intercepted is not None:
                         status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
@@ -231,7 +237,6 @@ def _telemetry_tool(*args, **kwargs):
                 start_time = time.time()
                 status, error_category, rows_returned, result = "success", None, 0, None
                 try:
-                    telemetry.capture_client_info(mcp)
                     intercepted = _intercept(func.__name__)
                     if intercepted is not None:
                         status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
@@ -259,35 +264,46 @@ mcp.tool = _telemetry_tool
 
 _BOOT_TIME = time.time()
 _TOOLS_LISTED = {"fired": False}
+_DISCOVERED = {"fired": False}
+
+# The request currently being served, exposed to telemetry that needs per-request
+# context (identity, progress token). MCP 2.0 is stateless — there is no persistent
+# request_context on the server — so the middleware stashes it here per request.
+_CURRENT_REQUEST = contextvars.ContextVar("ga4_current_request", default=None)
 
 
-def _hook_tools_list():
-    """Fire tools_listed once per process on the first tools/list — the only
-    protocol touch sessions make when they connect but never call a tool."""
+async def _telemetry_middleware(ctx, call_next):
+    """Runs for EVERY request (initialize, server/discover, tools/list, tools/call,
+    ...). In MCP 2.0 the v1 request_handlers monkey-patch is gone; middleware is the
+    supported, era-agnostic hook. Responsibilities:
+      1. expose the request to per-request telemetry via _CURRENT_REQUEST
+      2. capture client identity (dual-era: handshake session OR per-request _meta)
+      3. fire tools_listed once — the 'connected but never called a tool' signal
+      4. fire server_discovered once — a 2026-only touchpoint (stateless clients
+         probe server/discover before anything else; a cleaner connect sensor)"""
+    _CURRENT_REQUEST.set(ctx)
     try:
-        from mcp.types import ListToolsRequest
-        original = mcp._mcp_server.request_handlers.get(ListToolsRequest)
-        if original is None:
-            return
-
-        async def wrapped(req):
-            if not _TOOLS_LISTED["fired"]:
-                _TOOLS_LISTED["fired"] = True
-                try:
-                    telemetry.capture_client_info(mcp)
-                except Exception:
-                    pass
-                send_telemetry("tools_listed", {
-                    "seconds_since_boot": round(time.time() - _BOOT_TIME, 1),
-                })
-            return await original(req)
-
-        mcp._mcp_server.request_handlers[ListToolsRequest] = wrapped
+        telemetry.capture_client_info(ctx)
     except Exception:
         pass
+    method = getattr(ctx, "method", None)
+    try:
+        if method == "server/discover" and not _DISCOVERED["fired"]:
+            _DISCOVERED["fired"] = True
+            send_telemetry("server_discovered", {
+                "seconds_since_boot": round(time.time() - _BOOT_TIME, 1),
+            })
+        elif method == "tools/list" and not _TOOLS_LISTED["fired"]:
+            _TOOLS_LISTED["fired"] = True
+            send_telemetry("tools_listed", {
+                "seconds_since_boot": round(time.time() - _BOOT_TIME, 1),
+            })
+    except Exception:
+        pass
+    return await call_next(ctx)
 
 
-_hook_tools_list()
+mcp.middleware.append(_telemetry_middleware)
 
 
 _PROACTIVE_TRIGGERS = {"field_discovery", "pre_query", "category_browse"}

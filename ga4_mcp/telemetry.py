@@ -324,39 +324,91 @@ _RUNTIME_CLIENT = {
 }
 
 
-def capture_client_info(mcp_server):
-    """Read clientInfo, protocol version, and capability flags from the handshake."""
+def _meta_as_dict(meta):
+    """Per-request _meta may arrive as a plain dict (2026 stateless clients) or a
+    pydantic RequestParamsMeta. Normalize to a dict, preserving the namespaced
+    io.modelcontextprotocol/* keys (they live in the model's extra fields)."""
+    if meta is None:
+        return {}
+    if isinstance(meta, dict):
+        return meta
+    extra = getattr(meta, "__pydantic_extra__", None) or getattr(meta, "model_extra", None)
+    if isinstance(extra, dict) and extra:
+        return extra
+    try:
+        return meta.model_dump(by_alias=True)
+    except Exception:
+        return {}
+
+
+def capture_client_info(ctx):
+    """Populate _RUNTIME_CLIENT once, from whichever era the client speaks.
+
+    Dual-path by design — MCP 2.0 (2026-07-28) is stateless: clients put their
+    identity in per-request _meta and there is no initialize handshake. Older
+    clients (today's fleet) still do the handshake, so their identity lives on
+    ctx.session.client_params. `ctx` is the ServerRequestContext seen by the
+    request middleware. Idempotent: first successful capture wins."""
     if _RUNTIME_CLIENT["name"] is not None:
         return
     try:
-        ctx = mcp_server._mcp_server.request_context
-        params = ctx.session.client_params if (ctx and ctx.session) else None
-        if not params or not params.clientInfo:
+        info = None       # {name, version, title, description}
+        caps_raw = None   # capabilities mapping
+        proto = getattr(ctx, "protocol_version", None)
+
+        # 2026-07-28 stateless: identity in per-request _meta.
+        meta = _meta_as_dict(getattr(ctx, "meta", None))
+        if meta:
+            mci = meta.get("io.modelcontextprotocol/clientInfo")
+            if isinstance(mci, dict) and mci.get("name"):
+                info = mci
+                caps_raw = (meta.get("io.modelcontextprotocol/clientCapabilities")
+                            or meta.get("io.modelcontextprotocol/capabilities"))
+                proto = proto or meta.get("io.modelcontextprotocol/protocolVersion")
+
+        # Legacy: identity from the initialize handshake on the session. MCP 2.0
+        # renamed protocol fields camelCase -> snake_case (client_info,
+        # protocol_version); try snake_case first, fall back to the 1.x spelling.
+        if info is None:
+            sess = getattr(ctx, "session", None)
+            params = getattr(sess, "client_params", None) if sess else None
+            ci = None
+            if params is not None:
+                ci = getattr(params, "client_info", None) or getattr(params, "clientInfo", None)
+            if ci is not None and getattr(ci, "name", None):
+                info = {
+                    "name": ci.name,
+                    "version": getattr(ci, "version", None),
+                    "title": getattr(ci, "title", None),
+                    "description": getattr(ci, "description", None),
+                }
+                proto = (proto or getattr(params, "protocol_version", None)
+                         or getattr(params, "protocolVersion", None))
+                caps_obj = getattr(params, "capabilities", None)
+                if caps_obj is not None:
+                    try:
+                        caps_raw = caps_obj.model_dump(mode="json", exclude_none=True)
+                    except Exception:
+                        caps_raw = None
+
+        if not info or not info.get("name"):
             return
-        info = params.clientInfo
-        _RUNTIME_CLIENT["name"] = str(info.name)
-        _RUNTIME_CLIENT["version"] = str(info.version)
-        _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.name)
-        title = getattr(info, "title", None)
-        _RUNTIME_CLIENT["title"] = str(title) if title else None
-        desc = getattr(info, "description", None)
-        _RUNTIME_CLIENT["description"] = str(desc) if desc else None
-        pv = getattr(params, "protocolVersion", None)
-        _RUNTIME_CLIENT["protocol_version"] = str(pv) if pv else None
-        caps = getattr(params, "capabilities", None)
-        if caps is not None:
+
+        _RUNTIME_CLIENT["name"] = str(info.get("name"))
+        _RUNTIME_CLIENT["version"] = str(info.get("version")) if info.get("version") else None
+        _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.get("name"))
+        _RUNTIME_CLIENT["title"] = str(info["title"]) if info.get("title") else None
+        _RUNTIME_CLIENT["description"] = str(info["description"]) if info.get("description") else None
+        _RUNTIME_CLIENT["protocol_version"] = str(proto) if proto else None
+        if isinstance(caps_raw, dict):
             _RUNTIME_CLIENT["caps"] = {
-                "client_supports_sampling": getattr(caps, "sampling", None) is not None,
-                "client_supports_roots": getattr(caps, "roots", None) is not None,
-                "client_supports_elicitation": getattr(caps, "elicitation", None) is not None,
-                "client_has_experimental_caps": bool(getattr(caps, "experimental", None)),
+                "client_supports_sampling": "sampling" in caps_raw,
+                "client_supports_roots": "roots" in caps_raw,
+                "client_supports_elicitation": "elicitation" in caps_raw,
+                "client_has_experimental_caps": bool(caps_raw.get("experimental")),
             }
-            # Raw capabilities verbatim (incl. experimental keys) — the booleans
-            # above are a convenience, this is the record.
-            try:
-                _RUNTIME_CLIENT["caps_raw"] = caps.model_dump(mode="json", exclude_none=True)
-            except Exception:
-                pass
+            # Raw capabilities verbatim — the booleans above are a convenience.
+            _RUNTIME_CLIENT["caps_raw"] = caps_raw
     except Exception:
         pass
 

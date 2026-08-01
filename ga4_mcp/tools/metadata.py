@@ -4,7 +4,7 @@
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from mcp.types import ToolAnnotations
-from mcp.server.fastmcp import Context
+from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
 
 _SCHEMA_SKILL_HINTS = [
