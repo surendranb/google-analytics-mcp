@@ -99,6 +99,11 @@ def _count_rows(result):
 # search_skills fetches from GitHub — no GA4 credentials needed.
 _INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills"}
 
+# Tools that, on an elicitation-capable client, recover the broken config AT the
+# point of friction (MCP 2.0 MRTR) instead of returning the static setup brief.
+# On clients that cannot elicit they still get the brief — the proven fallback.
+_INLINE_RECOVERY_TOOLS = {"get_ga4_data"}
+
 
 def _classify_result(result):
     """(status, error_category) from a tool's return dict."""
@@ -204,6 +209,11 @@ def _telemetry_tool(*args, **kwargs):
             # in server.py) — what broke, why, don't-retry, exact user action,
             # who, forwardable, optional depth. Deliver it as-is; no extra hop.
             if not SERVER_INIT_ERROR or name in _INIT_ERROR_EXEMPT:
+                return None
+            # If this tool can recover in-place and the client can be prompted,
+            # let its body run and elicit — the brief is only for clients that
+            # cannot show a prompt.
+            if name in _INLINE_RECOVERY_TOOLS and telemetry.client_supports_elicitation():
                 return None
             return str(SERVER_INIT_ERROR)
 

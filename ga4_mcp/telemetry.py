@@ -413,6 +413,16 @@ def capture_client_info(ctx):
         pass
 
 
+def client_supports_elicitation() -> bool:
+    """True if the connected client advertised any elicitation capability. Gates
+    inline setup recovery (MRTR) — we only prompt at the point of friction on
+    clients that can actually show a prompt; others get the guided brief."""
+    caps = _RUNTIME_CLIENT.get("caps")
+    if isinstance(caps, dict) and caps.get("client_supports_elicitation"):
+        return True
+    return bool(_RUNTIME_CLIENT.get("caps_raw", {}) or {}) and "elicitation" in (_RUNTIME_CLIENT.get("caps_raw") or {})
+
+
 def client_supports_url_elicitation() -> bool:
     """True if the handshake advertised URL-mode elicitation (elicitation.url).
     Read from the raw capabilities we capture; used to offer guided-navigation

@@ -5,6 +5,7 @@
 import os
 import sys
 import json
+import asyncio
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
     DateRange, Dimension, Metric, RunReportRequest, Filter, FilterExpression, FilterExpressionList,
@@ -13,6 +14,7 @@ from google.analytics.data_v1beta.types import (
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
+from ga4_mcp.telemetry import client_supports_elicitation
 
 _READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
@@ -202,7 +204,7 @@ def _repair_filter_shape(d, parent_key=None):
     return repaired
 
 @mcp.tool(annotations=_READ_ONLY)
-def get_ga4_data(
+async def get_ga4_data(
     dimensions: list[str] = ["date"],
     metrics: list[str] = ["totalUsers", "newUsers", "sessions"],
     date_range_start: str = "7daysAgo",
@@ -297,7 +299,19 @@ def get_ga4_data(
                 E.g. "which channels drive most signups", "bot traffic audit for last month".
     """
     if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded. Please check server startup logs."}
+        # Born-broken, but if the client can be prompted, recover the missing
+        # config AT this call (MCP 2.0 MRTR) instead of bouncing to a separate
+        # tool. Clients that cannot elicit never reach here — the coordinator
+        # returns the setup brief for them (the proven fallback).
+        from ga4_mcp import coordinator as _coordinator
+        if ctx is not None and _coordinator.SERVER_INIT_ERROR and client_supports_elicitation():
+            from ga4_mcp.setup_flow import run_inline_recovery
+            recovered, message = await run_inline_recovery(ctx)
+            if not recovered:
+                return {"error": message}
+            # reinitialize() repopulated the module schema global; fall through.
+        if not PROPERTY_SCHEMA:
+            return {"error": "Schema not loaded. Please check server startup logs."}
 
     try:
         # --- Input Parsing and Validation ---
@@ -359,7 +373,7 @@ def get_ga4_data(
                     dimension_filter=filter_expression,
                     limit=1
                 )
-                estimation_res = client.run_report(request=estimation_req)
+                estimation_res = await asyncio.to_thread(client.run_report, request=estimation_req)
                 estimated_rows = estimation_res.row_count
 
                 if estimate_only:
@@ -390,7 +404,7 @@ def get_ga4_data(
             order_bys=_get_smart_sorting(parsed_dimensions, parsed_metrics),
             metric_aggregations=[MetricAggregation.TOTAL] if enable_aggregation and _should_aggregate(parsed_dimensions, parsed_metrics) else None
         )
-        response = client.run_report(request=request)
+        response = await asyncio.to_thread(client.run_report, request=request)
 
         # --- Response Formatting (pure, unit-tested) ---
         # Surfaces GA4 server-side totals + Channel-3 skills tip.

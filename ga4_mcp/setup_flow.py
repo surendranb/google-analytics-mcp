@@ -82,9 +82,20 @@ async def setup_ga4_access(ctx: Context) -> str:
     needed input through the client, then re-initializing without a restart.
     Call this whenever a configuration or authentication error is reported.
     """
+    _recovered, message = await run_inline_recovery(ctx)
+    return message
+
+
+async def run_inline_recovery(ctx) -> tuple[bool, str]:
+    """The setup-recovery engine, callable from any tool that hits a born-broken
+    config with an elicitation-capable client (MCP 2.0 MRTR): ask the user for the
+    missing value through the client, apply it, and re-initialize in-session.
+    Returns (recovered, message): recovered=True only when GA4 is now working.
+    setup_ga4_access wraps this; get_ga4_data calls it at the point of friction so
+    the user is prompted right where the query failed, not one hop away."""
     if not coordinator.SERVER_INIT_ERROR:
         _emit_flow("none_needed", None, "already_ok")
-        return "GA4 access is already configured and working. No setup needed."
+        return True, "GA4 access is already configured and working. No setup needed."
 
     category = coordinator.SERVER_INIT_ERROR_CATEGORY
     creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -108,7 +119,7 @@ async def setup_ga4_access(ctx: Context) -> str:
             )
             if r.action != "accept" or not r.data:
                 _emit_flow(branch, r.action, "paused")
-                return "Setup paused — no Property ID provided. Re-run setup_ga4_access when ready."
+                return False, "Setup paused — no Property ID provided. Re-run setup_ga4_access when ready."
             os.environ["GA4_PROPERTY_ID"] = r.data.property_id.strip()
 
         # Missing/invalid credentials path — offer the setup page, then collect.
@@ -128,7 +139,7 @@ async def setup_ga4_access(ctx: Context) -> str:
             )
             if r.action != "accept" or not r.data:
                 _emit_flow(branch, r.action, "paused")
-                return "Setup paused — no credentials path provided. Re-run setup_ga4_access when ready."
+                return False, "Setup paused — no credentials path provided. Re-run setup_ga4_access when ready."
             path = r.data.credentials_path.strip()
             if path.lower() != "adc":
                 # Validate at collection: existence alone isn't enough — a
@@ -137,11 +148,11 @@ async def setup_ga4_access(ctx: Context) -> str:
                 model, _email, ok = coordinator.inspect_credentials(path)
                 if model == "missing":
                     _emit_flow(branch, r.action, "invalid_path")
-                    return (f"No file exists at '{path}'. Ask the user for the correct absolute path to their "
+                    return False, (f"No file exists at '{path}'. Ask the user for the correct absolute path to their "
                             "Google service-account JSON key, then re-run setup_ga4_access.")
                 if not ok or model in ("unreadable", "unknown"):
                     _emit_flow(branch, r.action, "invalid_creds")
-                    return (f"The file at '{path}' is not a valid Google credentials JSON (expected a "
+                    return False, (f"The file at '{path}' is not a valid Google credentials JSON (expected a "
                             "service-account key or an authorized_user/ADC file). Ask the user to re-download "
                             "the service-account key from Google Cloud Console > IAM > Service Accounts > Keys.")
                 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
@@ -157,7 +168,7 @@ async def setup_ga4_access(ctx: Context) -> str:
             )
             if r.action != "accept" or not r.data or not r.data.done:
                 _emit_flow(branch, r.action, "paused")
-                return "Setup paused — run 'gcloud auth application-default login', then re-run setup_ga4_access."
+                return False, "Setup paused — run 'gcloud auth application-default login', then re-run setup_ga4_access."
 
         # Missing GA4 access (IAM) — confirm the console fix.
         elif category == "IAMError":
@@ -171,7 +182,7 @@ async def setup_ga4_access(ctx: Context) -> str:
             )
             if r.action != "accept" or not r.data or not r.data.done:
                 _emit_flow(branch, r.action, "paused")
-                return "Setup paused — grant Viewer access, then re-run setup_ga4_access."
+                return False, "Setup paused — grant Viewer access, then re-run setup_ga4_access."
 
         else:
             # Other init error — confirm and retry.
@@ -182,12 +193,12 @@ async def setup_ga4_access(ctx: Context) -> str:
             )
             if r.action != "accept" or not r.data or not r.data.done:
                 _emit_flow(branch, r.action, "paused")
-                return "Setup paused. Re-run setup_ga4_access after fixing the issue above."
+                return False, "Setup paused. Re-run setup_ga4_access after fixing the issue above."
 
     except Exception:
         # Client lacks elicitation — fall back to guided text.
         _emit_flow(branch, None, "elicit_unsupported")
-        return (f"This client can't prompt interactively. To fix setup manually: {coordinator.SERVER_INIT_ERROR} "
+        return False, (f"This client can't prompt interactively. To fix setup manually: {coordinator.SERVER_INIT_ERROR} "
                 "See https://ga4.builditwithai.xyz/setup, then restart your MCP client.")
 
     # Retry init with the updated environment.
@@ -197,7 +208,7 @@ async def setup_ga4_access(ctx: Context) -> str:
         msg = "✅ GA4 access is now working — you can query your analytics. "
         if os.getenv("GA4_PROPERTY_ID") and cat != "adc":
             msg += _persist_hint("GA4_PROPERTY_ID", os.getenv("GA4_PROPERTY_ID"))
-        return msg
+        return True, msg
     _emit_flow(branch, "accept", "still_broken", cat)
-    return (f"Still not connected ({cat}): {detail}. Re-run setup_ga4_access to try again, "
+    return False, (f"Still not connected ({cat}): {detail}. Re-run setup_ga4_access to try again, "
             "or see https://ga4.builditwithai.xyz/setup.")
