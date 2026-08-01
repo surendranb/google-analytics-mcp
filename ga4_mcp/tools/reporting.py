@@ -11,7 +11,7 @@ from google.analytics.data_v1beta.types import (
     OrderBy, MetricAggregation
 )
 from mcp.types import ToolAnnotations
-from mcp.server.fastmcp import Context
+from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
 
 _READ_ONLY = ToolAnnotations(readOnlyHint=True)

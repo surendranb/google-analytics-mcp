@@ -9,7 +9,7 @@ import urllib.request
 import urllib.error
 
 from mcp.types import ToolAnnotations
-from mcp.server.fastmcp import Context
+from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
 
 _READ_ONLY_EXTERNAL = ToolAnnotations(readOnlyHint=True, openWorldHint=True)

@@ -10,8 +10,7 @@ import time
 import inspect
 import functools
 
-from mcp.server.fastmcp import FastMCP
-
+from mcp.server.mcpserver import MCPServer
 from . import telemetry
 from .telemetry import send_telemetry
 
@@ -45,7 +44,7 @@ How to work with this server:
 3. get_ga4_data validates every name against the live schema. On an invalid name it tells you why and how to find the correct one — read that and fix it; do not retry the same guess.
 """
 
-mcp = FastMCP("Google Analytics 4", instructions=GA4_MCP_INSTRUCTIONS)
+mcp = MCPServer("Google Analytics 4", version=MCP_SERVER_VERSION, instructions=GA4_MCP_INSTRUCTIONS)
 telemetry.announce_and_fire_boot_events()
 
 
@@ -206,7 +205,6 @@ def _telemetry_tool(*args, **kwargs):
                 start_time = time.time()
                 status, error_category, rows_returned, result = "success", None, 0, None
                 try:
-                    telemetry.capture_client_info(mcp)
                     intercepted = _intercept(func.__name__)
                     if intercepted is not None:
                         status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
@@ -261,33 +259,33 @@ _BOOT_TIME = time.time()
 _TOOLS_LISTED = {"fired": False}
 
 
-def _hook_tools_list():
-    """Fire tools_listed once per process on the first tools/list — the only
-    protocol touch sessions make when they connect but never call a tool."""
+def _hook_requests():
     try:
-        from mcp.types import ListToolsRequest
-        original = mcp._mcp_server.request_handlers.get(ListToolsRequest)
-        if original is None:
-            return
+        from mcp.types import ListToolsRequest, CallToolRequest
+        for request_type in [ListToolsRequest, CallToolRequest]:
+            original = mcp._mcp_server.request_handlers.get(request_type)
+            if not original:
+                continue
 
-        async def wrapped(req):
-            if not _TOOLS_LISTED["fired"]:
-                _TOOLS_LISTED["fired"] = True
+            async def wrapped(req, orig=original):
+                if request_type == ListToolsRequest and not _TOOLS_LISTED["fired"]:
+                    _TOOLS_LISTED["fired"] = True
+                    send_telemetry("tools_listed", {
+                        "seconds_since_boot": round(time.time() - _BOOT_TIME, 1),
+                    })
                 try:
-                    telemetry.capture_client_info(mcp)
+                    if hasattr(req, "meta") and req.meta:
+                        telemetry.capture_client_info(req.meta)
                 except Exception:
                     pass
-                send_telemetry("tools_listed", {
-                    "seconds_since_boot": round(time.time() - _BOOT_TIME, 1),
-                })
-            return await original(req)
+                return await orig(req)
 
-        mcp._mcp_server.request_handlers[ListToolsRequest] = wrapped
+            mcp._mcp_server.request_handlers[request_type] = wrapped
     except Exception:
         pass
 
 
-_hook_tools_list()
+_hook_requests()
 
 
 _PROACTIVE_TRIGGERS = {"field_discovery", "pre_query", "category_browse"}

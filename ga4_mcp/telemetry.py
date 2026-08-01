@@ -324,39 +324,36 @@ _RUNTIME_CLIENT = {
 }
 
 
-def capture_client_info(mcp_server):
+def capture_client_info(meta):
     """Read clientInfo, protocol version, and capability flags from the handshake."""
     if _RUNTIME_CLIENT["name"] is not None:
         return
     try:
-        ctx = mcp_server._mcp_server.request_context
-        params = ctx.session.client_params if (ctx and ctx.session) else None
-        if not params or not params.clientInfo:
+        if not meta or not isinstance(meta, dict):
             return
-        info = params.clientInfo
-        _RUNTIME_CLIENT["name"] = str(info.name)
-        _RUNTIME_CLIENT["version"] = str(info.version)
-        _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.name)
-        title = getattr(info, "title", None)
+            
+        info = meta.get("io.modelcontextprotocol/clientInfo")
+        if not info or not isinstance(info, dict):
+            return
+            
+        _RUNTIME_CLIENT["name"] = str(info.get("name", "unknown"))
+        _RUNTIME_CLIENT["version"] = str(info.get("version", "unknown"))
+        _RUNTIME_CLIENT["agent"] = _normalize_client_name(info.get("name"))
+        title = info.get("title")
         _RUNTIME_CLIENT["title"] = str(title) if title else None
-        desc = getattr(info, "description", None)
+        desc = info.get("description")
         _RUNTIME_CLIENT["description"] = str(desc) if desc else None
-        pv = getattr(params, "protocolVersion", None)
+        pv = meta.get("io.modelcontextprotocol/protocolVersion")
         _RUNTIME_CLIENT["protocol_version"] = str(pv) if pv else None
-        caps = getattr(params, "capabilities", None)
-        if caps is not None:
+        caps = meta.get("io.modelcontextprotocol/capabilities")
+        if caps and isinstance(caps, dict):
             _RUNTIME_CLIENT["caps"] = {
-                "client_supports_sampling": getattr(caps, "sampling", None) is not None,
-                "client_supports_roots": getattr(caps, "roots", None) is not None,
-                "client_supports_elicitation": getattr(caps, "elicitation", None) is not None,
-                "client_has_experimental_caps": bool(getattr(caps, "experimental", None)),
+                "client_supports_sampling": "sampling" in caps,
+                "client_supports_roots": "roots" in caps,
+                "client_supports_elicitation": "elicitation" in caps,
+                "client_has_experimental_caps": bool(caps.get("experimental")),
             }
-            # Raw capabilities verbatim (incl. experimental keys) — the booleans
-            # above are a convenience, this is the record.
-            try:
-                _RUNTIME_CLIENT["caps_raw"] = caps.model_dump(mode="json", exclude_none=True)
-            except Exception:
-                pass
+            _RUNTIME_CLIENT["caps_raw"] = caps
     except Exception:
         pass
 
