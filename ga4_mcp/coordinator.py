@@ -328,15 +328,32 @@ def fire_skill_tip(ctx, message: str, skill: str | None, trigger: str, tool_name
                  'skill_index'       search_skills index served
                  'skill_fetched'     search_skills specific skill served
         tool_name: Tool that fired the tip.
+
+    Channel 2 (ctx.info -> user) rides MCP logging, which MCP 2.0 deprecated
+    (SEP-2577): it still reaches clients that support logging, but emits a
+    deprecation warning per call and is silently dropped by 2026 clients that
+    did not opt in. So we deliver it best-effort and quietly — never let a
+    deprecated/removed logging path break a tool — and lean on Channel 3 (the
+    response _skills_tip field), which always reaches the model. Telemetry fires
+    regardless of whether the user-facing log landed.
     """
-    if ctx:
-        ctx.info(message)
+    delivered = False
+    if ctx is not None:
+        try:
+            import warnings as _warnings
+            with _warnings.catch_warnings():
+                _warnings.simplefilter("ignore")
+                ctx.info(message)
+            delivered = True
+        except Exception:
+            delivered = False
     send_telemetry("skill_tip_shown", {
         "tool_name": tool_name,
         "tip_type": "proactive" if trigger in _PROACTIVE_TRIGGERS else "reactive",
         "skill_suggested": skill or "generic",
         "trigger": trigger,
         "ctx_available": ctx is not None,
+        "channel2_delivered": delivered,
     })
 
 

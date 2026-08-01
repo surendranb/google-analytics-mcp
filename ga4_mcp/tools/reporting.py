@@ -46,8 +46,74 @@ def _get_smart_sorting(dimensions, metrics):
     return order_bys
 
 def _should_aggregate(dimensions, metrics):
-    """Detect when server-side aggregation would be beneficial."""
-    return len(dimensions) == 0 or "date" not in dimensions
+    """Request GA4 server-side metric totals whenever a dimension splits the
+    metrics across rows (a time series like ['date'] or any breakdown). With no
+    dimensions GA4 already returns a single aggregate row, so a totals row would
+    be redundant. This is what lets a 7-day pull come back with the period figure
+    computed server-side, not left for the model to sum."""
+    return len(dimensions) >= 1 and len(metrics) >= 1
+
+
+def _extract_totals(response):
+    """Pull GA4's server-side totals (present when metric_aggregations=[TOTAL]
+    was requested) into a metric->value map. Returns None if absent."""
+    totals_rows = getattr(response, "totals", None) or []
+    if not totals_rows:
+        return None
+    headers = [h.name for h in response.metric_headers]
+    row = totals_rows[0]
+    out = {}
+    for i, name in enumerate(headers):
+        try:
+            out[name] = row.metric_values[i].value
+        except (IndexError, AttributeError):
+            continue
+    return out or None
+
+
+def _build_report_payload(response, skill):
+    """Format a GA4 RunReportResponse into the tool payload: data rows, metadata,
+    server-side totals (with a coaching note), and the Channel-3 skills tip. Pure
+    (no network), so it is unit-tested against a response stub."""
+    result = []
+    for row in response.rows:
+        data_row = {}
+        for i, dim_header in enumerate(response.dimension_headers):
+            data_row[dim_header.name] = row.dimension_values[i].value
+        for i, met_header in enumerate(response.metric_headers):
+            data_row[met_header.name] = row.metric_values[i].value
+        result.append(data_row)
+
+    payload = {
+        "data": result,
+        "metadata": {
+            "total_rows_in_source": getattr(response, "row_count", len(result)),
+            "returned_rows": len(result),
+        },
+    }
+
+    # Coaching: on a multi-row pull (time series or breakdown), GA4's own totals
+    # let the model state the period figure without summing rows itself — a known
+    # LLM error mode. A single row already IS the aggregate, so skip it there.
+    if len(result) > 1:
+        totals = _extract_totals(response)
+        if totals:
+            payload["totals"] = totals
+            payload["metadata"]["aggregation_note"] = (
+                f"`totals` are GA4 server-side aggregates across all {len(result)} "
+                "rows — use them for the period figure instead of summing rows "
+                "yourself. Additive metrics (users, sessions, pageviews) sum; "
+                "rate/ratio metrics are period-computed by GA4."
+            )
+
+    # Channel 3: model-to-user relay — the tip rides in the response so the model
+    # can weave it into its answer to the human.
+    if skill:
+        payload["_skills_tip"] = f"For deeper analysis, call search_skills('{skill}') — it has the full pattern for this query type including interpretation guidance."
+    else:
+        payload["_skills_tip"] = "Call search_skills() to explore 15 analytical recipes that provide proven query patterns and interpretation guidance."
+
+    return payload
 
 
 _SKILL_HINTS = [
@@ -152,7 +218,11 @@ def get_ga4_data(
     """
     Retrieve GA4 data with built-in intelligence for better and safer results.
 
-    Returns on success: {"data": [...], "metadata": {...}, "_skills_tip": "..."}
+    Returns on success: {"data": [...], "metadata": {...}, "_skills_tip": "..."}.
+      For multi-row pulls (a time series like ['date'], or any breakdown) the
+      result also carries "totals": {metric: value} — GA4 server-side aggregates
+      across all rows. Read the period figure from "totals"; do NOT sum the rows
+      yourself. (Additive metrics sum; rate metrics are period-computed by GA4.)
     Returns on volume warning: {"warning": "...", "estimated_rows": N, "suggestions": [...]}
     Returns on error: {"error": "..."}
 
@@ -220,7 +290,9 @@ def get_ga4_data(
         limit: Max rows to return. Defaults to 1000.
         estimate_only: If True, returns only estimated row count without fetching data.
         proceed_with_large_dataset: Set True to bypass the 2500-row volume warning.
-        enable_aggregation: If True, uses server-side aggregation when no date dimension. Default True.
+        enable_aggregation: If True, asks GA4 for server-side metric totals whenever a
+            dimension splits the data across rows (e.g. a 7-day ['date'] pull), returned
+            in a "totals" block so the model needn't sum rows. Default True.
         intent: Short plain-English description of what the user is trying to learn.
                 E.g. "which channels drive most signups", "bot traffic audit for last month".
     """
@@ -320,30 +392,9 @@ def get_ga4_data(
         )
         response = client.run_report(request=request)
 
-        # --- Response Formatting ---
-        result = []
-        for row in response.rows:
-            data_row = {}
-            for i, dim_header in enumerate(response.dimension_headers):
-                data_row[dim_header.name] = row.dimension_values[i].value
-            for i, met_header in enumerate(response.metric_headers):
-                data_row[met_header.name] = row.metric_values[i].value
-            result.append(data_row)
-
-        # Channel 3: embed skill tip in response for model to relay to user
-        response_payload = {
-            "data": result,
-            "metadata": {
-                "total_rows_in_source": response.row_count,
-                "returned_rows": len(result),
-            },
-        }
-        if skill:
-            response_payload["_skills_tip"] = f"For deeper analysis, call search_skills('{skill}') — it has the full pattern for this query type including interpretation guidance."
-        else:
-            response_payload["_skills_tip"] = "Call search_skills() to explore 15 analytical recipes that provide proven query patterns and interpretation guidance."
-
-        return response_payload
+        # --- Response Formatting (pure, unit-tested) ---
+        # Surfaces GA4 server-side totals + Channel-3 skills tip.
+        return _build_report_payload(response, skill)
 
     except Exception as e:
         error_message = f"Error fetching GA4 data: {str(e)}"
