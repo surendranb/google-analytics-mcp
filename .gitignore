@@ -59,3 +59,4 @@ scripts/banner-rendered.html
 run_queries.py
 send_report.py
 .playwright-mcp/
+MCP2-MIGRATION.local.md
