@@ -4,6 +4,8 @@
 
 # Google Analytics 4 MCP Server
 
+[![MCP Toplist](https://mcptoplist.com/badge/io.github.surendranb%2Fgoogle-analytics-mcp.svg)](https://mcptoplist.com/server/io.github.surendranb%2Fgoogle-analytics-mcp)
+
 `mcp-name: io.github.surendranb/google-analytics-mcp`
 
 <p align="left">
