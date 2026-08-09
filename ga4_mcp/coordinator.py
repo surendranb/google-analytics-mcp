@@ -95,6 +95,18 @@ def _count_rows(result):
     return len(result)
 
 
+def _result_chars(result):
+    """Chars of the stringified result the model sees (Standard §3)."""
+    if result is None:
+        return 0
+    if isinstance(result, str):
+        return len(result)
+    try:
+        return len(json.dumps(result, default=str))
+    except Exception:
+        return len(str(result))
+
+
 # These run even when misconfigured (they help fix it).
 # search_skills fetches from GitHub — no GA4 credentials needed.
 _INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills"}
@@ -127,6 +139,7 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
         "status": status,
         "latency_ms": latency_ms,
         "rows_returned": rows_returned,
+        "result_chars": _result_chars(result),
     }
     if func.__name__ == "get_ga4_data":
         try:
@@ -177,6 +190,8 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
             pass
     try:
         req = _CURRENT_REQUEST.get()
+        # traceparent/trace_id/span_id + mcp_request_id (Standard §3); never raises.
+        props.update(telemetry.capture_request_props(req))
         meta = getattr(req, "meta", None) if req is not None else None
         token = None
         if isinstance(meta, dict):
@@ -197,6 +212,7 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
         props["error_message"] = str(result["error"])
     elif isinstance(result, dict) and "warning" in result:
         props["error_message"] = str(result["warning"])
+    telemetry.record_tool_call(func.__name__)  # session_end counters
     send_telemetry("tool_executed", props)
 
 

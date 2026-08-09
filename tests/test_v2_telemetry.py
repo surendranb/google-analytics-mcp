@@ -86,9 +86,45 @@ def _check(era, client_name, payloads):
             )
         if not any(pr.get("mcp_protocol_version") for pr in tool_events):
             failures.append(f"[{era}] mcp_protocol_version not captured")
+        for pr in tool_events:
+            if not (isinstance(pr.get("result_chars"), int) and pr["result_chars"] > 0):
+                failures.append(f"[{era}] result_chars missing or not a positive int on tool_executed")
+                break
+        if not any(pr.get("mcp_request_id") for pr in tool_events):
+            failures.append(f"[{era}] mcp_request_id not captured on tool_executed")
 
     if not listed_events:
         failures.append(f"[{era}] tools_listed event never fired")
+
+    # Envelope contract (Client Contract v2): schema_version 2, legacy fields gone.
+    for p in payloads:
+        pr = p.get("properties", {})
+        if pr.get("schema_version") != 2:
+            failures.append(f"[{era}] schema_version != 2 on {p.get('event')!r}")
+        if "launch_channel" in pr:
+            failures.append(f"[{era}] legacy launch_channel still sent on {p.get('event')!r}")
+        if "has_ever_worked" in pr:
+            failures.append(f"[{era}] legacy has_ever_worked still sent on {p.get('event')!r}")
+    return failures
+
+
+def _check_session_end(payloads):
+    """session_end shape (Standard §3): duration, ordered tool names, counts, total."""
+    failures = []
+    ends = [p.get("properties", {}) for p in payloads if p.get("event") == "session_end"]
+    if not ends:
+        return ["session_end event never fired"]
+    pr = ends[0]
+    if not isinstance(pr.get("session_duration_s"), int):
+        failures.append("session_end.session_duration_s missing or not an int")
+    seq = pr.get("tool_sequence")
+    if not (isinstance(seq, list) and "list_dimension_categories" in seq and len(seq) <= 100):
+        failures.append(f"session_end.tool_sequence wrong shape: {seq!r}")
+    counts = pr.get("tool_counts")
+    if not (isinstance(counts, dict) and counts.get("list_dimension_categories", 0) >= 1):
+        failures.append(f"session_end.tool_counts wrong shape: {counts!r}")
+    if pr.get("calls_total") != sum((counts or {}).values()):
+        failures.append(f"session_end.calls_total != sum(tool_counts): {pr.get('calls_total')!r}")
     return failures
 
 
@@ -98,12 +134,21 @@ async def main():
         payloads = await _run_session("claude-code", mode)
         all_failures += _check(era, "claude-code", payloads)
 
+    # session_end fires via atexit in production (LIFO, before the sender drain);
+    # here we invoke the emitter directly against the same network intercept.
+    _PAYLOADS.clear()
+    t._emit_session_end()
+    t._drain_pending_sends(3.0)
+    all_failures += _check_session_end(list(_PAYLOADS))
+
     if all_failures:
         print("FAIL:")
         for f in all_failures:
             print("  -", f)
         sys.exit(1)
-    print("PASS: identity + tools_listed + protocol_version captured in both eras")
+    print("PASS: identity + tools_listed + protocol_version captured in both eras; "
+          "v2 envelope (schema_version 2, legacy fields dropped) + result_chars + "
+          "mcp_request_id + session_end shape verified")
 
 
 if __name__ == "__main__":

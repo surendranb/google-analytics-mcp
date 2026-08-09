@@ -17,7 +17,7 @@ import urllib.request
 from pathlib import Path
 
 GATEWAY_URL = "https://ga4.builditwithai.xyz/e"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 try:
     import importlib.metadata
@@ -44,12 +44,22 @@ INTERNAL_RUN = os.getenv("GA4_MCP_INTERNAL", "").lower() in ("1", "true", "yes")
 
 def _init_anonymous_identity():
     """Random installation UUID in ~/.ga4_mcp/; created on first run, reset by
-    deleting the folder. Returns (installation_id, is_first_install)."""
+    deleting the folder. Returns (installation_id, is_first_install).
+
+    Opt-out gates ALL side effects (Standard §1.4): when telemetry is disabled
+    an existing identity file may still be READ, but nothing is ever created
+    or written — no directory, no id file, no flag file."""
     try:
         config_dir = Path.home() / ".ga4_mcp"
-        config_dir.mkdir(parents=True, exist_ok=True)
-
         id_file = config_dir / "installation_id"
+
+        if TELEMETRY_DISABLED:
+            if id_file.exists():
+                return id_file.read_text(encoding="utf-8").strip(), False
+            # non-persistent id; never touches the filesystem when opted out
+            return f"anon_{uuid.uuid4()}", False
+
+        config_dir.mkdir(parents=True, exist_ok=True)
         if id_file.exists():
             installation_id = id_file.read_text(encoding="utf-8").strip()
             is_first_install = False
@@ -88,7 +98,10 @@ HAS_EVER_WORKED = _has_ever_worked()
 
 def mark_ever_worked():
     """Write the 'has successfully worked' marker once, on first successful init.
-    Additive to the frozen identity contract — a separate flag file, not the id."""
+    Additive to the frozen identity contract — a separate flag file, not the id.
+    Opt-out gates the write (Standard §1.4)."""
+    if TELEMETRY_DISABLED:
+        return
     try:
         f = Path.home() / ".ga4_mcp" / "ever_worked"
         if not f.exists():
@@ -179,8 +192,11 @@ def _normalize_client_name(raw):
 
 
 def _process_ancestor_names(max_depth=4):
-    """Parent-process command names (the agent sits above uvx/python)."""
+    """Parent-process command names (the agent sits above uvx/python).
+    Opt-out gates the `ps` subprocess walk entirely (Standard §1.4)."""
     names = []
+    if TELEMETRY_DISABLED:
+        return names
     try:
         if platform.system() not in ("Darwin", "Linux"):
             return names
@@ -278,7 +294,7 @@ AGENT_NAME = _detect_agent_name()
 def _detect_discovery_channel() -> str:
     """How the package was launched: uvx / homebrew / pip_venv / direct_python.
     (Launch mechanism, not discovery — kept under the old name for query
-    continuity; sent as launch_channel too.)"""
+    continuity; the legacy launch_channel duplicate was dropped in schema v2.)"""
     argv_str = " ".join(sys.argv).lower()
     if "uvx" in argv_str or "uv" in sys.executable:
         return "uvx"
@@ -423,6 +439,44 @@ def client_supports_elicitation() -> bool:
     return bool(_RUNTIME_CLIENT.get("caps_raw", {}) or {}) and "elicitation" in (_RUNTIME_CLIENT.get("caps_raw") or {})
 
 
+def _trace_ids(traceparent):
+    """Parse a SEP-414 traceparent into (trace_id, span_id)."""
+    try:
+        parts = str(traceparent).split("-")
+        if len(parts) >= 4:
+            return parts[1], parts[2]
+    except Exception:
+        pass
+    return None, None
+
+
+def capture_request_props(ctx):
+    """Per-request protocol props (Standard §3): the W3C traceparent when the
+    client sends one — the sanctioned session/workflow correlator, stdio has no
+    session concept in MCP 2.0 — plus the MCP request id. Same property names
+    as the gsc capture_request. Returns a props dict; never raises."""
+    props = {}
+    if ctx is None:
+        return props
+    try:
+        meta = _meta_as_dict(getattr(ctx, "meta", None))
+        traceparent = meta.get("traceparent") if meta else None
+        if traceparent:
+            props["traceparent"] = str(traceparent)
+            trace_id, span_id = _trace_ids(traceparent)
+            if trace_id:
+                props["trace_id"] = trace_id
+            if span_id:
+                props["span_id"] = span_id
+
+        request_id = getattr(ctx, "request_id", None)
+        if request_id:
+            props["mcp_request_id"] = str(request_id)
+    except Exception:
+        pass
+    return props
+
+
 def client_supports_url_elicitation() -> bool:
     """True if the handshake advertised URL-mode elicitation (elicitation.url).
     Read from the raw capabilities we capture; used to offer guided-navigation
@@ -432,6 +486,21 @@ def client_supports_url_elicitation() -> bool:
         return False
     elicit = caps.get("elicitation")
     return isinstance(elicit, dict) and "url" in elicit
+
+
+# Session counters (NOT handshake state): ordered tool names (most recent 100),
+# per-tool counts, and total calls — reported once in session_end at exit.
+_SESSION_START = time.time()
+_TOOL_SEQUENCE = []
+_TOOL_COUNTS = {}
+
+
+def record_tool_call(tool_name):
+    """Called by the coordinator's tool wrapper for every executed tool."""
+    _TOOL_SEQUENCE.append(tool_name)
+    if len(_TOOL_SEQUENCE) > 100:
+        _TOOL_SEQUENCE.pop(0)
+    _TOOL_COUNTS[tool_name] = _TOOL_COUNTS.get(tool_name, 0) + 1
 
 
 # In-flight sender threads, drained briefly at exit — short-lived sessions
@@ -449,9 +518,6 @@ def _drain_pending_sends(deadline_seconds=2.0):
             th.join(remaining)
         except Exception:
             pass
-
-
-atexit.register(_drain_pending_sends)
 
 
 def send_telemetry(event: str, properties: dict = None):
@@ -474,8 +540,6 @@ def send_telemetry(event: str, properties: dict = None):
                 "agent_name": _RUNTIME_CLIENT["agent"] or AGENT_NAME,
                 "run_context": RUN_CONTEXT,
                 "discovery_channel": DISCOVERY_CHANNEL,
-                "launch_channel": DISCOVERY_CHANNEL,
-                "has_ever_worked": HAS_EVER_WORKED,
                 "raw_env": ENV_SIGNALS,  # the raw clues behind run_context/agent_name
                 "session_id": SESSION_ID,
                 **(properties or {}),
@@ -524,6 +588,22 @@ def send_telemetry(event: str, properties: dict = None):
     _PENDING_SENDS.append(th)
     if len(_PENDING_SENDS) > 8:
         _PENDING_SENDS[:] = [t for t in _PENDING_SENDS if t.is_alive()]
+
+
+def _emit_session_end():
+    if TELEMETRY_DISABLED:
+        return
+    send_telemetry("session_end", {
+        "session_duration_s": int(time.time() - _SESSION_START),
+        "tool_sequence": list(_TOOL_SEQUENCE),
+        "tool_counts": dict(_TOOL_COUNTS),
+        "calls_total": sum(_TOOL_COUNTS.values()),
+    })
+
+
+# atexit is LIFO: session_end must fire before the drain joins senders.
+atexit.register(_drain_pending_sends)
+atexit.register(_emit_session_end)
 
 
 def _track_version_change():
