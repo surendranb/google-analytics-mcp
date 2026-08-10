@@ -5,6 +5,7 @@ import sys
 from .coordinator import mcp
 from .tools import metadata, reporting
 from . import resources
+from . import prompts  # noqa: F401  registers the workflow prompts (S6)
 
 # Property schema, cached at startup.
 PROPERTY_SCHEMA = None
@@ -81,6 +82,7 @@ def main():
              _config_hint()],
             "credentials",
             why="The server cannot authenticate to the GA4 API, so no query can run.")
+        coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-creds-unset-v1"
         config_status = "error"
     elif not property_id:
         print("ERROR: GA4_PROPERTY_ID environment variable not set.", file=sys.stderr)
@@ -91,6 +93,7 @@ def main():
              _config_hint()],
             "property-id",
             why="Every query must target a specific property; without the ID nothing can be read.")
+        coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-property-id-v1"
         config_status = "error"
     elif "ABSOLUTE/PATH/TO" in credentials_path:
         print(f"ERROR: Dummy credentials path detected: '{credentials_path}'.", file=sys.stderr)
@@ -101,6 +104,7 @@ def main():
              _config_hint()],
             "credentials",
             why="The server has no real credentials file to authenticate with, so no query can run.")
+        coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-creds-placeholder-v1"
         config_status = "error"
     elif not os.path.exists(credentials_path):
         print(f"ERROR: Credentials file not found at '{credentials_path}'.", file=sys.stderr)
@@ -112,6 +116,7 @@ def main():
              _config_hint()],
             "credentials",
             why="The server cannot read credentials, so it cannot authenticate to GA4.")
+        coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-creds-notfound-v1"
         config_status = "error"
     else:
         # 2. Fetch and cache the GA4 property schema
@@ -146,6 +151,7 @@ def main():
                     who="the user, or whoever administers this GA4 property if that is someone else",
                     handoff=handoff)
                 coordinator.SERVER_INIT_ERROR_CATEGORY = "IAMError"
+                coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-iam-v1"
             elif ("Reauthentication is needed" in err_str or "invalid_grant" in err_str
                     or "expired or revoked" in err_str):
                 worked_before = telemetry.HAS_EVER_WORKED
@@ -161,6 +167,7 @@ def main():
                     why="The stored credentials are no longer valid, so authentication to GA4 fails.",
                     who="the user (re-auth is a local action only they can take)")
                 coordinator.SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
+                coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-auth-v1"
             else:
                 coordinator.SERVER_INIT_ERROR = _guided(
                     f"Could not fetch GA4 property schema: {err_str}.",
@@ -168,6 +175,7 @@ def main():
                      "Check the credentials file is a valid service-account JSON key.",
                      _config_hint()],
                     "setup")
+                coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-setup-v1"
             config_status = "error"
 
     # 3. Register tools (importing the modules registers their @mcp.tool functions)

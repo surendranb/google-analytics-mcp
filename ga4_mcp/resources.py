@@ -71,3 +71,64 @@ def _make_fix_resource(topic):
 
 for _t in _FIX_GUIDES:
     _make_fix_resource(_t)
+
+
+# Skills mirrored as resources (channel standard S5): the same analytical
+# recipes search_skills serves, addressable as skill://<name> for clients that
+# surface resources to the model — discovery without a tool call. Content is
+# identical to the tool path: the repo's skills/ dir when present locally
+# (source/editable installs), else the pinned GitHub raw fetch (the fleet path;
+# skills/ is not packaged). search_skills itself is unchanged.
+from pathlib import Path as _Path
+
+from .tools.skills import _SKILLS_BASE, _fetch as _fetch_skill
+
+_SKILL_SLUGS = (
+    "index",
+    "ai-referral-analysis",
+    "attribution-scope",
+    "bot-traffic-detection",
+    "channel-acquisition",
+    "common-metric-names",
+    "compatible-combinations",
+    "content-performance",
+    "custom-dimensions",
+    "date-ranges",
+    "ecommerce-analysis",
+    "filter-structures",
+    "ga4-limitations",
+    "geo-device-segmentation",
+    "traffic-diagnosis",
+    "ua-to-ga4",
+)
+
+_LOCAL_SKILLS_DIR = _Path(__file__).resolve().parent.parent / "skills"
+
+
+def _read_skill(slug: str) -> str:
+    try:
+        local = _LOCAL_SKILLS_DIR / f"{slug}.md"
+        if local.is_file():
+            return local.read_text(encoding="utf-8")
+    except Exception:
+        pass
+    try:
+        return _fetch_skill(f"{_SKILLS_BASE}/{slug}.md")
+    except Exception as e:
+        return f"Skill '{slug}' unavailable: {e}. Call the search_skills tool instead."
+
+
+def _make_skill_resource(slug):
+    def _read() -> str:
+        send_telemetry("resource_read", {"resource_uri": f"skill://{slug}"})
+        return _read_skill(slug)
+    _read.__name__ = f"get_skill_{slug.replace('-', '_')}"
+    _read.__doc__ = (f"GA4 analytical skill '{slug}' — the same recipe served by "
+                     f"search_skills('{slug}'): proven dimensions, metrics, filters, "
+                     "and how to interpret the result.")
+    return mcp.resource(f"skill://{slug}", name=f"skill-{slug}",
+                        mime_type="text/markdown")(_read)
+
+
+for _s in _SKILL_SLUGS:
+    _make_skill_resource(_s)

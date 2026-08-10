@@ -30,6 +30,10 @@ _scrub = telemetry._scrub
 # distinguishes the failure family (InitError / ADCExpired / IAMError).
 SERVER_INIT_ERROR = None
 SERVER_INIT_ERROR_CATEGORY = "InitError"
+# Version tag of the boot-time brief currently in SERVER_INIT_ERROR (S3 channel
+# standard): captured as `brief_version` on the error tool_executed so post-brief
+# behavior can be measured per brief text. Telemetry-only; never changes a result.
+SERVER_INIT_BRIEF_VERSION = None
 
 # Server-level instructions — the FIRST thing the model reads on initialize,
 # before any tool is inspected or called, and kept in context for the session.
@@ -46,7 +50,12 @@ How to work with this server:
 3. get_ga4_data validates every name against the live schema. On an invalid name it tells you why and how to find the correct one — read that and fix it; do not retry the same guess.
 """
 
-mcp = MCPServer("Google Analytics 4", version=MCP_SERVER_VERSION, instructions=GA4_MCP_INSTRUCTIONS)
+mcp = MCPServer(
+    "Google Analytics 4",
+    version=MCP_SERVER_VERSION,
+    instructions=GA4_MCP_INSTRUCTIONS,
+    website_url="https://ga4mcp.com",
+)
 telemetry.announce_and_fire_boot_events()
 
 
@@ -72,6 +81,22 @@ def inspect_credentials(path):
         return ("unreadable", None, False)
     except Exception:
         return ("unknown", None, False)
+
+# S3: tool bodies note the version tag of the error brief they are about to
+# return (note_brief_version); the telemetry wrapper picks it up per call and
+# attaches it as `brief_version` on that tool_executed. Context-local so
+# concurrent calls can't cross-tag; telemetry-only, never affects a result.
+_CURRENT_BRIEF_VERSION = contextvars.ContextVar("ga4_current_brief_version", default=None)
+
+
+def note_brief_version(version):
+    """Tag the in-flight tool call with the version of the error brief being
+    returned. Guarded: never raises into a tool body."""
+    try:
+        _CURRENT_BRIEF_VERSION.set(version)
+    except Exception:
+        pass
+
 
 _original_tool = mcp.tool
 
@@ -203,6 +228,19 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
         pass
     if error_category:
         props["error_category"] = error_category
+    try:
+        # brief_version (S3): which versioned error brief this call surfaced.
+        # Tool-level briefs are noted by the tool body via note_brief_version;
+        # the boot-time brief carries SERVER_INIT_BRIEF_VERSION.
+        _bv = _CURRENT_BRIEF_VERSION.get()
+        if _bv:
+            props["brief_version"] = _bv
+            _CURRENT_BRIEF_VERSION.set(None)
+        elif (SERVER_INIT_ERROR and SERVER_INIT_BRIEF_VERSION
+                and func.__name__ not in _INIT_ERROR_EXEMPT and status == "error"):
+            props["brief_version"] = SERVER_INIT_BRIEF_VERSION
+    except Exception:
+        pass
     if SERVER_INIT_ERROR and func.__name__ not in _INIT_ERROR_EXEMPT:
         props["error_message"] = str(SERVER_INIT_ERROR)
     elif status == "exception":
@@ -387,7 +425,7 @@ def reinitialize():
     """Retry init from the current environment (used after setup recovery).
     Returns (ok, category, detail); clears SERVER_INIT_ERROR and loads the
     schema on success."""
-    global SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY
+    global SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY, SERVER_INIT_BRIEF_VERSION
     import os
     from .tools import metadata, reporting
 
@@ -395,18 +433,22 @@ def reinitialize():
     prop = os.getenv("GA4_PROPERTY_ID")
     if not creds:
         SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "GOOGLE_APPLICATION_CREDENTIALS not set.", "InitError"
+        SERVER_INIT_BRIEF_VERSION = "ga4-reinit-creds-v1"
         return False, "credentials", "credentials path not set"
     if not prop:
         SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "GA4_PROPERTY_ID not set.", "InitError"
+        SERVER_INIT_BRIEF_VERSION = "ga4-reinit-property-v1"
         return False, "property-id", "property id not set"
     if not os.path.exists(creds):
         SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = f"Credentials file not found at '{creds}'.", "InitError"
+        SERVER_INIT_BRIEF_VERSION = "ga4-reinit-notfound-v1"
         return False, "credentials", "credentials file not found"
     try:
         schema = metadata.get_property_schema_uncached(prop)
         metadata.PROPERTY_SCHEMA = schema
         reporting.PROPERTY_SCHEMA = schema
         SERVER_INIT_ERROR = None
+        SERVER_INIT_BRIEF_VERSION = None
         telemetry.mark_ever_worked()
         return True, "ok", "initialized"
     except Exception as e:
@@ -421,4 +463,6 @@ def reinitialize():
             SERVER_INIT_ERROR_CATEGORY = "InitError"
             cat = "setup"
         SERVER_INIT_ERROR = err
+        # Raw upstream error text, not one of the authored briefs — no version tag.
+        SERVER_INIT_BRIEF_VERSION = None
         return False, cat, err

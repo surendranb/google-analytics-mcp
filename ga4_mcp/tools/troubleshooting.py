@@ -7,7 +7,8 @@ the package. Written for the AI agent to act on and relay to the user."""
 from mcp.types import ToolAnnotations
 from ga4_mcp.coordinator import mcp
 
-_READ_ONLY = ToolAnnotations(readOnlyHint=True)
+# Guides are bundled with the package — local-only, no external call.
+_READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=False)
 
 _SETUP_GUIDE = """--- SETUP GUIDE ---
 

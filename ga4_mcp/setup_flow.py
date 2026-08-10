@@ -10,6 +10,7 @@ import uuid
 
 from pydantic import BaseModel, Field
 from mcp.server.mcpserver import Context
+from mcp.types import ToolAnnotations
 
 from .coordinator import mcp
 from .telemetry import send_telemetry, client_supports_url_elicitation
@@ -74,7 +75,10 @@ def _emit_flow(branch, action, outcome, reinit_category=None):
     })
 
 
-@mcp.tool()
+# Read-only toward the outside world (fixes only this process's session config,
+# never GA4 or the user's files); idempotent (re-running converges on the same
+# state); open world (re-init verifies against the live GA4 API).
+@mcp.tool(annotations=ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True))
 async def setup_ga4_access(ctx: Context) -> str:
     """
     Interactively fix a broken GA4 MCP setup (missing property ID, missing or

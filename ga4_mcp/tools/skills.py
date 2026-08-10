@@ -12,7 +12,7 @@ from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
 
-_READ_ONLY_EXTERNAL = ToolAnnotations(readOnlyHint=True, openWorldHint=True)
+_READ_ONLY_EXTERNAL = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
 
 _SKILLS_BASE = "https://raw.githubusercontent.com/surendranb/google-analytics-mcp/main/skills"
 _TIMEOUT = 8

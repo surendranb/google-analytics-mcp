@@ -13,10 +13,20 @@ from google.analytics.data_v1beta.types import (
 )
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
-from ga4_mcp.coordinator import mcp, fire_skill_tip
+from ga4_mcp.coordinator import mcp, fire_skill_tip, note_brief_version
 from ga4_mcp.telemetry import client_supports_elicitation
 
-_READ_ONLY = ToolAnnotations(readOnlyHint=True)
+# S3: version tags for the field-proven error briefs below. The brief TEXT is
+# unchanged — these tags ride telemetry only (`brief_version` on that error's
+# tool_executed) so post-brief behavior can be measured per brief revision.
+BRIEF_INVALID_DIMENSION = "ga4-schema-dim-v1"
+BRIEF_INVALID_METRIC = "ga4-schema-met-v1"
+BRIEF_FILTER_SHAPE = "ga4-filter-v1"
+BRIEF_INCOMPATIBLE = "ga4-incompatible-v1"
+BRIEF_IAM_QUERY = "ga4-iam-query-v1"
+
+# get_ga4_data hits the external GA4 Data API: open world, read-only, idempotent.
+_READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
 
 # This global variable will be populated by the server on startup.
 PROPERTY_SCHEMA = None
@@ -330,10 +340,12 @@ async def get_ga4_data(
         for dim in parsed_dimensions:
             if dim not in valid_dims:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 field names and UA→GA4 name mapping. search_skills('custom-dimensions') covers customEvent:/customUser: syntax.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
+                note_brief_version(BRIEF_INVALID_DIMENSION)
                 return {"error": f"Invalid dimension: '{dim}' — not present in this property's live GA4 schema. WHY: GA4 Data API field names often differ from names in model training data — many are Universal Analytics (sunset 2023-07-01) or older-GA4 artifacts that no longer exist — so a name you are confident about can be out of date. The current names live outside your training: call search_schema('<keyword>') to read THIS property's live schema (also finds custom dimensions), or search_skills('ua-to-ga4') for the maintained UA→GA4 name mapping. Do NOT retry '{dim}' or guess a variant."}
         for met in parsed_metrics:
             if met not in valid_mets:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 metric names. Common wrong guesses: 'conversions'→'keyEvents', 'users'→'totalUsers', 'uniquePageviews'→'screenPageViews'.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
+                note_brief_version(BRIEF_INVALID_METRIC)
                 return {"error": f"Invalid metric: '{met}' — not present in this property's live GA4 schema. WHY: GA4 Data API metric names often differ from names in model training data — many are Universal Analytics (sunset 2023-07-01) or metrics renamed since your training, so a name you are confident about can be out of date. The current names live outside your training: call search_schema('<keyword>') to read THIS property's live schema, or search_skills('common-metric-names') for the maintained name mapping. Do NOT retry '{met}' or guess a variant."}
 
         # --- Filter Expression Building ---
@@ -346,6 +358,7 @@ async def get_ga4_data(
                 filter_expression = FilterExpression(snake_filter)
             except Exception as e:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('filter-structures') has copy-paste templates for every filter type — single field, AND, OR, NOT, IN LIST.", skill="filter-structures", trigger="error_filter", tool_name="get_ga4_data")
+                note_brief_version(BRIEF_FILTER_SHAPE)
                 return {"error": f"Invalid dimension_filter structure: {e}. WHY: the GA4 filter shape and field names often differ from filter formats in model training data — field names are camelCase (eventName, not event_name) inside a specific nested structure. The current templates live outside your training: call search_skills('filter-structures') for copy-paste examples of every filter type, or search_schema to confirm a field name. Do NOT retry the same shape."}
 
         # Channel 2: proactive — fires before the API call, while query is in-flight
@@ -420,10 +433,12 @@ async def get_ga4_data(
         if "incompatible" in error_message.lower() or "dimensions & metrics" in error_message.lower():
             fire_skill_tip(ctx, "💡 Skill tip: search_skills('compatible-combinations') explains which dimension/metric scopes can be paired. Session dims need session metrics; event dims need event metrics.", skill="compatible-combinations", trigger="error_incompatible", tool_name="get_ga4_data")
             error_message += " SYSTEM DIRECTIVE: Call search_skills('compatible-combinations') to learn which dimensions and metrics can be combined."
+            note_brief_version(BRIEF_INCOMPATIBLE)
 
         elif "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
             fire_skill_tip(ctx, "💡 Permission error detected. Call get_troubleshooting_guide(topic='iam') for the exact steps to grant GA4 Viewer access to your service account.", skill=None, trigger="error_iam", tool_name="get_ga4_data")
             error_message += " SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='iam') to read the step-by-step IAM permissions guide and help the user resolve this."
+            note_brief_version(BRIEF_IAM_QUERY)
 
         else:
             fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures') for correct patterns.", skill=None, trigger="error_generic", tool_name="get_ga4_data")

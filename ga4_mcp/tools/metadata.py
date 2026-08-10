@@ -26,7 +26,10 @@ def _hint_from_keyword(keyword: str) -> str | None:
             return skill
     return None
 
-_READ_ONLY = ToolAnnotations(readOnlyHint=True)
+# Schema tools read the startup-cached property schema — no external call at
+# call time, hence open_world_hint=False (SDK v2 accepts snake_case field names
+# and serializes to the spec's camelCase aliases; verified empirically).
+_READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=False)
 
 # This global variable will be populated by the server on startup.
 PROPERTY_SCHEMA = None
