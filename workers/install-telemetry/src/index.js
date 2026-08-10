@@ -13,7 +13,7 @@ const KNOWN_EVENTS = new Set([
   "mcp_started", "tool_executed", "server_first_install", "resource_read",
   "package_download", "install_intent", "install_completed", "surface_click",
   "skill_tip_shown", "tools_listed", "server_discovered", "setup_flow",
-  "session_end", "skill_read",
+  "session_end", "skill_read", "prompt_used",
 ]);
 
 // Standard install/anon id shape; nonconforming ids are forwarded, just tagged.
