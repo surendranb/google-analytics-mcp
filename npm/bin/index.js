@@ -16,10 +16,10 @@ const child = spawn('uvx', args, {
 
 child.on('error', (err) => {
   if (err.code === 'ENOENT') {
-    console.error('[GA4 MCP Error] "uvx" command not found.');
+    console.error('[google-analytics-mcp Error] "uvx" command not found.');
     console.error('Please install uv (https://astral.sh/uv) or install directly via pip: pip install google-analytics-mcp');
   } else {
-    console.error('[GA4 MCP Error] Failed to start server process:', err.message);
+    console.error('[google-analytics-mcp Error] Failed to start server process:', err.message);
   }
   process.exit(1);
 });
