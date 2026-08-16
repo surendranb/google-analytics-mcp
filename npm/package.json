@@ -24,7 +24,7 @@
     "cursor"
   ],
   "author": "Surendran B <reachsuren@gmail.com>",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/surendranb/google-analytics-mcp.git"
@@ -32,7 +32,7 @@
   "bugs": {
     "url": "https://github.com/surendranb/google-analytics-mcp/issues"
   },
-  "homepage": "https://github.com/surendranb/google-analytics-mcp#readme",
+  "homepage": "https://ga4.builditwithai.xyz",
   "engines": {
     "node": ">=16.0.0"
   }

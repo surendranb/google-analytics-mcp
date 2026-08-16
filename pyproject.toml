@@ -7,7 +7,7 @@ name = "google-analytics-mcp"
 version = "2.11.1"
 description = "Model Context Protocol for Google Analytics 4 (Data API) allowing autonomous agents to query dimensions and metrics. Gives agents analysis-ready GA4 access with schema discovery, server-side aggregation, and smart defaults."
 readme = "README.md"
-license = "Apache-2.0"
+license = "MIT"
 authors = [
     {name = "Surendran B", email = "reachsuren@gmail.com"}
 ]

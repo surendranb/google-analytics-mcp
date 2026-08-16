@@ -1,107 +1,73 @@
-<p align="center">
-  <img src="logo.png" alt="Google Analytics MCP Logo" width="120" />
-</p>
+# Google Analytics 4 (GA4) MCP Server 📊
 
-# Google Analytics 4 MCP Server
+> **Model Context Protocol (MCP) server for Google Analytics 4: real-time query exploration, schema discovery, metric aggregation, and audience insights for AI agents.**
 
-`mcp-name: io.github.surendranb/google-analytics-mcp`
+[![PyPI version](https://img.shields.io/pypi/v/google-analytics-mcp?label=PyPI&color=blue)](https://pypi.org/project/google-analytics-mcp/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/google-analytics-mcp?label=PyPI%20downloads&color=blue)](https://pypi.org/project/google-analytics-mcp/)
+[![npm version](https://img.shields.io/npm/v/google-analytics-mcp?label=npm&color=red)](https://www.npmjs.com/package/google-analytics-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/google-analytics-mcp?label=npm%20downloads&color=red)](https://www.npmjs.com/package/google-analytics-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/Docs-ga4.builditwithai.xyz-purple)](https://ga4.builditwithai.xyz)
 
-<p align="left">
-  <a href="https://pypi.org/project/google-analytics-mcp/"><img src="https://img.shields.io/pypi/v/google-analytics-mcp?logo=pypi&logoColor=white&color=blue" alt="PyPI Version" /></a>
-  <a href="https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml"><img src="https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml/badge.svg?branch=main" alt="CI Status" /></a>
-  <a href="https://github.com/surendranb/google-analytics-mcp/stargazers"><img src="https://img.shields.io/github/stars/surendranb/google-analytics-mcp?logo=github&color=gold" alt="GitHub Stars" /></a>
-  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License" /></a>
-</p>
-
-Connect Google Analytics 4 data directly to AI agents, analyst copilots, and MCP runtimes across **Claude, ChatGPT, Gemini, Cursor, VS Code, and OpenClaw**. Gives models analysis-ready GA4 access with live schema discovery, metric auto-aliasing, server-side aggregation, and autonomous self-healing defenses.
-
-🌐 **Website & Documentation:** [https://ga4mcp.com](https://ga4mcp.com)  
-🔗 **Sister Project:** [Google Search Console MCP](https://github.com/surendranb/google-search-console-mcp)
-
-<p align="center">
-  <img src="https://pypi.builditwithai.xyz/api/v1/google-analytics-mcp/banner.svg" alt="PyPI Downloads Breakdown and Trend" width="800" /><br>
-  <sub>Powered by <a href="https://pypi.builditwithai.xyz">pypi.builditwithai.xyz</a></sub>
-</p>
+🌐 **Live Documentation & Web Portal**: [https://ga4.builditwithai.xyz](https://ga4.builditwithai.xyz)
 
 ---
 
-## ⚡ Quickstart — 1-Line Installations
-
-### 1. Universal 1-Line Installer (Recommended)
-
-Auto-detects your system, configures **Gemini CLI, Claude Desktop, Cursor, and VS Code** automatically in 1 command:
+## ⚡ Quickstart
 
 ```bash
-curl -fsSL https://ga4.builditwithai.xyz | bash
+# 1-Line Universal Installer (Auto-configures Claude Code, Cursor, Claude Desktop & Antigravity)
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+
+# Or run directly via your preferred runtime:
+uvx google-analytics-mcp
+npx -y google-analytics-mcp
 ```
 
-### 2. Homebrew (macOS & Linux)
+---
 
+## 🤖 Client Setup
+
+### A. Claude Code (CLI)
 ```bash
-brew tap surendranb/tap
-brew install google-analytics-mcp
+claude mcp add google-analytics -- uvx google-analytics-mcp
 ```
 
-### 3. One-Click for Cursor
-
-[![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?logo=cursor)](https://ga4.builditwithai.xyz/go/cursor)
-
-### 4. NPX / Node.js (Claude Code, Cursor, VS Code, Windsurf)
-
-Add to your MCP configuration file (`claude_desktop_config.json` or `.cursor/mcp.json`):
-
+### B. Cursor & Google Antigravity (`mcp.json`)
 ```json
 {
   "mcpServers": {
-    "ga4-analytics": {
-      "command": "npx",
-      "args": ["-y", "google-analytics-mcp"],
-      "env": {
-        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789"
-      }
-    }
-  }
-}
-```
-
-### 5. Gemini CLI Extension
-
-Install directly into Google Gemini CLI with a single command:
-
-```bash
-gemini extensions install github.com/surendranb/google-analytics-mcp
-```
-
-### 6. Python `uvx` & Explicit `python -m ga4_mcp`
-
-```json
-{
-  "mcpServers": {
-    "ga4-analytics": {
+    "google-analytics": {
       "command": "uvx",
-      "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"],
-      "env": {
-        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789"
-      }
+      "args": ["google-analytics-mcp"]
     }
   }
 }
 ```
 
-Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
-
+### C. Claude Desktop (`claude_desktop_config.json`)
 ```json
 {
   "mcpServers": {
-    "ga4-analytics": {
-      "command": "python",
-      "args": ["-m", "ga4_mcp"],
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
       "env": {
-        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/service-account-key.json",
-        "GA4_PROPERTY_ID": "123456789"
+        "GA4_PROPERTY_ID": "your_ga4_property_id",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service_account.json"
       }
+    }
+  }
+}
+```
+
+### D. VS Code (Cline / Roo Code / Continue)
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "npx",
+      "args": ["-y", "google-analytics-mcp"]
     }
   }
 }
@@ -109,55 +75,44 @@ Or run directly via `ga4-mcp-server` / `python -m ga4_mcp`:
 
 ---
 
-## 🧠 Why AI Agents & Marketers Prefer This Server
+## 🛠️ Tools & Capabilities
 
-- **Autonomous Self-Healing:** System directives automatically intercept schema hallucinations (like guessing legacy metric names or incorrect filter nesting) and guide models to self-correct via `get_troubleshooting_guide`.
-- **Metric Auto-Aliasing:** Automatically maps legacy or common LLM requests like `'conversions'` → `'keyEvents'`, preventing unnecessary query failures.
-- **Server-Side Aggregation:** Computes property totals dynamically for non-time-series queries, so LLMs spend time answering business questions rather than parsing raw rows.
-- **Data Volume Protection:** Runs quick row-count estimates before executing large queries (>2,500 rows) to prevent crashing model context windows.
-- **Multi-Platform Support:** Native packages and manifests for PyPI, npm, Gemini CLI, Smithery, OpenClaw, and OpenAPI REST actions.
-
----
-
-## 🔑 Setup & Credentials Guide
-
-### 1. Create a Google Cloud Service Account
-1. Open the [Google Cloud Console](https://console.cloud.google.com/).
-2. Enable the **Google Analytics Data API**.
-3. Under **APIs & Services → Credentials**, create a **Service Account**.
-4. Create a **JSON Key** and save it locally on your machine (e.g. `/Users/yourname/keys/ga4-key.json`).
-
-### 2. Grant Viewer Access in GA4
-1. Open [Google Analytics](https://analytics.google.com/).
-2. Select your GA4 Property → Open **Admin** (gear icon) → **Property Access Management**.
-3. Add the Service Account email (found inside the JSON key as `client_email`) with the **Viewer** role.
-
-### 3. Find Your GA4 Property ID
-1. In Google Analytics Admin → **Property Details**.
-2. Copy the numeric **Property ID** (e.g., `123456789`).
+| Tool Name | Parameters | Description | Return Type |
+|---|---|---|---|
+| `get_ga4_data` | `dimensions` (list), `metrics` (list), `date_ranges` (list), `limit` (int) | Runs multi-dimensional GA4 reports with automated metric totals and server-side aggregation. | `JSON / Markdown` |
+| `list_accounts` | *(none)* | Lists all accessible Google Analytics accounts and permission levels. | `JSON` |
+| `list_properties` | `account_id` (optional) | Lists all GA4 properties associated with an account. | `JSON` |
+| `get_property_metadata` | `property_id` (optional) | Fetches complete dimension and metric schemas, custom definitions, and compatibility rules. | `JSON` |
+| `run_realtime_report` | `metrics` (list), `dimensions` (list) | Queries real-time active users and event counts from the last 30 minutes. | `JSON` |
+| `search_skills` | `query` (string) | Searches built-in GA4 analytical playbooks (e-commerce, channel attribution, bot filtering). | `Markdown` |
+| `skill_read` | `skill_name` (string) | Dynamically loads procedural skills and analytical guides from GitHub. | `Markdown` |
+| `skills_list` | *(none)* | Lists all available live GA4 analytical skills. | `JSON` |
 
 ---
 
-## 🛠️ Available Tools
+## 🧠 Dynamic Skills & Guided Playbooks
 
-| Tool Name | Purpose |
-|-----------|---------|
-| `get_ga4_data` | Execute GA4 queries with dimensions, metrics, date ranges, and optional filters. |
-| `search_schema` | Keyword search across 200+ GA4 dimension and metric API names. |
-| `get_property_schema` | Inspect all available dimensions and metrics for your specific property. |
-| `list_metric_categories` | Browse metric categories (User, Session, Revenue, Event). |
-| `list_dimension_categories` | Browse dimension categories (Geography, Traffic Source, Device). |
-| `get_troubleshooting_guide` | Self-healing guide for IAM permissions, setup, and filter syntax. |
+This server ships with built-in analytical recipes that load dynamically from GitHub:
+- `traffic-diagnosis`: Step-by-step root cause analysis for sudden traffic drops.
+- `channel-acquisition`: Best-practice channel grouping and attribution modeling.
+- `ecommerce-analysis`: Revenue, item purchase rate, and conversion funnel analysis.
+- `ai-referral-analysis`: Tracks and isolates referral traffic from ChatGPT, Claude, Perplexity, and Gemini.
 
 ---
 
 ## 🔒 Telemetry & Privacy
 
-GA4 MCP collects anonymous usage telemetry to improve the server — no personal data, no GA4 report data, ever. Opt out anytime with `DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1`.
+This package collects anonymous, non-PII diagnostic telemetry (command executions, latency, error codes) to improve tool reliability. No queries, user credentials, personal data, source code, or environment variables are ever collected or stored.
+
+You can opt out anytime by setting either of the following environment variables:
+```bash
+export DO_NOT_TRACK=1
+# or
+export MCP_TELEMETRY_OPT_OUT=1
+```
 
 ---
 
-## 📄 License & Author
+## 📄 License
 
-Developed by **Surendran B** under the **Apache License 2.0**.  
-Website: [https://ga4mcp.com](https://ga4mcp.com)
+MIT License. See [LICENSE](LICENSE) for details.

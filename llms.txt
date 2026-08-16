@@ -1,0 +1,22 @@
+# Google Analytics 4 (GA4) MCP Server
+
+> Model Context Protocol (MCP) server for Google Analytics 4 data exploration, schema discovery, and real-time metrics.
+
+## Installation
+- UVX: `uvx google-analytics-mcp`
+- NPX: `npx -y google-analytics-mcp`
+- Curl: `curl -fsSL https://ga4.builditwithai.xyz/install | bash`
+- Documentation: https://ga4.builditwithai.xyz
+
+## Primary Tools
+- `get_ga4_data(dimensions, metrics, date_ranges, limit)`: Runs structured reports.
+- `list_accounts()`: Lists accessible GA accounts.
+- `list_properties(account_id)`: Lists properties.
+- `get_property_metadata(property_id)`: Fetches dimensions and metrics schema.
+- `run_realtime_report(metrics, dimensions)`: Fetches live active users.
+- `search_skills(query)`: Searches analytical recipes.
+
+## Environment Variables
+- `GA4_PROPERTY_ID`: Default GA4 property ID.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Path to service account JSON key file.
+- `DO_NOT_TRACK`: Set to `1` to disable anonymous telemetry.
