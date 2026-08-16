@@ -1,85 +1,91 @@
-# AGENTS.md — Codebase Operational Guide for AI Agents
+# AGENTS.md — Agent Operating Manual
 
-> **Context, architecture, file map, and execution commands for AI coding agents (Claude Code, Cursor, Codex, Gemini, Antigravity, OpenCode, Aider) working on `google-analytics-mcp`.**
-
----
-
-## 1. Codebase Overview
-
-- **Language & Runtime**: Python 3.10+ (using `mcp` SDK / FastMCP, `google-analytics-data`, `google-analytics-admin`, `httpx`).
-- **Package Name**: `google-analytics-mcp` (PyPI) / `google-analytics-mcp` (NPM thin wrapper).
-- **Core Function**: Connects LLMs to Google Analytics 4 (Data API v1beta & Admin API v1alpha) with schema discovery, multi-dimensional queries, realtime metrics, and domain-specific analytical playbooks.
+> **For AI Agents (Claude Code, Cursor, Codex, Gemini, Antigravity, OpenCode, Aider) connecting to or executing `google-analytics-mcp`.**
 
 ---
 
-## 2. Directory & File Map
+## ⚡ 1. Fast Install & Client Wiring (Start Here)
 
-```
-google-analytics-mcp/
-├── ga4_mcp/
-│   ├── server.py              # FastMCP server definition, tool registrations, signal handling
-│   ├── coordinator.py         # Multi-client orchestration, session context, skill tips
-│   ├── prompts.py             # Pre-engineered prompts (traffic-diagnosis, explain-drop)
-│   ├── resources.py           # Static setup resources and error-recovery guides
-│   ├── setup_flow.py          # Interactive credential validation and in-session recovery
-│   ├── telemetry.py           # Non-PII diagnostic telemetry gateway (Edge Schema v2)
-│   └── tools/
-│       ├── reporting.py       # Core get_ga4_data / run_report execution & metric aggregation
-│       ├── metadata.py        # Schema discovery, custom dimensions/metrics lookup
-│       ├── skills.py          # Dynamic GitHub analytical recipes loader (search_skills)
-│       └── troubleshooting.py # Error diagnosis (IAM 403, invalid filters, missing fields)
-├── npm/                       # Thin Node.js CLI launcher for npm / npx distribution
-│   ├── bin/index.js           # Subprocess wrapper spawning uvx google-analytics-mcp
-│   └── package.json           # NPM package metadata
-├── tests/                     # Automated test suite
-│   ├── test_reporting.py      # Multi-dimensional reporting tests
-│   ├── test_telemetry.py      # Telemetry payload & DNT validation tests
-│   ├── test_setup_flow.py     # Auth recovery tests
-│   └── test_skills.py         # Skills loader tests
-├── pyproject.toml             # Python packaging, dependencies, and CLI entrypoint (ga4-mcp-server)
-├── smithery.yaml              # Smithery.ai marketplace configuration
-├── server.json                # Official MCP registry specification
-├── gemini-extension.json      # Google Gemini / Antigravity extension manifest
-├── .claude-plugin/            # Claude Code plugin manifests (plugin.json, marketplace.json)
-└── .well-known/ai-plugin.json # OpenAI / ChatGPT Actions manifest
-```
-
----
-
-## 3. Environment Variables & Auth
-
-| Variable | Description | Required |
-|---|---|---|
-| `GA4_PROPERTY_ID` | Numeric GA4 property ID (e.g. `123456789`). | Yes (or passed per tool call) |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Path to Google Cloud Service Account JSON key file. | Yes (or via ADC / gcloud auth) |
-| `DO_NOT_TRACK` / `MCP_TELEMETRY_OPT_OUT` | Set to `1` to disable anonymous telemetry. | Optional |
-
----
-
-## 4. Development & Testing Commands
+In 90% of cases, you just need to install and configure this MCP server for your user:
 
 ```bash
-# Install dependencies in editable mode
-uv sync || pip install -e ".[dev]"
+# 1-Line Universal Auto-Installer (Configures Claude Code, Cursor, Claude Desktop & Antigravity)
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
 
-# Run the MCP server in stdio mode locally
-uv run python -m ga4_mcp.server
+# Or launch directly via stdio:
+uvx google-analytics-mcp
+npx -y google-analytics-mcp
+```
 
-# Run the test suite
-uv run pytest tests/ -v
-
-# Run linting & formatting checks
-uv run ruff check .
+### Client Config Snippet (`mcp.json` / `claude_desktop_config.json`)
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service_account.json"
+      }
+    }
+  }
+}
 ```
 
 ---
 
-## 5. Tool Implementation Invariants & Gotchas
+## 📖 2. What This Repo Is
 
-1. **Server-Side Aggregation (`reporting.py`)**:
-   - `get_ga4_data` must always compute server-side totals and format date ranges consistently.
-   - Do not request incompatible metric/dimension combinations; let `metadata.py` validate schema fields before executing queries.
-2. **Setup Recovery & Elicitation (`setup_flow.py`)**:
-   - If `GA4_PROPERTY_ID` or `GOOGLE_APPLICATION_CREDENTIALS` is missing, the server prompts the client interactively via MCP elicitation if the client advertises capability, rather than crashing on boot.
-3. **Telemetry Boundary (`telemetry.py`)**:
-   - Telemetry must remain strictly non-PII (command names, latency, HTTP error codes). Never log property IDs, account numbers, queries, or metric values.
+A production MCP server for **Google Analytics 4 (GA4)**. It gives you direct access to the Google Analytics Data API v1beta and Admin API v1alpha.
+
+### Primary Tools Available:
+- `get_ga4_data`: Run multi-dimensional reports with date ranges, metric totals, and server-side aggregation.
+- `list_accounts` & `list_properties`: Discover all GA4 properties the credentials can access.
+- `get_property_metadata`: Fetch exact dimension/metric schemas and custom event definitions for a property.
+- `run_realtime_report`: Fetch live active users and 30-minute event streams.
+- `search_skills`: Access pre-engineered analytical recipes (traffic drops, e-commerce, bot filtering).
+
+---
+
+## 👤 3. How to Handle the Human (Auth & Setup)
+
+If credentials are not yet configured, do **not** fail or dump a raw Python traceback on the human. Guide them with these exact steps:
+
+1. **Ask for their 9-digit GA4 Property ID**:
+   - *"You can find your numeric Property ID in Google Analytics under Admin → Property Settings → Property Details."*
+2. **Ask for a Google Cloud Service Account JSON Key**:
+   - The human needs a Service Account with the **Viewer** role on their GA4 Property in *Google Analytics Admin → Property Access Management*.
+   - Once they have the `.json` file, set:
+     ```bash
+     export GA4_PROPERTY_ID="123456789"
+     export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service_account.json"
+     ```
+3. **If Auth Fails**: Call `get_troubleshooting_guide(topic="setup")` or `get_troubleshooting_guide(topic="iam")` to guide the human through permission repair.
+
+---
+
+## ⚠️ 4. Quirks & API Landmines (Zero-Hallucination Rules)
+
+1. **Field Naming**:
+   - **Never use Universal Analytics names** (e.g. `ga:sessions` or `ga:pageviews` will hard-fail).
+   - `sessionDefaultChannelGroup`, `pagePath`, `country` are **dimensions**.
+   - `sessions`, `activeUsers`, `screenPageViews`, `eventCount` are **metrics**.
+2. **Scope Compatibility**:
+   - Do NOT mix incompatible scopes (e.g., User-scoped dimensions with Hit/Item-scoped metrics). When in doubt, call `get_property_metadata` first.
+3. **Date String Formats**:
+   - Allowed values: `'YYYY-MM-DD'`, `'today'`, `'yesterday'`, `'7daysAgo'`, `'30daysAgo'`, `'90daysAgo'`.
+4. **Server-Side Aggregation**:
+   - `get_ga4_data` returns pre-calculated metric totals. You do not need to do token-heavy arithmetic in your prompt.
+
+---
+
+## 🎯 5. Playbooks & Skills (How to Answer User Questions)
+
+When your human user asks high-level business questions, call `search_skills("<topic>")` **before** constructing queries:
+
+- **"Why did my traffic drop?"** → Call `search_skills("traffic-diagnosis")`
+- **"Where is our revenue / e-commerce sales coming from?"** → Call `search_skills("ecommerce-analysis")`
+- **"Are bots skewing our analytics?"** → Call `search_skills("bot-traffic-detection")`
+- **"How much traffic comes from AI (ChatGPT, Claude, Perplexity)?"** → Call `search_skills("ai-referral-analysis")`
+- **"Which acquisition channels perform best?"** → Call `search_skills("channel-acquisition")`
