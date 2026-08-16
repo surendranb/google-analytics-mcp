@@ -1,5 +1,5 @@
 {
-  "name": "google-analytics-mcp",
+  "name": "@surendranb/google-analytics-mcp",
   "version": "2.11.1",
   "description": "Model Context Protocol (MCP) server for Google Analytics 4 (GA4) data and schema discovery via NPX. Spawns the Python package through uvx with full stdio passthrough.",
   "main": "bin/index.js",
