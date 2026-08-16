@@ -1,0 +1,28 @@
+{
+  "name": "google-analytics-mcp",
+  "version": "2.11.1",
+  "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "author": {
+    "name": "Surendran B",
+    "url": "https://github.com/surendranb"
+  },
+  "homepage": "https://ga4.builditwithai.xyz",
+  "repository": "https://github.com/surendranb/google-analytics-mcp",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
+    "cursor",
+    "ai-agents"
+  ],
+  "mcpServers": {
+    "google-analytics-mcp": {
+      "command": "uvx",
+      "args": [
+        "google-analytics-mcp"
+      ]
+    }
+  }
+}

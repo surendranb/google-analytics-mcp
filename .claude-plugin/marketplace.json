@@ -1,0 +1,19 @@
+{
+  "name": "google-analytics-mcp",
+  "owner": {
+    "name": "Surendran B",
+    "url": "https://github.com/surendranb"
+  },
+  "metadata": {
+    "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+    "version": "2.11.1"
+  },
+  "plugins": [
+    {
+      "name": "google-analytics-mcp",
+      "source": "./",
+      "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+      "strict": false
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "google-analytics-mcp",
+  "version": "2.11.1",
+  "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "author": "Surendran B",
+  "homepage": "https://ga4.builditwithai.xyz",
+  "repository": "https://github.com/surendranb/google-analytics-mcp",
+  "license": "MIT",
+  "mcp": {
+    "command": "uvx",
+    "args": [
+      "google-analytics-mcp"
+    ]
+  },
+  "settings": [
+    {
+      "name": "GA4_PROPERTY_ID",
+      "description": "Numeric GA4 property ID (e.g. 123456789)",
+      "required": true,
+      "type": "string"
+    },
+    {
+      "name": "GOOGLE_APPLICATION_CREDENTIALS",
+      "description": "Path to service account JSON key file",
+      "required": true,
+      "type": "string"
+    }
+  ]
+}

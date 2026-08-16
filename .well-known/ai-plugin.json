@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Google Analytics 4 (GA4) MCP Server",
+  "name_for_model": "google_analytics_mcp",
+  "description_for_human": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "description_for_model": "Google Analytics 4 (GA4) MCP Server: Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights. Tools available: get_ga4_data, list_accounts, list_properties, get_property_metadata, run_realtime_report, search_skills, skill_read, skills_list",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://ga4.builditwithai.xyz/openapi.json"
+  },
+  "logo_url": "https://ga4.builditwithai.xyz/logo.png",
+  "contact_email": "support@builditwithai.xyz",
+  "legal_info_url": "https://ga4.builditwithai.xyz/legal"
+}
