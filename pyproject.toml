@@ -14,7 +14,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "mcp>=2.0.0,<3",
-    "google-analytics-data==0.19.0",
+    "google-analytics-data==0.23.0",
     "google-auth==2.40.0"
 ]
 keywords = ["google-analytics", "mcp", "mcp-server", "ai-agent", "analytics", "ga4", "agentic-workflows", "llm"]
