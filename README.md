@@ -2,12 +2,11 @@
 
 > **Model Context Protocol (MCP) server for Google Analytics 4: real-time query exploration, schema discovery, metric aggregation, and audience insights for AI agents.**
 
-[![PyPI version](https://img.shields.io/pypi/v/google-analytics-mcp?label=PyPI&color=blue)](https://pypi.org/project/google-analytics-mcp/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/google-analytics-mcp?label=PyPI%20downloads&color=blue)](https://pypi.org/project/google-analytics-mcp/)
-[![npm version](https://img.shields.io/npm/v/google-analytics-mcp?label=npm&color=red)](https://www.npmjs.com/package/google-analytics-mcp)
-[![npm downloads](https://img.shields.io/npm/dm/google-analytics-mcp?label=npm%20downloads&color=red)](https://www.npmjs.com/package/google-analytics-mcp)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/Docs-ga4.builditwithai.xyz-purple)](https://ga4.builditwithai.xyz)
+[![CI](https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml/badge.svg)](https://github.com/surendranb/google-analytics-mcp/actions)
+[![PyPI version](https://img.shields.io/pypi/v/google-analytics-mcp.svg?style=flat-square&color=blue)](https://pypi.org/project/google-analytics-mcp/)
+[![npm version](https://img.shields.io/npm/v/google-analytics-mcp.svg?style=flat-square&color=red)](https://www.npmjs.com/package/google-analytics-mcp)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/google-analytics-mcp/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/google-analytics-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 🌐 **Live Documentation & Web Portal**: [https://ga4.builditwithai.xyz](https://ga4.builditwithai.xyz)
 
