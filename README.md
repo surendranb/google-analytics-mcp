@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml/badge.svg)](https://github.com/surendranb/google-analytics-mcp/actions)
 [![PyPI version](https://img.shields.io/pypi/v/google-analytics-mcp.svg?style=flat-square&color=blue)](https://pypi.org/project/google-analytics-mcp/)
-[![npm version](https://img.shields.io/npm/v/google-analytics-mcp.svg?style=flat-square&color=red)](https://www.npmjs.com/package/google-analytics-mcp)
+[![npm version](https://img.shields.io/npm/v/@surendranb/google-analytics-mcp.svg?style=flat-square&color=red)](https://www.npmjs.com/package/@surendranb/google-analytics-mcp)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/google-analytics-mcp/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/google-analytics-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
@@ -20,7 +20,7 @@ curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
 
 # Or run directly via your preferred runtime:
 uvx google-analytics-mcp
-npx -y google-analytics-mcp
+npx -y @surendranb/google-analytics-mcp
 ```
 
 ---
@@ -66,7 +66,7 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
   "mcpServers": {
     "google-analytics": {
       "command": "npx",
-      "args": ["-y", "google-analytics-mcp"]
+      "args": ["-y", "@surendranb/google-analytics-mcp"]
     }
   }
 }

@@ -7,7 +7,7 @@
 
 const { spawn } = require('child_process');
 
-const args = ['--from', 'google-analytics-mcp', 'ga4-mcp-server', ...process.argv.slice(2)];
+const args = ['--from', 'google-analytics-mcp', 'google-analytics-mcp', ...process.argv.slice(2)];
 
 const child = spawn('uvx', args, {
   stdio: 'inherit',
