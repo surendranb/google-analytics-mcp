@@ -15,13 +15,15 @@
 ## ⚡ Quickstart
 
 ```bash
-# 1-Line Universal Installer (Auto-configures Claude Code, Cursor, Claude Desktop & Antigravity)
+# 1-Line Universal Installer (Auto-configures Claude Desktop, Cursor, Claude Code, Antigravity, VS Code, Zed, Windsurf)
 curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
 
 # Or run directly via your preferred runtime:
 uvx google-analytics-mcp
 npx -y @surendranb/google-analytics-mcp
 ```
+
+---
 
 ---
 
