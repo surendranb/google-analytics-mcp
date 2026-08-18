@@ -36,8 +36,8 @@ errors: list[str] = []
 
 if 'ga4-mcp-server = "ga4_mcp.server:main"' not in pyproject_text:
     errors.append("pyproject.toml must expose ga4-mcp-server = ga4_mcp.server:main")
-if 'license = "Apache-2.0"' not in pyproject_text:
-    errors.append('pyproject.toml must declare license = "Apache-2.0"')
+if 'license = "MIT"' not in pyproject_text:
+    errors.append('pyproject.toml must declare license = "MIT"')
 
 server = json.loads(server_text)
 if server.get("version") != version:
@@ -82,8 +82,8 @@ for relative_path, text in {
 for required_term in ["ga4-mcp-server", "python -m ga4_mcp"]:
     if required_term not in readme_text:
         errors.append(f"README.md must document {required_term}")
-if "Apache License 2.0" not in readme_text:
-    errors.append("README.md must state Apache License 2.0")
+if "MIT" not in readme_text:
+    errors.append("README.md must state MIT")
 
 template = json.loads(template_text)
 template_server = template.get("mcpServers", {}).get("ga4-analytics", {})

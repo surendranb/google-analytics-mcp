@@ -20,6 +20,8 @@ curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
 
 # Or run directly via your preferred runtime:
 uvx google-analytics-mcp
+uvx --from google-analytics-mcp ga4-mcp-server
+python -m ga4_mcp
 npx -y @surendranb/google-analytics-mcp
 ```
 
