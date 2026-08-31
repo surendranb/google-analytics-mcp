@@ -138,6 +138,15 @@ class SiteRegistry:
                         credentials_path=d.credentials_source,
                         source="discovered"
                     )
+                else:
+                    existing = self._properties[d.property_id]
+                    if existing.display_name.startswith("Property ") or not existing.display_name:
+                        existing.display_name = d.display_name
+                    if existing.account_name in ("Default Account", "Configured Account"):
+                        existing.account_name = d.account_name
+                    if not existing.account_id:
+                        existing.account_id = d.account_id
+
             # If only 1 property exists and no default is set, make it the default
             if len(self._properties) == 1 and not self._default_property_id:
                 single_id = next(iter(self._properties.keys()))

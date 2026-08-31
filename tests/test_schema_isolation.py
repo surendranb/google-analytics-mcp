@@ -25,14 +25,18 @@ def _run():
             },
             "store": {
                 "name": "E-Commerce Shop",
-                "property_id": "2002",
+                "property_id": "2002"
             }
         }
     })
 
+    import tempfile
+    os.environ["GA4_CONFIG_DIR"] = tempfile.mkdtemp()
     os.environ["GA4_SITES"] = sites_json
+
     registry.initialize(force_refresh=True)
     schema_cache.clear()
+
 
     # Pre-populate distinct schemas for Property 1001 and Property 2002
     schema_blog = {

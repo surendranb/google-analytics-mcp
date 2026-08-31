@@ -36,8 +36,10 @@ def _run():
     })
 
     os.environ["GA4_SITES"] = sites_json
+    os.environ["GA4_CONFIG_DIR"] = tempfile.mkdtemp()
     os.environ.pop("GA4_PROPERTY_ID", None)
     os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
+
 
     reg = SiteRegistry()
     reg.initialize(force_refresh=True)

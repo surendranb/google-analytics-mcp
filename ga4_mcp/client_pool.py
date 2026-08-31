@@ -60,17 +60,26 @@ class ClientPool:
             gw = (gateway_url or get_gateway_url()).rstrip("/")
             req = urllib.request.Request(
                 f"{gw}/api/v1/token",
-                headers={"Authorization": f"Bearer {session_token}"}
+                headers={
+                    "Authorization": f"Bearer {session_token}",
+                    "User-Agent": "ga4-mcp/1.0"
+                }
             )
             with urllib.request.urlopen(req, timeout=10) as resp:
-                if resp.status == 200:
+                status = getattr(resp, "status", getattr(resp, "code", 200))
+                if status == 200:
                     data = json.loads(resp.read().decode("utf-8"))
                     access_token = data.get("access_token")
                     if access_token:
-                        return Credentials(token=access_token)
-        except Exception:
-            pass
+                        return Credentials(
+                            token=access_token,
+                            scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                        )
+
+        except Exception as e:
+            print(f"DEBUG: Failed to fetch gateway credentials: {e}", file=sys.stderr)
         return None
+
 
 
     def get_data_client(self, credentials_path: str | None = None) -> BetaAnalyticsDataClient:

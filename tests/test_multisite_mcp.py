@@ -28,12 +28,16 @@ sites_json = json.dumps({
             "property_id": "222222",
             "credentials": "/fake/path/store.json"
         }
-
     }
 })
+
+import tempfile
+os.environ["GA4_CONFIG_DIR"] = tempfile.mkdtemp()
 os.environ.pop("GA4_PROPERTY_ID", None)
 os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
 os.environ["GA4_SITES"] = sites_json
+
+
 
 
 
