@@ -16,7 +16,7 @@ from ga4_mcp.auth_session import save_session, get_gateway_url
 SUCCESS_HTML = """<!DOCTYPE html>
 <html>
 <head>
-  <title>Connected to Google Analytics</title>
+  <title>Google Analytics 4 MCP — Authentication Successful</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -28,64 +28,124 @@ SUCCESS_HTML = """<!DOCTYPE html>
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      padding: 20px;
+      padding: 24px;
       box-sizing: border-box;
     }
     .card {
       background: #ffffff;
-      padding: 40px;
-      border-radius: 12px;
-      max-width: 460px;
+      padding: 36px 32px;
+      border-radius: 14px;
+      max-width: 520px;
       width: 100%;
-      box-shadow: 0 8px 24px rgba(0, 24, 88, 0.08);
+      box-shadow: 0 8px 30px rgba(0, 24, 88, 0.08);
       border: 2px solid #001858;
+      text-align: left;
+    }
+    .header {
       text-align: center;
+      margin-bottom: 24px;
     }
     .icon {
-      font-size: 48px;
-      margin-bottom: 16px;
+      font-size: 40px;
+      margin-bottom: 8px;
     }
     h1 {
       font-size: 22px;
-      margin: 0 0 12px;
+      margin: 0 0 8px;
       color: #001858;
-    }
-    p {
-      font-size: 15px;
-      line-height: 1.5;
-      color: #172b4d;
-      margin: 0 0 20px;
     }
     .badge {
       display: inline-block;
       background: #8bd3dd;
       color: #001858;
       font-weight: 600;
-      padding: 6px 14px;
+      padding: 5px 14px;
       border-radius: 20px;
       font-size: 13px;
-      margin-bottom: 20px;
     }
-    .note {
+    .section {
+      background: #fafafa;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .section-title {
       font-size: 13px;
-      color: #6b778c;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #001858;
+      margin-bottom: 8px;
+    }
+    .item {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #24292e;
+      margin: 6px 0;
+      display: flex;
+      align-items: flex-start;
+    }
+    .bullet {
+      margin-right: 8px;
+      color: #001858;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #586069;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="icon">📊</div>
-    <h1>Connected to Google Analytics</h1>
-    <div class="badge">Signed in as {email}</div>
-    <p>Your session token was automatically delivered to your local AI coding assistant.</p>
-    <p class="note">You can close this tab and return to your editor.</p>
+    <div class="header">
+      <div class="icon">📊</div>
+      <h1>Google Analytics 4 MCP Ready</h1>
+      <div class="badge">Signed in as {email}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">What Just Happened</div>
+      <div class="item">
+        <span class="bullet">✓</span>
+        <span>Your Google account was authenticated with read-only access so your GA4 properties can be discovered.</span>
+      </div>
+      <div class="item">
+        <span class="bullet">✓</span>
+        <span>Your session token was automatically delivered to your local AI coding assistant on this machine.</span>
+      </div>
+    </div>
+
+    <div class="section" style="border-left: 4px solid #001858;">
+      <div class="section-title">Privacy & Local Execution Guarantee</div>
+      <div class="item">
+        <span class="bullet">•</span>
+        <span><b>Local-Only Execution:</b> All queries execute directly between this machine and Google Analytics.</span>
+      </div>
+      <div class="item">
+        <span class="bullet">•</span>
+        <span><b>Zero Cloud Storage:</b> No analytics data, visitors, revenue, or report rows are ever stored, logged, or sent to third-party servers.</span>
+      </div>
+      <div class="item">
+        <span class="bullet">•</span>
+        <span><b>Read-Only Security:</b> The token cannot modify or delete any configurations or data.</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      You can safely close this tab and return to your AI assistant.
+    </div>
   </div>
   <script>
-    setTimeout(function() { window.close(); }, 3500);
+    setTimeout(function() { window.close(); }, 5000);
   </script>
 </body>
 </html>
 """
+
 
 
 class _LoopbackHandler(http.server.BaseHTTPRequestHandler):
