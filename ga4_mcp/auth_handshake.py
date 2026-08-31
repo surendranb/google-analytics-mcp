@@ -16,7 +16,7 @@ from ga4_mcp.auth_session import save_session, get_gateway_url
 SUCCESS_HTML = """<!DOCTYPE html>
 <html>
 <head>
-  <title>Google Analytics 4 MCP — Authentication Successful</title>
+  <title>Connected to Google Analytics</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -35,7 +35,7 @@ SUCCESS_HTML = """<!DOCTYPE html>
       background: #ffffff;
       padding: 36px 32px;
       border-radius: 14px;
-      max-width: 520px;
+      max-width: 480px;
       width: 100%;
       box-shadow: 0 8px 30px rgba(0, 24, 88, 0.08);
       border: 2px solid #001858;
@@ -67,27 +67,25 @@ SUCCESS_HTML = """<!DOCTYPE html>
       background: #fafafa;
       border: 1px solid #e1e4e8;
       border-radius: 8px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-    .section-title {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #001858;
-      margin-bottom: 8px;
+      padding: 18px 16px;
+      margin: 20px 0;
     }
     .item {
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.55;
       color: #24292e;
-      margin: 6px 0;
+      margin: 10px 0;
       display: flex;
       align-items: flex-start;
     }
+    .item:first-child {
+      margin-top: 0;
+    }
+    .item:last-child {
+      margin-bottom: 0;
+    }
     .bullet {
-      margin-right: 8px;
+      margin-right: 10px;
       color: #001858;
       font-weight: bold;
     }
@@ -103,40 +101,27 @@ SUCCESS_HTML = """<!DOCTYPE html>
   <div class="card">
     <div class="header">
       <div class="icon">📊</div>
-      <h1>Google Analytics 4 MCP Ready</h1>
+      <h1>Connected to Google Analytics</h1>
       <div class="badge">Signed in as {email}</div>
     </div>
 
     <div class="section">
-      <div class="section-title">What Just Happened</div>
-      <div class="item">
-        <span class="bullet">✓</span>
-        <span>Your Google account was authenticated with read-only access so your GA4 properties can be discovered.</span>
-      </div>
-      <div class="item">
-        <span class="bullet">✓</span>
-        <span>Your session token was automatically delivered to your local AI coding assistant on this machine.</span>
-      </div>
-    </div>
-
-    <div class="section" style="border-left: 4px solid #001858;">
-      <div class="section-title">Privacy & Local Execution Guarantee</div>
       <div class="item">
         <span class="bullet">•</span>
-        <span><b>Local-Only Execution:</b> All queries execute directly between this machine and Google Analytics.</span>
+        <span>This is a one-time sign-in so your AI assistant on this machine can find and access your analytics properties.</span>
       </div>
       <div class="item">
         <span class="bullet">•</span>
-        <span><b>Zero Cloud Storage:</b> No analytics data, visitors, revenue, or report rows are ever stored, logged, or sent to third-party servers.</span>
+        <span>All queries run directly from this machine to Google Analytics. Your data remains on this machine.</span>
       </div>
       <div class="item">
         <span class="bullet">•</span>
-        <span><b>Read-Only Security:</b> The token cannot modify or delete any configurations or data.</span>
+        <span>This connection is read-only. It cannot change or delete any of your settings or reports.</span>
       </div>
     </div>
 
     <div class="footer">
-      You can safely close this tab and return to your AI assistant.
+      You can safely close this tab and return to your editor.
     </div>
   </div>
   <script>
