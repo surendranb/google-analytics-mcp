@@ -4,69 +4,34 @@
 
 ---
 
-## ⚡ 1. Fast Install & Multi-Site Configuration
+## ⚡ 1. How This MCP Works
 
-### A. Zero-Config User Login (1-Command Consultant Login)
-If the user was invited to their GA4 properties via Google email, they only need:
-```bash
-gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.readonly
-```
-Then launch with **zero environment variables**! The server auto-discovers all accessible accounts and properties.
+This server provides instant, direct access to Google Analytics 4 Data and Admin APIs through two authentication paths:
 
-### B. Client Config Snippet: Single Site or Legacy
-```json
-{
-  "mcpServers": {
-    "google-analytics": {
-      "command": "uvx",
-      "args": ["google-analytics-mcp"],
-      "env": {
-        "GA4_PROPERTY_ID": "123456789",
-        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service_account.json"
-      }
-    }
-  }
-}
-```
-
-### C. Client Config Snippet: Multi-Site Registry
-Define multiple sites and credentials via `GA4_SITES` env var or `~/.config/ga4-mcp/sites.json`:
-```json
-{
-  "mcpServers": {
-    "google-analytics": {
-      "command": "uvx",
-      "args": ["google-analytics-mcp"],
-      "env": {
-        "GA4_SITES": "{\"default_site\":\"blog\",\"sites\":{\"blog\":{\"name\":\"Personal Blog\",\"property_id\":\"111111111\",\"credentials\":\"/path/to/blog-sa.json\"},\"store\":{\"name\":\"E-Commerce Shop\",\"property_id\":\"222222222\",\"credentials\":\"/path/to/store-sa.json\"}}}"
-      }
-    }
-  }
-}
-```
-Or simply drop multiple service account keys into `~/.config/ga4-mcp/credentials/` — the server auto-scans and indexes all properties.
+1. **Zero-Config Web Login**: When first launched, opening the browser allows the human user to sign in with Google once. The local server automatically captures the session token into `~/.config/ga4-mcp/session.json`.
+2. **Offline Service Account**: If the human sets `GOOGLE_APPLICATION_CREDENTIALS`, the server uses the local JSON key directly.
 
 ---
 
-## 📖 2. Primary Tools & Multi-Site Workflow
+## 📖 2. Recommended Agent Query Workflow
 
-1. **`list_properties`**: Call this FIRST to discover all accounts and properties accessible with your credentials.
-2. **`search_schema(keyword="...", property="<site_or_id>")`**: Search valid dimension/metric names for a specific property.
-3. **`get_ga4_data(dimensions=[...], metrics=[...], property="<site_or_id>")`**: Run reports with server-side totals and automated routing.
-4. **`search_skills(query="...")`**: Access analytical playbooks (traffic drops, e-commerce, AI referrals, bot detection).
+1. **Discover Properties**:
+   - Call `list_properties` to see all accessible GA4 accounts and properties.
+   - Note the `active_default` and any property names/IDs.
+2. **Find Exact Dimension/Metric Names**:
+   - Before executing complex queries, call `search_schema(keyword="...", property="<name_or_id>")` to get verified API names.
+3. **Execute Reports**:
+   - Call `get_ga4_data(dimensions=[...], metrics=[...], property="<name_or_id>")`.
+   - Read pre-calculated totals directly from `"totals"` in the response payload.
+4. **Use Analytical Recipes**:
+   - For high-level diagnostic questions (e.g. traffic drops, e-commerce, AI referrals, bot filtering), call `search_skills("<topic>")`.
 
 ---
 
-## 👤 3. How to Handle the Human (Auth & Setup)
+## 👤 3. How to Handle the Human (Auth & Permissions)
 
-If no credentials exist, guide the user with these exact steps:
-
-1. **If using personal/agency Google account (Zero GCP required)**:
-   - *"Run `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.readonly` in your terminal to connect all your GA4 properties in 1 minute."*
-2. **If using Service Accounts**:
-   - The user needs a Service Account with the **Viewer** role on their GA4 Property in *Google Analytics Admin → Property Access Management*.
-   - Point `GOOGLE_APPLICATION_CREDENTIALS` to the `.json` file, or drop it into `~/.config/ga4-mcp/credentials/`.
-3. **If Auth Fails**: Call `get_troubleshooting_guide(topic="setup")` or `get_troubleshooting_guide(topic="iam")`.
+- **If no session or credentials exist**: Inform the human that a browser window has opened for Google sign-in. Once they click Allow, continue the query.
+- **If permissions are missing**: Call `get_troubleshooting_guide(topic="setup")` or `get_troubleshooting_guide(topic="iam")`.
 
 ---
 
@@ -77,7 +42,6 @@ If no credentials exist, guide the user with these exact steps:
    - `sessions`, `activeUsers`, `screenPageViews`, `eventCount` are **metrics**.
    - 'screenPageViews' not 'pageViews'; 'totalUsers' not 'users'; 'keyEvents' not 'conversions'.
 2. **Multi-Property Queries**:
-   - When the user asks about a specific site, pass `property="<alias_or_name>"` to `get_ga4_data` and `search_schema`.
-   - The server validates against that specific property's live custom dimensions.
+   - Pass `property="<alias_or_name>"` (e.g. `property="RunInsight"`) to query specific properties.
 3. **Server-Side Aggregation**:
-   - `get_ga4_data` returns pre-calculated metric totals in `"totals"`. Read the period figure directly from `"totals"`; do not sum rows manually.
+   - `get_ga4_data` returns exact period totals in `"totals"`. Never sum individual rows manually.

@@ -66,9 +66,20 @@ def list_properties(ctx: Context = None) -> dict:
     if not props:
         return {
             "properties": [],
-            "message": "No GA4 properties found. Please verify your credentials or run 'gcloud auth application-default login'."
+            "total_properties": 0,
+            "message": "No GA4 properties found. Log in via browser or configure credentials in ~/.config/ga4-mcp/credentials/."
         }
-    return {"properties": props}
+
+    default_prop = next((p for p in props if p.get("is_default")), props[0] if props else None)
+    default_name = f"{default_prop.get('display_name')} (ID: {default_prop.get('property_id')})" if default_prop else "None"
+
+    return {
+        "properties": props,
+        "total_properties": len(props),
+        "active_default": default_name,
+        "how_to_query": "To query a specific property, pass property='<name_or_id>' (e.g. property='RunInsight') to get_ga4_data or search_schema. If omitted, the active default is queried automatically."
+    }
+
 
 
 @mcp.tool(annotations=_READ_ONLY)
