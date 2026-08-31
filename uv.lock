@@ -377,6 +377,22 @@ wheels = [
 ]
 
 [[package]]
+name = "google-analytics-admin"
+version = "0.30.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-api-core", extra = ["grpc"] },
+    { name = "google-auth" },
+    { name = "grpcio" },
+    { name = "proto-plus" },
+    { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/0b/dc92f543e8f93837d6c8f72f6052b48a81919a9676e4888852eb0f747fa6/google_analytics_admin-0.30.1.tar.gz", hash = "sha256:cc8b150217dbec45708867d9d81216e8a10e0f6d432e5e6ac66da2a83d4119b6", size = 614898, upload-time = "2026-06-25T23:39:24.837Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cc/4f/cce055793fd9c08e8debe676db1e2c09ca117d90a6429ef4684d6a120066/google_analytics_admin-0.30.1-py3-none-any.whl", hash = "sha256:53c9d2f140111faa5cfaa463ca3b69fc9f11fbf968cb2421b76839926ef065d9", size = 399979, upload-time = "2026-06-25T23:38:49.823Z" },
+]
+
+[[package]]
 name = "google-analytics-data"
 version = "0.19.0"
 source = { registry = "https://pypi.org/simple" }
@@ -394,9 +410,10 @@ wheels = [
 
 [[package]]
 name = "google-analytics-mcp"
-version = "2.11.2"
+version = "2.11.3"
 source = { editable = "." }
 dependencies = [
+    { name = "google-analytics-admin" },
     { name = "google-analytics-data" },
     { name = "google-auth" },
     { name = "mcp" },
@@ -412,6 +429,7 @@ sdlc = [
 [package.metadata]
 requires-dist = [
     { name = "aiocron", marker = "extra == 'sdlc'" },
+    { name = "google-analytics-admin", specifier = ">=0.30.1" },
     { name = "google-analytics-data", specifier = "==0.19.0" },
     { name = "google-antigravity", marker = "extra == 'sdlc'" },
     { name = "google-auth", specifier = "==2.40.0" },

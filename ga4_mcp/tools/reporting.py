@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-"""The core reporting tool for fetching GA4 data."""
+"""The core reporting tool for fetching GA4 data across single or multiple properties."""
 
 import os
 import sys
@@ -15,10 +15,11 @@ from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip, note_brief_version
 from ga4_mcp.telemetry import client_supports_elicitation
+from ga4_mcp.sites import registry, PropertyInfo
+from ga4_mcp.schema_cache import schema_cache
+from ga4_mcp.client_pool import client_pool
 
-# S3: version tags for the field-proven error briefs below. The brief TEXT is
-# unchanged — these tags ride telemetry only (`brief_version` on that error's
-# tool_executed) so post-brief behavior can be measured per brief revision.
+# S3: version tags for the field-proven error briefs below.
 BRIEF_INVALID_DIMENSION = "ga4-schema-dim-v1"
 BRIEF_INVALID_METRIC = "ga4-schema-met-v1"
 BRIEF_FILTER_SHAPE = "ga4-filter-v1"
@@ -28,7 +29,7 @@ BRIEF_IAM_QUERY = "ga4-iam-query-v1"
 # get_ga4_data hits the external GA4 Data API: open world, read-only, idempotent.
 _READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
 
-# This global variable will be populated by the server on startup.
+# Legacy global schema holder for backward compatibility
 PROPERTY_SCHEMA = None
 
 def _camel_to_snake(name: str) -> str:
@@ -59,16 +60,11 @@ def _get_smart_sorting(dimensions, metrics):
 
 def _should_aggregate(dimensions, metrics):
     """Request GA4 server-side metric totals whenever a dimension splits the
-    metrics across rows (a time series like ['date'] or any breakdown). With no
-    dimensions GA4 already returns a single aggregate row, so a totals row would
-    be redundant. This is what lets a 7-day pull come back with the period figure
-    computed server-side, not left for the model to sum."""
+    metrics across rows (a time series like ['date'] or any breakdown)."""
     return len(dimensions) >= 1 and len(metrics) >= 1
 
-
 def _extract_totals(response):
-    """Pull GA4's server-side totals (present when metric_aggregations=[TOTAL]
-    was requested) into a metric->value map. Returns None if absent."""
+    """Pull GA4's server-side totals into a metric->value map."""
     totals_rows = getattr(response, "totals", None) or []
     if not totals_rows:
         return None
@@ -82,11 +78,8 @@ def _extract_totals(response):
             continue
     return out or None
 
-
 def _build_report_payload(response, skill):
-    """Format a GA4 RunReportResponse into the tool payload: data rows, metadata,
-    server-side totals (with a coaching note), and the Channel-3 skills tip. Pure
-    (no network), so it is unit-tested against a response stub."""
+    """Format a GA4 RunReportResponse into the tool payload."""
     result = []
     for row in response.rows:
         data_row = {}
@@ -104,9 +97,6 @@ def _build_report_payload(response, skill):
         },
     }
 
-    # Coaching: on a multi-row pull (time series or breakdown), GA4's own totals
-    # let the model state the period figure without summing rows itself — a known
-    # LLM error mode. A single row already IS the aggregate, so skip it there.
     if len(result) > 1:
         totals = _extract_totals(response)
         if totals:
@@ -118,15 +108,12 @@ def _build_report_payload(response, skill):
                 "rate/ratio metrics are period-computed by GA4."
             )
 
-    # Channel 3: model-to-user relay — the tip rides in the response so the model
-    # can weave it into its answer to the human.
     if skill:
         payload["_skills_tip"] = f"For deeper analysis, call search_skills('{skill}') — it has the full pattern for this query type including interpretation guidance."
     else:
         payload["_skills_tip"] = "Call search_skills() to explore 15 analytical recipes that provide proven query patterns and interpretation guidance."
 
     return payload
-
 
 _SKILL_HINTS = [
     (["chatgpt", "claude", "perplexity", "gemini", "openai", "ai referral", "ai traffic", "llm"], "ai-referral-analysis"),
@@ -151,9 +138,6 @@ def _suggest_skill(dimensions: list, metrics: list, intent: str | None) -> str |
             return skill
     return None
 
-
-# Common LLM metric aliases (e.g., legacy GA metric names -> GA4 Data API names)
-# Extend from telemetry: recurring SchemaHallucination field names get an alias.
 METRIC_ALIASES = {
     "conversions": "keyEvents",
     "conversion_rate": "sessionKeyEventRate",
@@ -169,8 +153,6 @@ DIMENSION_ALIASES = {
     "defaultChannelGrouping": "defaultChannelGroup",
 }
 
-# Filter-shape repairs for structures models actually send (from telemetry).
-# Applied AFTER camel->snake conversion; valid shapes pass through untouched.
 _FILTER_KEY_SYNONYMS = {
     "or_filter": "or_group",
     "and_filter": "and_group",
@@ -179,18 +161,9 @@ _FILTER_KEY_SYNONYMS = {
     "filters": "expressions",
 }
 _FILTER_LEAF_KEYS = {"field_name", "string_filter", "in_list_filter", "numeric_filter", "between_filter"}
-
-
 _FILTER_EXPR_KEYS = {"filter", "and_group", "or_group", "not_expression", "expressions"}
 
-
 def _repair_filter_shape(d, parent_key=None):
-    """
-    Map known wrong keys to proto names, wrap bare leaf filters sent without
-    their {"filter": {...}} wrapper, and drop decorative keys models invent at
-    the Filter leaf (e.g. "type"). Dicts under a "filter" key ARE the leaf
-    (proto Filter), so they are never wrapped again.
-    """
     if isinstance(d, list):
         return [_repair_filter_shape(x, parent_key) for x in d]
     if not isinstance(d, dict):
@@ -199,14 +172,12 @@ def _repair_filter_shape(d, parent_key=None):
     for k, v in d.items():
         nk = _FILTER_KEY_SYNONYMS.get(k, k)
         repaired[nk] = _repair_filter_shape(v, nk)
-    # Models invent {"stringFilter": {"exact": "x"}} — translate to the proto form
     if parent_key == "string_filter" and "exact" in repaired and "value" not in repaired:
         repaired["value"] = repaired.pop("exact")
         repaired.setdefault("match_type", "EXACT")
     is_leaf_bearing = bool(repaired.keys() & _FILTER_LEAF_KEYS)
     if parent_key == "filter" or (parent_key in (None, "expressions", "not_expression") and is_leaf_bearing
                                   and not (repaired.keys() & _FILTER_EXPR_KEYS)):
-        # At (or wrapping into) a Filter leaf: strip decorative junk keys
         cleaned = {k: v for k, v in repaired.items() if k in _FILTER_LEAF_KEYS}
         if parent_key == "filter":
             return cleaned if cleaned else repaired
@@ -225,6 +196,7 @@ async def get_ga4_data(
     proceed_with_large_dataset: bool = False,
     enable_aggregation: bool = True,
     intent: str = None,
+    property: str = None,
     ctx: Context = None,
 ):
     """
@@ -238,60 +210,11 @@ async def get_ga4_data(
     Returns on volume warning: {"warning": "...", "estimated_rows": N, "suggestions": [...]}
     Returns on error: {"error": "..."}
 
-    CRITICAL WORKFLOW — follow this sequence every time:
-
-    1. DISCOVER FIELDS: NEVER guess dimension or metric names. Call `search_schema`,
-       `list_dimension_categories`, or `list_metric_categories` FIRST to verify exact
-       API names for this property. Guessing costs you a failed round-trip.
-
-    2. DISCOVER PATTERN: For any domain-specific analysis, call `search_skills('<topic>')`
-       BEFORE querying to get the proven methodology — correct dimensions, metrics,
-       filters, and how to interpret the result. One extra call prevents multiple failures.
-       Use for: traffic diagnosis, attribution, ecommerce, channel acquisition, content
-       performance, geo/device segmentation, AI referrals, bot detection.
-
-    3. RETRIEVE: Call get_ga4_data with the verified fields and the skill's pattern.
-
-    4. TROUBLESHOOT: On schema error, invalid field, or filter parse error — do NOT
-       retry by guessing. Your training may predate current GA4 (UA was sunset
-       2023-07-01). Call `search_schema('<keyword>')` to find the current name in
-       THIS property, or `search_skills('ua-to-ga4' | 'common-metric-names' |
-       'filter-structures')` for the mapping.
-
-    FIELD NAMES — GA4 API names vs common wrong guesses:
-    - 'screenPageViews'       not 'uniquePageviews' or 'pageViews'
-    - 'totalUsers'            not 'users'
-    - 'keyEvents'             not 'conversions' or 'goalCompletionsAll'
-    - 'sessionKeyEventRate'   not 'sessionConversionRate' or 'conversionRate' (GA4 renamed conversions→key events, 2024)
-    - 'userEngagementDuration' not 'timeOnPage' or 'avgTimeOnPage'
-    - 'averageSessionDuration' not 'avgSessionDuration'
-    - 'itemsViewed'           not 'itemViews'
-    - 'ecommercePurchases'    not 'purchases'
-    - 'sessionDefaultChannelGroup'  not 'sessionDefaultChannelGrouping'
-    - 'sessionSource'/'sessionMedium'  not 'source'/'medium'
-    - All names are camelCase — never snake_case (page_path → pagePath, event_name → eventName)
-    - 'bounceRate' and 'newUsers' are correct as-is
-
-    DATE RANGES:
-    - Format: 'YYYY-MM-DD' or relative strings: '7daysAgo', '30daysAgo', 'yesterday', 'today'
-    - 'NdaysAgo' counts back from today, excluding today. 'yesterday' = last complete day.
-    - Period comparison (YoY, WoW): run two separate queries with different date ranges,
-      then compare the results. The API does not support multi-period in one call.
-
-    SCOPE RULES — incompatible combinations return a 400 error:
-    - Session dims (sessionSource, sessionMedium, sessionCampaignName) → use with
-      sessions, bounceRate, sessionKeyEventRate. NOT with eventCount.
-    - Event dims (eventName) → use with eventCount. NOT with sessions.
-    - User dims (firstUserSource, firstUserMedium) → use with totalUsers, newUsers. NOT sessions.
-    - Safe with any metric: date, deviceCategory, country, city, pagePath, pageTitle.
-
-    FILTER STRUCTURE:
-    - Simple: {"filter": {"fieldName": "sessionSource", "stringFilter": {"value": "google", "matchType": "CONTAINS"}}}
-    - AND:    {"andGroup": {"expressions": [{"filter": {...}}, {"filter": {...}}]}}
-    - OR:     {"orGroup":  {"expressions": [{"filter": {...}}, {"filter": {...}}]}}
-    - NOT:    {"notExpression": {"filter": {...}}}
-    - Wrong keys that break filters: and_filter→andGroup, or_filter→orGroup,
-      not_filter→notExpression, filters→expressions, field→fieldName
+    CRITICAL WORKFLOW:
+    1. DISCOVER SITES & FIELDS: Call `list_properties` to see all accessible sites.
+       Call `search_schema` to verify exact dimension/metric names for that property.
+    2. DISCOVER PATTERN: Call `search_skills('<topic>')` BEFORE querying for proven combinations.
+    3. RETRIEVE: Call get_ga4_data with verified fields and optional `property='...'`.
 
     Args:
         dimensions: GA4 dimension names (verified via schema tools, e.g. ["date", "city"]).
@@ -302,75 +225,87 @@ async def get_ga4_data(
         limit: Max rows to return. Defaults to 1000.
         estimate_only: If True, returns only estimated row count without fetching data.
         proceed_with_large_dataset: Set True to bypass the 2500-row volume warning.
-        enable_aggregation: If True, asks GA4 for server-side metric totals whenever a
-            dimension splits the data across rows (e.g. a 7-day ['date'] pull), returned
-            in a "totals" block so the model needn't sum rows. Default True.
+        enable_aggregation: If True, asks GA4 for server-side metric totals. Default True.
         intent: Short plain-English description of what the user is trying to learn.
-                E.g. "which channels drive most signups", "bot traffic audit for last month".
+        property: Optional property name, alias, or numeric Property ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        # Born-broken, but if the client can be prompted, recover the missing
-        # config AT this call (MCP 2.0 MRTR) instead of bouncing to a separate
-        # tool. Clients that cannot elicit never reach here — the coordinator
-        # returns the setup brief for them (the proven fallback).
+    # --- Resolve Target Property and Schema ---
+    prop_info, err = registry.resolve(property)
+    active_schema = None
+
+    if err or not prop_info:
+        # Check if born-broken and elicit-capable
         from ga4_mcp import coordinator as _coordinator
         if ctx is not None and _coordinator.SERVER_INIT_ERROR and client_supports_elicitation():
             from ga4_mcp.setup_flow import run_inline_recovery
             recovered, message = await run_inline_recovery(ctx)
             if not recovered:
                 return {"error": message}
-            # reinitialize() repopulated the module schema global; fall through.
-        if not PROPERTY_SCHEMA:
-            return {"error": "Schema not loaded. Please check server startup logs."}
+            prop_info, err = registry.resolve(property)
+
+        if not prop_info:
+            # Fallback to legacy PROPERTY_SCHEMA if populated
+            if PROPERTY_SCHEMA:
+                active_schema = PROPERTY_SCHEMA
+                legacy_id = os.getenv("GA4_PROPERTY_ID", "")
+                prop_info = PropertyInfo(property_id=legacy_id, display_name=f"Property {legacy_id}")
+            else:
+                return {"error": err or "No accessible GA4 property resolved. Call list_properties to view available sites."}
+
+    if not active_schema:
+        try:
+            active_schema = schema_cache.get_schema(prop_info)
+        except Exception as e:
+            if PROPERTY_SCHEMA:
+                active_schema = PROPERTY_SCHEMA
+            else:
+                return {"error": f"Could not load schema for property '{prop_info.display_name}' ({prop_info.property_id}): {e}"}
 
     try:
         # --- Input Parsing and Validation ---
         parsed_dimensions = dimensions if isinstance(dimensions, list) else [d.strip() for d in dimensions.split(',')]
         parsed_metrics = metrics if isinstance(metrics, list) else [m.strip() for m in metrics.split(',')]
 
-        # Transparently translate common aliases (e.g. conversions -> keyEvents)
         parsed_metrics = [METRIC_ALIASES.get(m, m) for m in parsed_metrics]
         parsed_dimensions = [DIMENSION_ALIASES.get(d, d) for d in parsed_dimensions]
 
         if not parsed_metrics:
             return {"error": "Metrics list cannot be empty."}
 
-        valid_dims = PROPERTY_SCHEMA["dimensions"].keys()
-        valid_mets = PROPERTY_SCHEMA["metrics"].keys()
+        valid_dims = active_schema["dimensions"].keys()
+        valid_mets = active_schema["metrics"].keys()
         for dim in parsed_dimensions:
             if dim not in valid_dims:
-                fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 field names and UA→GA4 name mapping. search_skills('custom-dimensions') covers customEvent:/customUser: syntax.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
+                fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 field names.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
                 note_brief_version(BRIEF_INVALID_DIMENSION)
-                return {"error": f"Invalid dimension: '{dim}' — not present in this property's live GA4 schema. WHY: GA4 Data API field names often differ from names in model training data — many are Universal Analytics (sunset 2023-07-01) or older-GA4 artifacts that no longer exist — so a name you are confident about can be out of date. The current names live outside your training: call search_schema('<keyword>') to read THIS property's live schema (also finds custom dimensions), or search_skills('ua-to-ga4') for the maintained UA→GA4 name mapping. Do NOT retry '{dim}' or guess a variant."}
+                return {"error": f"Invalid dimension: '{dim}' — not present in property '{prop_info.display_name}' live GA4 schema. Call search_schema('<keyword>') to verify names for this property."}
         for met in parsed_metrics:
             if met not in valid_mets:
-                fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 metric names. Common wrong guesses: 'conversions'→'keyEvents', 'users'→'totalUsers', 'uniquePageviews'→'screenPageViews'.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
+                fire_skill_tip(ctx, "💡 Skill tip: search_skills('common-metric-names') has the correct GA4 metric names.", skill="common-metric-names", trigger="error_schema", tool_name="get_ga4_data")
                 note_brief_version(BRIEF_INVALID_METRIC)
-                return {"error": f"Invalid metric: '{met}' — not present in this property's live GA4 schema. WHY: GA4 Data API metric names often differ from names in model training data — many are Universal Analytics (sunset 2023-07-01) or metrics renamed since your training, so a name you are confident about can be out of date. The current names live outside your training: call search_schema('<keyword>') to read THIS property's live schema, or search_skills('common-metric-names') for the maintained name mapping. Do NOT retry '{met}' or guess a variant."}
+                return {"error": f"Invalid metric: '{met}' — not present in property '{prop_info.display_name}' live GA4 schema. Call search_schema('<keyword>') to verify names for this property."}
 
         # --- Filter Expression Building ---
         filter_expression = None
         if dimension_filter:
             try:
-                # Recursively translate camelCase keys to snake_case for proto-plus
-                # compatibility, then repair known wrong shapes models send
                 snake_filter = _repair_filter_shape(_convert_keys_to_snake(dimension_filter))
                 filter_expression = FilterExpression(snake_filter)
             except Exception as e:
-                fire_skill_tip(ctx, "💡 Skill tip: search_skills('filter-structures') has copy-paste templates for every filter type — single field, AND, OR, NOT, IN LIST.", skill="filter-structures", trigger="error_filter", tool_name="get_ga4_data")
+                fire_skill_tip(ctx, "💡 Skill tip: search_skills('filter-structures') has copy-paste templates for every filter type.", skill="filter-structures", trigger="error_filter", tool_name="get_ga4_data")
                 note_brief_version(BRIEF_FILTER_SHAPE)
-                return {"error": f"Invalid dimension_filter structure: {e}. WHY: the GA4 filter shape and field names often differ from filter formats in model training data — field names are camelCase (eventName, not event_name) inside a specific nested structure. The current templates live outside your training: call search_skills('filter-structures') for copy-paste examples of every filter type, or search_schema to confirm a field name. Do NOT retry the same shape."}
+                return {"error": f"Invalid dimension_filter structure: {e}. Call search_skills('filter-structures') for templates."}
 
-        # Channel 2: proactive — fires before the API call, while query is in-flight
+        # Channel 2: proactive tip
         skill = _suggest_skill(parsed_dimensions, parsed_metrics, intent)
         if skill:
-            fire_skill_tip(ctx, f"💡 Skill available: search_skills('{skill}') has the full analytical methodology for this query type — proven field combinations, filters, and interpretation guidance.", skill=skill, trigger="pre_query", tool_name="get_ga4_data")
+            fire_skill_tip(ctx, f"💡 Skill available: search_skills('{skill}') has the full analytical methodology for this query type.", skill=skill, trigger="pre_query", tool_name="get_ga4_data")
         else:
-            fire_skill_tip(ctx, "💡 GA4 Skills: 15 analytical recipes available. Call search_skills() to find the proven pattern for traffic, ecommerce, attribution, content, geo, and more.", skill=None, trigger="pre_query", tool_name="get_ga4_data")
+            fire_skill_tip(ctx, "💡 GA4 Skills: 15 analytical recipes available. Call search_skills() to find the proven pattern.", skill=None, trigger="pre_query", tool_name="get_ga4_data")
 
         # --- API Client and Request Objects ---
-        client = BetaAnalyticsDataClient()
-        property_id = os.getenv("GA4_PROPERTY_ID")
+        client = client_pool.get_data_client(prop_info.credentials_path)
+        property_target = f"properties/{prop_info.property_id}"
         dimension_objects = [Dimension(name=d) for d in parsed_dimensions]
         metric_objects = [Metric(name=m) for m in parsed_metrics]
         date_range_object = DateRange(start_date=date_range_start, end_date=date_range_end)
@@ -379,7 +314,7 @@ async def get_ga4_data(
         if not proceed_with_large_dataset or estimate_only:
             try:
                 estimation_req = RunReportRequest(
-                    property=f"properties/{property_id}",
+                    property=property_target,
                     dimensions=dimension_objects,
                     metrics=metric_objects,
                     date_ranges=[date_range_object],
@@ -408,7 +343,7 @@ async def get_ga4_data(
 
         # --- Main GA4 API Call ---
         request = RunReportRequest(
-            property=f"properties/{property_id}",
+            property=property_target,
             dimensions=dimension_objects,
             metrics=metric_objects,
             date_ranges=[date_range_object],
@@ -419,28 +354,27 @@ async def get_ga4_data(
         )
         response = await asyncio.to_thread(client.run_report, request=request)
 
-        # --- Response Formatting (pure, unit-tested) ---
-        # Surfaces GA4 server-side totals + Channel-3 skills tip.
+        # --- Response Formatting ---
         return _build_report_payload(response, skill)
 
     except Exception as e:
-        error_message = f"Error fetching GA4 data: {str(e)}"
+        error_message = f"Error fetching GA4 data for property '{prop_info.display_name}' ({prop_info.property_id}): {str(e)}"
         print(error_message, file=sys.stderr)
         if hasattr(e, 'details'):
             details_val = e.details() if callable(getattr(e, 'details', None)) else getattr(e, 'details')
             error_message += f" Details: {details_val}"
 
         if "incompatible" in error_message.lower() or "dimensions & metrics" in error_message.lower():
-            fire_skill_tip(ctx, "💡 Skill tip: search_skills('compatible-combinations') explains which dimension/metric scopes can be paired. Session dims need session metrics; event dims need event metrics.", skill="compatible-combinations", trigger="error_incompatible", tool_name="get_ga4_data")
+            fire_skill_tip(ctx, "💡 Skill tip: search_skills('compatible-combinations') explains which dimension/metric scopes can be paired.", skill="compatible-combinations", trigger="error_incompatible", tool_name="get_ga4_data")
             error_message += " SYSTEM DIRECTIVE: Call search_skills('compatible-combinations') to learn which dimensions and metrics can be combined."
             note_brief_version(BRIEF_INCOMPATIBLE)
 
         elif "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
-            fire_skill_tip(ctx, "💡 Permission error detected. Call get_troubleshooting_guide(topic='iam') for the exact steps to grant GA4 Viewer access to your service account.", skill=None, trigger="error_iam", tool_name="get_ga4_data")
-            error_message += " SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='iam') to read the step-by-step IAM permissions guide and help the user resolve this."
+            fire_skill_tip(ctx, "💡 Permission error detected. Verify that your credentials have Viewer access on this GA4 property.", skill=None, trigger="error_iam", tool_name="get_ga4_data")
+            error_message += " SYSTEM DIRECTIVE: Call get_troubleshooting_guide(topic='iam') to read the IAM permissions guide."
             note_brief_version(BRIEF_IAM_QUERY)
 
         else:
-            fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures') for correct patterns.", skill=None, trigger="error_generic", tool_name="get_ga4_data")
+            fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures').", skill=None, trigger="error_generic", tool_name="get_ga4_data")
 
         return {"error": error_message}

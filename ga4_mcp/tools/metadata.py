@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
-"""Tools for fetching and exploring GA4 property metadata."""
+"""Tools for fetching and exploring GA4 property metadata and property catalog."""
 
-from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
+from ga4_mcp.sites import registry, PropertyInfo
+from ga4_mcp.schema_cache import schema_cache
 
 _SCHEMA_SKILL_HINTS = [
     (["channel", "source", "medium", "campaign", "acquisition"], "channel-acquisition"),
@@ -26,60 +27,68 @@ def _hint_from_keyword(keyword: str) -> str | None:
             return skill
     return None
 
-# Schema tools read the startup-cached property schema — no external call at
-# call time, hence open_world_hint=False (SDK v2 accepts snake_case field names
-# and serializes to the spec's camelCase aliases; verified empirically).
+# Read-only metadata tools
 _READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=False)
 
-# This global variable will be populated by the server on startup.
+# Legacy global schema holder for backward compatibility
 PROPERTY_SCHEMA = None
 
-def get_property_schema_uncached(property_id: str) -> dict:
-    """
-    Fetches the full schema (dimensions and metrics) for a GA4 property.
-    This function makes a live API call and is intended to be called once on startup.
-    """
-    client = BetaAnalyticsDataClient()
-    request = {"name": f"properties/{property_id}/metadata"}
-    metadata = client.get_metadata(request=request)
 
-    schema = {"dimensions": {}, "metrics": {}}
+def _resolve_schema_for_property(property_identifier: str | None = None) -> tuple[dict | None, str | None]:
+    """Helper to resolve a property and return its schema dictionary."""
+    global PROPERTY_SCHEMA
+    prop_info, err = registry.resolve(property_identifier)
+    if err or not prop_info:
+        if PROPERTY_SCHEMA:
+            return PROPERTY_SCHEMA, None
+        return None, err or "Could not resolve GA4 property."
 
-    for dim in metadata.dimensions:
-        schema["dimensions"][dim.api_name] = {
-            "ui_name": dim.ui_name,
-            "description": dim.description,
-            "category": dim.category,
-            "custom_definition": dim.custom_definition,
-        }
+    try:
+        schema = schema_cache.get_schema(prop_info)
+        return schema, None
+    except Exception as e:
+        if PROPERTY_SCHEMA:
+            return PROPERTY_SCHEMA, None
+        return None, f"Could not load schema for property '{prop_info.display_name}' ({prop_info.property_id}): {e}"
 
-    for met in metadata.metrics:
-        schema["metrics"][met.api_name] = {
-            "ui_name": met.ui_name,
-            "description": met.description,
-            "category": met.category,
-            "type": met.type_.name,
-        }
-    return schema
 
 @mcp.tool(annotations=_READ_ONLY)
-def search_schema(keyword: str, ctx: Context = None):
+def list_properties(ctx: Context = None) -> dict:
     """
-    Search for a keyword across all dimensions and metrics for this property.
+    List all GA4 properties and accounts accessible with your configured credentials.
+
+    Returns: {"properties": [{"property_id": "...", "display_name": "...", "account_name": "...", "alias": "...", "is_default": bool}, ...]}
+
+    Use this tool to see what websites/properties you can query, or when a user mentions a site
+    by name and you need to confirm its exact Property ID.
+    """
+    props = registry.list_all()
+    if not props:
+        return {
+            "properties": [],
+            "message": "No GA4 properties found. Please verify your credentials or run 'gcloud auth application-default login'."
+        }
+    return {"properties": props}
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def search_schema(keyword: str, property: str = None, ctx: Context = None):
+    """
+    Search for a keyword across all dimensions and metrics for a GA4 property.
     Returns a ranked list of up to 10 matching fields scored by relevance.
 
     Returns: {"top_results": {"DIMENSION: api_name": score, "METRIC: api_name": score, ...}}
 
     Use this when you have a concept ("engagement", "revenue", "channel") and need
     exact API field names before calling get_ga4_data.
-    Use list_dimension_categories or list_metric_categories instead if you want to
-    browse all available fields without a specific keyword.
 
     Args:
         keyword: One or more keywords to search for (e.g., "user", "campaign revenue").
+        property: Optional property name, alias, or numeric ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded. Please check server startup logs."}
+    schema, err = _resolve_schema_for_property(property)
+    if err or not schema:
+        return {"error": err or "Schema not loaded. Please check server startup logs."}
 
     # Proactive Channel 2: fire before returning results, while model is still in discovery mode
     skill = _hint_from_keyword(keyword)
@@ -92,7 +101,7 @@ def search_schema(keyword: str, ctx: Context = None):
     search_terms = keyword.lower().split()
 
     # Search dimensions
-    for name, info in PROPERTY_SCHEMA["dimensions"].items():
+    for name, info in schema["dimensions"].items():
         score = 0
         for term in search_terms:
             if term in name.lower(): score += 10
@@ -103,7 +112,7 @@ def search_schema(keyword: str, ctx: Context = None):
             scores[f"DIMENSION: {name}"] = score
 
     # Search metrics
-    for name, info in PROPERTY_SCHEMA["metrics"].items():
+    for name, info in schema["metrics"].items():
         score = 0
         for term in search_terms:
             if term in name.lower(): score += 10
@@ -122,35 +131,40 @@ def search_schema(keyword: str, ctx: Context = None):
 
 
 @mcp.tool(annotations=_READ_ONLY)
-def get_property_schema():
+def get_property_schema(property: str = None):
     """
-    Returns the complete schema for the configured GA4 property, including all
+    Returns the complete schema for a GA4 property, including all
     available dimensions and metrics (standard and custom). Warning: This can be
     a very large object (10k+ tokens). Use search_schema for most discovery tasks.
+
+    Args:
+        property: Optional property name, alias, or numeric ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded. Please check server startup logs."}
-    return PROPERTY_SCHEMA
+    schema, err = _resolve_schema_for_property(property)
+    if err or not schema:
+        return {"error": err or "Schema not loaded. Please check server startup logs."}
+    return schema
+
 
 @mcp.tool(annotations=_READ_ONLY)
-def list_dimension_categories(ctx: Context = None):
+def list_dimension_categories(property: str = None, ctx: Context = None):
     """
-    List all dimension categories for this GA4 property, with a count of
+    List all dimension categories for a GA4 property, with a count of
     dimensions in each category.
 
     Returns: {"dimension_categories": {"Category Name": count, ...}}
 
-    Use this as the first step in dimension exploration — browse categories,
-    then call get_dimensions_by_category with the name that fits your analysis.
-    Use search_schema instead if you already have a keyword to search for.
+    Args:
+        property: Optional property name, alias, or numeric ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded."}
+    schema, err = _resolve_schema_for_property(property)
+    if err or not schema:
+        return {"error": err or "Schema not loaded."}
 
     fire_skill_tip(ctx, "💡 While you explore dimensions: search_skills() has 15 analytical recipes with proven dimension+metric combinations ready to use. Call search_skills('<topic>') before get_ga4_data to skip the guesswork.", skill=None, trigger="category_browse", tool_name="list_dimension_categories")
 
     categories = {}
-    for dim_info in PROPERTY_SCHEMA["dimensions"].values():
+    for dim_info in schema["dimensions"].values():
         category = dim_info.get("category", "Uncategorized")
         if category not in categories:
             categories[category] = 0
@@ -158,25 +172,26 @@ def list_dimension_categories(ctx: Context = None):
 
     return {"dimension_categories": categories}
 
+
 @mcp.tool(annotations=_READ_ONLY)
-def list_metric_categories(ctx: Context = None):
+def list_metric_categories(property: str = None, ctx: Context = None):
     """
-    List all metric categories for this GA4 property, with a count of
+    List all metric categories for a GA4 property, with a count of
     metrics in each category.
 
     Returns: {"metric_categories": {"Category Name": count, ...}}
 
-    Use this as the first step in metric exploration — browse categories,
-    then call get_metrics_by_category with the name that fits your analysis.
-    Use search_schema instead if you already have a keyword to search for.
+    Args:
+        property: Optional property name, alias, or numeric ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded."}
+    schema, err = _resolve_schema_for_property(property)
+    if err or not schema:
+        return {"error": err or "Schema not loaded."}
 
     fire_skill_tip(ctx, "💡 While you explore metrics: search_skills() has 15 analytical recipes with proven dimension+metric combinations ready to use. Call search_skills('<topic>') before get_ga4_data to skip the guesswork.", skill=None, trigger="category_browse", tool_name="list_metric_categories")
 
     categories = {}
-    for met_info in PROPERTY_SCHEMA["metrics"].values():
+    for met_info in schema["metrics"].values():
         category = met_info.get("category", "Uncategorized")
         if category not in categories:
             categories[category] = 0
@@ -184,25 +199,24 @@ def list_metric_categories(ctx: Context = None):
 
     return {"metric_categories": categories}
 
+
 @mcp.tool(annotations=_READ_ONLY)
-def get_dimensions_by_category(category: str):
+def get_dimensions_by_category(category: str, property: str = None):
     """
     Return all dimensions in a specific category with their API names and descriptions.
 
     Returns: {"dimension_api_name": "description", ...}
 
-    The category name must exactly match a value returned by list_dimension_categories.
-    Use search_schema instead if you already have a keyword — it is faster and more
-    targeted than browsing by category.
-
     Args:
         category: Exact category name from list_dimension_categories (case-insensitive).
+        property: Optional property name, alias, or numeric ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded."}
+    schema, err = _resolve_schema_for_property(property)
+    if err or not schema:
+        return {"error": err or "Schema not loaded."}
 
     dimensions_in_category = {}
-    for name, dim_info in PROPERTY_SCHEMA["dimensions"].items():
+    for name, dim_info in schema["dimensions"].items():
         if dim_info.get("category", "Uncategorized").lower() == category.lower():
             dimensions_in_category[name] = dim_info["description"]
             
@@ -211,25 +225,24 @@ def get_dimensions_by_category(category: str):
         
     return dimensions_in_category
 
+
 @mcp.tool(annotations=_READ_ONLY)
-def get_metrics_by_category(category: str):
+def get_metrics_by_category(category: str, property: str = None):
     """
     Return all metrics in a specific category with their API names and descriptions.
 
     Returns: {"metric_api_name": "description", ...}
 
-    The category name must exactly match a value returned by list_metric_categories.
-    Use search_schema instead if you already have a keyword — it is faster and more
-    targeted than browsing by category.
-
     Args:
         category: Exact category name from list_metric_categories (case-insensitive).
+        property: Optional property name, alias, or numeric ID. Defaults to active property.
     """
-    if not PROPERTY_SCHEMA:
-        return {"error": "Schema not loaded."}
+    schema, err = _resolve_schema_for_property(property)
+    if err or not schema:
+        return {"error": err or "Schema not loaded."}
 
     metrics_in_category = {}
-    for name, met_info in PROPERTY_SCHEMA["metrics"].items():
+    for name, met_info in schema["metrics"].items():
         if met_info.get("category", "Uncategorized").lower() == category.lower():
             metrics_in_category[name] = met_info["description"]
 

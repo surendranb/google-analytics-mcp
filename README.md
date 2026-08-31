@@ -5,27 +5,26 @@
 [![CI](https://github.com/surendranb/google-analytics-mcp/actions/workflows/package-checks.yml/badge.svg)](https://github.com/surendranb/google-analytics-mcp/actions)
 [![PyPI version](https://img.shields.io/pypi/v/google-analytics-mcp.svg?style=flat-square&color=blue)](https://pypi.org/project/google-analytics-mcp/)
 [![npm version](https://img.shields.io/npm/v/@surendranb/google-analytics-mcp.svg?style=flat-square&color=red)](https://www.npmjs.com/package/@surendranb/google-analytics-mcp)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/google-analytics-mcp/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/google-analytics-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-
-🌐 **Live Documentation & Web Portal**: [https://ga4.builditwithai.xyz](https://ga4.builditwithai.xyz)
 
 ---
 
 ## ⚡ Quickstart
 
+### Option 1: 1-Click User Login (Zero GCP, All Accounts)
+If your Google account (`you@agency.com` or `you@gmail.com`) is already a Viewer on your GA4 properties:
 ```bash
-# 1-Line Universal Installer (Auto-configures Claude Desktop, Cursor, Claude Code, Antigravity, VS Code, Zed, Windsurf)
-curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
-
-# Or run directly via your preferred runtime:
-uvx google-analytics-mcp
-uvx --from google-analytics-mcp ga4-mcp-server
-python -m ga4_mcp
-npx -y @surendranb/google-analytics-mcp
+gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.readonly
 ```
+Then launch the server with **zero configuration** — it auto-discovers all your accessible GA4 accounts and properties!
 
----
+### Option 2: Service Account Key(s)
+Set environment variables:
+```bash
+export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service_account.json"
+```
+Or drop multiple service account keys into `~/.config/ga4-mcp/credentials/` for automatic multi-account indexing.
 
 ---
 
@@ -48,7 +47,7 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
 }
 ```
 
-### C. Claude Desktop (`claude_desktop_config.json`)
+### C. Multi-Site Client Config (`claude_desktop_config.json` / `mcp.json`)
 ```json
 {
   "mcpServers": {
@@ -56,21 +55,8 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
       "command": "uvx",
       "args": ["google-analytics-mcp"],
       "env": {
-        "GA4_PROPERTY_ID": "your_ga4_property_id",
-        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/service_account.json"
+        "GA4_SITES": "{\"default_site\":\"blog\",\"sites\":{\"blog\":{\"name\":\"Personal Blog\",\"property_id\":\"111111111\",\"credentials\":\"/path/to/blog-sa.json\"},\"store\":{\"name\":\"E-Commerce Shop\",\"property_id\":\"222222222\",\"credentials\":\"/path/to/store-sa.json\"}}}"
       }
-    }
-  }
-}
-```
-
-### D. VS Code (Cline / Roo Code / Continue)
-```json
-{
-  "mcpServers": {
-    "google-analytics": {
-      "command": "npx",
-      "args": ["-y", "@surendranb/google-analytics-mcp"]
     }
   }
 }
@@ -80,42 +66,30 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
 
 ## 🛠️ Tools & Capabilities
 
-| Tool Name | Parameters | Description | Return Type |
-|---|---|---|---|
-| `get_ga4_data` | `dimensions` (list), `metrics` (list), `date_ranges` (list), `limit` (int) | Runs multi-dimensional GA4 reports with automated metric totals and server-side aggregation. | `JSON / Markdown` |
-| `list_accounts` | *(none)* | Lists all accessible Google Analytics accounts and permission levels. | `JSON` |
-| `list_properties` | `account_id` (optional) | Lists all GA4 properties associated with an account. | `JSON` |
-| `get_property_metadata` | `property_id` (optional) | Fetches complete dimension and metric schemas, custom definitions, and compatibility rules. | `JSON` |
-| `run_realtime_report` | `metrics` (list), `dimensions` (list) | Queries real-time active users and event counts from the last 30 minutes. | `JSON` |
-| `search_skills` | `query` (string) | Searches built-in GA4 analytical playbooks (e-commerce, channel attribution, bot filtering). | `Markdown` |
-| `skill_read` | `skill_name` (string) | Dynamically loads procedural skills and analytical guides from GitHub. | `Markdown` |
-| `skills_list` | *(none)* | Lists all available live GA4 analytical skills. | `JSON` |
+| Tool Name | Parameters | Description |
+|---|---|---|
+| `list_properties` | *(none)* | Discovers and lists all accessible GA4 properties and accounts across all credentials. |
+| `get_ga4_data` | `dimensions`, `metrics`, `date_range_start`, `date_range_end`, `dimension_filter`, `limit`, `property` | Runs multi-dimensional reports with automated metric totals, smart sorting, and property routing. |
+| `search_schema` | `keyword`, `property` | Searches valid dimension and metric names scored by relevance for a specific property. |
+| `get_property_schema` | `property` | Fetches complete dimension and metric schemas for a property. |
+| `list_dimension_categories` | `property` | Lists dimension categories and counts for a property. |
+| `list_metric_categories` | `property` | Lists metric categories and counts for a property. |
+| `search_skills` | `query` | Accesses pre-engineered analytical recipes (traffic drops, e-commerce, AI referrals, bot detection). |
+| `setup_ga4_access` | *(none)* | Interactively diagnoses and repairs authentication and property configuration. |
 
 ---
 
-## 🧠 Dynamic Skills & Guided Playbooks
+## 🧪 Testing
 
-This server ships with built-in analytical recipes that load dynamically from GitHub:
-- `traffic-diagnosis`: Step-by-step root cause analysis for sudden traffic drops.
-- `channel-acquisition`: Best-practice channel grouping and attribution modeling.
-- `ecommerce-analysis`: Revenue, item purchase rate, and conversion funnel analysis.
-- `ai-referral-analysis`: Tracks and isolates referral traffic from ChatGPT, Claude, Perplexity, and Gemini.
-
----
-
-## 🔒 Telemetry & Privacy
-
-This package collects anonymous, non-PII diagnostic telemetry (command executions, latency, error codes) to improve tool reliability. No queries, user credentials, personal data, source code, or environment variables are ever collected or stored.
-
-You can opt out anytime by setting either of the following environment variables:
+Run the full automated test suite:
 ```bash
-export DO_NOT_TRACK=1
-# or
-export MCP_TELEMETRY_OPT_OUT=1
+uv run python tests/test_aggregation.py
+uv run python tests/test_discovery.py
+uv run python tests/test_sites_registry.py
+uv run python tests/test_schema_isolation.py
+uv run python tests/test_multisite_mcp.py
+uv run python tests/test_mcp_connection.py
+uv run python tests/test_v2_inline_recovery.py
+uv run python tests/test_v2_setup_recovery.py
+uv run python tests/test_v2_telemetry.py
 ```
-
----
-
-## 📄 License
-
-MIT License. See [LICENSE](LICENSE) for details.

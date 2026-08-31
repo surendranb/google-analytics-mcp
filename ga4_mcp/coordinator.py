@@ -423,46 +423,48 @@ def fire_skill_tip(ctx, message: str, skill: str | None, trigger: str, tool_name
 
 def reinitialize():
     """Retry init from the current environment (used after setup recovery).
-    Returns (ok, category, detail); clears SERVER_INIT_ERROR and loads the
-    schema on success."""
+    Returns (ok, category, detail); clears SERVER_INIT_ERROR on success."""
     global SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY, SERVER_INIT_BRIEF_VERSION
     import os
+    from .sites import registry
+    from .schema_cache import schema_cache
     from .tools import metadata, reporting
 
+    registry.initialize(force_refresh=True)
+
+    if registry.has_any():
+        prop_info, _ = registry.resolve()
+        if prop_info:
+            try:
+                schema = schema_cache.get_schema(prop_info)
+                metadata.PROPERTY_SCHEMA = schema
+                reporting.PROPERTY_SCHEMA = schema
+                SERVER_INIT_ERROR = None
+                SERVER_INIT_BRIEF_VERSION = None
+                telemetry.mark_ever_worked()
+                return True, "ok", "initialized"
+            except Exception as e:
+                err_str = str(e)
+                if "403" in err_str or "permission" in err_str.lower():
+                    SERVER_INIT_ERROR_CATEGORY = "IAMError"
+                    cat = "iam"
+                elif "Reauthentication" in err_str or "invalid_grant" in err_str:
+                    SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
+                    cat = "adc"
+                else:
+                    SERVER_INIT_ERROR_CATEGORY = "InitError"
+                    cat = "setup"
+                SERVER_INIT_ERROR = err_str
+                return False, cat, err_str
+
+
     creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    prop = os.getenv("GA4_PROPERTY_ID")
-    if not creds:
-        SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "GOOGLE_APPLICATION_CREDENTIALS not set.", "InitError"
-        SERVER_INIT_BRIEF_VERSION = "ga4-reinit-creds-v1"
-        return False, "credentials", "credentials path not set"
-    if not prop:
-        SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "GA4_PROPERTY_ID not set.", "InitError"
-        SERVER_INIT_BRIEF_VERSION = "ga4-reinit-property-v1"
-        return False, "property-id", "property id not set"
-    if not os.path.exists(creds):
+    if creds and not os.path.exists(creds):
         SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = f"Credentials file not found at '{creds}'.", "InitError"
         SERVER_INIT_BRIEF_VERSION = "ga4-reinit-notfound-v1"
         return False, "credentials", "credentials file not found"
-    try:
-        schema = metadata.get_property_schema_uncached(prop)
-        metadata.PROPERTY_SCHEMA = schema
-        reporting.PROPERTY_SCHEMA = schema
-        SERVER_INIT_ERROR = None
-        SERVER_INIT_BRIEF_VERSION = None
-        telemetry.mark_ever_worked()
-        return True, "ok", "initialized"
-    except Exception as e:
-        err = str(e)
-        if "403" in err or "PermissionDenied" in err or "permission" in err.lower():
-            SERVER_INIT_ERROR_CATEGORY = "IAMError"
-            cat = "iam"
-        elif "Reauthentication" in err or "invalid_grant" in err or "expired" in err or "revoked" in err:
-            SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
-            cat = "adc"
-        else:
-            SERVER_INIT_ERROR_CATEGORY = "InitError"
-            cat = "setup"
-        SERVER_INIT_ERROR = err
-        # Raw upstream error text, not one of the authored briefs — no version tag.
-        SERVER_INIT_BRIEF_VERSION = None
-        return False, cat, err
+
+    SERVER_INIT_ERROR, SERVER_INIT_ERROR_CATEGORY = "No GA4 properties configured or discovered.", "InitError"
+    SERVER_INIT_BRIEF_VERSION = "ga4-reinit-property-v1"
+    return False, "property-id", "no properties accessible"
+
