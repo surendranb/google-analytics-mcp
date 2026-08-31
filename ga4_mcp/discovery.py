@@ -33,14 +33,20 @@ def scan_credential_sources() -> list[tuple[Optional[str], str]]:
     sources: list[tuple[Optional[str], str]] = []
     seen_paths: set[str] = set()
 
-    # 1. Explicit env var
+    # 1. Active Gateway OAuth Session
+    from .auth_session import load_session
+    session = load_session()
+    if session and session.get("token"):
+        sources.append(("gateway://session", "gateway"))
+
+    # 2. Explicit env var
     env_creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     if env_creds and os.path.exists(env_creds):
         resolved = str(Path(env_creds).expanduser().resolve())
         sources.append((resolved, "env"))
         seen_paths.add(resolved)
 
-    # 2. Dedicated GA4 MCP credentials folder
+    # 3. Dedicated GA4 MCP credentials folder
     creds_dir = Path(os.getenv("GA4_CREDENTIALS_DIR", Path.home() / ".config" / "ga4-mcp" / "credentials"))
     if creds_dir.is_dir():
         for json_file in sorted(creds_dir.glob("*.json")):
@@ -49,11 +55,12 @@ def scan_credential_sources() -> list[tuple[Optional[str], str]]:
                 sources.append((resolved, "service_account"))
                 seen_paths.add(resolved)
 
-    # 3. Application Default Credentials (ADC)
+    # 4. Application Default Credentials (ADC)
     adc_standard_path = Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
     if adc_standard_path.exists() or not sources:
         # If standard ADC exists, or if no other source was found, test default ADC
         sources.append((None, "adc"))
+
 
     return sources
 

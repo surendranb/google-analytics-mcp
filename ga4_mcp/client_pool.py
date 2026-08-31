@@ -9,8 +9,13 @@ import os
 import sys
 from pathlib import Path
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
+
 from google.analytics.admin_v1alpha import AnalyticsAdminServiceClient
 from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
+import urllib.request
+import json
+from .auth_session import load_session, get_gateway_url
 
 
 class ClientPool:
@@ -24,15 +29,49 @@ class ClientPool:
     def _normalize_key(credentials_path: str | None) -> str:
         if not credentials_path:
             return "__default__"
+        if credentials_path.startswith("gateway://"):
+            return credentials_path
         return str(Path(credentials_path).expanduser().resolve())
 
     @staticmethod
     def _create_credentials(credentials_path: str | None):
-        if credentials_path:
-            resolved = Path(credentials_path).expanduser().resolve()
-            if resolved.exists():
-                return service_account.Credentials.from_service_account_file(str(resolved))
+        if not credentials_path:
+            # Check if active session exists
+            session = load_session()
+            if session and session.get("token"):
+                return ClientPool._fetch_gateway_credentials(session["token"], session.get("gateway_url"))
+            return None
+
+        if credentials_path.startswith("gateway://"):
+            session = load_session()
+            token = session.get("token") if session else credentials_path.replace("gateway://", "")
+            gw_url = session.get("gateway_url") if session else get_gateway_url()
+            return ClientPool._fetch_gateway_credentials(token, gw_url)
+
+        resolved = Path(credentials_path).expanduser().resolve()
+        if resolved.exists():
+            return service_account.Credentials.from_service_account_file(str(resolved))
         return None
+
+    @staticmethod
+    def _fetch_gateway_credentials(session_token: str, gateway_url: str | None = None) -> Credentials | None:
+        """Calls Cloudflare Gateway /api/v1/token to get short-lived Google access token."""
+        try:
+            gw = (gateway_url or get_gateway_url()).rstrip("/")
+            req = urllib.request.Request(
+                f"{gw}/api/v1/token",
+                headers={"Authorization": f"Bearer {session_token}"}
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    access_token = data.get("access_token")
+                    if access_token:
+                        return Credentials(token=access_token)
+        except Exception:
+            pass
+        return None
+
 
     def get_data_client(self, credentials_path: str | None = None) -> BetaAnalyticsDataClient:
         """Get or create a BetaAnalyticsDataClient for the given credentials."""
