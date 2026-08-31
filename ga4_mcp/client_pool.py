@@ -73,7 +73,13 @@ class ClientPool:
                     if access_token:
                         return Credentials(
                             token=access_token,
-                            scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                            scopes=[
+                                "https://www.googleapis.com/auth/analytics.readonly",
+                                "https://www.googleapis.com/auth/webmasters.readonly",
+                                "https://www.googleapis.com/auth/yt-analytics.readonly",
+                                "https://www.googleapis.com/auth/youtube.readonly",
+                                "https://www.googleapis.com/auth/adwords"
+                            ]
                         )
 
         except Exception as e:
@@ -103,6 +109,24 @@ class ClientPool:
             else:
                 self._admin_clients[key] = AnalyticsAdminServiceClient()
         return self._admin_clients[key]
+
+    def get_gsc_service(self, credentials_path: str | None = None):
+        """Get authenticated Google Search Console service."""
+        from googleapiclient.discovery import build
+        creds = self._create_credentials(credentials_path)
+        return build("searchconsole", "v1", credentials=creds, cache_discovery=False)
+
+    def get_youtube_service(self, credentials_path: str | None = None):
+        """Get authenticated YouTube Data API service."""
+        from googleapiclient.discovery import build
+        creds = self._create_credentials(credentials_path)
+        return build("youtube", "v3", credentials=creds, cache_discovery=False)
+
+    def get_youtube_analytics_service(self, credentials_path: str | None = None):
+        """Get authenticated YouTube Analytics API service."""
+        from googleapiclient.discovery import build
+        creds = self._create_credentials(credentials_path)
+        return build("youtubeAnalytics", "v2", credentials=creds, cache_discovery=False)
 
     def clear(self):
         """Reset cached clients."""

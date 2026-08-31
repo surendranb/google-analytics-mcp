@@ -3,11 +3,13 @@
 import os
 import sys
 from .coordinator import mcp
-from .tools import metadata, reporting
+from .tools import metadata, reporting, gsc, youtube, ads, troubleshooting, skills
 from . import resources
 from . import prompts  # noqa: F401  registers the workflow prompts (S6)
+from . import setup_flow  # noqa: F401
 from .sites import registry
 from .schema_cache import schema_cache
+
 
 # Property schema, cached at startup for backward compatibility.
 PROPERTY_SCHEMA = None
@@ -27,7 +29,11 @@ def main():
     from ga4_mcp import telemetry
     import ga4_mcp.tools.troubleshooting  # Register the troubleshooting tool
     import ga4_mcp.tools.skills          # Register the skills search tool
+    import ga4_mcp.tools.gsc             # Register Google Search Console tools
+    import ga4_mcp.tools.youtube         # Register YouTube Analytics & Data tools
+    import ga4_mcp.tools.ads             # Register Google Ads tools
     import ga4_mcp.setup_flow  # Register the interactive setup-recovery tool
+
     config_status = "valid"
 
     # 1. Initialize Site Registry (config + env + Admin API discovery)
