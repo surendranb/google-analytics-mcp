@@ -22,3 +22,6 @@
   - [Geo Device Segmentation](/skills/geo-device-segmentation/SKILL.md)
   - [Traffic Diagnosis](/skills/traffic-diagnosis/SKILL.md)
   - [UA to GA4 Migration](/skills/ua-to-ga4/SKILL.md)
+
+- **Legal**
+  - [Privacy Policy](/privacy.html)
