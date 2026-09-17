@@ -2,77 +2,611 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Google Analytics MCP Server</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Documentation and setup guide for the GA4 MCP Server">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  
-  <!-- Docsify-Themeable (Premium Dark) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
-  
-  <style>
-    /* Custom tweaks for a premium look */
-    :root {
-      --theme-color: #38bdf8;
-      --base-font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --base-font-size: 16px;
-      --sidebar-width: 18rem;
-      --cover-background-color: #0f172a;
-      --cover-button-primary-background: #38bdf8;
-      --cover-button-primary-color: #0f172a;
-      --cover-button-primary-border: 1px solid #38bdf8;
-      --cover-button-background: transparent;
-      --cover-button-border: 1px solid rgba(255, 255, 255, 0.2);
-      --cover-button-color: #f8fafc;
-      --sidebar-background: #1e293b;
-    }
-    .app-name-link {
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-    main {
-      padding-top: 2rem;
-    }
-    .sidebar>h1 {
-      margin: 1.5rem 0;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GA4 MCP - Google Analytics for AI Agents</title>
+  <meta name="description" content="Connect Claude, Cursor, and Codex to Google Analytics 4 in 10 seconds. Zero Cloud Console required, zero server retention, 100% open source.">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="stylesheet" href="/styles.css">
 
-  <!-- PostHog Tracking -->
+  <!-- PostHog Analytics -->
   <script>
     !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'});
   </script>
 </head>
 <body>
-  <div id="app">Loading GA4 MCP Docs...</div>
-  <script>
-    window.$docsify = {
-      name: 'GA4 MCP Server',
-      repo: 'https://github.com/surendranb/google-analytics-mcp',
-      loadSidebar: true,
-      subMaxLevel: 2,
-      themeColor: '#38bdf8',
-      auto2top: true,
-      search: 'auto',
-      copyCode: {
-        buttonText : 'Copy',
-        errorText  : 'Error',
-        successText: 'Copied'
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container navbar">
+      <a href="/" class="brand">
+        <img src="/assets/logo.png" alt="GA4 MCP Logo" class="brand-logo">
+        <span>GA4 MCP</span>
+        <span class="brand-badge">FREE &bull; OPEN SOURCE</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#compare" class="nav-link">Auth Options</a></li>
+          <li><a href="#security" class="nav-link">Security Architecture</a></li>
+          <li><a href="#clients" class="nav-link">IDE Clients</a></li>
+          <li><a href="#playbook" class="nav-link">Agent Playbook</a></li>
+          <li><a href="#schema" class="nav-link">Schema & IAM</a></li>
+          <li><a href="/privacy" class="nav-link">Privacy</a></li>
+          <li><a href="https://github.com/surendranb/google-analytics-mcp" target="_blank" rel="noopener" class="nav-cta">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="quickstart">
+    <div class="container">
+      <div class="hero-pill">
+        <span class="hero-pill-dot"></span>
+        <span>100% Free &amp; Open Source &bull; Built for Claude Code, Cursor, Windsurf &amp; Codex</span>
+      </div>
+      <h1 class="hero-title">
+        Google Analytics for AI Agents.<br>
+        <span class="highlight-pink">Zero Cloud Console Required.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Give Claude and Cursor instant, secure access to your live Google Analytics 4 traffic, conversions, and AI referral attribution. Choose between 1-click browser sign-in or offline service account keys.
+      </p>
+
+      <!-- Terminal Installer Box -->
+      <div class="terminal-box">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <span class="terminal-title">Universal Installer (macOS, Linux, WSL)</span>
+          <span></span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-code">
+            <span class="prompt-symbol">$</span>curl -fsSL https://ga4mcp.com/install | bash
+          </div>
+          <button class="btn-copy" onclick="copySnippet('curl -fsSL https://ga4mcp.com/install | bash')">
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Alternative direct UVX -->
+      <div style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem;">
+        Or run directly via uvx: <code style="background: var(--surface-subtle); padding: 0.2rem 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 700; color: var(--text);">uvx google-analytics-mcp</code>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="hero-proof">
+        <div class="proof-item">
+          <span class="proof-icon">&check;</span>
+          <span>Zero Server Storage</span>
+        </div>
+        <div class="proof-item">
+          <span class="proof-icon">&check;</span>
+          <span>Read-Only Scope Protection</span>
+        </div>
+        <div class="proof-item">
+          <span class="proof-icon">&check;</span>
+          <span>Multi-Property Auto-Discovery</span>
+        </div>
+        <div class="proof-item">
+          <span class="proof-icon">&check;</span>
+          <span>100% Free &amp; Open Source (MIT)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Section: Two Ways to Connect -->
+  <section class="section" id="compare">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Authentication Options</div>
+        <h2 class="section-title">Two Ways to Connect: 1-Click Sign-In or Service Account</h2>
+        <p class="section-desc">
+          GA4 MCP will always remain 100% free and open source. The installer provides two authentication options depending on your preference and environment.
+        </p>
+      </div>
+
+      <div class="compare-grid">
+        <!-- 1-Click Flow -->
+        <div class="compare-card pro">
+          <div class="card-badge badge-pro">Option A: 1-Click Browser Sign-In</div>
+          <h3 class="compare-card-title">Zero-Knowledge OAuth Flow</h3>
+          <div class="compare-time time-pro">
+            10 Seconds <span class="time-sub">(Single browser click)</span>
+          </div>
+          <ul class="step-list">
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>Frictionless Setup:</strong> Choose 1-Click during install or trigger your first query in Claude/Cursor.</div>
+            </li>
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>Official Google Sign-In:</strong> Standard Google consent screen requesting read-only access (<code>analytics.readonly</code>).</div>
+            </li>
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>Instant Property Auto-Discovery:</strong> Automatically discovers all GA4 properties across all accounts you have access to.</div>
+            </li>
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>Local Vault Storage:</strong> Tokens stored locally in <code>~/.config/ga4-mcp/vault.json</code> (chmod 0600). Zero server storage.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Service Account Flow -->
+        <div class="compare-card pain" style="border-color: var(--border-color); background: #ffffff;">
+          <div class="card-badge badge-pro" style="background: var(--accent-teal);">Option B: Service Account JSON</div>
+          <h3 class="compare-card-title">Offline Cloud Console Setup</h3>
+          <div class="compare-time time-sub" style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 800; color: var(--text);">
+            Full Offline Control <span class="time-sub">(Zero OAuth dependency)</span>
+          </div>
+          <ul class="step-list">
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>100% Offline / Air-gapped:</strong> Direct service account JSON key (<code>GOOGLE_APPLICATION_CREDENTIALS</code>) or ADC.</div>
+            </li>
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>CI/CD &amp; Automation Friendly:</strong> Ideal for headless automated pipelines or shared enterprise infrastructure.</div>
+            </li>
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>Granular IAM Control:</strong> Grant Viewer access specifically to individual property IDs in the GA4 admin UI.</div>
+            </li>
+            <li class="step-item">
+              <span class="step-bullet bullet-check">&check;</span>
+              <div><strong>Standard Google Cloud Workflow:</strong> Use your existing GCP project and credentials without external redirection.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security & Zero-Knowledge Architecture -->
+  <section class="section" id="security">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Security &amp; Compliance</div>
+        <h2 class="section-title">Zero-Knowledge Security Architecture</h2>
+        <p class="section-desc">
+          Your analytics metrics and credentials never touch our servers. Designed for engineering leaders who require mathematical privacy guarantees.
+        </p>
+      </div>
+
+      <div class="security-pillars">
+        <div class="pillar-card">
+          <div class="pillar-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#001858" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h3 class="pillar-title">Zero Server Retention</h3>
+          <p class="pillar-desc">
+            The ephemeral Cloudflare Edge gateway serves solely as an authorization relay. Refresh tokens and query data are never saved to any database, cache, or log. Tokens live exclusively on your machine.
+          </p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#001858" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="M9 12l2 2 4-4"></path>
+            </svg>
+          </div>
+          <h3 class="pillar-title">Read-Only Scope Protection</h3>
+          <p class="pillar-desc">
+            Authentication is mathematically confined to <code>analytics.readonly</code>. The agent is structurally incapable of altering settings, deleting events, or making unauthorized configuration changes.
+          </p>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#001858" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </div>
+          <h3 class="pillar-title">Direct-to-Google Queries</h3>
+          <p class="pillar-desc">
+            Once authenticated, your local IDE queries Google's official Data API (<code>analyticsdata.googleapis.com</code>) directly over TLS. Zero analytics traffic ever transits our gateway.
+          </p>
+        </div>
+      </div>
+
+      <!-- Architecture Diagram Container -->
+      <div class="arch-diagram">
+        <h3 class="arch-title">Data Flow Architecture</h3>
+        <div class="flow-steps">
+          <div class="flow-node">
+            <div class="flow-node-title">1. Your AI Agent</div>
+            <div class="flow-node-desc">Claude Desktop, Cursor, Claude Code CLI</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node">
+            <div class="flow-node-title">2. Local GA4 MCP</div>
+            <div class="flow-node-desc">Runs locally on stdio / uvx</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node">
+            <div class="flow-node-title">3. Ephemeral Relay</div>
+            <div class="flow-node-desc">10-sec OAuth exchange (0 data stored)</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node">
+            <div class="flow-node-title">4. Google Analytics API</div>
+            <div class="flow-node-desc">Direct TLS query from your machine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Client Configuration Switcher -->
+  <section class="section" id="clients">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Universal IDE Support</div>
+        <h2 class="section-title">Configure Any AI Agent in Seconds</h2>
+        <p class="section-desc">
+          Compatible with all Model Context Protocol clients. Select your environment below for the exact configuration snippet.
+        </p>
+      </div>
+
+      <div class="config-card">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'tab-claudecode')">Claude Code CLI</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-cursor')">Cursor</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-claudedesktop')">Claude Desktop</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-windsurf')">Windsurf</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-cline')">Cline &amp; Zed</button>
+        </div>
+
+        <!-- Claude Code CLI -->
+        <div id="tab-claudecode" class="tab-content active">
+          <p><strong>Claude Code (Anthropic Terminal Agent):</strong> Run this command directly in your terminal to add GA4 MCP globally:</p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>Terminal Command</span>
+              <button class="btn-copy" onclick="copySnippet('claude mcp add google-analytics -- uvx google-analytics-mcp')">Copy</button>
+            </div>
+            <pre class="code-block"><code>claude mcp add google-analytics -- uvx google-analytics-mcp</code></pre>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Claude Code will automatically download and run the server using <code>uvx</code>. When prompted for analytics queries, it will trigger the browser login if no credentials exist.
+          </p>
+        </div>
+
+        <!-- Cursor -->
+        <div id="tab-cursor" class="tab-content">
+          <p><strong>Cursor IDE:</strong> Add this to your project root in <code>.cursor/mcp.json</code> (or global Cursor MCP settings):</p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>.cursor/mcp.json</span>
+              <button class="btn-copy" onclick="copySnippet('{\n  &quot;mcpServers&quot;: {\n    &quot;google-analytics&quot;: {\n      &quot;command&quot;: &quot;uvx&quot;,\n      &quot;args&quot;: [&quot;google-analytics-mcp&quot;]\n    }\n  }\n}')">Copy</button>
+            </div>
+            <pre class="code-block"><code>{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"]
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Claude Desktop -->
+        <div id="tab-claudedesktop" class="tab-content">
+          <p><strong>Claude Desktop:</strong> Add to <code>claude_desktop_config.json</code>:</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code><br>
+            Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code>
+          </p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>claude_desktop_config.json</span>
+              <button class="btn-copy" onclick="copySnippet('{\n  &quot;mcpServers&quot;: {\n    &quot;google-analytics&quot;: {\n      &quot;command&quot;: &quot;uvx&quot;,\n      &quot;args&quot;: [&quot;google-analytics-mcp&quot;]\n    }\n  }\n}')">Copy</button>
+            </div>
+            <pre class="code-block"><code>{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"]
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Windsurf -->
+        <div id="tab-windsurf" class="tab-content">
+          <p><strong>Windsurf:</strong> Add to <code>~/.codeium/windsurf/mcp_config.json</code>:</p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>mcp_config.json</span>
+              <button class="btn-copy" onclick="copySnippet('{\n  &quot;mcpServers&quot;: {\n    &quot;google-analytics&quot;: {\n      &quot;command&quot;: &quot;uvx&quot;,\n      &quot;args&quot;: [&quot;google-analytics-mcp&quot;]\n    }\n  }\n}')">Copy</button>
+            </div>
+            <pre class="code-block"><code>{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"]
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Cline & Zed -->
+        <div id="tab-cline" class="tab-content">
+          <p><strong>Cline &amp; Zed:</strong> Add the standard MCP stdio executable:</p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>settings.json</span>
+              <button class="btn-copy" onclick="copySnippet('{\n  &quot;mcp&quot;: {\n    &quot;servers&quot;: {\n      &quot;google-analytics&quot;: {\n        &quot;command&quot;: &quot;uvx&quot;,\n        &quot;args&quot;: [&quot;google-analytics-mcp&quot;]\n      }\n    }\n  }\n}')">Copy</button>
+            </div>
+            <pre class="code-block"><code>{
+  "mcp": {
+    "servers": {
+      "google-analytics": {
+        "command": "uvx",
+        "args": ["google-analytics-mcp"]
       }
     }
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Native GA4 Tools & Agent Prompt Playbook -->
+  <section class="section" id="playbook">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Agent Capabilities</div>
+        <h2 class="section-title">7 Specialized Tools &amp; Prompt Playbook</h2>
+        <p class="section-desc">
+          Engineered specifically for LLMs. Includes automated schema discovery, metric normalization, and attribution analysis.
+        </p>
+      </div>
+
+      <!-- 7 Tools Grid -->
+      <div class="tools-grid">
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">get_ga4_data</span>
+            <span class="tool-badge">Primary Query</span>
+          </div>
+          <p class="tool-desc">Executes structured queries with dimensions, metrics, date ranges, and advanced nested JSON filters.</p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            Dimensions: date, sessionSource, country, pagePath<br>
+            Metrics: activeUsers, sessions, bounceRate, keyEvents
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">list_properties</span>
+            <span class="tool-badge">Discovery</span>
+          </div>
+          <p class="tool-desc">Auto-discovers all GA4 properties across all linked Google accounts. Eliminates hunting for Property IDs.</p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            Returns: Property ID, display name, account ID, currency, timezone
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">search_schema</span>
+            <span class="tool-badge">Resilience</span>
+          </div>
+          <p class="tool-desc">Keyword search for valid API dimensions and metrics. Prevents invalid dimension hallucinations.</p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            Example: keyword="conversions" &rarr; reveals "keyEvents" API name
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">diagnose_traffic_drop</span>
+            <span class="tool-badge">Diagnostic</span>
+          </div>
+          <p class="tool-desc">Compares baseline vs comparison periods to pinpoint which channel, landing page, or device drove a decline.</p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            Automates percentage change and absolute delta calculations
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">get_user_acquisition</span>
+            <span class="tool-badge">Growth</span>
+          </div>
+          <p class="tool-desc">First-user acquisition channels, source/medium breakdown, and new user conversion velocity.</p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            Dimensions: firstUserDefaultChannelGroup, firstUserSourceMedium
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-header">
+            <span class="tool-name">get_realtime_data</span>
+            <span class="tool-badge">Live Monitor</span>
+          </div>
+          <p class="tool-desc">Real-time user count in the last 30 minutes, current top landing pages, and geographic distribution.</p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+            Live minute-by-minute activity monitoring
+          </div>
+        </div>
+      </div>
+
+      <!-- Playbook Cards -->
+      <div class="playbook-box">
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--headline); margin-bottom: 0.5rem;">Prompt Playbook for Developers &amp; Marketers</h3>
+        <p style="font-size: 1rem; color: var(--text-muted);">Copy and paste these exact prompts into Claude or Cursor to query your live data:</p>
+
+        <div class="prompt-cards">
+          <div class="prompt-card">
+            <p class="prompt-text">"Compare our organic search vs direct traffic over the last 14 days and identify top dropping landing pages."</p>
+            <button class="prompt-btn" onclick="copySnippet('Compare our organic search vs direct traffic over the last 14 days and identify top dropping landing pages.')">Copy Prompt</button>
+          </div>
+          <div class="prompt-card">
+            <p class="prompt-text">"Which AI referrals (ChatGPT, Claude, Perplexity, Copilot) sent us traffic this month and what was their conversion rate?"</p>
+            <button class="prompt-btn" onclick="copySnippet('Which AI referrals (ChatGPT, Claude, Perplexity, Copilot) sent us traffic this month and what was their conversion rate?')">Copy Prompt</button>
+          </div>
+          <div class="prompt-card">
+            <p class="prompt-text">"List all GA4 properties I have access to and show active users yesterday for each one."</p>
+            <button class="prompt-btn" onclick="copySnippet('List all GA4 properties I have access to and show active users yesterday for each one.')">Copy Prompt</button>
+          </div>
+          <div class="prompt-card">
+            <p class="prompt-text">"Diagnose our traffic drop between this week and last week. Break down by sessionDefaultChannelGroup and deviceCategory."</p>
+            <button class="prompt-btn" onclick="copySnippet('Diagnose our traffic drop between this week and last week. Break down by sessionDefaultChannelGroup and deviceCategory.')">Copy Prompt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Schema Resilience & Error Recovery Guide -->
+  <section class="section" id="schema">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Developer Reference</div>
+        <h2 class="section-title">Schema Resilience &amp; Troubleshooting</h2>
+        <p class="section-desc">
+          GA4 MCP includes built-in case-translation and automatic recovery logic to ensure your agent never gets stuck.
+        </p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <h3 class="faq-question">1. Case-Resilient Filter Formatting (camelCase &amp; snake_case)</h3>
+          <p class="faq-answer">
+            The GA4 MCP server automatically translates all filter parameters. Your AI agent can generate either standard Google Analytics API format (<code>fieldName</code>, <code>stringFilter</code>, <code>andGroup</code>) or Pythonic format (<code>field_name</code>, <code>string_filter</code>, <code>and_group</code>). Both compile and execute identically.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3 class="faq-question">2. Combining Multiple Filters (andGroup / orGroup)</h3>
+          <p class="faq-answer">
+            To combine multiple conditions (e.g. city is London AND device is Mobile), the filter must use an <code>andGroup</code> containing an <code>expressions</code> array. The MCP server validates this structure automatically before making the network request to prevent 400 Bad Request errors.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3 class="faq-question">3. How to fix IAM Permission Errors with Service Accounts</h3>
+          <p class="faq-answer">
+            If using a service account JSON file and receiving <code>IAM Error: The service account does not have Viewer access</code>: Open <a href="https://analytics.google.com" target="_blank" rel="noopener">analytics.google.com</a> &rarr; Admin &rarr; Property Access Management &rarr; Click <strong>+</strong> (Add users) &rarr; Paste your service account email (<code>...iam.gserviceaccount.com</code>) &rarr; Assign <strong>Viewer</strong> role.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3 class="faq-question">4. Refreshing Expired Application Default Credentials (ADC)</h3>
+          <p class="faq-answer">
+            If using local gcloud CLI authentication and receiving a 503 Reauthentication error, your local token has expired. Run <code>gcloud auth application-default login</code> in your terminal to refresh it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="brand">
+            <img src="/assets/logo.png" alt="GA4 MCP Logo" class="brand-logo">
+            <span>GA4 MCP</span>
+          </a>
+          <p class="footer-desc">
+            The open-source Model Context Protocol server for Google Analytics 4. Built for AI agents, engineering teams, and growth leaders.
+          </p>
+        </div>
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="#quickstart" class="footer-link">Quickstart</a></li>
+            <li><a href="#security" class="footer-link">Security Architecture</a></li>
+            <li><a href="#compare" class="footer-link">1-Click vs GCP</a></li>
+            <li><a href="#clients" class="footer-link">IDE Clients</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal & Security</div>
+          <ul class="footer-links">
+            <li><a href="/privacy" class="footer-link">Privacy Policy</a></li>
+            <li><a href="/terms" class="footer-link">Terms of Service</a></li>
+            <li><a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener" class="footer-link">Google Limited Use</a></li>
+            <li><a href="https://github.com/surendranb/google-analytics-mcp/blob/main/SECURITY.md" target="_blank" rel="noopener" class="footer-link">Security Disclosures</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Community</div>
+          <ul class="footer-links">
+            <li><a href="https://github.com/surendranb/google-analytics-mcp" target="_blank" rel="noopener" class="footer-link">GitHub Repository</a></li>
+            <li><a href="https://github.com/surendranb/google-analytics-mcp/issues" target="_blank" rel="noopener" class="footer-link">Issue Tracker</a></li>
+            <li><a href="mailto:reachsuren@gmail.com" class="footer-link">Contact Developer</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Surendran Balachandran. Released under the MIT License.</div>
+        <div>Styled with Happy Hues #17 &bull; Zero Server Storage &bull; Fully Open Source</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span>&check;</span>
+    <span id="toast-msg">Copied to clipboard!</span>
+  </div>
+
+  <!-- Interactive Scripts -->
+  <script>
+    function copySnippet(text) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast("Copied to clipboard!");
+      }).catch(function() {
+        showToast("Failed to copy");
+      });
+    }
+
+    function showToast(msg) {
+      var toast = document.getElementById("toast");
+      var toastMsg = document.getElementById("toast-msg");
+      toastMsg.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(function() {
+        toast.classList.remove("show");
+      }, 2500);
+    }
+
+    function switchTab(evt, tabId) {
+      var tabContents = document.querySelectorAll(".tab-content");
+      for (var i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
+      }
+
+      var tabBtns = document.querySelectorAll(".tab-btn");
+      for (var j = 0; j < tabBtns.length; j++) {
+        tabBtns[j].classList.remove("active");
+      }
+
+      document.getElementById(tabId).classList.add("active");
+      evt.currentTarget.classList.add("active");
+    }
   </script>
-  <!-- Docsify Core -->
-  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-  <!-- Docsify-Themeable -->
-  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
-  <!-- Search Plugin -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-  <!-- Docsify plugins -->
-  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
-  <!-- Syntax highlighting -->
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
 </body>
 </html>
