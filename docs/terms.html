@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service - GA4 MCP</title>
+  <meta name="description" content="Terms of Service and License Agreement for GA4 MCP.">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container navbar">
+      <a href="/" class="brand">
+        <img src="/assets/logo.png" alt="GA4 MCP Logo" class="brand-logo">
+        <span>GA4 MCP</span>
+        <span class="brand-badge">OPEN SOURCE</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Overview</a></li>
+          <li><a href="/#security" class="nav-link">Zero-Knowledge Architecture</a></li>
+          <li><a href="/#clients" class="nav-link">Clients</a></li>
+          <li><a href="/#playbook" class="nav-link">Tool Reference</a></li>
+          <li><a href="/privacy" class="nav-link">Privacy</a></li>
+          <li><a href="https://github.com/surendranb/google-analytics-mcp" target="_blank" rel="noopener" class="nav-cta">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Terms Content -->
+  <main class="legal-wrapper">
+    <div class="container">
+      <div class="legal-card">
+        <h1>Terms of Service</h1>
+        <div class="legal-meta">
+          <strong>Effective Date:</strong> September 17, 2026 &bull; 
+          <strong>Software:</strong> GA4 MCP (Google Analytics Model Context Protocol) &bull; 
+          <strong>License:</strong> MIT License
+        </div>
+
+        <div class="legal-body">
+          <p>
+            Welcome to GA4 MCP. By downloading, installing, running, or accessing the GA4 MCP server software, documentation, or the ephemeral OAuth authorization gateway (collectively, the "Service" or "Software"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not install or use the Service.
+          </p>
+
+          <h2>1. Open Source License (MIT)</h2>
+          <p>
+            The GA4 MCP software is an open-source project distributed under the terms of the <strong>MIT License</strong>:
+          </p>
+          <div class="callout-box" style="font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.5;">
+            Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br><br>
+            The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+          </div>
+
+          <h2>2. Use of Google Analytics & Third-Party APIs</h2>
+          <p>
+            GA4 MCP interfaces with the Google Analytics Admin API and Data API. Your use of Google APIs is independently governed by:
+          </p>
+          <ul>
+            <li><a href="https://developers.google.com/terms" target="_blank" rel="noopener">Google APIs Terms of Service</a></li>
+            <li><a href="https://marketingplatform.google.com/about/analytics/terms/us/" target="_blank" rel="noopener">Google Analytics Terms of Service</a></li>
+            <li><a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a></li>
+          </ul>
+          <p>
+            You are solely responsible for ensuring that your queries, reporting requests, and usage comply with Google's quota limits, rate limits, and service terms.
+          </p>
+
+          <h2>3. Ephemeral OAuth Relay Gateway</h2>
+          <p>
+            For your convenience, GA4 MCP provides an ephemeral Cloudflare Edge gateway to facilitate browser-based Google OAuth token exchange without requiring you to configure an independent GCP Project.
+          </p>
+          <ul>
+            <li>The gateway is provided free of charge for individual developers and organizations.</li>
+            <li>We do not guarantee uninterrupted availability of the relay gateway.</li>
+            <li>You may bypass the relay gateway entirely at any time by configuring your own local Google Cloud Service Account (<code>GOOGLE_APPLICATION_CREDENTIALS</code>) or Application Default Credentials (ADC).</li>
+          </ul>
+
+          <h2>4. Disclaimer of Warranties</h2>
+          <p>
+            THE SOFTWARE AND THE EPHEMERAL RELAY GATEWAY ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+          </p>
+
+          <h2>5. Limitation of Liability</h2>
+          <p>
+            Under no circumstances shall the maintainers, contributors, or affiliated entities be liable for any direct, indirect, incidental, consequential, special, or exemplary damages arising out of or in connection with your use or inability to use the Software, including but not limited to loss of data, loss of business profits, or API quota exhaustion.
+          </p>
+
+          <h2>6. Termination and Modifications</h2>
+          <p>
+            You may terminate these Terms at any time by ceasing all use of the Software, deleting all local configuration files (<code>rm -rf ~/.config/ga4-mcp</code>), and revoking the application permissions in your Google Account security panel. We reserve the right to update these Terms at any time by publishing the revised terms on this page.
+          </p>
+
+          <h2>7. Contact</h2>
+          <p>
+            For questions regarding these Terms, please contact:
+          </p>
+          <p>
+            <strong>Surendran Balachandran</strong><br>
+            Maintainer, GA4 MCP<br>
+            Email: <a href="mailto:reachsuren@gmail.com">reachsuren@gmail.com</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="brand">
+            <img src="/assets/logo.png" alt="GA4 MCP Logo" class="brand-logo">
+            <span>GA4 MCP</span>
+          </a>
+          <p class="footer-desc">
+            The open-source Model Context Protocol server for Google Analytics 4. Built for AI agents, engineering teams, and growth leaders.
+          </p>
+        </div>
+        <div>
+          <div class="footer-col-title">Platform</div>
+          <ul class="footer-links">
+            <li><a href="/#quickstart" class="footer-link">Quickstart</a></li>
+            <li><a href="/#security" class="footer-link">Security Architecture</a></li>
+            <li><a href="/#compare" class="footer-link">1-Click vs GCP</a></li>
+            <li><a href="/#clients" class="footer-link">IDE Clients</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal & Security</div>
+          <ul class="footer-links">
+            <li><a href="/privacy" class="footer-link">Privacy Policy</a></li>
+            <li><a href="/terms" class="footer-link">Terms of Service</a></li>
+            <li><a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener" class="footer-link">Google Limited Use</a></li>
+            <li><a href="https://github.com/surendranb/google-analytics-mcp/blob/main/SECURITY.md" target="_blank" rel="noopener" class="footer-link">Security Disclosures</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Community</div>
+          <ul class="footer-links">
+            <li><a href="https://github.com/surendranb/google-analytics-mcp" target="_blank" rel="noopener" class="footer-link">GitHub Repository</a></li>
+            <li><a href="https://github.com/surendranb/google-analytics-mcp/issues" target="_blank" rel="noopener" class="footer-link">Issue Tracker</a></li>
+            <li><a href="mailto:reachsuren@gmail.com" class="footer-link">Contact Developer</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Surendran Balachandran. Released under the MIT License.</div>
+        <div>Styled with Happy Hues #17 &bull; Zero Server Storage &bull; Fully Open Source</div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
