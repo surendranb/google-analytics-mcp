@@ -10,6 +10,7 @@ import time
 import json
 import uuid
 import atexit
+import signal
 import platform
 import threading
 import subprocess
@@ -156,6 +157,47 @@ def _scrub(value):
     if isinstance(value, (list, tuple)):
         return [_scrub(v) for v in value]
     return value
+
+
+# Secret patterns that only make sense inside error text (Google API errors echo
+# request context: tokens, key material, numeric property IDs). Kept separate
+# from _REDACTIONS so intent/query strings keep their numbers.
+_ERROR_SECRET_PATTERNS = [
+    (re.compile(r"Bearer\s+[A-Za-z0-9\-._~+/=]+", re.IGNORECASE), "Bearer <redacted>"),
+    (re.compile(r"ya29\.[A-Za-z0-9\-_]+"), "<oauth_token>"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----"),
+     "<private_key>"),
+    (re.compile(r"(?i)(client_secret|refresh_token|access_token|private_key|api_key)"
+                r"[\"'\s:=]+[A-Za-z0-9\-._~+/=]{8,}"), r"\1=<redacted>"),
+    (re.compile(r"[0-9]+-[A-Za-z0-9-]+\.apps\.googleusercontent\.com"), "<oauth_client>"),
+    # Bare numeric property IDs ("GA4 property 123456789"). Threshold is 6+
+    # digits so HTTP codes (400/403/429/500) and small counts survive intact.
+    (re.compile(r"\b\d{6,}\b"), "<id>"),
+]
+
+
+def _scrub_error_message(raw, max_chars=500):
+    """Bounded, secret-scrubbed error text for telemetry. Error strings echo
+    request context (tokens, property IDs, key paths) so they are never logged
+    raw: extra secret patterns first, then the shared _scrub redactions
+    (paths, emails, google keys, properties/<id>), then a hard length cap so
+    the field fits the worker's Analytics Engine blob and Amplitude props."""
+    try:
+        s = str(raw) if raw is not None else ""
+    except Exception:
+        return ""
+    for pattern, replacement in _ERROR_SECRET_PATTERNS:
+        try:
+            s = pattern.sub(replacement, s)
+        except Exception:
+            pass
+    try:
+        s = _scrub(s)
+    except Exception:
+        pass
+    if len(s) > max_chars:
+        s = s[:max_chars]
+    return s
 
 
 # Map a handshake clientInfo.name to a known bucket.
@@ -590,15 +632,55 @@ def send_telemetry(event: str, properties: dict = None):
         _PENDING_SENDS[:] = [t for t in _PENDING_SENDS if t.is_alive()]
 
 
+_EXIT_REASON = "clean"
+_EXIT_EXCEPTION = None
+
+
+def _capture_excepthook(exc_type, exc_value, exc_traceback):
+    global _EXIT_REASON, _EXIT_EXCEPTION
+    _EXIT_REASON = "exception"
+    _EXIT_EXCEPTION = exc_type.__name__ if exc_type else "UnknownException"
+    if _original_excepthook and callable(_original_excepthook):
+        _original_excepthook(exc_type, exc_value, exc_traceback)
+
+
+_original_excepthook = getattr(sys, "excepthook", None)
+sys.excepthook = _capture_excepthook
+
+_original_signals = {}
+
+
+def _capture_signal(sig, frame):
+    global _EXIT_REASON
+    _EXIT_REASON = "signal"
+    orig = _original_signals.get(sig)
+    if callable(orig):
+        orig(sig, frame)
+    else:
+        sys.exit(128 + sig)
+
+
+try:
+    for s in (signal.SIGINT, signal.SIGTERM):
+        _original_signals[s] = signal.getsignal(s)
+        signal.signal(s, _capture_signal)
+except (ValueError, AttributeError):
+    pass
+
+
 def _emit_session_end():
     if TELEMETRY_DISABLED:
         return
-    send_telemetry("session_end", {
+    payload = {
         "session_duration_s": int(time.time() - _SESSION_START),
         "tool_sequence": list(_TOOL_SEQUENCE),
         "tool_counts": dict(_TOOL_COUNTS),
         "calls_total": sum(_TOOL_COUNTS.values()),
-    })
+        "exit_reason": _EXIT_REASON,
+    }
+    if _EXIT_EXCEPTION:
+        payload["exit_exception"] = _EXIT_EXCEPTION
+    send_telemetry("session_end", payload)
 
 
 # atexit is LIFO: session_end must fire before the drain joins senders.

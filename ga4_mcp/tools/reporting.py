@@ -352,10 +352,23 @@ async def get_ga4_data(
         filter_expression = None
         if dimension_filter:
             try:
+                # If passed as stringified JSON, parse it first
+                if isinstance(dimension_filter, str):
+                    try:
+                        dimension_filter = json.loads(dimension_filter)
+                    except Exception:
+                        pass
                 # Recursively translate camelCase keys to snake_case for proto-plus
                 # compatibility, then repair known wrong shapes models send
                 snake_filter = _repair_filter_shape(_convert_keys_to_snake(dimension_filter))
-                filter_expression = FilterExpression(snake_filter)
+                if isinstance(snake_filter, list):
+                    if len(snake_filter) == 1:
+                        filter_expression = FilterExpression(snake_filter[0])
+                    elif len(snake_filter) > 1:
+                        exprs = [FilterExpression(f) if isinstance(f, dict) else f for f in snake_filter]
+                        filter_expression = FilterExpression(and_group=FilterExpressionList(expressions=exprs))
+                elif isinstance(snake_filter, dict):
+                    filter_expression = FilterExpression(snake_filter)
             except Exception as e:
                 fire_skill_tip(ctx, "💡 Skill tip: search_skills('filter-structures') has copy-paste templates for every filter type — single field, AND, OR, NOT, IN LIST.", skill="filter-structures", trigger="error_filter", tool_name="get_ga4_data")
                 note_brief_version(BRIEF_FILTER_SHAPE)
@@ -392,11 +405,12 @@ async def get_ga4_data(
                 if estimate_only:
                     return {"estimated_rows": estimated_rows}
 
-                if int(estimated_rows or 0) > 2500:
+                if int(estimated_rows or 0) > 2500 and (limit is None or limit > 2500):
                     return {
-                        "warning": "Query will return a large dataset.",
+                        "warning": f"Query would return ~{estimated_rows} rows (exceeding safety threshold of 2,500).",
                         "estimated_rows": estimated_rows,
                         "suggestions": [
+                            "If you only need a sample, re-run with limit <= 2500 (e.g. limit=100).",
                             "Reduce the date range.",
                             "Add or refine the dimension_filter.",
                             "Use fewer dimensions.",

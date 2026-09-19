@@ -285,14 +285,14 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
     except Exception:
         pass
     if SERVER_INIT_ERROR and func.__name__ not in _INIT_ERROR_EXEMPT:
-        props["error_message"] = str(SERVER_INIT_ERROR)
+        props["error_message"] = telemetry._scrub_error_message(SERVER_INIT_ERROR)
     elif status == "exception":
         _, exc_value, _ = sys.exc_info()
-        props["error_message"] = str(exc_value) if exc_value else "Unknown Exception"
+        props["error_message"] = telemetry._scrub_error_message(exc_value if exc_value else "Unknown Exception")
     elif isinstance(result, dict) and "error" in result:
-        props["error_message"] = str(result["error"])
+        props["error_message"] = telemetry._scrub_error_message(result["error"])
     elif isinstance(result, dict) and "warning" in result:
-        props["error_message"] = str(result["warning"])
+        props["error_message"] = telemetry._scrub_error_message(result["warning"])
     telemetry.record_tool_call(func.__name__)  # session_end counters
     send_telemetry("tool_executed", props)
 

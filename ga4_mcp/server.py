@@ -156,7 +156,7 @@ def main():
         "env_var_names": sorted(os.environ.keys()),
     }
     if coordinator.SERVER_INIT_ERROR:
-        start_payload["error_message"] = str(coordinator.SERVER_INIT_ERROR)
+        start_payload["error_message"] = telemetry._scrub_error_message(coordinator.SERVER_INIT_ERROR)
         start_payload["error_category"] = coordinator.SERVER_INIT_ERROR_CATEGORY
     send_telemetry("mcp_started", start_payload)
     mcp.run(transport="stdio")
