@@ -81,6 +81,13 @@
       margin: 2rem 0 0.75rem;
     }
 
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--headline);
+      margin: 1.25rem 0 0.5rem;
+    }
+
     p, ul, ol {
       font-size: 1rem;
       color: var(--text);
@@ -182,58 +189,102 @@
 
     <h2>3. Google API Services User Data Policy Compliance (Limited Use Disclosure)</h2>
     <p>
-      GA4 MCP's use and transfer of information received from Google APIs to any other app will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.
+      GA4 MCP's use and transfer of information received from Google APIs to any other app adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.
     </p>
     <p>Specifically:</p>
     <ul>
       <li>
-        <strong>No Third-Party Data Transfer or Sale:</strong> We do not transfer, distribute, or sell your Google user data to any external parties, data brokers, or advertisers under any circumstances.
+        <strong>No Third-Party Data Transfer or Sale:</strong> We do not transfer, disclose, share, or sell your Google user data to any third parties, data brokers, or advertising networks for purposes other than providing the core analytics services requested.
       </li>
       <li>
         <strong>No Advertising:</strong> We do not use or transfer your Google Analytics data to serve personalized, re-targeted, or interest-based advertisements.
       </li>
       <li>
-        <strong>No AI/ML Model Training:</strong> Your Google user data is <strong>never</strong> used to train, retrain, or fine-tune generalized machine learning models, foundational AI models, or public LLMs.
+        <strong>No Non-Personalized AI/ML Model Training:</strong> Google user data and analytics information accessed via Google APIs is <strong>never</strong> used to develop, improve, fine-tune, or train non-personalized AI and/or machine learning models, foundational models, or public LLMs.
       </li>
       <li>
-        <strong>No Human Review:</strong> No human (including GA4 MCP maintainers) has access to or reads your Google Analytics data, reports, or tokens. Queries execute entirely programmatically between your local machine and Google.
+        <strong>No Human Review:</strong> No human (including GA4 MCP maintainers or server administrators) has access to or reads your Google Analytics data, reports, or tokens. Queries execute entirely programmatically between your local machine and Google.
       </li>
     </ul>
 
-    <h2>4. Data Storage &amp; Retention</h2>
-    <ul>
-      <li>
-        <strong>Ephemeral Cloudflare Edge Gateway:</strong> During 1-Click Sign-in, Google redirects an authorization code to our gateway (<code>ga4-gateway.reachsuren.workers.dev</code>). The gateway executes an atomic exchange with Google's OAuth endpoint, returns the resulting token bundle directly to your local loopback server (<code>http://127.0.0.1:18443</code>), and immediately discards the tokens from memory. The gateway maintains <strong>zero persistent databases</strong> and does not log credentials.
-      </li>
-      <li>
-        <strong>Local Workstation Storage:</strong> Your authentication credentials reside exclusively on your local filesystem at <code>~/.config/ga4-mcp/vault.json</code> protected with Unix permissions (<code>chmod 0600</code>).
-      </li>
-      <li>
-        <strong>Direct API Communication:</strong> All Google Analytics Data API and Admin API calls are made directly from your workstation to <code>https://analyticsdata.googleapis.com</code>. Your analytics data never transits our gateway servers.
-      </li>
-    </ul>
-
-    <h2>5. Alternative Local Service Account Authentication</h2>
+    <h2>4. Data Protection Mechanisms for Sensitive Data</h2>
     <p>
-      If you prefer not to use OAuth, GA4 MCP fully supports 100% offline authentication using your own Google Cloud Service Account key (<code>GOOGLE_APPLICATION_CREDENTIALS</code>) or Google Cloud Application Default Credentials (ADC). In this mode, no network connection to our OAuth gateway is ever initiated.
+      GA4 MCP implements comprehensive technical and operational safeguards to protect sensitive Google user data (including OAuth tokens and analytics reporting data):
     </p>
-
-    <h2>6. Data Revocation &amp; Deletion</h2>
-    <p>You have full control over your authentication at all times:</p>
     <ul>
       <li>
-        <strong>Revoke via Google Account:</strong> You can revoke GA4 MCP's access at any time by visiting your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Permissions Settings</a> and clicking "Remove Access".
+        <strong>Security Procedures in Place:</strong> Strict security procedures and organizational controls are in place to ensure the confidentiality, integrity, and availability of all data processed by GA4 MCP.
       </li>
       <li>
-        <strong>Delete Local Tokens:</strong> You can delete all local session and credential files at any time by running:
+        <strong>We Use Encryption to Protect Your Information:</strong> Industry-standard cryptographic protocols are enforced at every stage of data handling, both in transit and at rest.
+      </li>
+    </ul>
+
+    <h3>A. Protection of Data in Transit</h3>
+    <ul>
+      <li>
+        <strong>Strict TLS Encryption:</strong> All communications between your local workstation, the Google Analytics APIs (<code>analyticsdata.googleapis.com</code>, <code>analyticsadmin.googleapis.com</code>), and Google OAuth 2.0 endpoints are encrypted in transit using Transport Layer Security (TLS 1.2 and TLS 1.3) over HTTPS.
+      </li>
+      <li>
+        <strong>No Unencrypted Channels:</strong> Plaintext HTTP transmissions of sensitive data or authentication tokens are strictly disallowed across all components of the application.
+      </li>
+    </ul>
+
+    <h3>B. Protection of Data at Rest</h3>
+    <ul>
+      <li>
+        <strong>Local Workstation Storage &amp; Restricted File Permissions:</strong> Your sensitive authentication credentials (OAuth refresh tokens and access tokens) reside exclusively on your local filesystem at <code>~/.config/ga4-mcp/session.json</code> (or <code>vault.json</code>). This file is created with restricted operating system permissions (Unix <code>chmod 0600</code>), ensuring that only your local operating system user account has read/write access.
+      </li>
+      <li>
+        <strong>Operating System Full-Disk Encryption:</strong> Stored credentials benefit from your workstation's underlying hardware and operating system disk encryption mechanisms (such as macOS FileVault, Windows BitLocker, or Linux LUKS).
+      </li>
+    </ul>
+
+    <h3>C. Stateless Ephemeral Edge Gateway (Zero Server Storage)</h3>
+    <ul>
+      <li>
+        <strong>Ephemeral Relay Only:</strong> During 1-Click Browser Sign-in, Google redirects an authorization code to our gateway (<code>ga4-gateway.reachsuren.workers.dev</code>). The gateway executes an atomic exchange with Google's OAuth token endpoint, returns the resulting token bundle directly to your local loopback listener (<code>http://127.0.0.1:18443</code>), and immediately wipes the tokens from memory.
+      </li>
+      <li>
+        <strong>Zero Persistent Databases:</strong> The edge gateway maintains <strong>zero persistent databases, zero caches, and zero credential logs</strong>. No sensitive Google tokens or user information are ever persisted on our cloud servers.
+      </li>
+      <li>
+        <strong>Direct Analytics Payloads:</strong> All Google Analytics Data API queries and reporting payloads stream directly between your local machine and Google's servers. Reporting payloads never traverse or get retained on any intermediary servers.
+      </li>
+    </ul>
+
+    <h2>5. Data Retention and Deletion</h2>
+    <p>
+      We believe in absolute data minimization and transparent data lifecycles:
+    </p>
+    <ul>
+      <li>
+        <strong>Retention Period:</strong> We store your personal information and authentication tokens locally on your machine only for the length of time needed to fulfill the analytical purposes outlined in this privacy policy, or until you choose to delete them or revoke access.
+      </li>
+      <li>
+        <strong>Zero Server Retention:</strong> Our edge infrastructure retains zero Google user data, zero analytics payloads, and zero credentials (0 seconds retention).
+      </li>
+      <li>
+        <strong>Disposal &amp; Deletion Upon Expiry:</strong> When your data retention period expires or when you choose to discontinue using GA4 MCP, all local data can be permanently deleted immediately.
+      </li>
+      <li>
+        <strong>How to Delete Local Data:</strong> You can delete all local tokens, configurations, and cached schemas at any time by executing:
         <br>
         <code>rm -rf ~/.config/ga4-mcp</code>
       </li>
+      <li>
+        <strong>How to Revoke Google Account Access:</strong> You can revoke GA4 MCP's authorization at any time directly from your Google Account by visiting <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Permissions Settings</a> and selecting "Remove Access". Once revoked, all existing OAuth tokens are permanently invalidated by Google.
+      </li>
     </ul>
 
-    <h2>7. Contact &amp; Privacy Inquiries</h2>
+    <h2>6. Alternative Offline Service Account Authentication</h2>
     <p>
-      If you have questions, concerns, or requests regarding this Privacy Policy, please contact the developer directly:
+      If you prefer not to use OAuth, GA4 MCP fully supports 100% offline authentication using your own Google Cloud Service Account key (<code>GOOGLE_APPLICATION_CREDENTIALS</code>) or Google Cloud Application Default Credentials (ADC). In this mode, no network connection to our OAuth gateway is ever initiated, and all authentication occurs directly between your workstation and Google Cloud.
+    </p>
+
+    <h2>7. Security Inquiries &amp; Incident Contact</h2>
+    <p>
+      For privacy inquiries, security questions, or data protection reports, please contact the maintainer directly:
     </p>
     <p>
       <strong>Surendran Balachandran</strong><br>
