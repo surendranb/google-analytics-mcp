@@ -128,6 +128,49 @@
       color: var(--headline);
     }
 
+    .summary-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid #2563eb;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0 2.5rem;
+    }
+
+    .summary-card h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 0.75rem;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.925rem;
+    }
+
+    .summary-table th, .summary-table td {
+      border: 1px solid #cbd5e1;
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .summary-table th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      width: 38%;
+    }
+
+    .summary-table td {
+      background-color: #ffffff;
+      color: #1e293b;
+    }
+
     .footer {
       margin-top: 4rem;
       padding-top: 1.5rem;
@@ -159,8 +202,41 @@
       At GA4 MCP (accessible at <a href="https://ga4mcp.com">https://ga4mcp.com</a> and via open-source package repositories), we treat privacy as an architectural guarantee. This Privacy Policy details how GA4 MCP accesses, processes, and protects your data when you use the open-source software and connect your Google Analytics accounts.
     </p>
 
-    <div class="callout">
-      <strong>Architecture Summary:</strong> GA4 MCP operates under a <strong>Zero-Knowledge, Zero-Server-Retention architecture</strong>. Your Google Analytics reporting data, property schemas, and OAuth refresh tokens reside exclusively on your local workstation. The edge gateway functions solely as an ephemeral OAuth authorization relay and never persists your credentials or analytics queries.
+    <div class="summary-card">
+      <h2>Summary of Google User Data Handling &amp; Protection (At a Glance)</h2>
+      <p>
+        GA4 MCP connects your local AI agent (Claude Desktop, Cursor, Cline, etc.) directly to Google Analytics. We implement a strict <strong>Zero-Knowledge, Zero-Server-Storage</strong> architecture:
+      </p>
+      <table class="summary-table">
+        <tr>
+          <th>Verification &amp; Privacy Item</th>
+          <th>GA4 MCP Architectural Guarantee</th>
+        </tr>
+        <tr>
+          <td><strong>Do we touch or store your analytics data?</strong></td>
+          <td><strong>No.</strong> Analytics queries execute directly between your local computer and Google APIs over TLS. Zero analytics reporting payloads ever touch, transit, or persist on our servers.</td>
+        </tr>
+        <tr>
+          <td><strong>How is sensitive data protected?</strong></td>
+          <td><strong>Strict Encryption:</strong> We use encryption to protect your information. All data in transit uses HTTPS (TLS 1.2 / TLS 1.3). Data at rest (OAuth tokens) is stored solely on your local workstation with restricted operating system permissions (Unix <code>chmod 0600</code>) and OS disk encryption.</td>
+        </tr>
+        <tr>
+          <td><strong>Where do OAuth tokens reside?</strong></td>
+          <td><strong>Exclusively on your local machine</strong> (<code>~/.config/ga4-mcp/session.json</code>). Our cloud gateway is an ephemeral in-memory relay that executes an atomic code exchange and immediately purges all credentials from memory with zero database storage.</td>
+        </tr>
+        <tr>
+          <td><strong>How do you delete data or revoke access?</strong></td>
+          <td><strong>Immediate user control:</strong> Delete all local tokens at any time via <code>rm -rf ~/.config/ga4-mcp</code>, or revoke access immediately in your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Permissions Settings</a>.</td>
+        </tr>
+        <tr>
+          <td><strong>Are AI models trained on your data?</strong></td>
+          <td><strong>Never.</strong> Google Analytics user data accessed via Google APIs is never used to develop, improve, or train non-personalized AI or ML models.</td>
+        </tr>
+        <tr>
+          <td><strong>Is Google user data sold or transferred?</strong></td>
+          <td><strong>Never.</strong> We do not sell, rent, disclose, or transfer Google user data to third parties, data brokers, or advertisers under any circumstances.</td>
+        </tr>
+      </table>
     </div>
 
     <h2>1. Information We Access</h2>
