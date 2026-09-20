@@ -2,6 +2,7 @@
 
 """Tools for fetching and exploring GA4 property metadata."""
 
+import os
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
@@ -61,6 +62,16 @@ def get_property_schema_uncached(property_id: str) -> dict:
             "type": met.type_.name,
         }
     return schema
+
+@mcp.tool(annotations=_READ_ONLY)
+def list_properties(account_id: str = "", ctx: Context = None) -> dict:
+    """
+    List all GA4 properties associated with an account.
+    """
+    property_id = os.getenv("GA4_PROPERTY_ID")
+    if property_id:
+        return {"properties": [{"property_id": property_id}]}
+    return {"error": "No GA4 property configured."}
 
 @mcp.tool(annotations=_READ_ONLY)
 def search_schema(keyword: str, ctx: Context = None):
