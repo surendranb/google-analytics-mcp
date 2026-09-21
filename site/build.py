@@ -15,7 +15,7 @@ Source of truth (site/dist/ is generated and committed, never hand-edited):
     skills/index.md                                   -> /skills/
     docs/privacy.html, docs/terms.html                -> /privacy/ /terms/ (text frozen)
     site/meta.json                                    -> per-URL title + description
-    site/src-assets/                                  -> og.png, favicons, mark
+    site/src-assets/                                  -> og.png, favicons, mark, font files
     site/style.css                                    -> /assets/style.css
 
 The home page copy is the CMO landing draft of 2026-09-21 (memory/drafts/ga4mcp-revamp,
@@ -60,6 +60,7 @@ SKILLS_SRC = ROOT / "skills"
 STYLE_SRC = SITE_DIR / "style.css"
 
 SITE = "https://ga4mcp.com"
+VERSION = "2.11.4"
 REPO = "https://github.com/surendranb/google-analytics-mcp"
 PYPI = "https://pypi.org/project/google-analytics-mcp/"
 NPM = "https://www.npmjs.com/package/@surendranb/google-analytics-mcp"
@@ -70,6 +71,8 @@ BUILD_DATE = date.today().isoformat()
 
 BANNED = ["balanced approach", "comprehensive", "seamless", "robust", "leverage", "utilize", "holistic"]
 FROZEN_URLS = ("/privacy/", "/terms/")
+# Served by site/dist/_redirects (and the edge function), not by a file on disk.
+REDIRECT_ONLY = {"/install"}
 
 TOOLS_COUNT = 11
 SKILLS_COUNT = 15
@@ -315,6 +318,32 @@ WEBMCP_JS = """  <script>
   </script>
 """
 
+# Progressive enhancement only: without this script the rail is a plain link list.
+RAIL_JS = """  <script>
+  /* Rail filter: no-JS fallback is the full list, so the input ships hidden. */
+  (function () {
+    var input = document.querySelector('[data-rail-filter]');
+    if (!input) return;
+    var box = input.closest('.rail-filter');
+    if (box) box.hidden = false;
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var sections = document.querySelectorAll('.rail-section');
+      for (var i = 0; i < sections.length; i++) {
+        var items = sections[i].querySelectorAll('li');
+        var shown = 0;
+        for (var j = 0; j < items.length; j++) {
+          var hit = !q || items[j].textContent.toLowerCase().indexOf(q) !== -1;
+          items[j].hidden = !hit;
+          if (hit) shown++;
+        }
+        sections[i].hidden = shown === 0;
+      }
+    });
+  })();
+  </script>
+"""
+
 
 # --------------------------------------------------------------------------- helpers
 def plain(text: str) -> str:
@@ -395,6 +424,7 @@ def load_meta() -> dict[str, dict[str, str]]:
 
 META = load_meta()
 PAGES: dict[str, dict] = {}
+SKILLS_NAV: list[dict] = []
 
 
 def meta_for(url: str) -> dict[str, str]:
@@ -406,6 +436,67 @@ def nav_item(href: str, label: str, url: str) -> str:
     active = url == href or (href != "/" and url.startswith(href))
     attr = ' aria-current="page"' if active else ""
     return f'<li><a href="{href}"{attr}>{label}</a></li>'
+
+
+def rail(url: str) -> str:
+    """Fixed workstation rail: brand, filter, sectioned nav, version foot.
+
+    Geometry mirrors the Workbench theme (fixed header, fixed 360px rail with
+    its own scroll, main column takes the rest). Every link marks the current
+    page with aria-current.
+    """
+    def link(href: str, label: str, ext: bool = False) -> str:
+        active = "" if ext else (' aria-current="page"' if url == href else "")
+        arrow = ' <span class="ext" aria-hidden="true">↗</span>' if ext else ""
+        return f'<li><a href="{href}"{active}>{label}{arrow}</a></li>'
+
+    skills = "\n        ".join(
+        link(f"/skills/{s['slug']}/", html.escape(s["title"])) for s in SKILLS_NAV)
+    return f"""<aside class="rail" aria-label="Site">
+  <div class="rail-head">
+    <a class="brand" href="/">{MARKS}<span>GA4 MCP Server</span></a>
+    <p class="rail-tagline">Google Analytics 4 for AI agents.</p>
+  </div>
+  <div class="rail-filter" hidden>
+    <label class="sr-only" for="rail-filter">Filter pages</label>
+    <input id="rail-filter" class="rail-search" type="search" placeholder="Filter pages…" data-rail-filter>
+  </div>
+  <nav class="rail-nav" aria-label="Pages" tabindex="0">
+    <div class="rail-section">
+      <p class="rail-label">Get started</p>
+      <ul>
+        {link("/", "Home")}
+        {link("/setup/", "Setup")}
+        {link(INSTALL, "Install", ext=True)}
+      </ul>
+    </div>
+    <div class="rail-section">
+      <p class="rail-label">Reference</p>
+      <ul>
+        {link("/schema/", "Schema")}
+        {link("/iam/", "IAM")}
+      </ul>
+    </div>
+    <div class="rail-section">
+      <p class="rail-label">Skills</p>
+      <ul>
+        {link("/skills/", "All skills")}
+        {skills}
+      </ul>
+    </div>
+    <div class="rail-section">
+      <p class="rail-label">Meta</p>
+      <ul>
+        {link(REPO, "GitHub", ext=True)}
+        {link(PYPI, "PyPI", ext=True)}
+        {link(NPM, "npm", ext=True)}
+        {link("/privacy/", "Privacy")}
+        {link("/terms/", "Terms")}
+      </ul>
+    </div>
+  </nav>
+  <div class="rail-foot"><p>v{VERSION} · MIT</p></div>
+</aside>"""
 
 
 def shell(url: str, body: str, jsonld: list[dict], md: str | None, og_type: str = "website",
@@ -457,19 +548,19 @@ def shell(url: str, body: str, jsonld: list[dict], md: str | None, og_type: str 
     header = f"""<body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
-  <div class="wrap bar">
+  <div class="bar">
     <a class="brand" href="/">{MARKS}<span>GA4 MCP</span></a>
     <nav class="main" aria-label="Main">
       <ul>
-        {nav_item("/setup/", "Setup", url)}
-        {nav_item("/schema/", "Filter schema", url)}
-        {nav_item("/iam/", "IAM", url)}
-        {nav_item("/skills/", "Skills", url)}
-        <li><a href="{REPO}">GitHub</a></li>
+        <li><a href="{REPO}">GitHub <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a href="{PYPI}">PyPI <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a class="btn install" href="/install">Install</a></li>
       </ul>
     </nav>
   </div>
-</header>"""
+</header>
+<div class="site-body">
+{rail(url)}"""
 
     footer = f"""<footer class="site-footer">
   <div class="wrap">
@@ -495,8 +586,9 @@ def shell(url: str, body: str, jsonld: list[dict], md: str | None, og_type: str 
     <p class="foot-legal">&copy; {YEAR} Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
   </div>
 </footer>"""
-    body_end = (f"</main>\n{footer}\n{extra_js}</body>\n</html>\n")
-    return "\n".join(head) + "\n" + header + "\n<main id=\"main\">\n" + body + "\n" + body_end
+    body_end = (f"</div>\n</main>\n{footer}\n</div>\n{RAIL_JS}{extra_js}</body>\n</html>\n")
+    return ("\n".join(head) + "\n" + header + "\n<main id=\"main\" class=\"main-col\">\n<div class=\"content\">\n"
+            + body + "\n" + body_end)
 
 
 def write_page(url: str, body: str, jsonld: list[dict], md: str | None = None, og_type: str = "website",
@@ -788,7 +880,7 @@ def build_home(skills: list[dict]) -> None:
       <p>Both servers are real, and both are free to use. Google publishes its own Analytics MCP server
       (labeled experimental, Apache-2.0). This one is community-built and MIT-licensed. Here's the split,
       without the sales gloss.</p>
-      <div class="tscroll"><table>
+      <div class="tscroll compare"><table>
         <caption class="sr-only">Feature comparison between this GA4 MCP server and Google's Analytics MCP server</caption>
         <thead><tr><th scope="col">{html.escape(COMPARE_HEAD[0])}</th>
         <th scope="col">{html.escape(COMPARE_HEAD[1])}</th><th scope="col">{html.escape(COMPARE_HEAD[2])}</th></tr></thead>
@@ -1137,6 +1229,13 @@ def copy_assets() -> list[str]:
     ASSETS_OUT.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(STYLE_SRC, ASSETS_OUT / "style.css")
     copied = ["assets/style.css"]
+    (ASSETS_OUT / "fonts").mkdir(parents=True, exist_ok=True)
+    for name in ("InterVariable.woff2", "newsreader-normal.woff2"):
+        source = SRC_ASSETS / "fonts" / name
+        if not source.is_file():
+            sys.exit(f"site/src-assets/fonts/{name} is missing — copy it from the Workbench theme (OFL).")
+        shutil.copyfile(source, ASSETS_OUT / "fonts" / name)
+        copied.append(f"assets/fonts/{name}")
     for name in ("og.png", "favicon.svg", "favicon-32.png", "favicon-16.png", "apple-touch-icon-180.png"):
         source = SRC_ASSETS / name
         if not source.is_file():
@@ -1153,6 +1252,8 @@ def check_links() -> tuple[list[str], list[str]]:
         for target, frag in re.findall(r'href="(/[^"#?]*)(?:#([^"]*))?"', entry["html"]):
             if target.endswith(".md"):
                 continue  # twins are linked on purpose
+            if target in REDIRECT_ONLY:
+                continue  # served by _redirects / the edge function, not a file
             resolved = None
             for candidate in (DIST / target.lstrip("/"), DIST / target.lstrip("/") / "index.html"):
                 if candidate.is_file():
@@ -1264,7 +1365,8 @@ def check_counts(skills: list[dict]) -> list[str]:
     if len(skills) != SKILLS_COUNT:
         problems.append(f"expected {SKILLS_COUNT} skills, found {len(skills)}")
     for url in ("/llms.txt", "/llms-full.txt", "/robots.txt", "/sitemap.xml", "/_redirects", "/404.html",
-                "/og.png", "/favicon.svg", "/data/tools.json", "/data/skills.json", "/assets/style.css"):
+                "/og.png", "/favicon.svg", "/data/tools.json", "/data/skills.json", "/assets/style.css",
+                "/assets/fonts/InterVariable.woff2", "/assets/fonts/newsreader-normal.woff2"):
         if not (DIST / url.lstrip("/")).is_file():
             problems.append(f"{url} was not written")
     return problems
@@ -1278,6 +1380,7 @@ def main() -> int:
     DIST.mkdir(parents=True)
 
     skills = discover_skills()
+    SKILLS_NAV.extend(skills)
     copied = copy_assets()
 
     build_home(skills)

@@ -1,7 +1,25 @@
 /* ga4mcp.com — Workbench "sunset" editorial docs.
    Tokens from ~/Projects/workbench/theme.json (sunset variation). Flat fills only.
    Body text sits on page/surface at >=7:1; accent is reserved for 24px+ display,
-   chips, rules and buttons (white on --accent-strong = 4.9:1). */
+   chips, rules and buttons (white on --accent-strong = 4.9:1).
+   Shell geometry mirrors the Workbench theme: fixed header, fixed 360px rail with
+   its own scroll, main window takes the rest. */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/InterVariable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("fonts/newsreader-normal.woff2") format("woff2");
+}
 
 :root {
   --page: #fdf0e2;
@@ -31,6 +49,8 @@
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
   --wrap: 1120px;
   --radius: 12px;
+  --hdr: 64px;
+  --rail: 360px;
 }
 
 *,
@@ -42,13 +62,14 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
+  padding-top: var(--hdr);
   background: var(--page);
   color: var(--body);
   font: 16px/1.65 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 
-.wrap { width: min(var(--wrap), 100% - 2.5rem); margin-inline: auto; }
+.wrap { width: min(var(--wrap), 100%); margin-inline: auto; }
 
 h1, h2, h3 { color: var(--title); margin: 0 0 .6rem; }
 h1 {
@@ -71,7 +92,7 @@ p { margin: 0 0 1rem; }
 .lead { font-size: 1.16rem; color: var(--lede); }
 .meta, .trust, .eyebrow { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
 .eyebrow { text-transform: uppercase; letter-spacing: .09em; color: var(--accent-text); margin-bottom: .7rem; }
-section { margin-block: 3rem; scroll-margin-top: 1.25rem; }
+section { margin-block: 3rem; scroll-margin-top: calc(var(--hdr) + 1rem); }
 section > h2:first-child, article > h2:first-child { margin-top: 0; }
 
 a { color: var(--secondary); text-underline-offset: .18em; }
@@ -79,7 +100,7 @@ a:hover { color: var(--accent-strong); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
 .skip {
-  position: absolute; left: 1rem; top: -3rem; z-index: 5;
+  position: absolute; left: 1rem; top: -3rem; z-index: 30;
   background: var(--ink); color: var(--page); padding: .5rem .8rem; border-radius: 0 0 8px 8px;
   text-decoration: none; transition: top .12s ease-in;
 }
@@ -89,24 +110,75 @@ a:hover { color: var(--accent-strong); }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* header + footer ------------------------------------------------------- */
-.site-header { background: var(--surface); border-bottom: 1px solid var(--border); }
+/* workstation shell: fixed header, fixed rail, main window --------------- */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  height: var(--hdr); background: var(--surface); border-bottom: 1px solid var(--border);
+}
 .site-header .bar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem;
-  min-height: 4.1rem; padding-block: .55rem;
+  height: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: .35rem 1.25rem; padding-inline: 32px;
 }
 .brand {
   display: inline-flex; align-items: center; gap: .55rem; font-weight: 650;
   color: var(--ink); text-decoration: none; letter-spacing: -.01em;
 }
 .brand .mark { display: block; flex: none; }
-nav.main ul, .site-footer ul { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; list-style: none; margin: 0; padding: 0; }
+nav.main ul, .site-footer ul { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1.1rem; list-style: none; margin: 0; padding: 0; }
 /* inline-block + padding-block keeps every nav target at or above 24 CSS px tall
    (WCAG 2.2 SC 2.5.8 target size, no spacing exception needed). */
 nav.main a { display: inline-block; padding-block: .3rem; color: var(--secondary); text-decoration: none; font-size: .95rem; }
 nav.main a:hover { color: var(--accent-strong); text-decoration: underline; }
 nav.main a[aria-current="page"] { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--accent-border); }
-.site-footer { background: var(--surface); border-top: 1px solid var(--border); margin-top: 4rem; padding-block: 2rem; }
+/* Scoped so the local nav colour rule cannot beat the button (white on --accent-strong = 4.9:1). */
+nav.main a.btn { padding: .38rem .9rem; font-size: .9rem; color: #fff; }
+nav.main a.btn:hover, nav.main a.btn:focus { text-decoration: none; color: #fff; }
+.ext { color: var(--muted); font-size: .85em; }
+
+/* Rail: fixed sidekick with its own scroll (Workbench geometry). */
+.rail {
+  position: fixed; top: var(--hdr); left: 0; z-index: 10;
+  width: var(--rail); height: calc(100vh - var(--hdr));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--sidebar); border-right: 1px solid var(--border);
+}
+.rail-head { flex: 0 0 auto; padding: 22px 20px 16px; border-bottom: 1px solid var(--hairline); }
+.rail-tagline { margin: .5rem 0 0; font-size: .82rem; color: var(--muted); }
+.rail-filter { flex: 0 0 auto; padding: 10px 14px; border-bottom: 1px solid var(--hairline); }
+.rail-search {
+  width: 100%; padding: 7px 10px; font-family: inherit; font-size: 12.5px; color: var(--ink);
+  background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+.rail-search:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); }
+.rail-nav { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 24px; scrollbar-width: thin; }
+.rail-nav::-webkit-scrollbar { width: 5px; }
+.rail-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.rail-label {
+  margin: 16px 8px 6px; font-size: 10.5px; font-weight: 750; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--muted);
+}
+.rail-section:first-child .rail-label { margin-top: 0; }
+.rail-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.rail-nav li a {
+  display: block; padding: 7px 12px; border: 1px solid transparent; border-radius: 8px;
+  font-size: 13px; font-weight: 600; line-height: 1.35; color: var(--secondary); text-decoration: none;
+}
+.rail-nav li a:hover { background: color-mix(in srgb, #fff 70%, transparent); border-color: var(--border); color: var(--ink); }
+.rail-nav li a[aria-current="page"] {
+  background: #fff; border-color: var(--border); border-left: 3.5px solid var(--accent);
+  color: var(--ink); font-weight: 750; box-shadow: 0 2px 8px rgba(20, 11, 4, .06);
+}
+.rail-nav li[hidden], .rail-section[hidden] { display: none; }
+.rail-foot { flex: 0 0 auto; padding: 12px 20px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--muted); }
+.rail-foot p { margin: 0; }
+
+.main-col { min-width: 0; margin-left: var(--rail); }
+.content { padding: 48px 64px 96px; }
+
+.site-footer {
+  margin-left: var(--rail); padding: 2rem 64px;
+  background: var(--surface); border-top: 1px solid var(--border);
+}
 .site-footer p { color: var(--muted); font-size: .9rem; max-width: 62ch; }
 .site-footer strong { color: var(--ink); }
 .site-footer a { display: inline-block; padding-block: .25rem; color: var(--secondary); }
@@ -168,6 +240,9 @@ code { font-family: var(--mono); font-size: .88em; background: var(--accent-wash
 .note p { margin: 0; color: var(--lede); font-size: .95rem; }
 .note strong { color: var(--ink); }
 .tscroll { overflow-x: auto; margin: 1.1rem 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+/* 3-column comparison: keep readable columns and scroll inside the main window
+   instead of compressing to ~170px columns on narrow desktops. */
+.tscroll.compare table { min-width: 640px; }
 table { width: 100%; border-collapse: collapse; font-size: .93rem; }
 th, td { padding: .62rem .75rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--hairline); }
 thead th { background: var(--accent-wash); color: var(--accent-text); font-weight: 650; border-bottom: 1px solid var(--accent-border); }
@@ -192,6 +267,21 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .mini { font-size: .88rem; color: var(--muted); }
 
 @media (max-width: 960px) {
+  body { padding-top: 0; }
+  .site-header { position: sticky; height: auto; min-height: var(--hdr); }
+  .site-header .bar { padding-inline: 16px; gap: .3rem .8rem; padding-block: .35rem; }
+  .brand { font-size: .95rem; }
+  nav.main a { font-size: .88rem; }
+  nav.main a.btn { padding: .32rem .7rem; font-size: .85rem; }
+  .site-body { display: flex; flex-direction: column; }
+  .main-col { order: 1; margin-left: 0; }
+  .rail {
+    order: 2; position: static; width: 100%; height: auto;
+    border-right: 0; border-top: 1px solid var(--border);
+  }
+  .rail-nav { max-height: 320px; }
+  .site-footer { order: 3; margin-left: 0; padding: 1.75rem 24px; }
+  .content { padding: 32px 24px 64px; }
   .hero-grid { grid-template-columns: 1fr; }
   .hero-mark { display: none; }
 }
@@ -202,6 +292,7 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 }
 
 @media print {
-  .site-header, .site-footer, .cta { display: none; }
-  body { background: #fff; }
+  .site-header, .site-footer, .rail, .cta { display: none; }
+  body { background: #fff; padding-top: 0; }
+  .main-col { margin-left: 0; }
 }

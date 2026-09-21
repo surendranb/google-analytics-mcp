@@ -50,20 +50,79 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
-  <div class="wrap bar">
+  <div class="bar">
     <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
     <nav class="main" aria-label="Main">
       <ul>
-        <li><a href="/setup/">Setup</a></li>
-        <li><a href="/schema/">Filter schema</a></li>
-        <li><a href="/iam/">IAM</a></li>
-        <li><a href="/skills/" aria-current="page">Skills</a></li>
-        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a class="btn install" href="/install">Install</a></li>
       </ul>
     </nav>
   </div>
 </header>
-<main id="main">
+<div class="site-body">
+<aside class="rail" aria-label="Site">
+  <div class="rail-head">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP Server</span></a>
+    <p class="rail-tagline">Google Analytics 4 for AI agents.</p>
+  </div>
+  <div class="rail-filter" hidden>
+    <label class="sr-only" for="rail-filter">Filter pages</label>
+    <input id="rail-filter" class="rail-search" type="search" placeholder="Filter pages…" data-rail-filter>
+  </div>
+  <nav class="rail-nav" aria-label="Pages" tabindex="0">
+    <div class="rail-section">
+      <p class="rail-label">Get started</p>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="https://ga4.builditwithai.xyz/install">Install <span class="ext" aria-hidden="true">↗</span></a></li>
+      </ul>
+    </div>
+    <div class="rail-section">
+      <p class="rail-label">Reference</p>
+      <ul>
+        <li><a href="/schema/">Schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+      </ul>
+    </div>
+    <div class="rail-section">
+      <p class="rail-label">Skills</p>
+      <ul>
+        <li><a href="/skills/">All skills</a></li>
+        <li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li>
+        <li><a href="/skills/attribution-scope/">Attribution Scope</a></li>
+        <li><a href="/skills/bot-traffic-detection/" aria-current="page">Bot Traffic Detection</a></li>
+        <li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li>
+        <li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li>
+        <li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li>
+        <li><a href="/skills/content-performance/">Content Performance Analysis</a></li>
+        <li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li>
+        <li><a href="/skills/date-ranges/">Date Ranges</a></li>
+        <li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li>
+        <li><a href="/skills/filter-structures/">Filter Structures</a></li>
+        <li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li>
+        <li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li>
+        <li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li>
+        <li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li>
+      </ul>
+    </div>
+    <div class="rail-section">
+      <p class="rail-label">Meta</p>
+      <ul>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm <span class="ext" aria-hidden="true">↗</span></a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="rail-foot"><p>v2.11.4 · MIT</p></div>
+</aside>
+<main id="main" class="main-col">
+<div class="content">
   <div class="wrap">
   <article class="prose">
     <a class="back" href="/skills/">← All skills</a>
@@ -129,6 +188,7 @@ unknown/new bots and scrapers that mimic real browser behaviour.</p>
     <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/bot-traffic-detection/SKILL.md">skills/bot-traffic-detection/SKILL.md</a>.</p>
   </article>
   </div>
+</div>
 </main>
 <footer class="site-footer">
   <div class="wrap">
@@ -154,5 +214,29 @@ unknown/new bots and scrapers that mimic real browser behaviour.</p>
     <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
   </div>
 </footer>
+</div>
+  <script>
+  /* Rail filter: no-JS fallback is the full list, so the input ships hidden. */
+  (function () {
+    var input = document.querySelector('[data-rail-filter]');
+    if (!input) return;
+    var box = input.closest('.rail-filter');
+    if (box) box.hidden = false;
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      var sections = document.querySelectorAll('.rail-section');
+      for (var i = 0; i < sections.length; i++) {
+        var items = sections[i].querySelectorAll('li');
+        var shown = 0;
+        for (var j = 0; j < items.length; j++) {
+          var hit = !q || items[j].textContent.toLowerCase().indexOf(q) !== -1;
+          items[j].hidden = !hit;
+          if (hit) shown++;
+        }
+        sections[i].hidden = shown === 0;
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
