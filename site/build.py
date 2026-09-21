@@ -85,8 +85,9 @@ SKILLS_COUNT = 15
 
 CHIPS = ["v2.11.4", "MIT", "PyPI + npm + one-line installer", "Not affiliated with Google"]
 
-CLIENTS = ["Claude Desktop", "Claude Code", "Cursor", "VS Code (Cline, Roo Code)", "Continue.dev",
-           "Windsurf", "Zed", "Google Antigravity", "OpenCode", "Gemini CLI (extension in the repo)"]
+CLIENTS = ["Claude Code", "Claude Desktop", "Claude Cowork", "OpenAI Codex", "Google Antigravity",
+           "Cursor", "OpenCode", "VS Code (Cline, Roo Code)", "Continue.dev", "Windsurf", "Zed",
+           "Gemini CLI (extension in the repo)"]
 
 WHY = [
     ("Field names checked against your property",
@@ -162,10 +163,10 @@ FAQS = [
      "Model Context Protocol is a standard for connecting AI apps to external tools. Your client launches this "
      "server, and the agent gets GA4 querying tools: reporting, schema search, skills, and troubleshooting."),
     ("Does it work with Claude? What about ChatGPT?",
-     "Claude Desktop and Claude Code are both covered by the installer, along with Cursor, VS Code (Cline, Roo Code), "
-     "Continue.dev, Windsurf, Zed, Google Antigravity, and OpenCode. Gemini CLI connects through the repo's extension. "
-     "ChatGPT isn't in the supported list; this is a local stdio server, so it needs a client that can launch local "
-     "MCP servers."),
+     "Claude Code, Claude Desktop, and Claude Cowork all run this server. The installer covers Claude Desktop and "
+     "Claude Code; Cowork is Claude Desktop's local agent mode, and local MCP servers run through the desktop app. "
+     "OpenAI's Codex CLI connects and is in regular use with this server; the ChatGPT app can't launch local stdio "
+     "servers, so it can't connect to this one."),
     ("Service account or OAuth?",
      "Both patterns run locally. A service-account JSON key doesn't expire and suits fixed or shared setups. "
      "Google Application Default Credentials via gcloud auth application-default login use OAuth user credentials "
@@ -706,8 +707,9 @@ No hand-edited JSON needed for most setups.
 
 {chr(10).join(f'- {c}' for c in CLIENTS)}
 
-The server speaks MCP over stdio. If your client can launch a local MCP server, a manual config snippet is
-all it takes; the repo has snippets for each client above.
+The server speaks MCP over stdio. The installer auto-configures Claude Desktop, Claude Code, Cursor, VS Code
+(Cline, Roo Code), Continue.dev, OpenCode, Windsurf, Zed, and Google Antigravity. Any client that can launch a
+local MCP server works with a standard stdio config.
 
 ## Why this server
 
@@ -850,8 +852,9 @@ def build_home(skills: list[dict]) -> None:
       <ul class="client-list">
 {clients}
       </ul>
-      <p>The server speaks MCP over stdio. If your client can launch a local MCP server, a manual config
-      snippet is all it takes; the repo has snippets for each client above.</p>
+      <p>The server speaks MCP over stdio. The installer auto-configures Claude Desktop, Claude Code, Cursor,
+      VS Code (Cline, Roo Code), Continue.dev, OpenCode, Windsurf, Zed, and Google Antigravity. Any client that
+      can launch a local MCP server works with a standard stdio config.</p>
     </section>
 
     <section id="why">

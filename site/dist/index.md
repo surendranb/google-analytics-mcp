@@ -1,6 +1,6 @@
 ---
 title: GA4 MCP Server — Google Analytics 4 for Claude & AI Agents
-description: Google Analytics MCP server for AI agents — query GA4 from Claude, Cursor, or any MCP client. Schema discovery, totals computed by GA4, 15 skills.
+description: Google Analytics MCP server for AI agents — query GA4 from Claude Code, Claude Desktop, or any MCP client. Schema discovery, 15 skills.
 url: https://ga4mcp.com/
 type: website
 site: https://ga4mcp.com
@@ -48,19 +48,22 @@ Quick start below.
 
 No hand-edited JSON needed for most setups.
 
-- Claude Desktop
 - Claude Code
+- Claude Desktop
+- Claude Cowork
+- OpenAI Codex
+- Google Antigravity
 - Cursor
+- OpenCode
 - VS Code (Cline, Roo Code)
 - Continue.dev
 - Windsurf
 - Zed
-- Google Antigravity
-- OpenCode
 - Gemini CLI (extension in the repo)
 
-The server speaks MCP over stdio. If your client can launch a local MCP server, a manual config snippet is
-all it takes; the repo has snippets for each client above.
+The server speaks MCP over stdio. The installer auto-configures Claude Desktop, Claude Code, Cursor, VS Code
+(Cline, Roo Code), Continue.dev, OpenCode, Windsurf, Zed, and Google Antigravity. Any client that can launch a
+local MCP server works with a standard stdio config.
 
 ## Why this server
 
@@ -182,7 +185,7 @@ Model Context Protocol is a standard for connecting AI apps to external tools. Y
 
 ### Does it work with Claude? What about ChatGPT?
 
-Claude Desktop and Claude Code are both covered by the installer, along with Cursor, VS Code (Cline, Roo Code), Continue.dev, Windsurf, Zed, Google Antigravity, and OpenCode. Gemini CLI connects through the repo's extension. ChatGPT isn't in the supported list; this is a local stdio server, so it needs a client that can launch local MCP servers.
+Claude Code, Claude Desktop, and Claude Cowork all run this server. The installer covers Claude Desktop and Claude Code; Cowork is Claude Desktop's local agent mode, and local MCP servers run through the desktop app. OpenAI's Codex CLI connects and is in regular use with this server; the ChatGPT app can't launch local stdio servers, so it can't connect to this one.
 
 ### Service account or OAuth?
 
