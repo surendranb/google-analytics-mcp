@@ -88,17 +88,6 @@ Setup, IAM, and schema guides ship inside the package and work offline. On clien
 
 Anonymous diagnostics only: no queries, no credentials, no analytics data. Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 and the server stops sending, and stops writing its local ID file. MIT licensed, no account.
 
-## In numbers
-
-- **7,103** — PyPI downloads, last 30 days
-- **242** — GitHub stars
-- **48** — GitHub forks
-- **15** — Agent skills
-- **v2.11.4** — Current version
-- **MIT** — License
-
-npm wrapper: 138 downloads in the last 30 days. Numbers as of Sep 2026.
-
 ## This server vs Google's official Analytics MCP server
 
 Both servers are real, and both are free to use. Google publishes its own Analytics MCP server (labeled

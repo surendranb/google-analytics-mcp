@@ -110,9 +110,6 @@ WHY = [
      "DO_NOT_TRACK=1 and the server stops sending, and stops writing its local ID file. MIT licensed, no account."),
 ]
 
-STATS = [("7,103", "PyPI downloads, last 30 days"), ("242", "GitHub stars"), ("48", "GitHub forks"),
-         ("15", "Agent skills"), ("v2.11.4", "Current version"), ("MIT", "License")]
-
 COMPARE_HEAD = ("", "This server", f"Google's server ({GOOGLE_SERVER.rsplit('/', 2)[-1]})")
 COMPARE_ROWS = [
     ("Built by", "Community project by Surendran B (BuildItWithAI); not affiliated with Google",
@@ -472,7 +469,7 @@ def rail(url: str) -> str:
       <ul>
         {link("/", "Home")}
         {link("/setup/", "Setup")}
-        {link(INSTALL, "Install", ext=True)}
+        {link("/#install", "Install")}
       </ul>
     </div>
     <div class="rail-section">
@@ -559,7 +556,7 @@ def shell(url: str, body: str, jsonld: list[dict], md: str | None, og_type: str 
       <ul>
         <li><a href="{REPO}">GitHub <span class="ext" aria-hidden="true">↗</span></a></li>
         <li><a href="{PYPI}">PyPI <span class="ext" aria-hidden="true">↗</span></a></li>
-        <li><a class="btn install" href="/install">Install</a></li>
+        <li><a class="btn install" href="/#install">Install</a></li>
       </ul>
     </nav>
   </div>
@@ -674,7 +671,6 @@ def home_markdown(skills: list[dict]) -> str:
     compare = "\n".join(f"| {row[0]} | {row[1]} | {row[2]} |" for row in COMPARE_ROWS)
     commands = "\n".join(f"# {name}\n{cmd}\n" for name, cmd, _ in INSTALL_BLOCKS)
     why = "\n".join(f"### {title}\n\n{body}\n" for title, body in WHY)
-    stats = "\n".join(f"- **{value}** — {label}" for value, label in STATS)
     faq = "\n".join(f"### {q}\n\n{a}\n" for q, a in FAQS)
     skill_list = "\n".join(f"- [{s['title']}]({SITE}/skills/{s['slug']}/index.md): {s['summary']}" for s in skills)
     return f"""{frontmatter(meta_for('/')['title'], meta_for('/')['description'], '/', 'website')}# GA4 MCP Server
@@ -714,12 +710,6 @@ all it takes; the repo has snippets for each client above.
 ## Why this server
 
 {why}
-## In numbers
-
-{stats}
-
-npm wrapper: 138 downloads in the last 30 days. Numbers as of Sep 2026.
-
 ## This server vs Google's official Analytics MCP server
 
 Both servers are real, and both are free to use. Google publishes its own Analytics MCP server (labeled
@@ -805,8 +795,6 @@ def build_home(skills: list[dict]) -> None:
     why = "\n".join(
         f'      <li class="card"><h3>{html.escape(title)}</h3><p>{html.escape(body)}</p></li>'
         for title, body in WHY)
-    stats = "\n".join(f'      <li class="stat"><b>{html.escape(value)}</b><span>{html.escape(label)}</span></li>'
-                      for value, label in STATS)
     compare = "\n".join(
         f'        <tr><th scope="row">{html.escape(label)}</th><td>{html.escape(mine)}</td>'
         f'<td>{html.escape(theirs)}</td></tr>' for label, mine, theirs in COMPARE_ROWS)
@@ -818,7 +806,7 @@ def build_home(skills: list[dict]) -> None:
     faq = "\n".join(f'      <h3>{html.escape(q)}</h3>\n      <p>{html.escape(a)}</p>' for q, a in FAQS)
     clients = "\n".join(f"      <li>{html.escape(c)}</li>" for c in CLIENTS)
     jump = " · ".join(f'<a href="#{anchor}">{label}</a>' for anchor, label in
-                      (("install", "Install"), ("works-with", "Clients"), ("why", "Why"), ("traction", "In numbers"),
+                      (("install", "Install"), ("works-with", "Clients"), ("why", "Why"),
                        ("compare", "Compare"), ("quickstart", "Quick start"), ("faq", "FAQ")))
 
     body = f"""  <div class="wrap">
@@ -869,15 +857,6 @@ def build_home(skills: list[dict]) -> None:
       <ul class="grid">
 {why}
       </ul>
-    </section>
-
-    <section id="traction">
-      <h2>In numbers</h2>
-      <ul class="stats">
-{stats}
-      </ul>
-      <p class="mini">npm wrapper: 138 downloads in the last 30 days. Numbers as of Sep 2026.
-      <a href="{REPO}">View the repo →</a></p>
     </section>
 
     <section id="compare">
