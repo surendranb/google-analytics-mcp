@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Setup Guide — GA4 MCP Server</title>
+<meta name="description" content="Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.">
+<link rel="canonical" href="https://ga4mcp.com/setup/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/setup/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Setup Guide — GA4 MCP Server">
+<meta property="og:description" content="Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.">
+<meta property="og:url" content="https://ga4mcp.com/setup/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Setup Guide — GA4 MCP Server">
+<meta name="twitter:description" content="Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Setup Guide — GA4 MCP Server","description":"Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.","url":"https://ga4mcp.com/setup/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Setup Guide — GA4 MCP Server","description":"Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.","url":"https://ga4mcp.com/setup/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/" aria-current="page">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+<h1 id="google-analytics-4-mcp-setup-guide">Google Analytics 4 MCP: Setup Guide</h1>
+<p>If you are seeing a setup error, it means the IDE (Claude Desktop, Cursor, etc.) started the MCP server, but the required environment variables are missing or incorrect. </p>
+<h2 id="1-missing-ga4_property_id">1. Missing <code>GA4_PROPERTY_ID</code></h2>
+<p>The user must provide the exact numeric Property ID of their Google Analytics 4 property.
+<strong>Action required by user:</strong>
+Tell the user to set the <code>GA4_PROPERTY_ID</code> environment variable in their MCP configuration (e.g., <code>claude_desktop_config.json</code> or Cursor settings).
+Example:</p>
+<pre><code class="language-json">&quot;env&quot;: {
+  &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+  &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;...&quot;
+}
+</code></pre>
+<h2 id="2-missing-google_application_credentials">2. Missing <code>GOOGLE_APPLICATION_CREDENTIALS</code></h2>
+<p>The server requires Google Cloud credentials to query the GA4 API. 
+<strong>Action required by user:</strong>
+They must set the <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable to the absolute path of their Service Account JSON key.
+Example:</p>
+<pre><code class="language-json">&quot;env&quot;: {
+  &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+  &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/Users/name/keys/ga4-key.json&quot;
+}
+</code></pre>
+<h2 id="3-expired-application-default-credentials-adc">3. Expired Application Default Credentials (ADC)</h2>
+<p>If the user is relying on <code>gcloud</code> local authentication (instead of a JSON file) and receives a <code>503 Reauthentication is needed</code> error, their local token has expired.
+<strong>Action required by user:</strong>
+Tell the user to open their terminal and run:</p>
+<pre><code class="language-bash">gcloud auth application-default login
+</code></pre>
+    <p class="doc-note">Served inside the MCP as the <code>docs://fix/setup</code> resource and as
+    <code>get_troubleshooting_guide("setup")</code>. Markdown twin:
+    <a href="/setup/index.md">/setup/index.md</a> · Source:
+    <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/docs/setup.md">docs/setup.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

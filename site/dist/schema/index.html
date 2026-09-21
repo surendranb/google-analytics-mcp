@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Schema &amp; Filters — GA4 MCP Server</title>
+<meta name="description" content="GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property&#x27;s live schema.">
+<link rel="canonical" href="https://ga4mcp.com/schema/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/schema/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Schema &amp; Filters — GA4 MCP Server">
+<meta property="og:description" content="GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property&#x27;s live schema.">
+<meta property="og:url" content="https://ga4mcp.com/schema/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Schema &amp; Filters — GA4 MCP Server">
+<meta name="twitter:description" content="GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property&#x27;s live schema.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Schema & Filters — GA4 MCP Server","description":"GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property's live schema.","url":"https://ga4mcp.com/schema/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Schema & Filters — GA4 MCP Server","description":"GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property's live schema.","url":"https://ga4mcp.com/schema/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/" aria-current="page">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+<h1 id="google-analytics-4-mcp-schema-guide">Google Analytics 4 MCP: Schema Guide</h1>
+<p>When using the <code>get_ga4_data</code> tool, you must pass valid JSON structures for <code>dimension_filter</code> or <code>metric_filter</code>. These follow the strict Google Analytics Data API (v1beta) schema.</p>
+<p><strong>DO NOT GUESS</strong>. Use the exact JSON structures provided below.</p>
+<h2 id="1-simple-string-filter">1. Simple String Filter</h2>
+<p>To filter where <code>city</code> exactly matches "London":</p>
+<pre><code class="language-json">{
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;city&quot;,
+    &quot;stringFilter&quot;: {
+      &quot;matchType&quot;: &quot;EXACT&quot;,
+      &quot;value&quot;: &quot;London&quot;
+    }
+  }
+}
+</code></pre>
+<h2 id="2-in-list-filter">2. In List Filter</h2>
+<p>To filter where <code>country</code> is in a list of values:</p>
+<pre><code class="language-json">{
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;country&quot;,
+    &quot;inListFilter&quot;: {
+      &quot;values&quot;: [&quot;United States&quot;, &quot;United Kingdom&quot;, &quot;Canada&quot;]
+    }
+  }
+}
+</code></pre>
+<h2 id="3-numeric-filter-metrics-only">3. Numeric Filter (Metrics only)</h2>
+<p>To filter where <code>activeUsers</code> is greater than 100 (used in <code>metric_filter</code>):</p>
+<pre><code class="language-json">{
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;activeUsers&quot;,
+    &quot;numericFilter&quot;: {
+      &quot;operation&quot;: &quot;GREATER_THAN&quot;,
+      &quot;value&quot;: {
+        &quot;int64Value&quot;: &quot;100&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h2 id="4-logical-and-or-nested-filters">4. Logical AND / OR (Nested Filters)</h2>
+<p>If you need to combine multiple filters, you MUST use <code>andGroup</code> or <code>orGroup</code>. Note the required <code>expressions</code> array!</p>
+<pre><code class="language-json">{
+  &quot;andGroup&quot;: {
+    &quot;expressions&quot;: [
+      {
+        &quot;filter&quot;: {
+          &quot;fieldName&quot;: &quot;city&quot;,
+          &quot;stringFilter&quot;: {
+            &quot;matchType&quot;: &quot;EXACT&quot;,
+            &quot;value&quot;: &quot;London&quot;
+          }
+        }
+      },
+      {
+        &quot;filter&quot;: {
+          &quot;fieldName&quot;: &quot;deviceCategory&quot;,
+          &quot;stringFilter&quot;: {
+            &quot;matchType&quot;: &quot;EXACT&quot;,
+            &quot;value&quot;: &quot;Mobile&quot;
+          }
+        }
+      }
+    ]
+  }
+}
+</code></pre>
+<p><strong>CRITICAL RULE:</strong> A filter expression can ONLY have ONE top-level key: either <code>filter</code>, <code>andGroup</code>, <code>orGroup</code>, or <code>notExpression</code> (or their snake_case equivalents: <code>and_group</code>, <code>or_group</code>, <code>not_expression</code>).</p>
+<h3 id="case-resilience-camelcase-snake_case">Case Resilience (camelCase &amp; snake_case)</h3>
+<p>The GA4 MCP server automatically translates all your filter keys. You can write them in either format:
+- <strong>camelCase (GA4 default):</strong> <code>fieldName</code>, <code>stringFilter</code>, <code>andGroup</code>, etc.
+- <strong>snake_case (Python default):</strong> <code>field_name</code>, <code>string_filter</code>, <code>and_group</code>, etc.
+Both will compile and run successfully.</p>
+<h2 id="5-finding-valid-dimensions-and-metrics">5. Finding Valid Dimensions and Metrics</h2>
+<p>If you encounter an "Invalid dimension" or "Invalid metric" error, it means you guessed an API name that does not exist in GA4. 
+You MUST use the <code>search_schema()</code> tool to find the exact API name.
+For example, if the user asks for "conversions", call <code>search_schema(keyword="conversions")</code> to discover that the correct GA4 API metric is <code>keyEvents</code>.</p>
+    <p class="doc-note">Served inside the MCP as the <code>docs://fix/schema</code> resource and as
+    <code>get_troubleshooting_guide("schema")</code>. Markdown twin:
+    <a href="/schema/index.md">/schema/index.md</a> · Source:
+    <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/docs/schema.md">docs/schema.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

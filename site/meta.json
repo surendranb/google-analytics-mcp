@@ -1,0 +1,112 @@
+{
+  "/": {
+    "title": "GA4 MCP Server — Google Analytics 4 for AI Agents",
+    "description": "Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.",
+    "target_query": "ga4 mcp server"
+  },
+  "/setup": {
+    "title": "Setup Guide — GA4 MCP Server",
+    "description": "Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.",
+    "target_query": "ga4 mcp setup"
+  },
+  "/schema": {
+    "title": "Schema & Filters — GA4 MCP Server",
+    "description": "GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property's live schema.",
+    "target_query": "ga4 mcp schema"
+  },
+  "/iam": {
+    "title": "IAM & Viewer Access — GA4 MCP Server",
+    "description": "Fix a 403: grant the service account Viewer access on your GA4 property (Admin > Property Access Management). Exact steps for the IAM repair.",
+    "target_query": "ga4 mcp iam permissions"
+  },
+  "/skills/": {
+    "title": "Agent Skills — GA4 MCP Server",
+    "description": "15 GA4 analytical recipes an agent can load on request: traffic diagnosis, channel acquisition, ecommerce, AI referrals, bot detection, field-name maps.",
+    "target_query": "ga4 mcp skills"
+  },
+  "/skills/ai-referral-analysis/": {
+    "title": "AI Referral Analysis — GA4 MCP Agent Skill",
+    "description": "Measure traffic from AI tools: how much comes from ChatGPT, Claude, Perplexity, and Gemini, and how an agent isolates it in GA4.",
+    "target_query": "ai traffic google analytics"
+  },
+  "/skills/attribution-scope/": {
+    "title": "Attribution Scope — GA4 MCP Agent Skill",
+    "description": "When to use session-scoped vs first-user vs event-scoped GA4 dimensions, and why mixing them returns API errors.",
+    "target_query": "ga4 attribution scope session vs user"
+  },
+  "/skills/bot-traffic-detection/": {
+    "title": "Bot Traffic Detection — GA4 MCP Agent Skill",
+    "description": "How to spot bot, scraper, and spam sessions in GA4 and exclude them from an AI agent's traffic analysis.",
+    "target_query": "filter bot traffic google analytics"
+  },
+  "/skills/channel-acquisition/": {
+    "title": "Channel Acquisition — GA4 MCP Agent Skill",
+    "description": "Break GA4 traffic down by source, medium, and default channel group, with the dimensions an agent should query.",
+    "target_query": "ga4 channel acquisition analysis"
+  },
+  "/skills/common-metric-names/": {
+    "title": "Common Metric Names — GA4 MCP Agent Skill",
+    "description": "Correct GA4 Data API names for metrics and dimensions, including active users (MAU/WAU/DAU) and common aliases.",
+    "target_query": "ga4 metric names"
+  },
+  "/skills/compatible-combinations/": {
+    "title": "Compatible Combinations — GA4 MCP Agent Skill",
+    "description": "Which GA4 dimension and metric combinations the API accepts, and which pairings return 400 errors.",
+    "target_query": "ga4 dimensions and metrics incompatible"
+  },
+  "/skills/content-performance/": {
+    "title": "Content Performance — GA4 MCP Agent Skill",
+    "description": "Find top pages and underperforming content in GA4: engagement, scroll depth, and return visits by page.",
+    "target_query": "ga4 content performance report"
+  },
+  "/skills/custom-dimensions/": {
+    "title": "Custom Dimensions — GA4 MCP Agent Skill",
+    "description": "Find and query GA4 custom dimensions and event parameters (customEvent:*, customUser:*) from an AI agent.",
+    "target_query": "ga4 custom dimensions query"
+  },
+  "/skills/date-ranges/": {
+    "title": "Date Ranges — GA4 MCP Agent Skill",
+    "description": "GA4 date syntax, relative ranges, and week-over-week or year-over-year comparisons without partial-day errors.",
+    "target_query": "ga4 date ranges query"
+  },
+  "/skills/ecommerce-analysis/": {
+    "title": "Ecommerce Analysis — GA4 MCP Agent Skill",
+    "description": "GA4 ecommerce analysis for agents: revenue, conversion rate, AOV, and funnel drop-off from purchase events.",
+    "target_query": "ga4 ecommerce analysis"
+  },
+  "/skills/filter-structures/": {
+    "title": "Filter Structures — GA4 MCP Agent Skill",
+    "description": "Copy-paste GA4 dimension_filter shapes: single field, AND, OR, NOT, and IN LIST, with the keys the API accepts.",
+    "target_query": "ga4 dimension filter json"
+  },
+  "/skills/ga4-limitations/": {
+    "title": "GA4 Limitations — GA4 MCP Agent Skill",
+    "description": "What the GA4 Data API can't do (funnels, cohorts, paths, per-user analysis) and where to go instead.",
+    "target_query": "ga4 api limitations"
+  },
+  "/skills/geo-device-segmentation/": {
+    "title": "Geo Device Segmentation — GA4 MCP Agent Skill",
+    "description": "Split GA4 users and sessions by country, city, device category, and OS to read regional and device patterns.",
+    "target_query": "ga4 geo device segmentation"
+  },
+  "/skills/traffic-diagnosis/": {
+    "title": "Traffic Diagnosis — GA4 MCP Agent Skill",
+    "description": "A step-by-step GA4 method an AI agent follows to find the cause of a traffic drop, spike, or channel shift.",
+    "target_query": "ga4 traffic drop diagnosis"
+  },
+  "/skills/ua-to-ga4/": {
+    "title": "UA to GA4 Migration — GA4 MCP Agent Skill",
+    "description": "Map Universal Analytics field names (users, uniquePageviews, conversions) to their GA4 Data API equivalents.",
+    "target_query": "universal analytics to ga4 mapping"
+  },
+  "/privacy": {
+    "title": "Privacy — GA4 MCP Server",
+    "description": "No analytics payloads stored on our servers; queries run locally; telemetry opts out with DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1.",
+    "target_query": "ga4 mcp privacy"
+  },
+  "/terms": {
+    "title": "Terms — GA4 MCP Server",
+    "description": "MIT license, Google API terms, the OAuth authorization relay, and warranty and liability disclaimers for the GA4 MCP server.",
+    "target_query": "ga4 mcp terms"
+  }
+}

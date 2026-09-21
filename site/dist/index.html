@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>GA4 MCP Server — Google Analytics 4 for AI Agents</title>
+<meta name="description" content="Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.">
+<link rel="canonical" href="https://ga4mcp.com/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="GA4 MCP Server — Google Analytics 4 for AI Agents">
+<meta property="og:description" content="Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.">
+<meta property="og:url" content="https://ga4mcp.com/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GA4 MCP Server — Google Analytics 4 for AI Agents">
+<meta name="twitter:description" content="Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GA4 MCP Server","alternateName":"google-analytics-mcp","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","description":"MCP server that gives AI agents analysis-ready access to Google Analytics 4: schema discovery, server-side aggregation, and 15 analytical skills over stdio.","url":"https://ga4mcp.com/","codeRepository":"https://github.com/surendranb/google-analytics-mcp","license":"https://opensource.org/license/mit","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"softwareVersion":"2.11.4","softwareRequirements":"Python 3.10+, or Node 16+ via the npx wrapper","author":{"@type":"Person","name":"Surendran B"},"keywords":["GA4","MCP","Google Analytics 4","AI agents","llms.txt","WebMCP"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is MCP?","acceptedAnswer":{"@type":"Answer","text":"Model Context Protocol is a standard for connecting AI apps to external tools. Your client launches this server, and the agent gets GA4 querying tools: reporting, schema search, skills, and troubleshooting."}},{"@type":"Question","name":"Does it work with Claude? What about ChatGPT?","acceptedAnswer":{"@type":"Answer","text":"Claude Desktop and Claude Code are both covered by the installer, along with Cursor, VS Code (Cline, Roo Code), Continue.dev, Windsurf, Zed, Google Antigravity, and OpenCode. Gemini CLI connects through the repo's extension. ChatGPT isn't in the supported list; this is a local stdio server, so it needs a client that can launch local MCP servers."}},{"@type":"Question","name":"Service account or OAuth?","acceptedAnswer":{"@type":"Answer","text":"Both patterns run locally. A service-account JSON key doesn't expire and suits fixed or shared setups. Google Application Default Credentials via gcloud auth application-default login use OAuth user credentials refreshed on your machine. The quick start uses a service account because it has the fewest moving parts."}},{"@type":"Question","name":"Is it free?","acceptedAnswer":{"@type":"Answer","text":"Yes. MIT licensed, no account, no seat pricing, no hosted service in the query path. Queries run from your machine straight to Google's GA4 Data API, and your use of Google's APIs is governed by Google's terms and quotas."}},{"@type":"Question","name":"What does it collect, and can I turn telemetry off?","acceptedAnswer":{"@type":"Answer","text":"Anonymous usage diagnostics: which tools ran, latency, error codes. No queries, no credentials, no analytics data, no file paths. Set DISABLETELEMETRY=1 or DONOTTRACK=1 and nothing is sent; when opted out, the server also stops creating its local ID file. The privacy policy has the full detail."}},{"@type":"Question","name":"How many tools does it ship?","acceptedAnswer":{"@type":"Answer","text":"11 in v2.11.4: getga4data for reports, six schema tools for field discovery (search, full schema, and category browsing), plus listproperties, searchskills, gettroubleshootingguide, and setupga4access."}},{"@type":"Question","name":"How is this different from Google's official server?","acceptedAnswer":{"@type":"Answer","text":"Google's is vendor-maintained and labeled experimental, with coverage that includes funnel reports and Google Ads links. This one focuses on agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed totals, and guided setup recovery. The comparison above has the full split."}},{"@type":"Question","name":"Does it support Universal Analytics?","acceptedAnswer":{"@type":"Answer","text":"No. UA properties stopped processing data on 2023-07-01, and this server talks to GA4 only. If you're translating old field names, the ua-to-ga4 skill maps every common one."}},{"@type":"Question","name":"Is it read-only?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every tool is annotated read-only, and the server reads metadata and reports from the GA4 Data API. It doesn't change your GA4 configuration."}},{"@type":"Question","name":"I'm getting an error. Where do I start?","acceptedAnswer":{"@type":"Answer","text":"Ask your agent to run gettroubleshootingguide(topic=\"setup\"), (\"iam\"), or (\"schema\"). The guides are bundled with the package and work offline. setupga4access walks the fix mid-session, and this site's setup, IAM, and schema pages mirror the same steps."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"GA4 MCP Server — Google Analytics 4 for AI Agents","description":"Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.","url":"https://ga4mcp.com/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article>
+    <section class="hero" id="hero">
+      <div class="hero-grid">
+      <div>
+      <p class="eyebrow">Model Context Protocol · GA4 Data API v1beta</p>
+      <h1>GA4 MCP Server</h1>
+      <p class="lead">Google Analytics 4 for AI agents.</p>
+      <p>Point Claude, Cursor, or any MCP client at your GA4 property. The server reads your property's real
+      schema before it writes a query, asks GA4 for period totals instead of letting the model sum rows, and
+      keeps 15 analytical skills one call away.</p>
+      <div class="cta">
+        <a class="btn" href="#install">Install in one line</a>
+        <a class="btn ghost" href="/setup/">Read the setup guide</a>
+      </div>
+      <p class="trust">v2.11.4 · MIT · PyPI + npm + one-line installer · Not affiliated with Google</p>
+      </div>
+      <div class="hero-mark" aria-hidden="true"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg></div>
+      </div>
+      <p class="mini">On this page: <a href="#install">Install</a> · <a href="#works-with">Clients</a> · <a href="#why">Why</a> · <a href="#traction">In numbers</a> · <a href="#compare">Compare</a> · <a href="#quickstart">Quick start</a> · <a href="#faq">FAQ</a></p>
+    </section>
+
+    <section id="install">
+      <h2>Install</h2>
+      <p>Three ways in. The installer finds your client and writes the config entry; the runtime commands drop
+      into any MCP client's config.</p>
+    <figure class="cmd"><pre><code># Universal installer (auto-configures your client)
+curl -fsSL &quot;https://ga4.builditwithai.xyz/install&quot; | bash</code></pre><figcaption>Detects Claude Desktop, Claude Code, Cursor, VS Code (Cline, Roo Code), Continue.dev, Windsurf, Zed, Google Antigravity, and OpenCode.</figcaption></figure>
+    <figure class="cmd"><pre><code># uvx
+uvx google-analytics-mcp</code></pre><figcaption>Requires uv.</figcaption></figure>
+    <figure class="cmd"><pre><code># npx
+npx -y @surendranb/google-analytics-mcp</code></pre><figcaption>The npm package launches the Python server through uvx, so uv is required here too.</figcaption></figure>
+    <figure class="cmd"><pre><code># Claude Code users
+claude mcp add google-analytics -- uvx google-analytics-mcp</code></pre><figcaption>Adds the server to Claude Code in one command.</figcaption></figure>
+      <div class="note"><p><strong>Before the first query,</strong> set two env values:
+      <code>GA4_PROPERTY_ID</code> and <code>GOOGLE_APPLICATION_CREDENTIALS</code>. Both are covered in
+      <a href="#quickstart">quick start</a> below. No installer run is required for the runtime commands;
+      they fetch the package on first launch.</p></div>
+    </section>
+
+    <section id="works-with">
+      <h2>Works with your client</h2>
+      <p>No hand-edited JSON needed for most setups.</p>
+      <ul class="client-list">
+      <li>Claude Desktop</li>
+      <li>Claude Code</li>
+      <li>Cursor</li>
+      <li>VS Code (Cline, Roo Code)</li>
+      <li>Continue.dev</li>
+      <li>Windsurf</li>
+      <li>Zed</li>
+      <li>Google Antigravity</li>
+      <li>OpenCode</li>
+      <li>Gemini CLI (extension in the repo)</li>
+      </ul>
+      <p>The server speaks MCP over stdio. If your client can launch a local MCP server, a manual config
+      snippet is all it takes; the repo has snippets for each client above.</p>
+    </section>
+
+    <section id="why">
+      <h2>Why this server</h2>
+      <ul class="grid">
+      <li class="card"><h3>Field names checked against your property</h3><p>search_schema and the category browsers read a schema fetched from your own GA4 property at boot. get_ga4_data checks every dimension and metric before the API call, so an invalid name comes back with the fix instead of a raw 400.</p></li>
+      <li class="card"><h3>15 analytical skills, loaded on request</h3><p>Traffic drops, channel acquisition, ecommerce, AI referrals, bot detection, field-name maps. Skills are fetched from the repo when asked, so adding one doesn&#x27;t need a package release.</p></li>
+      <li class="card"><h3>Totals computed by GA4, not your model</h3><p>Multi-row pulls return a totals block from GA4&#x27;s own aggregation, plus a note telling the agent to read the period figure there instead of summing rows itself.</p></li>
+      <li class="card"><h3>Defaults that stop runaway queries</h3><p>Row counts are estimated before the fetch by default. A query that would return more than 2,500 rows comes back with a warning and concrete ways to narrow it, unless you pass proceed_with_large_dataset=True. Common metric aliases (conversions → keyEvents) and filter-shape repairs fix the mistakes models actually make.</p></li>
+      <li class="card"><h3>The boring failures have built-in fixes</h3><p>Setup, IAM, and schema guides ship inside the package and work offline. On clients that support prompts, setup_ga4_access collects a missing property ID or credentials path mid-session and reconnects without a restart.</p></li>
+      <li class="card"><h3>Telemetry you can switch off</h3><p>Anonymous diagnostics only: no queries, no credentials, no analytics data. Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 and the server stops sending, and stops writing its local ID file. MIT licensed, no account.</p></li>
+      </ul>
+    </section>
+
+    <section id="traction">
+      <h2>In numbers</h2>
+      <ul class="stats">
+      <li class="stat"><b>7,103</b><span>PyPI downloads, last 30 days</span></li>
+      <li class="stat"><b>242</b><span>GitHub stars</span></li>
+      <li class="stat"><b>48</b><span>GitHub forks</span></li>
+      <li class="stat"><b>15</b><span>Agent skills</span></li>
+      <li class="stat"><b>v2.11.4</b><span>Current version</span></li>
+      <li class="stat"><b>MIT</b><span>License</span></li>
+      </ul>
+      <p class="mini">npm wrapper: 138 downloads in the last 30 days. Numbers as of Sep 2026.
+      <a href="https://github.com/surendranb/google-analytics-mcp">View the repo →</a></p>
+    </section>
+
+    <section id="compare">
+      <h2>This server vs Google's official Analytics MCP server</h2>
+      <p>Both servers are real, and both are free to use. Google publishes its own Analytics MCP server
+      (labeled experimental, Apache-2.0). This one is community-built and MIT-licensed. Here's the split,
+      without the sales gloss.</p>
+      <div class="tscroll"><table>
+        <caption class="sr-only">Feature comparison between this GA4 MCP server and Google's Analytics MCP server</caption>
+        <thead><tr><th scope="col"></th>
+        <th scope="col">This server</th><th scope="col">Google&#x27;s server (google-analytics-mcp)</th></tr></thead>
+        <tbody>
+        <tr><th scope="row">Built by</th><td>Community project by Surendran B (BuildItWithAI); not affiliated with Google</td><td>Google&#x27;s Analytics organization</td></tr>
+        <tr><th scope="row">Status</th><td>v2.11.4, MIT</td><td>Labeled &quot;Experimental&quot;, Apache-2.0</td></tr>
+        <tr><th scope="row">API coverage</th><td>GA4 Data API: reporting + metadata</td><td>Admin API + Data API: account and property info, Google Ads links, core, funnel, and realtime reports</td></tr>
+        <tr><th scope="row">Setup</th><td>One-line installer, or uvx / npx; property ID + credentials</td><td>pipx run analytics-mcp; requires a Google Cloud project ID and enabling the Admin + Data APIs</td></tr>
+        <tr><th scope="row">Extras</th><td>15 skills loaded at call time, pre-flight schema checks, GA4-computed totals, row-cap guard, offline troubleshooting guides, in-session setup recovery</td><td>Vendor-maintained reference toolset</td></tr>
+        </tbody>
+      </table></div>
+      <h3>When to use which</h3>
+      <p><strong>Reach for Google's server if</strong> you want the vendor-maintained baseline, funnel reports,
+      or Google Ads account links.</p>
+      <p><strong>Reach for this one if</strong> you're driving an agent through day-to-day analysis and want it
+      to stop guessing field names, read period totals instead of summing rows, and follow a documented method
+      per question.</p>
+      <p class="mini">GA4 MCP is an independent open-source project. It isn't affiliated with, endorsed by, or
+      sponsored by Google. "Google Analytics" is a trademark of Google LLC.</p>
+    </section>
+
+    <section id="quickstart">
+      <h2>Quick start</h2>
+      <h3>1. Get credentials and a property ID</h3>
+      <p>Two options, both local to your machine.</p>
+    <p><em>Service account (recommended for a persistent setup):</em> create a service account in Google Cloud
+    Console, download its JSON key, then add the service account's <code>client_email</code> as a
+    <strong>Viewer</strong> on your GA4 property (Admin → Property Access Management).</p>
+    <p><em>gcloud:</em> run <code>gcloud auth application-default login</code> and use the generated credentials
+    file. Then set both values:</p>
+    <pre><code>export GA4_PROPERTY_ID="123456789"                      # numeric ID, Admin → Property details
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</code></pre>
+    <p>Your property ID is the numeric one, not the <code>G-</code> measurement ID.</p>
+      <h3>2. Install and wire your client</h3>
+      <pre><code>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</code></pre>
+    <p>The installer detects your client and writes the config. Prefer manual? Add
+    <code>uvx google-analytics-mcp</code> to your MCP config and pass the two env values above.</p>
+      <h3>3. Ask your first question</h3>
+      <p>"What were my top channels last week?" · "Why did organic traffic drop in the last 7 days?" ·
+    "How much traffic came from AI assistants?" The agent picks the dimensions and metrics, runs the report,
+    and reads the totals GA4 computed.</p>
+      <div class="cta"><a class="btn" href="#install">Install now</a></div>
+    </section>
+
+    <section id="faq">
+      <h2>FAQ</h2>
+      <div class="faq">
+      <h3>What is MCP?</h3>
+      <p>Model Context Protocol is a standard for connecting AI apps to external tools. Your client launches this server, and the agent gets GA4 querying tools: reporting, schema search, skills, and troubleshooting.</p>
+      <h3>Does it work with Claude? What about ChatGPT?</h3>
+      <p>Claude Desktop and Claude Code are both covered by the installer, along with Cursor, VS Code (Cline, Roo Code), Continue.dev, Windsurf, Zed, Google Antigravity, and OpenCode. Gemini CLI connects through the repo&#x27;s extension. ChatGPT isn&#x27;t in the supported list; this is a local stdio server, so it needs a client that can launch local MCP servers.</p>
+      <h3>Service account or OAuth?</h3>
+      <p>Both patterns run locally. A service-account JSON key doesn&#x27;t expire and suits fixed or shared setups. Google Application Default Credentials via gcloud auth application-default login use OAuth user credentials refreshed on your machine. The quick start uses a service account because it has the fewest moving parts.</p>
+      <h3>Is it free?</h3>
+      <p>Yes. MIT licensed, no account, no seat pricing, no hosted service in the query path. Queries run from your machine straight to Google&#x27;s GA4 Data API, and your use of Google&#x27;s APIs is governed by Google&#x27;s terms and quotas.</p>
+      <h3>What does it collect, and can I turn telemetry off?</h3>
+      <p>Anonymous usage diagnostics: which tools ran, latency, error codes. No queries, no credentials, no analytics data, no file paths. Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 and nothing is sent; when opted out, the server also stops creating its local ID file. The privacy policy has the full detail.</p>
+      <h3>How many tools does it ship?</h3>
+      <p>11 in v2.11.4: get_ga4_data for reports, six schema tools for field discovery (search, full schema, and category browsing), plus list_properties, search_skills, get_troubleshooting_guide, and setup_ga4_access.</p>
+      <h3>How is this different from Google&#x27;s official server?</h3>
+      <p>Google&#x27;s is vendor-maintained and labeled experimental, with coverage that includes funnel reports and Google Ads links. This one focuses on agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed totals, and guided setup recovery. The comparison above has the full split.</p>
+      <h3>Does it support Universal Analytics?</h3>
+      <p>No. UA properties stopped processing data on 2023-07-01, and this server talks to GA4 only. If you&#x27;re translating old field names, the ua-to-ga4 skill maps every common one.</p>
+      <h3>Is it read-only?</h3>
+      <p>Yes. Every tool is annotated read-only, and the server reads metadata and reports from the GA4 Data API. It doesn&#x27;t change your GA4 configuration.</p>
+      <h3>I&#x27;m getting an error. Where do I start?</h3>
+      <p>Ask your agent to run get_troubleshooting_guide(topic=&quot;setup&quot;), (&quot;iam&quot;), or (&quot;schema&quot;). The guides are bundled with the package and work offline. setup_ga4_access walks the fix mid-session, and this site&#x27;s setup, IAM, and schema pages mirror the same steps.</p>
+      </div>
+      <div class="cta"><a class="btn" href="#install">Install GA4 MCP</a></div>
+    </section>
+
+    <section id="footer-cta">
+      <h2>Open source, MIT, and local</h2>
+      <p>Install it, then ask your first question. Repo, setup guides, and the skills library:</p>
+      <p><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a> · <a href="/setup/">Setup</a> · <a href="/schema/">Schema</a> ·
+      <a href="/iam/">IAM</a> · <a href="/skills/">Skills</a> · <a href="/privacy/">Privacy</a> ·
+      <a href="/terms/">Terms</a></p>
+      <p class="mini">GA4 MCP is an independent project, not affiliated with Google. "Google Analytics" is a
+      trademark of Google LLC.</p>
+    </section>
+
+    <section id="agents">
+      <h2>For agents</h2>
+      <p>Every page here has a markdown twin, and the browser exposes five read-only tools through
+      <code>navigator.modelContext</code> when the client supports WebMCP. If you are an agent reading the
+      HTML, the faster path is <a href="/llms.txt">llms.txt</a> for the map and
+      <a href="/llms-full.txt">llms-full.txt</a> for every page in one file.
+      Machine data: <a href="/data/tools.json">tools.json</a> (11 tools),
+      <a href="/data/skills.json">skills.json</a> (15 skills).</p>
+    </section>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+  <script>
+  /* WebMCP: read-only tools for browser agents. Never required to read the page. */
+  (function () {
+    var INSTALL = {
+      universal: 'curl -fsSL "https://ga4.builditwithai.xyz/install" | bash',
+      uvx: 'uvx google-analytics-mcp',
+      npx: 'npx -y @surendranb/google-analytics-mcp',
+      claude_code: 'claude mcp add google-analytics -- uvx google-analytics-mcp',
+      python: 'python -m ga4_mcp'
+    };
+    async function twin(path) {
+      var res = await fetch(path, { headers: { accept: "text/markdown" } });
+      if (!res.ok) throw new Error("fetch failed: " + path + " (" + res.status + ")");
+      return await res.text();
+    }
+    var tools = {
+      get_install_command: {
+        description: "Return the install command for this GA4 MCP server. Optionally name a client: universal, uvx, npx, claude_code, python.",
+        inputSchema: { type: "object", properties: { client: { type: "string" } } },
+        execute: async function (args) {
+          var key = (args && args.client ? String(args.client) : "universal").toLowerCase().replace(/[^a-z_]/g, "_");
+          var command = INSTALL[key] || INSTALL.universal;
+          return command + "\nRequires GA4_PROPERTY_ID and GOOGLE_APPLICATION_CREDENTIALS before the first query.";
+        }
+      },
+      list_skills: {
+        description: "List the 15 GA4 analytical skills shipped with the server, as JSON.",
+        inputSchema: { type: "object", properties: {} },
+        execute: async function () { return await twin("/data/skills.json"); }
+      },
+      get_skill: {
+        description: "Return one skill recipe as markdown. Slug example: traffic-diagnosis.",
+        inputSchema: { type: "object", properties: { slug: { type: "string" } }, required: ["slug"] },
+        execute: async function (args) {
+          var slug = String((args && args.slug) || "").trim().toLowerCase();
+          if (!/^[a-z0-9-]+$/.test(slug)) throw new Error("slug must be a skill slug, e.g. traffic-diagnosis");
+          return await twin("/skills/" + slug + "/index.md");
+        }
+      },
+      get_tool_reference: {
+        description: "Return the 11 MCP tool definitions (names, parameters, descriptions) as JSON. Optionally filter by tool name.",
+        inputSchema: { type: "object", properties: { name: { type: "string" } } },
+        execute: async function (args) {
+          var all = JSON.parse(await twin("/data/tools.json"));
+          var name = args && args.name ? String(args.name) : "";
+          var hit = all.tools.filter(function (t) { return t.name === name; });
+          return JSON.stringify(name ? { tools: hit } : all, null, 2);
+        }
+      },
+      get_doc: {
+        description: "Return a troubleshooting guide as markdown. Topic must be setup, schema, or iam.",
+        inputSchema: { type: "object", properties: { topic: { type: "string" } }, required: ["topic"] },
+        execute: async function (args) {
+          var topic = String((args && args.topic) || "").trim().toLowerCase();
+          if (["setup", "schema", "iam"].indexOf(topic) === -1) throw new Error("topic must be setup, schema, or iam");
+          return await twin("/" + topic + "/index.md");
+        }
+      }
+    };
+    window.ga4mcpTools = tools;
+    var mc = navigator.modelContext || window.modelContext;
+    if (!mc || typeof mc.registerTool !== "function") return;
+    for (var name in tools) {
+      try {
+        mc.registerTool({
+          name: name,
+          description: tools[name].description,
+          inputSchema: tools[name].inputSchema,
+          execute: tools[name].execute,
+          annotations: { readOnlyHint: true }
+        });
+      } catch (err) {
+        console.warn("WebMCP registration failed:", name, err);
+      }
+    }
+  })();
+  </script>
+</body>
+</html>

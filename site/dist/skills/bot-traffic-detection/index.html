@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Bot Traffic Detection — GA4 MCP Agent Skill</title>
+<meta name="description" content="How to spot bot, scraper, and spam sessions in GA4 and exclude them from an AI agent&#x27;s traffic analysis.">
+<link rel="canonical" href="https://ga4mcp.com/skills/bot-traffic-detection/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/skills/bot-traffic-detection/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Bot Traffic Detection — GA4 MCP Agent Skill">
+<meta property="og:description" content="How to spot bot, scraper, and spam sessions in GA4 and exclude them from an AI agent&#x27;s traffic analysis.">
+<meta property="og:url" content="https://ga4mcp.com/skills/bot-traffic-detection/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Bot Traffic Detection — GA4 MCP Agent Skill">
+<meta name="twitter:description" content="How to spot bot, scraper, and spam sessions in GA4 and exclude them from an AI agent&#x27;s traffic analysis.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bot Traffic Detection — GA4 MCP Agent Skill","description":"How to spot bot, scraper, and spam sessions in GA4 and exclude them from an AI agent's traffic analysis.","url":"https://ga4mcp.com/skills/bot-traffic-detection/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Bot Traffic Detection — GA4 MCP Agent Skill","description":"How to spot bot, scraper, and spam sessions in GA4 and exclude them from an AI agent's traffic analysis.","url":"https://ga4mcp.com/skills/bot-traffic-detection/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/" aria-current="page">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+    <a class="back" href="/skills/">← All skills</a>
+<h1 id="bot-traffic-detection">Bot Traffic Detection</h1>
+<p>Identify and exclude bot, scraper, and spam sessions from GA4 data.</p>
+<h2 id="when-to-use">When to use</h2>
+<ul>
+<li>Traffic has unexplained spikes that don't correlate with any activity</li>
+<li>Bounce rate is 0% or near-100% across many sessions</li>
+<li>Sessions show 0 engagement time but high pageview counts</li>
+<li>Referrers look suspicious (random domains, unrecognised TLDs)</li>
+<li>You want to establish a clean baseline before any analysis</li>
+</ul>
+<h2 id="how-to-detect">How to detect</h2>
+<h3 id="step-1-check-engagement-time-distribution">Step 1 — Check engagement time distribution</h3>
+<p>Query sessions with very low or zero engagement:</p>
+<pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;, &quot;sessionSource&quot;, &quot;sessionMedium&quot;]
+metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;, &quot;bounceRate&quot;, &quot;screenPageViewsPerSession&quot;]
+date_range: last 7–14 days
+</code></pre>
+<p>Bot signals: <code>userEngagementDuration</code> near 0, <code>screenPageViewsPerSession</code> exactly 1,
+<code>bounceRate</code> at 1.0 (100%).</p>
+<h3 id="step-2-inspect-referrer-sources">Step 2 — Inspect referrer sources</h3>
+<pre><code>dimensions: [&quot;sessionSource&quot;, &quot;sessionMedium&quot;, &quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;, &quot;newUsers&quot;]
+dimension_filter: sessionMedium = &quot;referral&quot;
+</code></pre>
+<p>Flag sources where <code>userEngagementDuration / sessions</code> &lt; 2 seconds.</p>
+<h3 id="step-3-check-hostname">Step 3 — Check hostname</h3>
+<pre><code>dimensions: [&quot;hostname&quot;]
+metrics: [&quot;sessions&quot;, &quot;screenPageViews&quot;]
+</code></pre>
+<p>Bot traffic often hits unexpected hostnames (staging domains, raw IPs,
+or hostnames you don't own). Filter to your known production hostnames.</p>
+<h3 id="step-4-geographic-anomalies">Step 4 — Geographic anomalies</h3>
+<pre><code>dimensions: [&quot;country&quot;, &quot;city&quot;, &quot;sessionSource&quot;]
+metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;]
+dimension_filter: country = [countries with no expected traffic]
+</code></pre>
+<p>Clusters of sessions from unexpected countries with 0 engagement = bot signal.</p>
+<h2 id="exclusion-approach">Exclusion approach</h2>
+<p>GA4 does not have a native bot filter toggle beyond the automatic Google filter.
+To exclude suspected bot traffic from your analysis, add a dimension filter:</p>
+<pre><code>dimension_filter: {
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;sessionDefaultChannelGroup&quot;,
+    &quot;stringFilter&quot;: {&quot;matchType&quot;: &quot;EXACT&quot;, &quot;value&quot;: &quot;Direct&quot;}
+  }
+}
+</code></pre>
+<p>…combined with a metric filter on <code>userEngagementDuration &gt; 0</code>.</p>
+<p>Note: GA4 already filters known bots automatically. What remains are
+unknown/new bots and scrapers that mimic real browser behaviour.</p>
+<h2 id="what-to-report">What to report</h2>
+<ul>
+<li>Total suspicious sessions as % of all sessions</li>
+<li>Top suspicious sources with their engagement metrics</li>
+<li>Whether the pattern is new (spike) or chronic (baseline contamination)</li>
+</ul>
+    <p class="doc-note">Load it in a session with <code>search_skills("bot-traffic-detection")</code>, or read the MCP
+    resource <code>skill://bot-traffic-detection</code>. Markdown twin:
+    <a href="/skills/bot-traffic-detection/index.md">/skills/bot-traffic-detection/index.md</a> · Source:
+    <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/bot-traffic-detection/SKILL.md">skills/bot-traffic-detection/SKILL.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

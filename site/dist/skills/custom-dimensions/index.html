@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Custom Dimensions — GA4 MCP Agent Skill</title>
+<meta name="description" content="Find and query GA4 custom dimensions and event parameters (customEvent:*, customUser:*) from an AI agent.">
+<link rel="canonical" href="https://ga4mcp.com/skills/custom-dimensions/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/skills/custom-dimensions/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Custom Dimensions — GA4 MCP Agent Skill">
+<meta property="og:description" content="Find and query GA4 custom dimensions and event parameters (customEvent:*, customUser:*) from an AI agent.">
+<meta property="og:url" content="https://ga4mcp.com/skills/custom-dimensions/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Custom Dimensions — GA4 MCP Agent Skill">
+<meta name="twitter:description" content="Find and query GA4 custom dimensions and event parameters (customEvent:*, customUser:*) from an AI agent.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Custom Dimensions — GA4 MCP Agent Skill","description":"Find and query GA4 custom dimensions and event parameters (customEvent:*, customUser:*) from an AI agent.","url":"https://ga4mcp.com/skills/custom-dimensions/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Custom Dimensions — GA4 MCP Agent Skill","description":"Find and query GA4 custom dimensions and event parameters (customEvent:*, customUser:*) from an AI agent.","url":"https://ga4mcp.com/skills/custom-dimensions/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/" aria-current="page">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+    <a class="back" href="/skills/">← All skills</a>
+<h1 id="custom-dimensions-and-event-parameters">Custom Dimensions and Event Parameters</h1>
+<p>How to find and query property-specific custom dimensions in GA4.</p>
+<h2 id="the-core-rule">The core rule</h2>
+<p>Custom dimensions are <strong>property-specific</strong>. Never guess their names.
+Always call <code>search_schema("custom")</code> first — it will show every registered
+custom dimension for this exact property.</p>
+<h2 id="two-valid-syntaxes">Two valid syntaxes</h2>
+<p>GA4 supports two ways to access custom data:</p>
+<p><strong>Registered custom dimensions</strong> — appear in the schema by their registered name.
+Find them with <code>search_schema</code>. Use the name exactly as returned.</p>
+<p><strong>Unregistered event parameters</strong> — accessed inline with:
+- <code>customEvent:parameter_name</code> for event-scoped parameters
+- <code>customUser:property_name</code> for user-scoped properties</p>
+<p>The <code>parameter_name</code> must exactly match what your tracking code sends.
+If the property has not collected this parameter, the API returns an error.</p>
+<h2 id="why-guessing-fails">Why guessing fails</h2>
+<p>The model cannot know what custom parameters a GA4 property uses —
+they are defined by the site's own tracking code and GA4 Admin settings.
+<code>customEvent:page_category</code> works on one property and fails on another
+depending on whether that property's tracking sends a <code>page_category</code> parameter.</p>
+<h2 id="workflow">Workflow</h2>
+<ol>
+<li>Call <code>search_schema("custom")</code> — lists all registered custom dimensions.</li>
+<li>If the one you need appears, use its exact API name.</li>
+<li>If it does not appear, ask the user what event parameter name their
+   tracking code uses, then query with <code>customEvent:that_name</code>.</li>
+<li>If the query still fails, the parameter is not collected by this property.</li>
+</ol>
+<h2 id="scope-matters">Scope matters</h2>
+<div class="tscroll"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Syntax</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event</td>
+<td><code>customEvent:name</code></td>
+<td>per-hit data (page category, product id, etc.)</td>
+</tr>
+<tr>
+<td>User</td>
+<td><code>customUser:name</code></td>
+<td>user attributes (plan, cohort, customer type)</td>
+</tr>
+<tr>
+<td>Session</td>
+<td>registered name only</td>
+<td>session-level custom groupings</td>
+</tr>
+</tbody>
+</table></div>
+<p>Mixing scopes can cause incompatibility errors — see the <code>compatible-combinations</code> skill.</p>
+    <p class="doc-note">Load it in a session with <code>search_skills("custom-dimensions")</code>, or read the MCP
+    resource <code>skill://custom-dimensions</code>. Markdown twin:
+    <a href="/skills/custom-dimensions/index.md">/skills/custom-dimensions/index.md</a> · Source:
+    <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/custom-dimensions/SKILL.md">skills/custom-dimensions/SKILL.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

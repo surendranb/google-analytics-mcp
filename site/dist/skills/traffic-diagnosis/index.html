@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Traffic Diagnosis — GA4 MCP Agent Skill</title>
+<meta name="description" content="A step-by-step GA4 method an AI agent follows to find the cause of a traffic drop, spike, or channel shift.">
+<link rel="canonical" href="https://ga4mcp.com/skills/traffic-diagnosis/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/skills/traffic-diagnosis/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Traffic Diagnosis — GA4 MCP Agent Skill">
+<meta property="og:description" content="A step-by-step GA4 method an AI agent follows to find the cause of a traffic drop, spike, or channel shift.">
+<meta property="og:url" content="https://ga4mcp.com/skills/traffic-diagnosis/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Traffic Diagnosis — GA4 MCP Agent Skill">
+<meta name="twitter:description" content="A step-by-step GA4 method an AI agent follows to find the cause of a traffic drop, spike, or channel shift.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Traffic Diagnosis — GA4 MCP Agent Skill","description":"A step-by-step GA4 method an AI agent follows to find the cause of a traffic drop, spike, or channel shift.","url":"https://ga4mcp.com/skills/traffic-diagnosis/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Traffic Diagnosis — GA4 MCP Agent Skill","description":"A step-by-step GA4 method an AI agent follows to find the cause of a traffic drop, spike, or channel shift.","url":"https://ga4mcp.com/skills/traffic-diagnosis/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/" aria-current="page">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+    <a class="back" href="/skills/">← All skills</a>
+<h1 id="traffic-change-diagnosis">Traffic Change Diagnosis</h1>
+<p>Systematically diagnose why traffic changed — spike, drop, or shift in mix.
+Follow these steps in order. Each step narrows the hypothesis.</p>
+<h2 id="step-1-establish-the-baseline">Step 1 — Establish the baseline</h2>
+<p>Compare the period in question to the equivalent prior period:</p>
+<pre><code>dimensions: [&quot;date&quot;]
+metrics: [&quot;sessions&quot;, &quot;totalUsers&quot;, &quot;newUsers&quot;, &quot;engagedSessions&quot;, &quot;keyEvents&quot;]
+date_range: affected period + same-length prior period
+</code></pre>
+<p>Measure: absolute change, % change, and whether all metrics moved together.
+If sessions dropped but engagement rate improved, volume dropped but quality held — different cause than if everything dropped proportionally.</p>
+<h2 id="step-2-isolate-which-channel-changed">Step 2 — Isolate which channel changed</h2>
+<pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;, &quot;totalUsers&quot;, &quot;engagedSessions&quot;, &quot;engagementRate&quot;]
+date_range: affected period vs prior period
+</code></pre>
+<p>Which channel account for most of the change? Narrow to that channel before going deeper.</p>
+<h2 id="step-3-check-time-pattern-sudden-vs-gradual">Step 3 — Check time pattern (sudden vs gradual)</h2>
+<pre><code>dimensions: [&quot;date&quot;, &quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;]
+date_range: last 28 days
+</code></pre>
+<ul>
+<li><strong>Sudden single-day spike/drop</strong> → campaign launch/end, deploy, media mention, bot flood</li>
+<li><strong>Gradual decline over weeks</strong> → SEO decay, seasonal drift, quality score drop</li>
+<li><strong>Step change that persists</strong> → tracking change, filter change, channel definition update</li>
+</ul>
+<h2 id="step-4-fingerprint-the-cause">Step 4 — Fingerprint the cause</h2>
+<p>Run queries matching the suspected cause:</p>
+<p><strong>Bot flood</strong> — see <code>bot-traffic-detection</code> skill:
+- <code>engagementRate</code> near 0, <code>averageSessionDuration</code> ≈ 0
+- Unusual hostname or country concentration</p>
+<p><strong>Campaign start/end</strong>:</p>
+<pre><code>dimensions: [&quot;sessionCampaignName&quot;, &quot;sessionSource&quot;, &quot;sessionMedium&quot;]
+metrics: [&quot;sessions&quot;, &quot;keyEvents&quot;, &quot;engagementRate&quot;]
+dimension_filter: sessionDefaultChannelGroup IN [&quot;Paid Search&quot;, &quot;Paid Social&quot;, &quot;Display&quot;]
+</code></pre>
+<p><strong>SEO change (organic)</strong>:</p>
+<pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;, &quot;landingPagePlusQueryString&quot;]
+metrics: [&quot;sessions&quot;, &quot;engagementRate&quot;, &quot;keyEvents&quot;]
+dimension_filter: sessionDefaultChannelGroup = &quot;Organic Search&quot;
+date_range: 90 days (to see gradual trend)
+</code></pre>
+<p><strong>Technical/tracking change</strong> — all channels drop equally at the same moment.
+Check with <code>dimensions: ["date"]</code> — a vertical drop on a single date across all channels
+points to a tag firing issue or consent mode change.</p>
+<h2 id="step-5-conclude">Step 5 — Conclude</h2>
+<p>State:
+1. What changed (metric + magnitude)
+2. Which channel drove it
+3. When it started (sudden or gradual)
+4. Most likely cause (from fingerprinting)
+5. One action: investigate further / fix tracking / pause campaign / accept as seasonal</p>
+<h2 id="what-not-to-do">What not to do</h2>
+<p>Do not conclude "traffic dropped" from a single metric in isolation.
+Do not compare to the prior week without accounting for day-of-week patterns
+(Monday always differs from Sunday — compare Monday-to-Monday or full weeks).</p>
+    <p class="doc-note">Load it in a session with <code>search_skills("traffic-diagnosis")</code>, or read the MCP
+    resource <code>skill://traffic-diagnosis</code>. Markdown twin:
+    <a href="/skills/traffic-diagnosis/index.md">/skills/traffic-diagnosis/index.md</a> · Source:
+    <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/traffic-diagnosis/SKILL.md">skills/traffic-diagnosis/SKILL.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

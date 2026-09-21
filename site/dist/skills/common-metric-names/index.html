@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Common Metric Names — GA4 MCP Agent Skill</title>
+<meta name="description" content="Correct GA4 Data API names for metrics and dimensions, including active users (MAU/WAU/DAU) and common aliases.">
+<link rel="canonical" href="https://ga4mcp.com/skills/common-metric-names/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fdf0e2">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/skills/common-metric-names/index.md">
+<link rel="describedby" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Common Metric Names — GA4 MCP Agent Skill">
+<meta property="og:description" content="Correct GA4 Data API names for metrics and dimensions, including active users (MAU/WAU/DAU) and common aliases.">
+<meta property="og:url" content="https://ga4mcp.com/skills/common-metric-names/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Common Metric Names — GA4 MCP Agent Skill">
+<meta name="twitter:description" content="Correct GA4 Data API names for metrics and dimensions, including active users (MAU/WAU/DAU) and common aliases.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Common Metric Names — GA4 MCP Agent Skill","description":"Correct GA4 Data API names for metrics and dimensions, including active users (MAU/WAU/DAU) and common aliases.","url":"https://ga4mcp.com/skills/common-metric-names/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Common Metric Names — GA4 MCP Agent Skill","description":"Correct GA4 Data API names for metrics and dimensions, including active users (MAU/WAU/DAU) and common aliases.","url":"https://ga4mcp.com/skills/common-metric-names/","inLanguage":"en"}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(){var t="posthog";return"posthog"!==a&&(t+="."+a),t||(t+=" (stub)")},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/><rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/><rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/" aria-current="page">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+    <a class="back" href="/skills/">← All skills</a>
+<h1 id="common-metric-dimension-names">Common Metric &amp; Dimension Names</h1>
+<p>The correct GA4 Data API names for fields models most often get wrong.
+Use these before calling <code>get_ga4_data</code> — wrong names return a hard error.</p>
+<blockquote>
+<p>⚠️ <strong>YOUR TRAINING DATA IS OUTDATED</strong>: Universal Analytics was sunset
+2023-07-01, and on 2024-05-06 Google Analytics 4 renamed all conversion metrics to <strong>"key events"</strong>
+(<code>conversions</code> → <code>keyEvents</code>, <code>conversionRate</code> → <code>sessionKeyEventRate</code>).
+Querying <code>conversions</code> will fail with an <code>Invalid metric</code> error. Always use <code>keyEvents</code>.</p>
+</blockquote>
+<h2 id="metrics-correct-api-names">Metrics — correct API names</h2>
+<div class="tscroll"><table>
+<thead>
+<tr>
+<th>What you mean</th>
+<th>Wrong (will fail)</th>
+<th>Correct API name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Goal completions / conversions (RENAMED 2024)</td>
+<td><code>conversions</code>, <code>goals</code>, <code>conversion</code></td>
+<td><code>keyEvents</code></td>
+</tr>
+<tr>
+<td>Total users</td>
+<td><code>users</code>, <code>totalVisitors</code></td>
+<td><code>totalUsers</code></td>
+</tr>
+<tr>
+<td>Active users (rolling 30-day ≈ MAU)</td>
+<td><code>MAU</code>, <code>monthlyActiveUsers</code>, <code>activeVisitors</code></td>
+<td><code>active28DayUsers</code></td>
+</tr>
+<tr>
+<td>Active users (rolling 7-day ≈ WAU)</td>
+<td><code>WAU</code>, <code>weeklyActiveUsers</code></td>
+<td><code>active7DayUsers</code></td>
+</tr>
+<tr>
+<td>Active users (rolling 1-day ≈ DAU)</td>
+<td><code>DAU</code>, <code>dailyActiveUsers</code></td>
+<td><code>active1DayUsers</code></td>
+</tr>
+<tr>
+<td>Distinct users in the queried range</td>
+<td><code>uniqueUsers</code></td>
+<td><code>activeUsers</code></td>
+</tr>
+<tr>
+<td>Page views</td>
+<td><code>pageViews</code>, <code>pageviews</code>, <code>page_views</code></td>
+<td><code>screenPageViews</code></td>
+</tr>
+<tr>
+<td>E-commerce purchases</td>
+<td><code>purchases</code>, <code>transactions</code></td>
+<td><code>ecommercePurchases</code></td>
+</tr>
+<tr>
+<td>Product views</td>
+<td><code>itemViews</code>, <code>productViews</code></td>
+<td><code>itemsViewed</code></td>
+</tr>
+<tr>
+<td>Items added to cart</td>
+<td><code>addToCarts</code>, <code>cartAdds</code></td>
+<td><code>itemsAddedToCart</code></td>
+</tr>
+<tr>
+<td>Revenue</td>
+<td><code>revenue</code>, <code>ecommerceRevenue</code></td>
+<td><code>purchaseRevenue</code></td>
+</tr>
+<tr>
+<td>Avg session duration</td>
+<td><code>avgSessionDuration</code>, <code>avgTimeOnSite</code></td>
+<td><code>averageSessionDuration</code></td>
+</tr>
+<tr>
+<td>Total engagement time</td>
+<td><code>engagementDuration</code>, <code>timeOnSite</code></td>
+<td><code>userEngagementDuration</code></td>
+</tr>
+<tr>
+<td>Session key event rate (was "conversion rate", renamed 2024)</td>
+<td><code>conversionRate</code>, <code>goalConversionRate</code>, <code>sessionConversionRate</code></td>
+<td><code>sessionKeyEventRate</code></td>
+</tr>
+<tr>
+<td>User key event rate</td>
+<td><code>userConversionRate</code></td>
+<td><code>userKeyEventRate</code></td>
+</tr>
+<tr>
+<td>Engaged sessions</td>
+<td><code>qualifiedSessions</code>, <code>validSessions</code></td>
+<td><code>engagedSessions</code></td>
+</tr>
+<tr>
+<td>Pages per session</td>
+<td><code>pagesPerSession</code>, <code>pageDepth</code></td>
+<td><code>screenPageViewsPerSession</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dimensions-correct-api-names">Dimensions — correct API names</h2>
+<div class="tscroll"><table>
+<thead>
+<tr>
+<th>What you mean</th>
+<th>Wrong (will fail)</th>
+<th>Correct API name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Traffic channel group</td>
+<td><code>sessionDefaultChannelGrouping</code>, <code>channelGrouping</code></td>
+<td><code>sessionDefaultChannelGroup</code></td>
+</tr>
+<tr>
+<td>Landing page + query</td>
+<td><code>landingPage</code> (often wrong scope)</td>
+<td><code>landingPagePlusQueryString</code></td>
+</tr>
+<tr>
+<td>Page path</td>
+<td><code>pagePath</code>, <code>page</code></td>
+<td><code>pagePath</code></td>
+</tr>
+<tr>
+<td>Page path + query</td>
+<td><code>pagePathPlusQueryString</code></td>
+<td><code>unifiedPagePathScreen</code></td>
+</tr>
+<tr>
+<td>Session source</td>
+<td><code>source</code> (wrong scope — see attribution-scope skill)</td>
+<td><code>sessionSource</code></td>
+</tr>
+<tr>
+<td>Session medium</td>
+<td><code>medium</code> (wrong scope)</td>
+<td><code>sessionMedium</code></td>
+</tr>
+<tr>
+<td>Device type</td>
+<td><code>device</code>, <code>deviceType</code></td>
+<td><code>deviceCategory</code></td>
+</tr>
+<tr>
+<td>Operating system</td>
+<td><code>os</code></td>
+<td><code>operatingSystem</code></td>
+</tr>
+<tr>
+<td>Browser</td>
+<td><code>userAgent</code></td>
+<td><code>browser</code></td>
+</tr>
+<tr>
+<td>Week of year</td>
+<td><code>week</code>, <code>weekNumber</code></td>
+<td><code>week</code> (this one IS correct)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="note-on-active-users-mau-wau-dau">Note on active users (MAU / WAU / DAU)</h2>
+<p>GA4 has no <code>MAU</code>, <code>WAU</code>, <code>DAU</code>, <code>monthlyActiveUsers</code>, or <code>dailyActiveUsers</code> metric —
+these hard-error. Use the rolling n-day metrics: <code>active1DayUsers</code> (≈ DAU),
+<code>active7DayUsers</code> (≈ WAU), <code>active28DayUsers</code> (≈ MAU). Each counts distinct users
+active in the N days <em>ending on that date</em> (a rolling window, not a calendar bucket).
+<code>activeUsers</code> = distinct users in the queried range. Never sum daily <code>activeUsers</code>
+across rows to get a period total — it double-counts users active on multiple days.
+For a monthly total, query <code>activeUsers</code> once over the whole range (no date dimension),
+or use <code>active28DayUsers</code> for a rolling month. Stickiness ratios <code>dauPerMau</code>,
+<code>dauPerWau</code>, <code>wauPerMau</code> are also available as metrics.</p>
+<h2 id="note-on-bounce-rate">Note on bounce rate</h2>
+<p>GA4 bounce rate = sessions with NO engaged session (opposite of GA3 logic).
+A bounce rate of 60% means 60% of sessions had no engagement — that is high.
+In GA3, bounce rate meant single-page sessions. Do not compare GA3 and GA4 bounce rates.</p>
+<h2 id="when-you-hit-a-schema-error">When you hit a schema error</h2>
+<p>If <code>get_ga4_data</code> returns "Invalid dimension" or "Invalid metric", do not guess
+alternatives. Use <code>search_schema</code> with a keyword to find the correct name, or
+check this skill's table above.</p>
+    <p class="doc-note">Load it in a session with <code>search_skills("common-metric-names")</code>, or read the MCP
+    resource <code>skill://common-metric-names</code>. Markdown twin:
+    <a href="/skills/common-metric-names/index.md">/skills/common-metric-names/index.md</a> · Source:
+    <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/common-metric-names/SKILL.md">skills/common-metric-names/SKILL.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed.
+    Not affiliated with Google. "Google Analytics" is a trademark of Google LLC.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup/">Setup</a></li>
+        <li><a href="/schema/">Filter schema</a></li>
+        <li><a href="/iam/">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/llms-full.txt">llms-full.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+        <li><a href="/terms/">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

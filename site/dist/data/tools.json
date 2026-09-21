@@ -1,0 +1,84 @@
+{
+  "site": "https://ga4mcp.com",
+  "updated": "2026-09-21",
+  "count": 11,
+  "tools": [
+    {
+      "name": "get_ga4_data",
+      "parameters": "dimensions, metrics, date_range_start, date_range_end, dimension_filter, limit, estimate_only, proceed_with_large_dataset, enable_aggregation, intent",
+      "description": "Runs a GA4 report and returns rows plus a server-computed totals block from GA4's own aggregation.",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "search_schema",
+      "parameters": "keyword",
+      "description": "Ranks dimension and metric API names for this property.",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "get_property_schema",
+      "parameters": "-",
+      "description": "The full dimension and metric schema for the property, standard and custom..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "list_dimension_categories",
+      "parameters": "-",
+      "description": "Dimension categories with counts, for browsing instead of guessing..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "list_metric_categories",
+      "parameters": "-",
+      "description": "Metric categories with counts..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "get_dimensions_by_category",
+      "parameters": "category",
+      "description": "Every dimension in one category, with its description..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "get_metrics_by_category",
+      "parameters": "category",
+      "description": "Every metric in one category, with its description..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "list_properties",
+      "parameters": "account_id (optional)",
+      "description": "The GA4 properties the configured credentials can read..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "search_skills",
+      "parameters": "query (slug or keyword; empty returns the index)",
+      "description": "Serves one analytical recipe as markdown..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "get_troubleshooting_guide",
+      "parameters": "topic: setup | iam | schema",
+      "description": "The fix path for a boot error, a 403, or a filter-shape error.",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    },
+    {
+      "name": "setup_ga4_access",
+      "parameters": "-",
+      "description": "Collects a missing property ID or credentials path through the client and reconnects without a restart..",
+      "read_only": true,
+      "documentation": "https://ga4mcp.com/#agents"
+    }
+  ]
+}

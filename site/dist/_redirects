@@ -1,0 +1,18 @@
+# Legacy paths -> clean URLs (Netlify _redirects)
+/setup.md            /setup/            301
+/schema.md           /schema/           301
+/iam.md              /iam/              301
+/privacy.html        /privacy/          301
+/terms.html          /terms/            301
+# Old skill URLs -> skill pages
+/skills/*/SKILL.md   /skills/:splat/    301
+# No-trailing-slash variants of the directory URLs
+/setup               /setup/            301
+/schema              /schema/           301
+/iam                 /iam/              301
+/privacy             /privacy/          301
+/terms               /terms/            301
+/skills              /skills/           301
+/skills/:slug        /skills/:slug/     301
+# Installer endpoint (unchanged)
+/install             https://ga4.builditwithai.xyz/?src=install  302

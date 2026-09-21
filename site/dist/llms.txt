@@ -1,0 +1,85 @@
+# GA4 MCP Server
+
+> Model Context Protocol server for Google Analytics 4: schema discovery before a query is built, totals
+> computed by GA4 instead of the model, 11 tools, 15 analytical skills. MIT licensed, stdio, runs locally.
+
+Canonical site: https://ga4mcp.com · Version 2.11.4 · Updated 2026-09-21
+
+## Install
+
+```bash
+# universal installer (writes the client config)
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+# or run it directly
+uvx google-analytics-mcp
+npx -y @surendranb/google-analytics-mcp
+```
+
+Set `GA4_PROPERTY_ID` and `GOOGLE_APPLICATION_CREDENTIALS` before the first query. Details:
+https://ga4mcp.com/setup/ · [markdown](https://ga4mcp.com/setup/index.md)
+
+## Documentation
+
+- [Setup Guide — GA4 MCP Server](https://ga4mcp.com/setup/) · [markdown](https://ga4mcp.com/setup/index.md) — Install the GA4 MCP server with uvx, npx, or the one-line installer. Service-account or gcloud credentials, plus configs for Claude, Cursor, and more.
+- [Schema & Filters — GA4 MCP Server](https://ga4mcp.com/schema/) · [markdown](https://ga4mcp.com/schema/index.md) — GA4 Data API dimension and metric names, dimension_filter shapes, and how search_schema checks field names against your property's live schema.
+- [IAM & Viewer Access — GA4 MCP Server](https://ga4mcp.com/iam/) · [markdown](https://ga4mcp.com/iam/index.md) — Fix a 403: grant the service account Viewer access on your GA4 property (Admin > Property Access Management). Exact steps for the IAM repair.
+
+## Skills (15)
+
+- [AI Referral Analysis](https://ga4mcp.com/skills/ai-referral-analysis/) · [markdown](https://ga4mcp.com/skills/ai-referral-analysis/index.md): Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.
+- [Attribution Scope](https://ga4mcp.com/skills/attribution-scope/) · [markdown](https://ga4mcp.com/skills/attribution-scope/index.md): GA4 has three distinct attribution scopes. Using the wrong scope gives misleading results. Choose based on the question you are answering.
+- [Bot Traffic Detection](https://ga4mcp.com/skills/bot-traffic-detection/) · [markdown](https://ga4mcp.com/skills/bot-traffic-detection/index.md): Identify and exclude bot, scraper, and spam sessions from GA4 data.
+- [Channel Acquisition Analysis](https://ga4mcp.com/skills/channel-acquisition/) · [markdown](https://ga4mcp.com/skills/channel-acquisition/index.md): Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.
+- [Common Metric & Dimension Names](https://ga4mcp.com/skills/common-metric-names/) · [markdown](https://ga4mcp.com/skills/common-metric-names/index.md): The correct GA4 Data API names for fields models most often get wrong. Use these before calling getga4data — wrong names return a hard error.
+- [Compatible Dimension and Metric Combinations](https://ga4mcp.com/skills/compatible-combinations/) · [markdown](https://ga4mcp.com/skills/compatible-combinations/index.md): GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: \"The request's dimensions & metrics are incompatible.\
+- [Content Performance Analysis](https://ga4mcp.com/skills/content-performance/) · [markdown](https://ga4mcp.com/skills/content-performance/index.md): Identify top-performing pages, find underperforming content, and understand engagement patterns across your site.
+- [Custom Dimensions and Event Parameters](https://ga4mcp.com/skills/custom-dimensions/) · [markdown](https://ga4mcp.com/skills/custom-dimensions/index.md): How to find and query property-specific custom dimensions in GA4.
+- [Date Ranges](https://ga4mcp.com/skills/date-ranges/) · [markdown](https://ga4mcp.com/skills/date-ranges/index.md): How to specify date ranges in getga4data and how to structure period-over-period comparisons.
+- [Ecommerce Analysis](https://ga4mcp.com/skills/ecommerce-analysis/) · [markdown](https://ga4mcp.com/skills/ecommerce-analysis/index.md): Revenue, conversion rate, AOV, and funnel drop-off using GA4 ecommerce events.
+- [Filter Structures](https://ga4mcp.com/skills/filter-structures/) · [markdown](https://ga4mcp.com/skills/filter-structures/index.md): The correct shape for dimensionfilter in getga4data. Wrong structure returns an \"Invalid dimensionfilter\" error. Use these templates.
+- [GA4 API Limitations](https://ga4mcp.com/skills/ga4-limitations/) · [markdown](https://ga4mcp.com/skills/ga4-limitations/index.md): What this MCP cannot do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.
+- [Geo and Device Segmentation](https://ga4mcp.com/skills/geo-device-segmentation/) · [markdown](https://ga4mcp.com/skills/geo-device-segmentation/index.md): Break down user behaviour by country, city, device category, and OS to understand regional patterns and optimise for your key markets.
+- [Traffic Change Diagnosis](https://ga4mcp.com/skills/traffic-diagnosis/) · [markdown](https://ga4mcp.com/skills/traffic-diagnosis/index.md): Systematically diagnose why traffic changed — spike, drop, or shift in mix. Follow these steps in order. Each step narrows the hypothesis.
+- [UA to GA4 Field Name Mapping](https://ga4mcp.com/skills/ua-to-ga4/) · [markdown](https://ga4mcp.com/skills/ua-to-ga4/index.md): Universal Analytics (UA) and GA4 use different names for equivalent concepts. UA was sunset on 2023-07-01; models trained before or around then guess UA field names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed \"conversions\" to \"key events\" (see the conversions rows below). If a name feels obviously right but returns \"Invalid metric/dimension\", assume your training predates the change and verify with searchschema. This skill gives the correct GA4 Data API name for every common UA metric and dimension.
+
+Skills index: https://ga4mcp.com/skills/ · [markdown](https://ga4mcp.com/skills/index.md)
+
+## Tools (11)
+
+- `get_ga4_data(dimensions, metrics, date_range_start, date_range_end, dimension_filter, limit, estimate_only, proceed_with_large_dataset, enable_aggregation, intent)`: Runs a GA4 report and returns rows plus a server-computed totals block from GA4's own aggregation. Estimates row counts first and warns above 2,500 rows.
+- `search_schema(keyword)`: Ranks dimension and metric API names for this property. Call it before typing a field name.
+- `get_property_schema(-)`: The full dimension and metric schema for the property, standard and custom.
+- `list_dimension_categories(-)`: Dimension categories with counts, for browsing instead of guessing.
+- `list_metric_categories(-)`: Metric categories with counts.
+- `get_dimensions_by_category(category)`: Every dimension in one category, with its description.
+- `get_metrics_by_category(category)`: Every metric in one category, with its description.
+- `list_properties(account_id (optional))`: The GA4 properties the configured credentials can read.
+- `search_skills(query (slug or keyword; empty returns the index))`: Serves one analytical recipe as markdown.
+- `get_troubleshooting_guide(topic: setup | iam | schema)`: The fix path for a boot error, a 403, or a filter-shape error. Bundled with the package, works offline.
+- `setup_ga4_access(-)`: Collects a missing property ID or credentials path through the client and reconnects without a restart.
+
+## Machine data
+
+- [tools.json](https://ga4mcp.com/data/tools.json): all 11 tools with parameters and descriptions
+- [skills.json](https://ga4mcp.com/data/skills.json): skill slugs, titles, one-line descriptions
+- [llms-full.txt](https://ga4mcp.com/llms-full.txt): every page above inlined as markdown
+- [index.md](https://ga4mcp.com/index.md): the home page as markdown
+- [sitemap.xml](https://ga4mcp.com/sitemap.xml) · [robots.txt](https://ga4mcp.com/robots.txt)
+- Content negotiation: send `Accept: text/markdown` to any content URL for its markdown twin
+
+## Distribution
+
+- Repository: https://github.com/surendranb/google-analytics-mcp
+- PyPI: https://pypi.org/project/google-analytics-mcp/
+- npm: https://www.npmjs.com/package/@surendranb/google-analytics-mcp
+- Installer endpoint: https://ga4.builditwithai.xyz/install
+- Google's official Analytics MCP server (for comparison): https://github.com/googleanalytics/google-analytics-mcp
+
+## Environment
+
+- `GA4_PROPERTY_ID`: default GA4 property ID (numeric, not the `G-` measurement ID)
+- `GOOGLE_APPLICATION_CREDENTIALS`: absolute path to a service-account JSON key
+- `DISABLE_TELEMETRY=1` / `DO_NOT_TRACK=1`: stop anonymous diagnostics and the local ID file
+
+GA4 MCP is an independent project, not affiliated with or endorsed by Google. "Google Analytics" is a
+trademark of Google LLC.

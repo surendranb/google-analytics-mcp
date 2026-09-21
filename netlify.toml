@@ -1,4 +1,37 @@
+# ga4mcp.com deploy config.
+#
+# Publish is the committed build output (site/dist), so the deployed bytes are
+# the reviewed bytes: no build step can change what Netlify serves. Regenerate
+# with:  uv run --no-project --with markdown python3 site/build.py
+#
+# Branch deploys keep whatever the Netlify UI has configured for the site.
+
 [build]
   base = "."
-  publish = "dist"
+  publish = "site/dist"
   command = ""
+
+# Content negotiation, markdown twins, and agent telemetry.
+[[edge_functions]]
+  function = "negotiate"
+  path = "/*"
+
+# Content Signals: the studio's crawl stance, served from the origin.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Signal = "ai-train=yes, search=yes, ai-input=yes"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Markdown twins are duplicates of a real page: no index, canonical points at the HTML.
+[[headers]]
+  for = "/*.md"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"

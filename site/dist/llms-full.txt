@@ -1,0 +1,1526 @@
+# GA4 MCP Server — full text
+
+> Every documentation page and every skill in one file, for agents that would rather read once than crawl.
+> Canonical: https://ga4mcp.com · Updated 2026-09-21
+
+# Home
+
+# GA4 MCP Server
+
+> Google Analytics 4 for AI agents.
+
+Point Claude, Cursor, or any MCP client at your GA4 property. The server reads your property's real schema
+before it writes a query, asks GA4 for period totals instead of letting the model sum rows, and keeps 15
+analytical skills one call away.
+
+v2.11.4 · MIT · PyPI + npm + one-line installer · Not affiliated with Google
+
+- Install in one line: `#install` below
+- Setup guide: https://ga4mcp.com/setup/ · [markdown](https://ga4mcp.com/setup/index.md)
+- Repo: https://github.com/surendranb/google-analytics-mcp
+
+## Install
+
+Three ways in. The installer finds your client and writes the config entry; the runtime commands drop into
+any MCP client's config.
+
+```bash
+# Universal installer (auto-configures your client)
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+
+# uvx
+uvx google-analytics-mcp
+
+# npx
+npx -y @surendranb/google-analytics-mcp
+
+# Claude Code users
+claude mcp add google-analytics -- uvx google-analytics-mcp
+```
+
+Before the first query, set `GA4_PROPERTY_ID` and `GOOGLE_APPLICATION_CREDENTIALS`. Both are covered in
+Quick start below.
+
+## Works with your client
+
+No hand-edited JSON needed for most setups.
+
+- Claude Desktop
+- Claude Code
+- Cursor
+- VS Code (Cline, Roo Code)
+- Continue.dev
+- Windsurf
+- Zed
+- Google Antigravity
+- OpenCode
+- Gemini CLI (extension in the repo)
+
+The server speaks MCP over stdio. If your client can launch a local MCP server, a manual config snippet is
+all it takes; the repo has snippets for each client above.
+
+## Why this server
+
+### Field names checked against your property
+
+search_schema and the category browsers read a schema fetched from your own GA4 property at boot. get_ga4_data checks every dimension and metric before the API call, so an invalid name comes back with the fix instead of a raw 400.
+
+### 15 analytical skills, loaded on request
+
+Traffic drops, channel acquisition, ecommerce, AI referrals, bot detection, field-name maps. Skills are fetched from the repo when asked, so adding one doesn't need a package release.
+
+### Totals computed by GA4, not your model
+
+Multi-row pulls return a totals block from GA4's own aggregation, plus a note telling the agent to read the period figure there instead of summing rows itself.
+
+### Defaults that stop runaway queries
+
+Row counts are estimated before the fetch by default. A query that would return more than 2,500 rows comes back with a warning and concrete ways to narrow it, unless you pass proceed_with_large_dataset=True. Common metric aliases (conversions → keyEvents) and filter-shape repairs fix the mistakes models actually make.
+
+### The boring failures have built-in fixes
+
+Setup, IAM, and schema guides ship inside the package and work offline. On clients that support prompts, setup_ga4_access collects a missing property ID or credentials path mid-session and reconnects without a restart.
+
+### Telemetry you can switch off
+
+Anonymous diagnostics only: no queries, no credentials, no analytics data. Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 and the server stops sending, and stops writing its local ID file. MIT licensed, no account.
+
+## In numbers
+
+- **7,103** — PyPI downloads, last 30 days
+- **242** — GitHub stars
+- **48** — GitHub forks
+- **15** — Agent skills
+- **v2.11.4** — Current version
+- **MIT** — License
+
+npm wrapper: 138 downloads in the last 30 days. Numbers as of Sep 2026.
+
+## This server vs Google's official Analytics MCP server
+
+Both servers are real, and both are free to use. Google publishes its own Analytics MCP server (labeled
+experimental, Apache-2.0). This one is community-built and MIT-licensed.
+
+| | This server | Google's server |
+|---|---|---|
+| Built by | Community project by Surendran B (BuildItWithAI); not affiliated with Google | Google's Analytics organization |
+| Status | v2.11.4, MIT | Labeled "Experimental", Apache-2.0 |
+| API coverage | GA4 Data API: reporting + metadata | Admin API + Data API: account and property info, Google Ads links, core, funnel, and realtime reports |
+| Setup | One-line installer, or uvx / npx; property ID + credentials | pipx run analytics-mcp; requires a Google Cloud project ID and enabling the Admin + Data APIs |
+| Extras | 15 skills loaded at call time, pre-flight schema checks, GA4-computed totals, row-cap guard, offline troubleshooting guides, in-session setup recovery | Vendor-maintained reference toolset |
+
+**Reach for Google's server if** you want the vendor-maintained baseline, funnel reports, or Google Ads
+account links.
+
+**Reach for this one if** you're driving an agent through day-to-day analysis and want it to stop guessing
+field names, read period totals instead of summing rows, and follow a documented method per question.
+
+GA4 MCP is an independent open-source project. It isn't affiliated with, endorsed by, or sponsored by Google.
+"Google Analytics" is a trademark of Google LLC.
+
+## Quick start
+
+### 1. Get credentials and a property ID
+
+Create a service account in Google Cloud Console, download its JSON key, then add the service account's
+`client_email` as a **Viewer** on your GA4 property (Admin → Property Access Management). Or run
+`gcloud auth application-default login` and use the generated credentials file.
+
+```bash
+export GA4_PROPERTY_ID="123456789"                      # numeric ID, Admin → Property details
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"
+```
+
+Your property ID is the numeric one, not the `G-` measurement ID.
+
+### 2. Install and wire your client
+
+```bash
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+```
+
+### 3. Ask your first question
+
+"What were my top channels last week?" · "Why did organic traffic drop in the last 7 days?" · "How much
+traffic came from AI assistants?"
+
+## Tools
+
+11 tools cover reporting, schema discovery, and the fix paths an agent hits during setup.
+
+- `get_ga4_data(dimensions, metrics, date_range_start, date_range_end, dimension_filter, limit, estimate_only, proceed_with_large_dataset, enable_aggregation, intent)`: Runs a GA4 report and returns rows plus a server-computed totals block from GA4's own aggregation. Estimates row counts first and warns above 2,500 rows.
+- `search_schema(keyword)`: Ranks dimension and metric API names for this property. Call it before typing a field name.
+- `get_property_schema(-)`: The full dimension and metric schema for the property, standard and custom.
+- `list_dimension_categories(-)`: Dimension categories with counts, for browsing instead of guessing.
+- `list_metric_categories(-)`: Metric categories with counts.
+- `get_dimensions_by_category(category)`: Every dimension in one category, with its description.
+- `get_metrics_by_category(category)`: Every metric in one category, with its description.
+- `list_properties(account_id (optional))`: The GA4 properties the configured credentials can read.
+- `search_skills(query (slug or keyword; empty returns the index))`: Serves one analytical recipe as markdown.
+- `get_troubleshooting_guide(topic: setup | iam | schema)`: The fix path for a boot error, a 403, or a filter-shape error. Bundled with the package, works offline.
+- `setup_ga4_access(-)`: Collects a missing property ID or credentials path through the client and reconnects without a restart.
+
+Machine-readable: https://ga4mcp.com/data/tools.json
+
+## Skills
+
+- [AI Referral Analysis](https://ga4mcp.com/skills/ai-referral-analysis/index.md): Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.
+- [Attribution Scope](https://ga4mcp.com/skills/attribution-scope/index.md): GA4 has three distinct attribution scopes. Using the wrong scope gives misleading results. Choose based on the question you are answering.
+- [Bot Traffic Detection](https://ga4mcp.com/skills/bot-traffic-detection/index.md): Identify and exclude bot, scraper, and spam sessions from GA4 data.
+- [Channel Acquisition Analysis](https://ga4mcp.com/skills/channel-acquisition/index.md): Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.
+- [Common Metric & Dimension Names](https://ga4mcp.com/skills/common-metric-names/index.md): The correct GA4 Data API names for fields models most often get wrong. Use these before calling getga4data — wrong names return a hard error.
+- [Compatible Dimension and Metric Combinations](https://ga4mcp.com/skills/compatible-combinations/index.md): GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: \"The request's dimensions & metrics are incompatible.\
+- [Content Performance Analysis](https://ga4mcp.com/skills/content-performance/index.md): Identify top-performing pages, find underperforming content, and understand engagement patterns across your site.
+- [Custom Dimensions and Event Parameters](https://ga4mcp.com/skills/custom-dimensions/index.md): How to find and query property-specific custom dimensions in GA4.
+- [Date Ranges](https://ga4mcp.com/skills/date-ranges/index.md): How to specify date ranges in getga4data and how to structure period-over-period comparisons.
+- [Ecommerce Analysis](https://ga4mcp.com/skills/ecommerce-analysis/index.md): Revenue, conversion rate, AOV, and funnel drop-off using GA4 ecommerce events.
+- [Filter Structures](https://ga4mcp.com/skills/filter-structures/index.md): The correct shape for dimensionfilter in getga4data. Wrong structure returns an \"Invalid dimensionfilter\" error. Use these templates.
+- [GA4 API Limitations](https://ga4mcp.com/skills/ga4-limitations/index.md): What this MCP cannot do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.
+- [Geo and Device Segmentation](https://ga4mcp.com/skills/geo-device-segmentation/index.md): Break down user behaviour by country, city, device category, and OS to understand regional patterns and optimise for your key markets.
+- [Traffic Change Diagnosis](https://ga4mcp.com/skills/traffic-diagnosis/index.md): Systematically diagnose why traffic changed — spike, drop, or shift in mix. Follow these steps in order. Each step narrows the hypothesis.
+- [UA to GA4 Field Name Mapping](https://ga4mcp.com/skills/ua-to-ga4/index.md): Universal Analytics (UA) and GA4 use different names for equivalent concepts. UA was sunset on 2023-07-01; models trained before or around then guess UA field names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed \"conversions\" to \"key events\" (see the conversions rows below). If a name feels obviously right but returns \"Invalid metric/dimension\", assume your training predates the change and verify with searchschema. This skill gives the correct GA4 Data API name for every common UA metric and dimension.
+
+Machine-readable: https://ga4mcp.com/data/skills.json
+
+## FAQ
+
+### What is MCP?
+
+Model Context Protocol is a standard for connecting AI apps to external tools. Your client launches this server, and the agent gets GA4 querying tools: reporting, schema search, skills, and troubleshooting.
+
+### Does it work with Claude? What about ChatGPT?
+
+Claude Desktop and Claude Code are both covered by the installer, along with Cursor, VS Code (Cline, Roo Code), Continue.dev, Windsurf, Zed, Google Antigravity, and OpenCode. Gemini CLI connects through the repo's extension. ChatGPT isn't in the supported list; this is a local stdio server, so it needs a client that can launch local MCP servers.
+
+### Service account or OAuth?
+
+Both patterns run locally. A service-account JSON key doesn't expire and suits fixed or shared setups. Google Application Default Credentials via gcloud auth application-default login use OAuth user credentials refreshed on your machine. The quick start uses a service account because it has the fewest moving parts.
+
+### Is it free?
+
+Yes. MIT licensed, no account, no seat pricing, no hosted service in the query path. Queries run from your machine straight to Google's GA4 Data API, and your use of Google's APIs is governed by Google's terms and quotas.
+
+### What does it collect, and can I turn telemetry off?
+
+Anonymous usage diagnostics: which tools ran, latency, error codes. No queries, no credentials, no analytics data, no file paths. Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 and nothing is sent; when opted out, the server also stops creating its local ID file. The privacy policy has the full detail.
+
+### How many tools does it ship?
+
+11 in v2.11.4: get_ga4_data for reports, six schema tools for field discovery (search, full schema, and category browsing), plus list_properties, search_skills, get_troubleshooting_guide, and setup_ga4_access.
+
+### How is this different from Google's official server?
+
+Google's is vendor-maintained and labeled experimental, with coverage that includes funnel reports and Google Ads links. This one focuses on agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed totals, and guided setup recovery. The comparison above has the full split.
+
+### Does it support Universal Analytics?
+
+No. UA properties stopped processing data on 2023-07-01, and this server talks to GA4 only. If you're translating old field names, the ua-to-ga4 skill maps every common one.
+
+### Is it read-only?
+
+Yes. Every tool is annotated read-only, and the server reads metadata and reports from the GA4 Data API. It doesn't change your GA4 configuration.
+
+### I'm getting an error. Where do I start?
+
+Ask your agent to run get_troubleshooting_guide(topic="setup"), ("iam"), or ("schema"). The guides are bundled with the package and work offline. setup_ga4_access walks the fix mid-session, and this site's setup, IAM, and schema pages mirror the same steps.
+
+## Machine surfaces
+
+- llms.txt: https://ga4mcp.com/llms.txt
+- llms-full.txt: https://ga4mcp.com/llms-full.txt
+- sitemap.xml: https://ga4mcp.com/sitemap.xml
+- tools.json: https://ga4mcp.com/data/tools.json
+- skills.json: https://ga4mcp.com/data/skills.json
+
+---
+
+Open source, MIT, and local. Install it, then ask your first question.
+
+GitHub: https://github.com/surendranb/google-analytics-mcp · PyPI: https://pypi.org/project/google-analytics-mcp/ · npm: https://www.npmjs.com/package/@surendranb/google-analytics-mcp · Installer: https://ga4.builditwithai.xyz/install
+
+
+# Documentation
+
+## Setup Guide — GA4 MCP Server
+
+# Google Analytics 4 MCP: Setup Guide
+
+If you are seeing a setup error, it means the IDE (Claude Desktop, Cursor, etc.) started the MCP server, but the required environment variables are missing or incorrect. 
+
+## 1. Missing `GA4_PROPERTY_ID`
+The user must provide the exact numeric Property ID of their Google Analytics 4 property.
+**Action required by user:**
+Tell the user to set the `GA4_PROPERTY_ID` environment variable in their MCP configuration (e.g., `claude_desktop_config.json` or Cursor settings).
+Example:
+```json
+"env": {
+  "GA4_PROPERTY_ID": "123456789",
+  "GOOGLE_APPLICATION_CREDENTIALS": "..."
+}
+```
+
+## 2. Missing `GOOGLE_APPLICATION_CREDENTIALS`
+The server requires Google Cloud credentials to query the GA4 API. 
+**Action required by user:**
+They must set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the absolute path of their Service Account JSON key.
+Example:
+```json
+"env": {
+  "GA4_PROPERTY_ID": "123456789",
+  "GOOGLE_APPLICATION_CREDENTIALS": "/Users/name/keys/ga4-key.json"
+}
+```
+
+## 3. Expired Application Default Credentials (ADC)
+If the user is relying on `gcloud` local authentication (instead of a JSON file) and receives a `503 Reauthentication is needed` error, their local token has expired.
+**Action required by user:**
+Tell the user to open their terminal and run:
+```bash
+gcloud auth application-default login
+```
+
+
+## Schema & Filters — GA4 MCP Server
+
+# Google Analytics 4 MCP: Schema Guide
+
+When using the `get_ga4_data` tool, you must pass valid JSON structures for `dimension_filter` or `metric_filter`. These follow the strict Google Analytics Data API (v1beta) schema.
+
+**DO NOT GUESS**. Use the exact JSON structures provided below.
+
+## 1. Simple String Filter
+To filter where `city` exactly matches "London":
+
+```json
+{
+  "filter": {
+    "fieldName": "city",
+    "stringFilter": {
+      "matchType": "EXACT",
+      "value": "London"
+    }
+  }
+}
+```
+
+## 2. In List Filter
+To filter where `country` is in a list of values:
+
+```json
+{
+  "filter": {
+    "fieldName": "country",
+    "inListFilter": {
+      "values": ["United States", "United Kingdom", "Canada"]
+    }
+  }
+}
+```
+
+## 3. Numeric Filter (Metrics only)
+To filter where `activeUsers` is greater than 100 (used in `metric_filter`):
+
+```json
+{
+  "filter": {
+    "fieldName": "activeUsers",
+    "numericFilter": {
+      "operation": "GREATER_THAN",
+      "value": {
+        "int64Value": "100"
+      }
+    }
+  }
+}
+```
+
+## 4. Logical AND / OR (Nested Filters)
+If you need to combine multiple filters, you MUST use `andGroup` or `orGroup`. Note the required `expressions` array!
+
+```json
+{
+  "andGroup": {
+    "expressions": [
+      {
+        "filter": {
+          "fieldName": "city",
+          "stringFilter": {
+            "matchType": "EXACT",
+            "value": "London"
+          }
+        }
+      },
+      {
+        "filter": {
+          "fieldName": "deviceCategory",
+          "stringFilter": {
+            "matchType": "EXACT",
+            "value": "Mobile"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+**CRITICAL RULE:** A filter expression can ONLY have ONE top-level key: either `filter`, `andGroup`, `orGroup`, or `notExpression` (or their snake_case equivalents: `and_group`, `or_group`, `not_expression`).
+
+### Case Resilience (camelCase & snake_case)
+The GA4 MCP server automatically translates all your filter keys. You can write them in either format:
+- **camelCase (GA4 default):** `fieldName`, `stringFilter`, `andGroup`, etc.
+- **snake_case (Python default):** `field_name`, `string_filter`, `and_group`, etc.
+Both will compile and run successfully.
+
+## 5. Finding Valid Dimensions and Metrics
+If you encounter an "Invalid dimension" or "Invalid metric" error, it means you guessed an API name that does not exist in GA4. 
+You MUST use the `search_schema()` tool to find the exact API name.
+For example, if the user asks for "conversions", call `search_schema(keyword="conversions")` to discover that the correct GA4 API metric is `keyEvents`.
+
+
+
+## IAM & Viewer Access — GA4 MCP Server
+
+# Google Analytics 4 MCP: IAM Permissions Guide
+
+If you receive an `IAM Error: The service account does not have Viewer access to the GA4 property`, the user has successfully configured their Service Account key, but that Service Account is NOT authorized in the Google Analytics UI.
+
+## How to fix this:
+Instruct the user to follow these exact steps:
+
+1. Copy the `client_email` address from their Service Account JSON key (e.g., `my-agent@my-project.iam.gserviceaccount.com`).
+2. Go to [analytics.google.com](https://analytics.google.com).
+3. Select the correct GA4 Property (Property ID must match `GA4_PROPERTY_ID`).
+4. Click **Admin** (the gear icon at the bottom left).
+5. Under the **Property** column, click **Property Access Management**.
+6. Click the blue **+** button -> **Add users**.
+7. Paste the Service Account `client_email` into the Email addresses field.
+8. Under **Standard roles**, select **Viewer**.
+9. Click **Add**.
+
+Once they complete these steps, you can safely retry the query.
+
+
+# Skills
+
+## Skill: AI Referral Analysis
+
+Source: https://ga4mcp.com/skills/ai-referral-analysis/index.md
+
+# AI Referral Analysis
+
+Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini,
+Copilot, and others — and understand how it behaves compared to other channels.
+
+## When to use
+- You want to quantify how much of your traffic comes from AI assistants
+- You're tracking whether AI-driven discovery is growing over time
+- You want to compare AI referral quality (engagement, conversion) to SEO or direct
+
+## Known AI referral sources
+These domains appear as `sessionSource` in GA4 when users click links from AI tools:
+
+| Tool | Source domains |
+|---|---|
+| ChatGPT | `chatgpt.com`, `chat.openai.com` |
+| Claude | `claude.ai` |
+| Perplexity | `perplexity.ai` |
+| Gemini | `gemini.google.com` |
+| Copilot | `copilot.microsoft.com`, `bing.com` (when AI-driven) |
+| You.com | `you.com` |
+| Grok | `grok.x.ai`, `x.com` |
+
+## Step 1 — Volume and trend
+```
+dimensions: ["date", "sessionSource"]
+metrics: ["sessions", "newUsers", "userEngagementDuration", "screenPageViews"]
+dimension_filter: sessionSource contains "chatgpt.com" OR "perplexity.ai" OR
+                  "claude.ai" OR "gemini.google.com" OR "copilot.microsoft.com"
+date_range: last 30–90 days
+```
+
+Use `date` as a dimension to see the growth trend.
+
+## Step 2 — Quality comparison
+Compare AI referral quality against your other top channels:
+
+```
+dimensions: ["sessionDefaultChannelGroup", "sessionSource"]
+metrics: ["sessions", "userEngagementDuration", "screenPageViewsPerSession",
+          "keyEvents", "bounceRate"]
+date_range: last 30 days
+```
+
+Then filter the results to AI sources and compare engagement metrics
+against `Organic Search` and `Direct`.
+
+## Step 3 — Which pages AI drives traffic to
+```
+dimensions: ["sessionSource", "landingPage"]
+metrics: ["sessions", "userEngagementDuration", "keyEvents"]
+dimension_filter: sessionSource contains "chatgpt.com" OR "perplexity.ai" OR "claude.ai"
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+This shows which content AI tools are citing and sending users to.
+
+## What to report
+- AI referral as % of total sessions (and % of total new users)
+- Month-over-month growth rate for AI referral traffic
+- Engagement quality: AI vs Organic Search (userEngagementDuration, keyEvents)
+- Top landing pages receiving AI referral traffic
+- Which AI tool sends the most traffic
+
+## Skill: Attribution Scope
+
+Source: https://ga4mcp.com/skills/attribution-scope/index.md
+
+# Attribution Scope
+
+GA4 has three distinct attribution scopes. Using the wrong scope gives
+misleading results. Choose based on the question you are answering.
+
+## The three scopes
+
+| Scope | Dimension prefix | Question it answers | When to use |
+|---|---|---|---|
+| **Session** | `session` | Where did THIS session come from? | Traffic Acquisition — volume, engagement, conversions by source |
+| **First-user** | `firstUser` | Which channel originally acquired this user? | User Acquisition — who brought in new users |
+| **Event/attribution** | *(no prefix)* | Which channel gets credit for this conversion? | Advertising reports — AI-weighted conversion credit allocation |
+
+## Dimensions by scope
+
+**Session scope** — use for traffic analysis:
+- `sessionDefaultChannelGroup`
+- `sessionSource`
+- `sessionMedium`
+- `sessionCampaignName`
+- `sessionSourceMedium`
+
+**First-user scope** — use for acquisition analysis:
+- `firstUserDefaultChannelGroup`
+- `firstUserSource`
+- `firstUserMedium`
+- `firstUserCampaignName`
+
+**Event/attribution scope** — use only in advertising/conversion contexts:
+- `defaultChannelGroup` *(no prefix)*
+- `source` *(no prefix)*
+- `medium` *(no prefix)*
+
+## How to choose
+
+**"Where is my traffic coming from?"** → session scope
+```
+dimensions: ["sessionDefaultChannelGroup", "sessionSource", "sessionMedium"]
+metrics: ["sessions", "totalUsers", "engagedSessions", "keyEvents"]
+```
+
+**"Which channels are bringing in new users?"** → first-user scope
+```
+dimensions: ["firstUserDefaultChannelGroup", "firstUserSource"]
+metrics: ["newUsers", "totalUsers"]
+```
+
+**"How should I attribute conversion credit across channels?"** → event scope
+(Use only with advertising campaign analysis; this is AI-weighted attribution.)
+
+## Common mistake
+
+A user acquired via Instagram who later converts via Google Organic will show:
+- `sessionDefaultChannelGroup = "Organic Search"` (where this session came from)
+- `firstUserDefaultChannelGroup = "Organic Social"` (where they were first acquired)
+
+These are different questions. Mixing scopes in one query produces meaningless results.
+Never combine `sessionSource` with `firstUserMedium` in the same report.
+
+## Nested filters
+
+When filtering, use the same scope as your dimensions:
+```json
+// Filtering traffic acquisition report — use session-scoped dimension
+{"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Search", "matchType": "EXACT"}}}
+
+// NOT source (attribution scope) — wrong scope for this report
+{"filter": {"fieldName": "source", "stringFilter": {"value": "google", "matchType": "EXACT"}}}
+```
+
+## Skill: Bot Traffic Detection
+
+Source: https://ga4mcp.com/skills/bot-traffic-detection/index.md
+
+# Bot Traffic Detection
+
+Identify and exclude bot, scraper, and spam sessions from GA4 data.
+
+## When to use
+- Traffic has unexplained spikes that don't correlate with any activity
+- Bounce rate is 0% or near-100% across many sessions
+- Sessions show 0 engagement time but high pageview counts
+- Referrers look suspicious (random domains, unrecognised TLDs)
+- You want to establish a clean baseline before any analysis
+
+## How to detect
+
+### Step 1 — Check engagement time distribution
+Query sessions with very low or zero engagement:
+
+```
+dimensions: ["sessionDefaultChannelGroup", "sessionSource", "sessionMedium"]
+metrics: ["sessions", "userEngagementDuration", "bounceRate", "screenPageViewsPerSession"]
+date_range: last 7–14 days
+```
+
+Bot signals: `userEngagementDuration` near 0, `screenPageViewsPerSession` exactly 1,
+`bounceRate` at 1.0 (100%).
+
+### Step 2 — Inspect referrer sources
+```
+dimensions: ["sessionSource", "sessionMedium", "sessionDefaultChannelGroup"]
+metrics: ["sessions", "userEngagementDuration", "newUsers"]
+dimension_filter: sessionMedium = "referral"
+```
+
+Flag sources where `userEngagementDuration / sessions` < 2 seconds.
+
+### Step 3 — Check hostname
+```
+dimensions: ["hostname"]
+metrics: ["sessions", "screenPageViews"]
+```
+
+Bot traffic often hits unexpected hostnames (staging domains, raw IPs,
+or hostnames you don't own). Filter to your known production hostnames.
+
+### Step 4 — Geographic anomalies
+```
+dimensions: ["country", "city", "sessionSource"]
+metrics: ["sessions", "userEngagementDuration"]
+dimension_filter: country = [countries with no expected traffic]
+```
+
+Clusters of sessions from unexpected countries with 0 engagement = bot signal.
+
+## Exclusion approach
+GA4 does not have a native bot filter toggle beyond the automatic Google filter.
+To exclude suspected bot traffic from your analysis, add a dimension filter:
+
+```
+dimension_filter: {
+  "filter": {
+    "fieldName": "sessionDefaultChannelGroup",
+    "stringFilter": {"matchType": "EXACT", "value": "Direct"}
+  }
+}
+```
+…combined with a metric filter on `userEngagementDuration > 0`.
+
+Note: GA4 already filters known bots automatically. What remains are
+unknown/new bots and scrapers that mimic real browser behaviour.
+
+## What to report
+- Total suspicious sessions as % of all sessions
+- Top suspicious sources with their engagement metrics
+- Whether the pattern is new (spike) or chronic (baseline contamination)
+
+## Skill: Channel Acquisition Analysis
+
+Source: https://ga4mcp.com/skills/channel-acquisition/index.md
+
+# Channel Acquisition Analysis
+
+Break down sessions and users by traffic source, medium, and channel group
+to understand where your audience comes from and which channels perform best.
+
+## Correct dimension names
+| Concept | GA4 API name |
+|---|---|
+| Channel group | `sessionDefaultChannelGroup` |
+| Source | `sessionSource` |
+| Medium | `sessionMedium` |
+| Source / Medium | `sessionSourceMedium` |
+| Campaign name | `sessionCampaignName` |
+| Campaign ID | `sessionCampaignId` |
+| Ad content | `sessionManualAdContent` |
+
+Do not use `sessionDefaultChannelGrouping` — it does not exist.
+Do not combine `sessionCampaignName` with user-scoped metrics like `totalUsers`.
+
+## Step 1 — Channel overview
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["sessions", "totalUsers", "newUsers", "userEngagementDuration",
+          "screenPageViewsPerSession", "bounceRate"]
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+## Step 2 — Source / medium detail
+```
+dimensions: ["sessionSource", "sessionMedium"]
+metrics: ["sessions", "newUsers", "userEngagementDuration", "keyEvents"]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 25
+```
+
+## Step 3 — Campaign performance (paid)
+```
+dimensions: ["sessionCampaignName", "sessionDefaultChannelGroup"]
+metrics: ["sessions", "newUsers", "keyEvents", "userEngagementDuration"]
+dimension_filter: {
+  "filter": {
+    "fieldName": "sessionMedium",
+    "stringFilter": {"matchType": "EXACT", "value": "cpc"}
+  }
+}
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+## Step 4 — Trend by channel over time
+```
+dimensions: ["date", "sessionDefaultChannelGroup"]
+metrics: ["sessions", "newUsers"]
+date_range: last 90 days
+order_by: date ASC
+```
+
+## What to report
+- Top 5 channels by sessions and by new users
+- Engagement quality per channel (userEngagementDuration per session)
+- Which channel drives the most key events (conversions)
+- Week-over-week or month-over-month trend for top channels
+
+## Skill: Common Metric & Dimension Names
+
+Source: https://ga4mcp.com/skills/common-metric-names/index.md
+
+# Common Metric & Dimension Names
+
+The correct GA4 Data API names for fields models most often get wrong.
+Use these before calling `get_ga4_data` — wrong names return a hard error.
+
+> ⚠️ **YOUR TRAINING DATA IS OUTDATED**: Universal Analytics was sunset
+> 2023-07-01, and on 2024-05-06 Google Analytics 4 renamed all conversion metrics to **"key events"**
+> (`conversions` → `keyEvents`, `conversionRate` → `sessionKeyEventRate`).
+> Querying `conversions` will fail with an `Invalid metric` error. Always use `keyEvents`.
+
+## Metrics — correct API names
+
+| What you mean | Wrong (will fail) | Correct API name |
+|---|---|---|
+| Goal completions / conversions (RENAMED 2024) | `conversions`, `goals`, `conversion` | `keyEvents` |
+| Total users | `users`, `totalVisitors` | `totalUsers` |
+| Active users (rolling 30-day ≈ MAU) | `MAU`, `monthlyActiveUsers`, `activeVisitors` | `active28DayUsers` |
+| Active users (rolling 7-day ≈ WAU) | `WAU`, `weeklyActiveUsers` | `active7DayUsers` |
+| Active users (rolling 1-day ≈ DAU) | `DAU`, `dailyActiveUsers` | `active1DayUsers` |
+| Distinct users in the queried range | `uniqueUsers` | `activeUsers` |
+| Page views | `pageViews`, `pageviews`, `page_views` | `screenPageViews` |
+| E-commerce purchases | `purchases`, `transactions` | `ecommercePurchases` |
+| Product views | `itemViews`, `productViews` | `itemsViewed` |
+| Items added to cart | `addToCarts`, `cartAdds` | `itemsAddedToCart` |
+| Revenue | `revenue`, `ecommerceRevenue` | `purchaseRevenue` |
+| Avg session duration | `avgSessionDuration`, `avgTimeOnSite` | `averageSessionDuration` |
+| Total engagement time | `engagementDuration`, `timeOnSite` | `userEngagementDuration` |
+| Session key event rate (was "conversion rate", renamed 2024) | `conversionRate`, `goalConversionRate`, `sessionConversionRate` | `sessionKeyEventRate` |
+| User key event rate | `userConversionRate` | `userKeyEventRate` |
+| Engaged sessions | `qualifiedSessions`, `validSessions` | `engagedSessions` |
+| Pages per session | `pagesPerSession`, `pageDepth` | `screenPageViewsPerSession` |
+
+## Dimensions — correct API names
+
+| What you mean | Wrong (will fail) | Correct API name |
+|---|---|---|
+| Traffic channel group | `sessionDefaultChannelGrouping`, `channelGrouping` | `sessionDefaultChannelGroup` |
+| Landing page + query | `landingPage` (often wrong scope) | `landingPagePlusQueryString` |
+| Page path | `pagePath`, `page` | `pagePath` |
+| Page path + query | `pagePathPlusQueryString` | `unifiedPagePathScreen` |
+| Session source | `source` (wrong scope — see attribution-scope skill) | `sessionSource` |
+| Session medium | `medium` (wrong scope) | `sessionMedium` |
+| Device type | `device`, `deviceType` | `deviceCategory` |
+| Operating system | `os` | `operatingSystem` |
+| Browser | `userAgent` | `browser` |
+| Week of year | `week`, `weekNumber` | `week` (this one IS correct) |
+
+## Note on active users (MAU / WAU / DAU)
+
+GA4 has no `MAU`, `WAU`, `DAU`, `monthlyActiveUsers`, or `dailyActiveUsers` metric —
+these hard-error. Use the rolling n-day metrics: `active1DayUsers` (≈ DAU),
+`active7DayUsers` (≈ WAU), `active28DayUsers` (≈ MAU). Each counts distinct users
+active in the N days *ending on that date* (a rolling window, not a calendar bucket).
+`activeUsers` = distinct users in the queried range. Never sum daily `activeUsers`
+across rows to get a period total — it double-counts users active on multiple days.
+For a monthly total, query `activeUsers` once over the whole range (no date dimension),
+or use `active28DayUsers` for a rolling month. Stickiness ratios `dauPerMau`,
+`dauPerWau`, `wauPerMau` are also available as metrics.
+
+## Note on bounce rate
+
+GA4 bounce rate = sessions with NO engaged session (opposite of GA3 logic).
+A bounce rate of 60% means 60% of sessions had no engagement — that is high.
+In GA3, bounce rate meant single-page sessions. Do not compare GA3 and GA4 bounce rates.
+
+## When you hit a schema error
+
+If `get_ga4_data` returns "Invalid dimension" or "Invalid metric", do not guess
+alternatives. Use `search_schema` with a keyword to find the correct name, or
+check this skill's table above.
+
+## Skill: Compatible Dimension and Metric Combinations
+
+Source: https://ga4mcp.com/skills/compatible-combinations/index.md
+
+# Compatible Dimension and Metric Combinations
+
+GA4 enforces strict rules about which dimensions and metrics can appear
+in the same request. Incompatible combinations return a 400 error:
+"The request's dimensions & metrics are incompatible."
+
+## The core rule
+
+GA4 data is scoped at three levels: **event**, **session**, and **user**.
+Mixing dimensions and metrics from incompatible scopes causes errors.
+
+| Scope | Example dimensions | Example metrics |
+|---|---|---|
+| Event | `eventName`, `customEvent:*` | `eventCount` |
+| Session | `sessionDefaultChannelGroup`, `sessionSource`, `sessionCampaignName` | `sessions`, `bounceRate`, `sessionKeyEventRate` |
+| User | `firstUserDefaultChannelGroup`, `firstUserSource` | `totalUsers`, `newUsers` |
+
+## Most common incompatible pairs
+
+| Dimension | Incompatible metric | Use instead |
+|---|---|---|
+| `sessionSource` / `sessionMedium` / `sessionCampaignName` | `eventCount` | `sessions` |
+| `eventName` | `sessions` | `eventCount` |
+| `promotionId` / `promotionName` | most session/user metrics | only pair with `promotionViews`, `promotionClicks` |
+| `itemId` / `itemName` | `sessions`, `totalUsers` | `itemsViewed`, `addToCarts`, `ecommercePurchases` |
+| `firstUserSource` / `firstUserMedium` | `sessions` | `totalUsers`, `newUsers` |
+
+## When you hit this error
+
+The GA4 error message names the exact field to remove:
+`"Please remove eventCount to make the request compatible for example."`
+
+Read the message literally — remove that field and replace it with a
+scope-compatible equivalent.
+
+## Safe combinations (always work)
+
+- `date` + any metric
+- `deviceCategory` + any metric
+- `country` / `city` + any metric
+- `pagePath` / `pageTitle` + `screenPageViews`, `totalUsers`, `sessions`
+- `sessionDefaultChannelGroup` + `sessions`, `totalUsers`, `bounceRate`
+
+## Ecommerce-specific
+
+Ecommerce metrics (`ecommercePurchases`, `purchaseRevenue`, `addToCarts`,
+`itemsViewed`) are event-scoped. Pair them with event-scoped or
+`date`/`deviceCategory`/geo dimensions — not with session campaign dimensions.
+
+## Skill: Content Performance Analysis
+
+Source: https://ga4mcp.com/skills/content-performance/index.md
+
+# Content Performance Analysis
+
+Identify top-performing pages, find underperforming content, and understand
+engagement patterns across your site.
+
+## When to use
+- You want to know which pages drive the most traffic and engagement
+- You want to find pages with high views but low engagement (poor content fit)
+- You want to identify content that drives conversions or return visits
+
+## Correct dimension and metric names
+| Concept | GA4 API name |
+|---|---|
+| Page path | `pagePath` |
+| Page title | `pageTitle` |
+| Landing page | `landingPage` |
+| Page views | `screenPageViews` |
+| Unique page views (users) | `totalUsers` |
+| Engagement rate | `engagementRate` |
+| Avg engagement time | `userEngagementDuration` |
+| Scroll depth | `scrolledUsers` (if scroll event is tracked) |
+| Entries (landing views) | `sessions` with `landingPage` dimension |
+
+Do not use `pageviews` — the correct metric is `screenPageViews`.
+
+## Step 1 — Top pages by traffic
+```
+dimensions: ["pagePath", "pageTitle"]
+metrics: ["screenPageViews", "totalUsers", "userEngagementDuration",
+          "engagementRate", "bounceRate"]
+date_range: last 30 days
+order_by: screenPageViews DESC
+limit: 25
+```
+
+## Step 2 — Landing page performance
+Which pages do users enter your site through, and how well do they engage:
+
+```
+dimensions: ["landingPage"]
+metrics: ["sessions", "newUsers", "userEngagementDuration",
+          "engagementRate", "keyEvents"]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 25
+```
+
+## Step 3 — Underperforming content (high views, low engagement)
+Run Step 1, then flag pages where:
+- `screenPageViews` is in the top 50% AND
+- `engagementRate` is below 0.3 (30%) OR `userEngagementDuration` < 30 seconds
+
+These pages attract traffic but fail to hold attention — candidates for
+content improvement or better internal linking.
+
+## Step 4 — Content trend over time
+```
+dimensions: ["date", "pagePath"]
+metrics: ["screenPageViews", "totalUsers"]
+dimension_filter: pagePath contains "/blog" (or your content path)
+date_range: last 90 days
+order_by: date ASC
+```
+
+## What to report
+- Top 10 pages by views and by engagement time
+- Top 5 landing pages and their conversion rate
+- 3–5 underperforming pages (high traffic, low engagement) as actionable findings
+- Any page with a notable trend (growing or declining) over the period
+
+## Skill: Custom Dimensions and Event Parameters
+
+Source: https://ga4mcp.com/skills/custom-dimensions/index.md
+
+# Custom Dimensions and Event Parameters
+
+How to find and query property-specific custom dimensions in GA4.
+
+## The core rule
+
+Custom dimensions are **property-specific**. Never guess their names.
+Always call `search_schema("custom")` first — it will show every registered
+custom dimension for this exact property.
+
+## Two valid syntaxes
+
+GA4 supports two ways to access custom data:
+
+**Registered custom dimensions** — appear in the schema by their registered name.
+Find them with `search_schema`. Use the name exactly as returned.
+
+**Unregistered event parameters** — accessed inline with:
+- `customEvent:parameter_name` for event-scoped parameters
+- `customUser:property_name` for user-scoped properties
+
+The `parameter_name` must exactly match what your tracking code sends.
+If the property has not collected this parameter, the API returns an error.
+
+## Why guessing fails
+
+The model cannot know what custom parameters a GA4 property uses —
+they are defined by the site's own tracking code and GA4 Admin settings.
+`customEvent:page_category` works on one property and fails on another
+depending on whether that property's tracking sends a `page_category` parameter.
+
+## Workflow
+
+1. Call `search_schema("custom")` — lists all registered custom dimensions.
+2. If the one you need appears, use its exact API name.
+3. If it does not appear, ask the user what event parameter name their
+   tracking code uses, then query with `customEvent:that_name`.
+4. If the query still fails, the parameter is not collected by this property.
+
+## Scope matters
+
+| Scope | Syntax | Use for |
+|---|---|---|
+| Event | `customEvent:name` | per-hit data (page category, product id, etc.) |
+| User | `customUser:name` | user attributes (plan, cohort, customer type) |
+| Session | registered name only | session-level custom groupings |
+
+Mixing scopes can cause incompatibility errors — see the `compatible-combinations` skill.
+
+## Skill: Date Ranges
+
+Source: https://ga4mcp.com/skills/date-ranges/index.md
+
+# Date Ranges
+
+How to specify date ranges in `get_ga4_data` and how to structure
+period-over-period comparisons.
+
+## Valid formats
+
+```
+date_range_start / date_range_end accept:
+  "YYYY-MM-DD"   — absolute date, e.g. "2024-01-15"
+  "today"        — current day (partial — use carefully)
+  "yesterday"    — last complete day
+  "NdaysAgo"     — N days back from today, e.g. "7daysAgo", "30daysAgo", "90daysAgo"
+```
+
+`NdaysAgo` excludes today. `7daysAgo` to `yesterday` = last 7 complete days.
+
+## Common windows
+
+| Window | start | end |
+|---|---|---|
+| Last 7 days | `7daysAgo` | `yesterday` |
+| Last 28 days | `28daysAgo` | `yesterday` |
+| Last 90 days | `90daysAgo` | `yesterday` |
+| This month | `YYYY-MM-01` | `today` |
+| Last month | `YYYY-MM-01` (prior) | `YYYY-MM-last-day` (prior) |
+| Year to date | `YYYY-01-01` | `yesterday` |
+
+## Period-over-period comparison
+
+The GA4 Data API does not support multi-period in a single call. Run two
+separate `get_ga4_data` calls, then compare the results.
+
+**Example: week-over-week**
+
+Call 1 — this week:
+```
+date_range_start: "7daysAgo"
+date_range_end:   "yesterday"
+```
+
+Call 2 — last week:
+```
+date_range_start: "14daysAgo"
+date_range_end:   "8daysAgo"
+```
+
+**Example: year-over-year for July**
+
+Call 1 — this year:
+```
+date_range_start: "2025-07-01"
+date_range_end:   "2025-07-31"
+```
+
+Call 2 — last year:
+```
+date_range_start: "2024-07-01"
+date_range_end:   "2024-07-31"
+```
+
+Then compute the delta: `(current - prior) / prior * 100` for each metric.
+
+## Partial-day reads
+
+`today` includes only the hours elapsed so far. Comparing `today` to `yesterday`
+is misleading — yesterday is a full day, today is partial.
+
+For intra-day analysis, use `today` for both start and end and note the
+IST hours covered in your interpretation.
+
+## Common mistakes
+
+- `"last7days"` is NOT valid — use `"7daysAgo"`
+- `"last-week"` is NOT valid — use absolute dates or `NdaysAgo`
+- Do not use `date_range_end: "today"` when comparing to a prior complete period
+- `"0daysAgo"` = today (same as `"today"`)
+
+## Skill: Ecommerce Analysis
+
+Source: https://ga4mcp.com/skills/ecommerce-analysis/index.md
+
+# Ecommerce Analysis
+
+Revenue, conversion rate, AOV, and funnel drop-off using GA4 ecommerce events.
+
+## When to use
+- You have purchase, add_to_cart, begin_checkout events in GA4
+- You want to measure revenue, conversion rate, or average order value
+- You want to find where users drop off in the purchase funnel
+
+## Correct metric and dimension names
+GA4 ecommerce uses specific API names — do not guess:
+
+| Concept | GA4 API name |
+|---|---|
+| Revenue | `purchaseRevenue` |
+| Transactions | `ecommercePurchases` |
+| AOV | `averagePurchaseRevenue` |
+| Add to cart | `addToCarts` |
+| Checkout started | `checkouts` |
+| Cart-to-view rate | `cartToViewRate` |
+| Purchase-to-view rate | `purchaseToViewRate` |
+| Item views | `itemsViewed` |
+| Item revenue | `itemRevenue` |
+| Items purchased | `itemsPurchased` |
+| Product name | `itemName` |
+| Product category | `itemCategory` |
+| Transaction ID | `transactionId` |
+
+## Step 1 — Revenue overview
+```
+dimensions: ["date"]
+metrics: ["ecommercePurchases", "purchaseRevenue", "averagePurchaseRevenue"]
+date_range: last 30 days
+order_by: date ASC
+```
+
+## Step 2 — Funnel: views → cart → checkout → purchase
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["itemsViewed", "addToCarts", "checkouts", "ecommercePurchases",
+          "cartToViewRate", "purchaseToViewRate"]
+date_range: last 30 days
+order_by: ecommercePurchases DESC
+```
+
+Drop-off between stages = `1 - (next_stage / current_stage)`.
+The biggest drop-off is the highest-value fix.
+
+## Step 3 — Top products
+```
+dimensions: ["itemName", "itemCategory"]
+metrics: ["itemsViewed", "addToCarts", "itemsPurchased", "itemRevenue"]
+date_range: last 30 days
+order_by: itemRevenue DESC
+```
+
+## Step 4 — Revenue by channel
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["ecommercePurchases", "purchaseRevenue", "averagePurchaseRevenue"]
+date_range: last 30 days
+order_by: purchaseRevenue DESC
+```
+
+## Incompatible combinations to avoid
+- `itemId` or `itemSku` cannot be combined with session-level metrics
+- `ecommercePurchases` cannot be combined with `eventCount` in the same query
+- Use separate queries for item-level and session-level analysis
+
+## What to report
+- Revenue trend over the period
+- Funnel conversion rates and biggest drop-off point
+- Top 10 products by revenue
+- Best-performing acquisition channel by revenue and AOV
+
+## Skill: Filter Structures
+
+Source: https://ga4mcp.com/skills/filter-structures/index.md
+
+# Filter Structures
+
+The correct shape for `dimension_filter` in `get_ga4_data`.
+Wrong structure returns an "Invalid dimension_filter" error. Use these templates.
+
+## The one rule
+
+Every leaf filter **must** be wrapped in a `"filter"` key. `fieldName` never appears at the top level.
+
+```json
+// WRONG — fieldName at top level
+{"fieldName": "sessionSource", "stringFilter": {"value": "google"}}
+
+// CORRECT — wrapped in "filter"
+{"filter": {"fieldName": "sessionSource", "stringFilter": {"value": "google"}}}
+```
+
+## Template: single field filter
+
+```json
+{
+  "filter": {
+    "fieldName": "DIMENSION_NAME",
+    "stringFilter": {
+      "value": "VALUE",
+      "matchType": "EXACT"
+    }
+  }
+}
+```
+
+`matchType` options: `EXACT`, `BEGINS_WITH`, `ENDS_WITH`, `CONTAINS`, `FULL_REGEXP`, `PARTIAL_REGEXP`
+
+## Template: AND — all conditions must match
+
+```json
+{
+  "andGroup": {
+    "expressions": [
+      {"filter": {"fieldName": "deviceCategory", "stringFilter": {"value": "mobile", "matchType": "EXACT"}}},
+      {"filter": {"fieldName": "country", "stringFilter": {"value": "United States", "matchType": "EXACT"}}}
+    ]
+  }
+}
+```
+
+## Template: OR — any condition matches
+
+```json
+{
+  "orGroup": {
+    "expressions": [
+      {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Search", "matchType": "EXACT"}}},
+      {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Social", "matchType": "EXACT"}}}
+    ]
+  }
+}
+```
+
+## Template: NOT — exclude matching sessions
+
+```json
+{
+  "notExpression": {
+    "filter": {
+      "fieldName": "sessionDefaultChannelGroup",
+      "stringFilter": {"value": "Direct", "matchType": "EXACT"}
+    }
+  }
+}
+```
+
+## Template: IN LIST — match any of several values
+
+```json
+{
+  "filter": {
+    "fieldName": "country",
+    "inListFilter": {
+      "values": ["United States", "United Kingdom", "Canada"]
+    }
+  }
+}
+```
+
+## Common wrong keys → correct keys
+
+| Wrong key | Correct key |
+|---|---|
+| `and_filter` | `andGroup` |
+| `or_filter` | `orGroup` |
+| `not_filter` | `notExpression` |
+| `filters` | `expressions` |
+| `field` | `fieldName` |
+| `stringFilter.exact` | `stringFilter.value` |
+
+## Field names are always camelCase
+
+> ⚠️ **CRITICAL FILTER TRAP**: Field names in `dimension_filter` (inside `fieldName`) MUST be exact camelCase. Passing `page_path` or `session_default_channel_group` will fail with an `Unknown field for FilterExpression` error.
+
+| Wrong (snake_case) | Correct (camelCase) |
+|---|---|
+| `page_path` | `pagePath` |
+| `session_default_channel_group` | `sessionDefaultChannelGroup` |
+| `session_source` | `sessionSource` |
+| `session_source_medium` | `sessionSourceMedium` |
+| `session_campaign_name` | `sessionCampaignName` |
+| `landing_page` | `landingPage` |
+| `device_category` | `deviceCategory` |
+| `event_name` | `eventName` |
+
+If you use snake_case in `fieldName`, the filter will fail with an "Unknown field" error. Do NOT retry snake_case.
+
+## Note
+
+Only dimensions can be filtered with `dimension_filter`. To filter on metric
+values (e.g. sessions > 100), you must do this in post-processing — the GA4
+Data API does not support metric filters in `RunReport`.
+
+## Skill: GA4 API Limitations
+
+Source: https://ga4mcp.com/skills/ga4-limitations/index.md
+
+# GA4 API Limitations
+
+What this MCP **cannot** do via the GA4 Data API, and where to go instead.
+Attempting these will either fail or produce meaningless aggregate data.
+
+## Not available via this MCP
+
+| Analysis type | Why not available | Where to do it instead |
+|---|---|---|
+| Funnel analysis (drop-off by step) | `runFunnelReport` exists in the API but is not exposed by this MCP | GA4 UI → Explore → Funnel Exploration |
+| Cohort retention (week N return rate) | `runCohortReport` not exposed | GA4 UI → Explore → Cohort Exploration |
+| User path / flow analysis | Not available in aggregate API | GA4 UI → Explore → Path Exploration |
+| Per-user event sequences | API returns aggregate rows only — no individual user journeys | BigQuery export (raw events) |
+| Real-time custom breakdowns | Realtime API is limited to last 30 minutes, basic dimensions | GA4 UI → Realtime report |
+| Raw event-level data | Data API aggregates; no row-level access | BigQuery export |
+| Segment overlap / Venn analysis | Not a native API feature | BigQuery or GA4 Explore comparisons |
+| Custom channel group definitions | Read-only via API; custom groups must be created in UI | GA4 UI → Admin → Custom Channel Groups |
+
+## What IS available (and often underused)
+
+- **Period-over-period in one call**: pass two `date_ranges` — GA4 returns both periods in a single response (use `date_range_start`/`date_range_end` for each; call twice if two-range isn't supported)
+- **Ecommerce metrics**: full purchase funnel metrics (`itemsViewed`, `itemsAddedToCart`, `itemsPurchased`, `purchaseRevenue`, `cartToViewRate`) — aggregate only, not per-session funnel
+- **Search Console integration**: available as a linked report in GA4 UI but the Search Console data is on a separate API — not queryable via this MCP (use Google Search Console API directly)
+- **Custom dimensions and metrics**: available if defined in the property — they appear in the schema alongside standard fields
+- **Attribution modeling comparisons**: not directly queryable — data-driven vs last-click is set at the property level, not a query-time parameter
+
+## When a user asks for funnel or cohort analysis
+
+Tell them: the GA4 Data API returns aggregate metrics, not event sequences.
+For funnel drop-off between specific steps, use GA4 Explore → Funnel Exploration.
+For cohort retention (week 1 / week 2 return), use GA4 Explore → Cohort Exploration.
+These analyses require the GA4 UI or a BigQuery export, not the Data API.
+
+## Skill: Geo and Device Segmentation
+
+Source: https://ga4mcp.com/skills/geo-device-segmentation/index.md
+
+# Geo and Device Segmentation
+
+Break down user behaviour by country, city, device category, and OS
+to understand regional patterns and optimise for your key markets.
+
+## Correct dimension names
+| Concept | GA4 API name |
+|---|---|
+| Country | `country` |
+| City | `city` |
+| Region | `region` |
+| Device category | `deviceCategory` |
+| Operating system | `operatingSystem` |
+| OS version | `operatingSystemVersion` |
+| Browser | `browser` |
+| Screen resolution | `screenResolution` |
+| Language | `language` |
+
+Device category values: `desktop`, `mobile`, `tablet`.
+
+## Step 1 — Country breakdown
+```
+dimensions: ["country"]
+metrics: ["totalUsers", "sessions", "userEngagementDuration",
+          "screenPageViewsPerSession", "keyEvents"]
+date_range: last 30 days
+order_by: totalUsers DESC
+limit: 20
+```
+
+## Step 2 — Device split
+```
+dimensions: ["deviceCategory"]
+metrics: ["sessions", "totalUsers", "engagementRate",
+          "userEngagementDuration", "bounceRate"]
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+## Step 3 — Country + device cross-tab
+Understand device preferences by market:
+
+```
+dimensions: ["country", "deviceCategory"]
+metrics: ["sessions", "userEngagementDuration", "bounceRate"]
+dimension_filter: country IN [your top 5 countries from Step 1]
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+Note: combining country + deviceCategory + additional dimensions in one query
+may exceed GA4's cardinality limit. Keep to 2–3 dimensions max.
+
+## Step 4 — Single-country deep dive
+For a specific country (e.g. Japan):
+
+```
+dimensions: ["city", "deviceCategory"]
+metrics: ["sessions", "totalUsers", "userEngagementDuration", "keyEvents"]
+dimension_filter: {
+  "filter": {
+    "fieldName": "country",
+    "stringFilter": {"matchType": "EXACT", "value": "Japan"}
+  }
+}
+date_range: last 30 days
+order_by: sessions DESC
+limit: 20
+```
+
+## Step 5 — Browser and OS (for technical optimisation)
+```
+dimensions: ["browser", "operatingSystem", "deviceCategory"]
+metrics: ["sessions", "bounceRate", "userEngagementDuration"]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 20
+```
+
+## What to report
+- Top 10 countries by users and their engagement quality
+- Mobile vs desktop vs tablet split (sessions and engagement rate)
+- Any country where engagement is significantly below average — flagged for investigation
+- Device preferences by your top 3 markets if they differ meaningfully
+
+## Skill: Traffic Change Diagnosis
+
+Source: https://ga4mcp.com/skills/traffic-diagnosis/index.md
+
+# Traffic Change Diagnosis
+
+Systematically diagnose why traffic changed — spike, drop, or shift in mix.
+Follow these steps in order. Each step narrows the hypothesis.
+
+## Step 1 — Establish the baseline
+
+Compare the period in question to the equivalent prior period:
+```
+dimensions: ["date"]
+metrics: ["sessions", "totalUsers", "newUsers", "engagedSessions", "keyEvents"]
+date_range: affected period + same-length prior period
+```
+
+Measure: absolute change, % change, and whether all metrics moved together.
+If sessions dropped but engagement rate improved, volume dropped but quality held — different cause than if everything dropped proportionally.
+
+## Step 2 — Isolate which channel changed
+
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["sessions", "totalUsers", "engagedSessions", "engagementRate"]
+date_range: affected period vs prior period
+```
+
+Which channel account for most of the change? Narrow to that channel before going deeper.
+
+## Step 3 — Check time pattern (sudden vs gradual)
+
+```
+dimensions: ["date", "sessionDefaultChannelGroup"]
+metrics: ["sessions"]
+date_range: last 28 days
+```
+
+- **Sudden single-day spike/drop** → campaign launch/end, deploy, media mention, bot flood
+- **Gradual decline over weeks** → SEO decay, seasonal drift, quality score drop
+- **Step change that persists** → tracking change, filter change, channel definition update
+
+## Step 4 — Fingerprint the cause
+
+Run queries matching the suspected cause:
+
+**Bot flood** — see `bot-traffic-detection` skill:
+- `engagementRate` near 0, `averageSessionDuration` ≈ 0
+- Unusual hostname or country concentration
+
+**Campaign start/end**:
+```
+dimensions: ["sessionCampaignName", "sessionSource", "sessionMedium"]
+metrics: ["sessions", "keyEvents", "engagementRate"]
+dimension_filter: sessionDefaultChannelGroup IN ["Paid Search", "Paid Social", "Display"]
+```
+
+**SEO change (organic)**:
+```
+dimensions: ["sessionDefaultChannelGroup", "landingPagePlusQueryString"]
+metrics: ["sessions", "engagementRate", "keyEvents"]
+dimension_filter: sessionDefaultChannelGroup = "Organic Search"
+date_range: 90 days (to see gradual trend)
+```
+
+**Technical/tracking change** — all channels drop equally at the same moment.
+Check with `dimensions: ["date"]` — a vertical drop on a single date across all channels
+points to a tag firing issue or consent mode change.
+
+## Step 5 — Conclude
+
+State:
+1. What changed (metric + magnitude)
+2. Which channel drove it
+3. When it started (sudden or gradual)
+4. Most likely cause (from fingerprinting)
+5. One action: investigate further / fix tracking / pause campaign / accept as seasonal
+
+## What not to do
+
+Do not conclude "traffic dropped" from a single metric in isolation.
+Do not compare to the prior week without accounting for day-of-week patterns
+(Monday always differs from Sunday — compare Monday-to-Monday or full weeks).
+
+## Skill: UA to GA4 Field Name Mapping
+
+Source: https://ga4mcp.com/skills/ua-to-ga4/index.md
+
+# UA to GA4 Field Name Mapping
+
+Universal Analytics (UA) and GA4 use different names for equivalent concepts.
+UA was sunset on 2023-07-01; models trained before or around then guess UA field
+names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed
+"conversions" to "key events" (see the conversions rows below). If a name feels
+obviously right but returns "Invalid metric/dimension", assume your training
+predates the change and verify with `search_schema`. This skill gives the correct
+GA4 Data API name for every common UA metric and dimension.
+
+## Metrics
+
+| UA name (wrong) | GA4 API name (correct) |
+|---|---|
+| `users` | `totalUsers` |
+| `uniquePageviews` | `screenPageViews` |
+| `pageviews` | `screenPageViews` |
+| `avgSessionDuration` | `averageSessionDuration` |
+| `timeOnPage` / `avgTimeOnPage` | `userEngagementDuration` |
+| `goalCompletionsAll` / `conversions` | `keyEvents` |
+| `goalConversionRateAll` / `conversionRate` / `sessionConversionRate` | `sessionKeyEventRate` |
+| `userConversionRate` | `userKeyEventRate` |
+| `transactions` / `purchases` | `ecommercePurchases` |
+| `transactionRevenue` / `revenue` | `purchaseRevenue` |
+| `revenuePerTransaction` | `averagePurchaseRevenue` |
+| `transactionsPerSession` | `purchaseToViewRate` |
+| `itemQuantity` / `itemViews` | `itemsViewed` |
+| `itemRevenue` | `itemRevenue` (same) |
+| `entrances` | `sessions` (no direct equivalent — use sessions) |
+| `pageValue` | no direct equivalent |
+
+## Dimensions
+
+| UA name (wrong) | GA4 API name (correct) |
+|---|---|
+| `channelGrouping` | `sessionDefaultChannelGroup` |
+| `defaultChannelGrouping` | `sessionDefaultChannelGroup` |
+| `source` | `sessionSource` |
+| `medium` | `sessionMedium` |
+| `campaign` | `sessionCampaignName` |
+| `keyword` | `sessionManualTerm` |
+| `sourceMedium` | `sessionSourceMedium` |
+| `adContent` | `sessionManualAdContent` |
+| `pagePath` | `pagePath` (same) |
+| `pageTitle` | `pageTitle` (same) |
+| `landingPagePath` | `landingPage` |
+| `exitPagePath` | no direct equivalent |
+| `deviceCategory` | `deviceCategory` (same) |
+| `operatingSystem` | `operatingSystem` (same) |
+| `browser` | `browser` (same) |
+| `country` | `country` (same) |
+| `city` | `city` (same) |
+| `userType` | use `newVsReturning` |
+
+## Key rules
+
+All GA4 API names are camelCase — never snake_case.
+
+| Wrong (snake_case) | Correct |
+|---|---|
+| `page_path` | `pagePath` |
+| `session_source` | `sessionSource` |
+| `device_category` | `deviceCategory` |
+| `event_name` | `eventName` |
+| `total_users` | `totalUsers` |
+
+## Attribution scope
+
+GA4 splits attribution into three scopes. Use the right prefix:
+
+| Scope | Prefix | Use for |
+|---|---|---|
+| Session | `session` (e.g. `sessionSource`) | Traffic acquisition analysis |
+| First user | `firstUser` (e.g. `firstUserSource`) | User acquisition analysis |
+| Event | `(none)` (e.g. `pagePath`) | Event-level analysis |
+
+Mixing scopes causes 400 errors — see `compatible-combinations` skill.
