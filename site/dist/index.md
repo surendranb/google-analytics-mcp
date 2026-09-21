@@ -1,6 +1,6 @@
 ---
 title: GA4 MCP Server — Google Analytics 4 for AI Agents
-description: Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.
+description: Google Analytics MCP server for AI agents — query GA4 from Claude, Cursor, or any MCP client. Schema discovery, totals computed by GA4, 15 skills.
 url: https://ga4mcp.com/
 type: website
 site: https://ga4mcp.com
@@ -200,9 +200,9 @@ Anonymous usage diagnostics: which tools ran, latency, error codes. No queries, 
 
 11 in v2.11.4: get_ga4_data for reports, six schema tools for field discovery (search, full schema, and category browsing), plus list_properties, search_skills, get_troubleshooting_guide, and setup_ga4_access.
 
-### How is this different from Google's official server?
+### Is there an official Google Analytics MCP server?
 
-Google's is vendor-maintained and labeled experimental, with coverage that includes funnel reports and Google Ads links. This one focuses on agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed totals, and guided setup recovery. The comparison above has the full split.
+Yes — Google ships an official Google Analytics MCP server (experimental, Apache-2.0), maintained by Google's Analytics organization, with coverage that includes funnel reports and Google Ads links. This one focuses on agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed totals, and guided setup recovery. The comparison above has the full split.
 
 ### Does it support Universal Analytics?
 

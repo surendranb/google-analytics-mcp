@@ -180,10 +180,11 @@ FAQS = [
     ("How many tools does it ship?",
      "11 in v2.11.4: get_ga4_data for reports, six schema tools for field discovery (search, full schema, and category "
      "browsing), plus list_properties, search_skills, get_troubleshooting_guide, and setup_ga4_access."),
-    ("How is this different from Google's official server?",
-     "Google's is vendor-maintained and labeled experimental, with coverage that includes funnel reports and Google Ads "
-     "links. This one focuses on agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed "
-     "totals, and guided setup recovery. The comparison above has the full split."),
+    ("Is there an official Google Analytics MCP server?",
+     "Yes — Google ships an official Google Analytics MCP server (experimental, Apache-2.0), maintained by Google's "
+     "Analytics organization, with coverage that includes funnel reports and Google Ads links. This one focuses on "
+     "agent workflow: schema checks before a query runs, 15 skills on call, GA4-computed totals, and guided setup "
+     "recovery. The comparison above has the full split."),
     ("Does it support Universal Analytics?",
      'No. UA properties stopped processing data on 2023-07-01, and this server talks to GA4 only. If you\'re translating '
      "old field names, the ua-to-ga4 skill maps every common one."),

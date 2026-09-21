@@ -1,7 +1,7 @@
 {
   "/": {
     "title": "GA4 MCP Server — Google Analytics 4 for AI Agents",
-    "description": "Query GA4 from Claude, Cursor, or any MCP client. Schema discovery, GA4-computed totals, 15 skills, one-line install. MIT. Not affiliated with Google.",
+    "description": "Google Analytics MCP server for AI agents — query GA4 from Claude, Cursor, or any MCP client. Schema discovery, totals computed by GA4, 15 skills.",
     "target_query": "ga4 mcp server"
   },
   "/setup": {
