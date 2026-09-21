@@ -1226,6 +1226,8 @@ def build_cf_pages() -> None:
 # Content Signals: the studio's crawl stance, served from the origin.
 /*
   Content-Signal: ai-train=yes, search=yes, ai-input=yes
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
 
 # Markdown twins duplicate a real page: noindex, canonical points at the HTML.
 # Pages splats match greedily across slashes; both the flat and the nested form are
