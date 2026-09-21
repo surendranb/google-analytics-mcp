@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/mark-512.png" width="96" alt="GA4 MCP logo"></p>
+
 # Google Analytics 4 (GA4) MCP Server 📊
 
 > **Model Context Protocol (MCP) server for Google Analytics 4: real-time query exploration, schema discovery, metric aggregation, and audience insights for AI agents.**
