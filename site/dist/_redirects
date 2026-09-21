@@ -13,6 +13,22 @@
 /privacy             /privacy/          301
 /terms               /terms/            301
 /skills              /skills/           301
-/skills/:slug        /skills/:slug/     301
+# No-trailing-slash variants of the skill pages, enumerated from skills/ so no
+# pattern can also match /skills/index.md and shadow the skills index twin.
+/skills/ai-referral-analysis     /skills/ai-referral-analysis/  301
+/skills/attribution-scope        /skills/attribution-scope/  301
+/skills/bot-traffic-detection    /skills/bot-traffic-detection/  301
+/skills/channel-acquisition      /skills/channel-acquisition/  301
+/skills/common-metric-names      /skills/common-metric-names/  301
+/skills/compatible-combinations  /skills/compatible-combinations/  301
+/skills/content-performance      /skills/content-performance/  301
+/skills/custom-dimensions        /skills/custom-dimensions/  301
+/skills/date-ranges              /skills/date-ranges/  301
+/skills/ecommerce-analysis       /skills/ecommerce-analysis/  301
+/skills/filter-structures        /skills/filter-structures/  301
+/skills/ga4-limitations          /skills/ga4-limitations/  301
+/skills/geo-device-segmentation  /skills/geo-device-segmentation/  301
+/skills/traffic-diagnosis        /skills/traffic-diagnosis/  301
+/skills/ua-to-ga4                /skills/ua-to-ga4/  301
 # Installer endpoint (unchanged)
 /install             https://ga4.builditwithai.xyz/?src=install  302

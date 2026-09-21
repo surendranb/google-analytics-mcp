@@ -32,7 +32,8 @@ data/tools.json (11 tools from the package), data/skills.json.
 
 The build fails (exit 1) on: a broken internal link, a missing or empty twin, a
 page with no H1 without JS, a privacy/terms word change, a banned token, a
-title over 60 chars, a description over 155 chars, or a sitemap entry with no page.
+title over 60 chars, a description over 155 chars, a sitemap entry with no page,
+or a _redirects source that shadows an emitted asset.
 """
 
 from __future__ import annotations
@@ -1151,7 +1152,7 @@ trademark of Google LLC.
     (DIST / "llms-full.txt").write_text(full, encoding="utf-8")
 
 
-def build_robots(urls: list[str]) -> None:
+def build_robots(urls: list[str], skills: list[dict]) -> None:
     bots = ("GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "PerplexityBot",
             "Google-Extended", "Applebot-Extended", "CCBot", "Amazonbot")
     robots = ("# https://ga4mcp.com/robots.txt\n"
@@ -1171,7 +1172,13 @@ def build_robots(urls: list[str]) -> None:
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + entries + "\n</urlset>\n", encoding="utf-8")
 
-    redirects = """# Legacy paths -> clean URLs (Netlify _redirects)
+    # No-slash skill rules are enumerated from the skill list, never a wildcard:
+    # Pages applies _redirects before static assets, so a "/skills/<anything>" rule
+    # also matched /skills/index.md and 301'd the skills index twin into a 404.
+    skill_sources = sorted(f"/skills/{s['slug']}" for s in skills)
+    width = max(len(src) for src in skill_sources)
+    skill_rules = "\n".join(f"{src:<{width}}  {src}/  301" for src in skill_sources)
+    redirects = f"""# Legacy paths -> clean URLs (Netlify _redirects)
 /setup.md            /setup/            301
 /schema.md           /schema/           301
 /iam.md              /iam/              301
@@ -1186,7 +1193,9 @@ def build_robots(urls: list[str]) -> None:
 /privacy             /privacy/          301
 /terms               /terms/            301
 /skills              /skills/           301
-/skills/:slug        /skills/:slug/     301
+# No-trailing-slash variants of the skill pages, enumerated from skills/ so no
+# pattern can also match /skills/index.md and shadow the skills index twin.
+{skill_rules}
 # Installer endpoint (unchanged)
 /install             https://ga4.builditwithai.xyz/?src=install  302
 """
@@ -1454,6 +1463,63 @@ def check_cf_pages() -> list[str]:
     return problems
 
 
+def redirect_source_regex(source: str) -> re.Pattern[str]:
+    """A _redirects source as a regex: :placeholder is one segment, * spans slashes."""
+    parts = re.split(r"(:[A-Za-z_]+|\*)", source)
+    return re.compile("".join("[^/]+" if part.startswith(":") else ".*" if part == "*" else re.escape(part)
+                              for part in parts) + "$")
+
+
+def check_redirects(skills: list[dict]) -> list[str]:
+    """Fail if any _redirects source matches an emitted asset path.
+
+    Cloudflare Pages applies _redirects before static assets, so a source that
+    matches an emitted path makes that path unreachable. The old /skills/:slug
+    wildcard matched /skills/index.md and 301'd the skills index twin into a 404;
+    the no-slash skill rules are enumerated from skills/ instead, and this guard
+    keeps the next wildcard from landing.
+    """
+    problems: list[str] = []
+    try:
+        lines = (DIST / "_redirects").read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        return [f"_redirects is missing: {exc}"]
+    sources = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        parts = stripped.split()
+        if len(parts) >= 2:
+            sources.append(parts[0])
+    enumerated = [src for src in sources if re.fullmatch(r"/skills/[^/]+", src)]
+    if len(enumerated) != len(skills):
+        problems.append(f"_redirects has {len(enumerated)} no-slash /skills/<slug> rules, "
+                        f"expected {len(skills)} enumerated from skills/")
+    if any(":slug" in src for src in sources):
+        problems.append("_redirects still uses a :slug wildcard; enumerate the skill slugs instead")
+
+    # Asset paths as Pages serves them: the file path, plus the directory URL for index.html.
+    assets = []
+    for path in sorted(DIST.rglob("*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(DIST).as_posix()
+        if "/" not in rel and rel.startswith("_"):
+            continue  # Pages config files (_redirects, _headers, _routes.json), never served as assets
+        assets.append("/" + rel)
+        if path.name == "index.html":
+            assets.append("/" + rel[: -len("index.html")])
+    for source in sources:
+        if not source.startswith("/"):
+            continue
+        rx = redirect_source_regex(source)
+        shadowed = next((asset for asset in assets if rx.match(asset)), None)
+        if shadowed:
+            problems.append(f"_redirects rule {source!r} shadows emitted asset {shadowed!r}")
+    return problems
+
+
 def main() -> int:
     if not (SITE_DIR / "meta.json").is_file():
         return print("site/meta.json is missing") or 1
@@ -1474,12 +1540,13 @@ def main() -> int:
     urls = ["/"] + [f"/{s}/" for s in ("setup", "schema", "iam")] + ["/skills/"] + \
            [f"/skills/{s['slug']}/" for s in skills] + ["/privacy/", "/terms/"]
     build_llms(skills)
-    build_robots(urls)
+    build_robots(urls, skills)
     build_data(skills)
     build_cf_pages()
 
     problems = (check_links()[0] + check_twins() + check_legal() + check_nojs() + check_meta()
-                + check_banned() + check_sitemap(urls) + check_counts(skills) + check_cf_pages())
+                + check_banned() + check_sitemap(urls) + check_counts(skills) + check_cf_pages()
+                + check_redirects(skills))
 
     print("\nURL                                  bytes  twin  file")
     for url in urls:
