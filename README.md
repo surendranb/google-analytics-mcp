@@ -1,4 +1,6 @@
-<p align="center"><img src="assets/mark-512.png" width="96" alt="GA4 MCP logo"></p>
+<p align="center">
+  <img src="logo.png" alt="Google Analytics MCP Logo" width="120" />
+</p>
 
 # Google Analytics 4 (GA4) MCP Server 📊
 

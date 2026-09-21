@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="GA4 MCP Server">
-  <title>GA4 MCP Server</title>
-  <!-- sunset bars: rising series on a common baseline; capsule ends, no gradients -->
-  <rect x="14" y="54" width="16" height="38" rx="8" fill="#ea580c"/>
-  <rect x="42" y="40" width="16" height="52" rx="8" fill="#1e3a8a"/>
-  <rect x="70" y="26" width="16" height="66" rx="8" fill="#140b04"/>
-</svg>
