@@ -1,7 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="GA4 MCP Server">
-  <title>GA4 MCP Server</title>
-  <rect x="0" y="0" width="100" height="100" rx="19" fill="#140b04"/>
-  <rect x="26.5" y="50" width="11" height="24" rx="5.5" fill="#fdba74"/>
-  <rect x="44.5" y="40" width="11" height="34" rx="5.5" fill="#ea580c"/>
-  <rect x="62.5" y="30" width="11" height="44" rx="5.5" fill="#fdf0e2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- GA4 MCP Server - eye favicon. Small-size build: molecule nodes omitted and the band stroked +3/745
+       so the almond stays legible at 16px; the mark itself is unchanged (see mark.svg). -->
+  <rect width="100" height="100" rx="22" fill="#fbf8f3"/>
+  <g transform="translate(3.63, 14.97) scale(0.11673)">
+    <defs>
+      <linearGradient id="iris" gradientUnits="userSpaceOnUse" x1="266.34" y1="175.09" x2="527.38" y2="423.75">
+      <stop offset="0" stop-color="#6b42f5"/>
+      <stop offset="0.25" stop-color="#5c4cf6"/>
+      <stop offset="0.5" stop-color="#5068f0"/>
+      <stop offset="0.75" stop-color="#3881ef"/>
+      <stop offset="1" stop-color="#1da3ea"/>
+    </linearGradient>
+    </defs>
+    <circle cx="396.88" cy="300.81" r="207" fill="#26194b"/>
+    <path fill="#26194b" stroke="#26194b" stroke-width="3" stroke-linejoin="round" fill-rule="evenodd" d="M 42 271.36 C 39.96 273.46 37.87 275.55 36.24 278 C 34.5 279.98 32.68 281.88 31.11 284 C 24.2 289.95 23.71 299.69 25.49 308 C 28.53 316.2 35.86 321.61 41 328.42 A 1911.47 809.58 -89.78 0 0 758 323.09 C 760.39 321.57 761.76 319.04 763.62 317 C 772.31 308.09 772.28 291.85 763 283.38 C 761.33 281.38 759.83 279.24 758 277.38 A 904.8 2419.64 -0.04 0 0 42 271.36 Z M 135 365.2 C 113.82 345.72 92.24 324.15 72.73 301 C 72.94 298.66 74.7 296.98 75.72 295 C 84.43 285.48 93.21 276.02 102.43 267 C 107.92 261.47 113.5 256.01 119 250.49 C 122.28 247.23 125.62 244.01 129 240.85 C 130.61 239.89 140.13 230.39 135 235.68 A 1039.15 573.35 89.48 0 1 665 241.01 C 659.89 235.7 669.66 245.15 671 246.41 C 673.65 248.97 676.34 251.5 679 254.06 C 684.48 259.23 689.8 264.56 695 270 C 703.65 279.8 713.96 288.21 721.41 299 C 721.6 303.32 716.82 305.82 714.55 309 C 711.99 311.53 709.87 314.45 707.33 317 C 702.17 322.2 697.27 327.63 692.29 333 C 687.28 338.24 682.1 343.32 677 348.48 C 674.12 351.41 661.37 364.02 665 360.15 A 896.33 534.87 -89.12 0 1 135 365.2 Z"/>
+    <circle cx="396.86" cy="299.42" r="180.26" fill="url(#iris)"/>
+  </g>
 </svg>

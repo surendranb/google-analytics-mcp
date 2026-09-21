@@ -238,10 +238,9 @@ TRACKING = """  <!-- PostHog Tracking -->
   </script>
 """
 
-MARKS = ('<svg class="mark" width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" focusable="false">'
-         '<rect x="14" y="54" width="16" height="38" rx="8" fill="#fdba74"/>'
-         '<rect x="42" y="40" width="16" height="52" rx="8" fill="#ea580c"/>'
-         '<rect x="70" y="26" width="16" height="66" rx="8" fill="#1e3a8a"/></svg>')
+# Brand mark: the "eye" (site/src-assets/mark.svg, 769.31x469.94). Referenced as an
+# asset so header, rail, and hero share one cached file and one gradient id.
+MARKS = '<img class="mark" src="/assets/mark.svg" width="43" height="26" alt="">'
 
 # Progressive enhancement only: the page is complete without this script.
 WEBMCP_JS = """  <script>
@@ -1276,6 +1275,11 @@ def copy_assets() -> list[str]:
             sys.exit(f"site/src-assets/{name} is missing — run site/tools/render-assets.py")
         shutil.copyfile(source, DIST / name)
         copied.append(name)
+    mark = SRC_ASSETS / "mark.svg"
+    if not mark.is_file():
+        sys.exit("site/src-assets/mark.svg is missing — the eye master mark ships with the site sources")
+    shutil.copyfile(mark, ASSETS_OUT / "mark.svg")
+    copied.append("assets/mark.svg")
     return copied
 
 

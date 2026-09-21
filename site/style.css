@@ -123,7 +123,7 @@ a:hover { color: var(--accent-strong); }
   display: inline-flex; align-items: center; gap: .55rem; font-weight: 650;
   color: var(--ink); text-decoration: none; letter-spacing: -.01em;
 }
-.brand .mark { display: block; flex: none; }
+.brand .mark { display: block; flex: none; height: 26px; width: auto; }
 nav.main ul, .site-footer ul { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1.1rem; list-style: none; margin: 0; padding: 0; }
 /* inline-block + padding-block keeps every nav target at or above 24 CSS px tall
    (WCAG 2.2 SC 2.5.8 target size, no spacing exception needed). */
@@ -187,7 +187,7 @@ nav.main a.btn:hover, nav.main a.btn:focus { text-decoration: none; color: #fff;
 /* hero + chips ---------------------------------------------------------- */
 .hero { padding-top: 1.6rem; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2.5rem; align-items: center; }
-.hero-mark svg { width: 240px; height: 240px; display: block; }
+.hero-mark img { width: 240px; height: auto; display: block; }
 .hero .lead { max-width: 60ch; }
 .hero p { max-width: 68ch; }
 .cta { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.4rem 0 1rem; }
