@@ -28,8 +28,8 @@ jobs:
         run: python3 scripts/check_package_consistency.py
 
       - name: Build distributions with uv
-        # dist/ also holds the committed ga4mcp.com site — clear it so only
-        # package distributions reach upload-artifact and PyPI.
+        # Clear dist/ so only package distributions reach upload-artifact and
+        # PyPI (the site lives in site/dist/ and is not part of this job).
         run: rm -rf dist/ && uv build
 
       - name: Upload distributions

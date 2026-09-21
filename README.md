@@ -8,7 +8,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/google-analytics-mcp/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/google-analytics-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-🌐 **Docs & Web Portal**: [ga4mcp.com](https://ga4mcp.com) — [Setup](https://ga4mcp.com/setup) · [Filter schema](https://ga4mcp.com/schema) · [IAM](https://ga4mcp.com/iam) · [Skills library](https://ga4mcp.com/skills/) · [llms.txt](https://ga4mcp.com/llms.txt)
+🌐 **Docs & Web Portal**: [ga4mcp.com](https://ga4mcp.com) — [Setup](https://ga4mcp.com/setup/) · [Filter schema](https://ga4mcp.com/schema/) · [IAM](https://ga4mcp.com/iam/) · [Skills library](https://ga4mcp.com/skills/) · [llms.txt](https://ga4mcp.com/llms.txt) · [llms-full.txt](https://ga4mcp.com/llms-full.txt)
 
 ---
 
@@ -80,16 +80,23 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
 
 ## 🛠️ Tools & Capabilities
 
-| Tool Name | Parameters | Description | Return Type |
-|---|---|---|---|
-| `get_ga4_data` | `dimensions` (list), `metrics` (list), `date_ranges` (list), `limit` (int) | Runs multi-dimensional GA4 reports with automated metric totals and server-side aggregation. | `JSON / Markdown` |
-| `list_accounts` | *(none)* | Lists all accessible Google Analytics accounts and permission levels. | `JSON` |
-| `list_properties` | `account_id` (optional) | Lists all GA4 properties associated with an account. | `JSON` |
-| `get_property_metadata` | `property_id` (optional) | Fetches complete dimension and metric schemas, custom definitions, and compatibility rules. | `JSON` |
-| `run_realtime_report` | `metrics` (list), `dimensions` (list) | Queries real-time active users and event counts from the last 30 minutes. | `JSON` |
-| `search_skills` | `query` (string) | Searches built-in GA4 analytical playbooks (e-commerce, channel attribution, bot filtering). | `Markdown` |
-| `skill_read` | `skill_name` (string) | Dynamically loads procedural skills and analytical guides from GitHub. | `Markdown` |
-| `skills_list` | *(none)* | Lists all available live GA4 analytical skills. | `JSON` |
+11 tools ship in v2.11.4, all annotated read-only. Every page of [ga4mcp.com](https://ga4mcp.com) has a markdown twin (`/setup/index.md`), and the full set is machine-readable at [data/tools.json](https://ga4mcp.com/data/tools.json).
+
+| Tool | Arguments | What it returns |
+|---|---|---|
+| `get_ga4_data` | `dimensions`, `metrics`, `date_range_start`, `date_range_end`, `dimension_filter`, `limit`, `estimate_only`, `proceed_with_large_dataset`, `enable_aggregation`, `intent` | Report rows plus a `totals` block computed by GA4, with pre-flight schema checks and a row-cap warning above 2,500 rows. |
+| `search_schema` | `keyword` | Ranked dimension and metric API names for the property. Run this before typing a field name. |
+| `get_property_schema` | *(none)* | Full dimension and metric schema, standard and custom. |
+| `list_dimension_categories` | *(none)* | Dimension categories with counts. |
+| `list_metric_categories` | *(none)* | Metric categories with counts. |
+| `get_dimensions_by_category` | `category` | Every dimension in one category, with descriptions. |
+| `get_metrics_by_category` | `category` | Every metric in one category, with descriptions. |
+| `list_properties` | `account_id` (optional) | GA4 properties the configured credentials can read. |
+| `search_skills` | `query` (slug or keyword; empty returns the index) | One analytical recipe as markdown. |
+| `get_troubleshooting_guide` | `topic`: `setup` \| `iam` \| `schema` | The fix path for a boot error, a 403, or a filter-shape error. Works offline. |
+| `setup_ga4_access` | *(none)* | Collects a missing property ID or credentials path and reconnects without a client restart. |
+
+Also exposed: resources `docs://setup_guide`, `docs://fix/setup`, `docs://fix/iam`, `docs://fix/schema`, and `skill://<slug>` per recipe.
 
 ---
 
@@ -101,6 +108,8 @@ This server ships with built-in analytical recipes that load dynamically from Gi
 - `ecommerce-analysis`: Revenue, item purchase rate, and conversion funnel analysis.
 - `ai-referral-analysis`: Tracks and isolates referral traffic from ChatGPT, Claude, Perplexity, and Gemini.
 
+All 15 are listed at [ga4mcp.com/skills](https://ga4mcp.com/skills/) and indexed at [data/skills.json](https://ga4mcp.com/data/skills.json).
+
 ---
 
 ## 🔒 Telemetry & Privacy
@@ -111,8 +120,9 @@ You can opt out anytime by setting either of the following environment variables
 ```bash
 export DO_NOT_TRACK=1
 # or
-export MCP_TELEMETRY_OPT_OUT=1
+export DISABLE_TELEMETRY=1
 ```
+`NO_TELEMETRY=1` works too, and so does `GA_MCP_TELEMETRY=false`. When opted out, no event is sent and the local ID file is not created.
 
 ---
 

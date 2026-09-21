@@ -4,16 +4,18 @@
 
 ## Installation
 - UVX: `uvx google-analytics-mcp`
-- NPX: `npx -y google-analytics-mcp`
+- NPX: `npx -y @surendranb/google-analytics-mcp`
 - Curl: `curl -fsSL https://ga4.builditwithai.xyz/install | bash`
 - Documentation: https://ga4mcp.com
 - Repo: https://github.com/surendranb/google-analytics-mcp
 
 ## Docs
-- [Setup and troubleshooting](https://ga4mcp.com/setup): missing GA4_PROPERTY_ID, missing credentials path, expired ADC.
-- [Filter schema](https://ga4mcp.com/schema): exact `dimension_filter` JSON shapes, camelCase and snake_case.
-- [IAM permissions](https://ga4mcp.com/iam): grant the service account Viewer access on the property.
-- [Skills library](https://ga4mcp.com/skills/): 15 analytical recipes.
+Every page below also exists as markdown: send `Accept: text/markdown`, or fetch the `.md` path directly.
+
+- [Setup and troubleshooting](https://ga4mcp.com/setup/) · [markdown](https://ga4mcp.com/setup/index.md): missing GA4_PROPERTY_ID, missing credentials path, expired ADC.
+- [Filter schema](https://ga4mcp.com/schema/) · [markdown](https://ga4mcp.com/schema/index.md): exact `dimension_filter` JSON shapes, camelCase and snake_case.
+- [IAM permissions](https://ga4mcp.com/iam/) · [markdown](https://ga4mcp.com/iam/index.md): grant the service account Viewer access on the property.
+- [Skills library](https://ga4mcp.com/skills/) · [markdown](https://ga4mcp.com/skills/index.md): 15 analytical recipes.
 
 ## Primary Tools
 - `get_ga4_data(dimensions, metrics, date_range_start, date_range_end, dimension_filter, limit, estimate_only, proceed_with_large_dataset, enable_aggregation, intent)`: Runs structured reports; returns rows plus a server-computed `totals` block.
@@ -43,7 +45,15 @@
 - [Traffic Change Diagnosis](https://ga4mcp.com/skills/traffic-diagnosis/): ordered steps to find the cause of a spike, drop, or mix shift.
 - [UA to GA4 Field Name Mapping](https://ga4mcp.com/skills/ua-to-ga4/): every common Universal Analytics name and its GA4 equivalent.
 
+## Machine Data
+- [llms.txt](https://ga4mcp.com/llms.txt): this file, canonical copy.
+- [llms-full.txt](https://ga4mcp.com/llms-full.txt): every docs and skills page inlined.
+- [index.md](https://ga4mcp.com/index.md): the home page as markdown.
+- [tools.json](https://ga4mcp.com/data/tools.json): all 11 tools with parameters and descriptions.
+- [skills.json](https://ga4mcp.com/data/skills.json): skill slugs, titles, one-line descriptions.
+- [sitemap.xml](https://ga4mcp.com/sitemap.xml) · [robots.txt](https://ga4mcp.com/robots.txt)
+
 ## Environment Variables
 - `GA4_PROPERTY_ID`: Default GA4 property ID.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to service account JSON key file.
-- `DO_NOT_TRACK`: Set to `1` to disable anonymous telemetry.
+- `DO_NOT_TRACK`, `DISABLE_TELEMETRY`, or `NO_TELEMETRY`: set to `1` to disable anonymous telemetry.
