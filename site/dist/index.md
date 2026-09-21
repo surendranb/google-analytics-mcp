@@ -1,5 +1,5 @@
 ---
-title: GA4 MCP Server — Google Analytics 4 for AI Agents
+title: GA4 MCP Server — Google Analytics 4 for Claude & AI Agents
 description: Google Analytics MCP server for AI agents — query GA4 from Claude, Cursor, or any MCP client. Schema discovery, totals computed by GA4, 15 skills.
 url: https://ga4mcp.com/
 type: website
