@@ -912,10 +912,10 @@ def build_skills(skills: list[dict]) -> None:
     <p class="lead">{len(skills)} analytical recipes, each one a page plus an MCP resource at
     <code>skill://&lt;slug&gt;</code>. Load one in a session with <code>search_skills("&lt;slug&gt;")</code>;
     the text below is the same content the agent receives.</p>
+{render_markdown(intro_md)}
     <ul class="grid">
 {rows}
     </ul>
-{render_markdown(intro_md)}
     <p class="doc-note">Machine-readable index: <a href="/data/skills.json">/data/skills.json</a>. Markdown twin:
     <a href="{twin_url(url)}">{twin_url(url)}</a>.</p>
   </article>

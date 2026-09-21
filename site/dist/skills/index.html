@@ -70,6 +70,11 @@
     <p class="lead">15 analytical recipes, each one a page plus an MCP resource at
     <code>skill://&lt;slug&gt;</code>. Load one in a session with <code>search_skills("&lt;slug&gt;")</code>;
     the text below is the same content the agent receives.</p>
+<p>Analytical recipes for common GA4 analysis patterns. Each skill gives you
+the exact dimensions, metrics, filters, and interpretation logic to answer
+a specific question using the tools already available in this MCP.</p>
+<p>To use a skill: call <code>search_skills("skill-name")</code> to fetch the full instructions.
+To browse: call <code>search_skills("")</code> to see this index.</p>
     <ul class="grid">
       <li class="card"><h3><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></h3><p>Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.</p><p class="tag">skill://ai-referral-analysis</p></li>
       <li class="card"><h3><a href="/skills/attribution-scope/">Attribution Scope</a></h3><p>GA4 has three distinct attribution scopes. Using the wrong scope gives misleading results. Choose based on the question you are answering.</p><p class="tag">skill://attribution-scope</p></li>
@@ -87,11 +92,6 @@
       <li class="card"><h3><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></h3><p>Systematically diagnose why traffic changed — spike, drop, or shift in mix. Follow these steps in order. Each step narrows the hypothesis.</p><p class="tag">skill://traffic-diagnosis</p></li>
       <li class="card"><h3><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></h3><p>Universal Analytics (UA) and GA4 use different names for equivalent concepts. UA was sunset on 2023-07-01; models trained before or around then guess UA field names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed \&quot;conversions\&quot; to \&quot;key events\&quot; (see the conversions rows below). If a name feels obviously right but returns \&quot;Invalid metric/dimension\&quot;, assume your training predates the change and verify with searchschema. This skill gives the correct GA4 Data API name for every common UA metric and dimension.</p><p class="tag">skill://ua-to-ga4</p></li>
     </ul>
-<p>Analytical recipes for common GA4 analysis patterns. Each skill gives you
-the exact dimensions, metrics, filters, and interpretation logic to answer
-a specific question using the tools already available in this MCP.</p>
-<p>To use a skill: call <code>search_skills("skill-name")</code> to fetch the full instructions.
-To browse: call <code>search_skills("")</code> to see this index.</p>
     <p class="doc-note">Machine-readable index: <a href="/data/skills.json">/data/skills.json</a>. Markdown twin:
     <a href="/skills/index.md">/skills/index.md</a>.</p>
   </article>

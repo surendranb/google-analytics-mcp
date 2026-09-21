@@ -101,13 +101,15 @@ a:hover { color: var(--accent-strong); }
 }
 .brand .mark { display: block; flex: none; }
 nav.main ul, .site-footer ul { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; list-style: none; margin: 0; padding: 0; }
-nav.main a { color: var(--secondary); text-decoration: none; font-size: .95rem; }
+/* inline-block + padding-block keeps every nav target at or above 24 CSS px tall
+   (WCAG 2.2 SC 2.5.8 target size, no spacing exception needed). */
+nav.main a { display: inline-block; padding-block: .3rem; color: var(--secondary); text-decoration: none; font-size: .95rem; }
 nav.main a:hover { color: var(--accent-strong); text-decoration: underline; }
 nav.main a[aria-current="page"] { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--accent-border); }
 .site-footer { background: var(--surface); border-top: 1px solid var(--border); margin-top: 4rem; padding-block: 2rem; }
 .site-footer p { color: var(--muted); font-size: .9rem; max-width: 62ch; }
 .site-footer strong { color: var(--ink); }
-.site-footer a { color: var(--secondary); }
+.site-footer a { display: inline-block; padding-block: .25rem; color: var(--secondary); }
 .foot-legal { color: var(--faint); font-size: .84rem; margin-bottom: 0; }
 
 /* hero + chips ---------------------------------------------------------- */
