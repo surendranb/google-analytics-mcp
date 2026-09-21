@@ -1,0 +1,16 @@
+# Legacy docsify paths -> clean paths
+/setup.md          /setup        301
+/schema.md         /schema       301
+/iam.md            /iam          301
+/privacy.html      /privacy      301
+/terms.html        /terms        301
+# Old skill URLs -> skill pages
+/skills/*/SKILL.md /skills/:splat/  301
+# Clean paths: rewritten, not redirected, so every listed URL answers 200
+/setup             /setup.html   200
+/schema            /schema.html  200
+/iam               /iam.html     200
+/privacy           /privacy.html 200
+/terms             /terms.html   200
+# Installer endpoint (unchanged)
+/install           https://ga4.builditwithai.xyz/?src=install  302

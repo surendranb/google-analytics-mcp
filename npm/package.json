@@ -32,7 +32,7 @@
   "bugs": {
     "url": "https://github.com/surendranb/google-analytics-mcp/issues"
   },
-  "homepage": "https://ga4.builditwithai.xyz",
+  "homepage": "https://ga4mcp.com",
   "engines": {
     "node": ">=16.0.0"
   }

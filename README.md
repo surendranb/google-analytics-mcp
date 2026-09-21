@@ -8,7 +8,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/google-analytics-mcp/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/google-analytics-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-🌐 **Live Documentation & Web Portal**: [https://ga4.builditwithai.xyz](https://ga4.builditwithai.xyz)
+🌐 **Docs & Web Portal**: [ga4mcp.com](https://ga4mcp.com) — [Setup](https://ga4mcp.com/setup) · [Filter schema](https://ga4mcp.com/schema) · [IAM](https://ga4mcp.com/iam) · [Skills library](https://ga4mcp.com/skills/) · [llms.txt](https://ga4mcp.com/llms.txt)
 
 ---
 

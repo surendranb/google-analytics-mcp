@@ -37,6 +37,7 @@ sdlc = [
 
 [project.urls]
 Homepage = "https://github.com/surendranb/google-analytics-mcp"
+Documentation = "https://ga4mcp.com"
 Repository = "https://github.com/surendranb/google-analytics-mcp"
 Issues = "https://github.com/surendranb/google-analytics-mcp/issues"
 

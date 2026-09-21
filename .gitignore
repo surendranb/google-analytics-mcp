@@ -6,9 +6,12 @@ __pycache__/
 .DS_Store
 
 # Build artifacts
-dist/
 build/
 *.egg-info/
+# dist/ holds the committed ga4mcp.com site (built by build.py); only package
+# artifacts from `uv build` / `python -m build` are ignored.
+/dist/*.whl
+/dist/*.tar.gz
 
 # Release artifacts (temporary files)
 RELEASE_PLAN.md

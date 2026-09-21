@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="GA4 MCP Server">
+  <title>GA4 MCP Server</title>
+  <!-- badge form: navy tile, bars inverted to keep contrast on any surface -->
+  <rect x="0" y="0" width="100" height="100" rx="19" fill="#001858"/>
+  <rect x="26.5" y="50" width="11" height="24" rx="5.5" fill="#8bd3dd"/>
+  <rect x="44.5" y="40" width="11" height="34" rx="5.5" fill="#f582ae"/>
+  <rect x="62.5" y="30" width="11" height="44" rx="5.5" fill="#fef6e4"/>
+</svg>

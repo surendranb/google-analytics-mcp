@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Channel Acquisition — GA4 MCP Agent Skill</title>
+<meta name="description" content="Break GA4 traffic down by source, medium, and default channel group, with the dimensions an agent should query.">
+<link rel="canonical" href="https://ga4mcp.com/skills/channel-acquisition/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fef6e4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Channel Acquisition — GA4 MCP Agent Skill">
+<meta property="og:description" content="Break GA4 traffic down by source, medium, and default channel group, with the dimensions an agent should query.">
+<meta property="og:url" content="https://ga4mcp.com/skills/channel-acquisition/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Channel Acquisition — GA4 MCP Agent Skill">
+<meta name="twitter:description" content="Break GA4 traffic down by source, medium, and default channel group, with the dimensions an agent should query.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="alternate" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Channel Acquisition — GA4 MCP Agent Skill","description":"Break GA4 traffic down by source, medium, and default channel group, with the dimensions an agent should query.","url":"https://ga4mcp.com/skills/channel-acquisition/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"> <!-- bars mark: rising series on a common baseline; capsule ends, no gradients --> <rect x="14" y="54" width="16" height="38" rx="8" fill="#8bd3dd"/> <rect x="42" y="40" width="16" height="52" rx="8" fill="#f582ae"/> <rect x="70" y="26" width="16" height="66" rx="8" fill="#001858"/> </svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup">Setup</a></li>
+        <li><a href="/schema">Filter schema</a></li>
+        <li><a href="/iam">IAM</a></li>
+        <li><a href="/skills/" aria-current="page">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+    <a class="back" href="/skills/">← All skills</a>
+<h1 id="channel-acquisition-analysis">Channel Acquisition Analysis</h1>
+<p>Break down sessions and users by traffic source, medium, and channel group
+to understand where your audience comes from and which channels perform best.</p>
+<h2 id="correct-dimension-names">Correct dimension names</h2>
+<div class="tscroll"><table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>GA4 API name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Channel group</td>
+<td><code>sessionDefaultChannelGroup</code></td>
+</tr>
+<tr>
+<td>Source</td>
+<td><code>sessionSource</code></td>
+</tr>
+<tr>
+<td>Medium</td>
+<td><code>sessionMedium</code></td>
+</tr>
+<tr>
+<td>Source / Medium</td>
+<td><code>sessionSourceMedium</code></td>
+</tr>
+<tr>
+<td>Campaign name</td>
+<td><code>sessionCampaignName</code></td>
+</tr>
+<tr>
+<td>Campaign ID</td>
+<td><code>sessionCampaignId</code></td>
+</tr>
+<tr>
+<td>Ad content</td>
+<td><code>sessionManualAdContent</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Do not use <code>sessionDefaultChannelGrouping</code> — it does not exist.
+Do not combine <code>sessionCampaignName</code> with user-scoped metrics like <code>totalUsers</code>.</p>
+<h2 id="step-1-channel-overview">Step 1 — Channel overview</h2>
+<pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;, &quot;totalUsers&quot;, &quot;newUsers&quot;, &quot;userEngagementDuration&quot;,
+          &quot;screenPageViewsPerSession&quot;, &quot;bounceRate&quot;]
+date_range: last 30 days
+order_by: sessions DESC
+</code></pre>
+<h2 id="step-2-source-medium-detail">Step 2 — Source / medium detail</h2>
+<pre><code>dimensions: [&quot;sessionSource&quot;, &quot;sessionMedium&quot;]
+metrics: [&quot;sessions&quot;, &quot;newUsers&quot;, &quot;userEngagementDuration&quot;, &quot;keyEvents&quot;]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 25
+</code></pre>
+<h2 id="step-3-campaign-performance-paid">Step 3 — Campaign performance (paid)</h2>
+<pre><code>dimensions: [&quot;sessionCampaignName&quot;, &quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;, &quot;newUsers&quot;, &quot;keyEvents&quot;, &quot;userEngagementDuration&quot;]
+dimension_filter: {
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;sessionMedium&quot;,
+    &quot;stringFilter&quot;: {&quot;matchType&quot;: &quot;EXACT&quot;, &quot;value&quot;: &quot;cpc&quot;}
+  }
+}
+date_range: last 30 days
+order_by: sessions DESC
+</code></pre>
+<h2 id="step-4-trend-by-channel-over-time">Step 4 — Trend by channel over time</h2>
+<pre><code>dimensions: [&quot;date&quot;, &quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;, &quot;newUsers&quot;]
+date_range: last 90 days
+order_by: date ASC
+</code></pre>
+<h2 id="what-to-report">What to report</h2>
+<ul>
+<li>Top 5 channels by sessions and by new users</li>
+<li>Engagement quality per channel (userEngagementDuration per session)</li>
+<li>Which channel drives the most key events (conversions)</li>
+<li>Week-over-week or month-over-month trend for top channels</li>
+</ul>
+    <p class="doc-note">Load it in a session with <code>search_skills("channel-acquisition")</code>, or read the MCP resource <code>skill://channel-acquisition</code>. Source: <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/channel-acquisition/SKILL.md">skills/channel-acquisition/SKILL.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed. Not affiliated with Google.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup">Setup</a></li>
+        <li><a href="/schema">Filter schema</a></li>
+        <li><a href="/iam">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>

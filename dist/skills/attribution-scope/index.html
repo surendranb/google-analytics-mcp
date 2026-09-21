@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Attribution Scope — GA4 MCP Agent Skill</title>
+<meta name="description" content="When to use session-scoped vs first-user vs event-scoped GA4 dimensions, and why mixing them returns API errors.">
+<link rel="canonical" href="https://ga4mcp.com/skills/attribution-scope/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#fef6e4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="GA4 MCP Server">
+<meta property="og:title" content="Attribution Scope — GA4 MCP Agent Skill">
+<meta property="og:description" content="When to use session-scoped vs first-user vs event-scoped GA4 dimensions, and why mixing them returns API errors.">
+<meta property="og:url" content="https://ga4mcp.com/skills/attribution-scope/">
+<meta property="og:image" content="https://ga4mcp.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GA4 MCP Server — Google Analytics 4 for AI agents">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Attribution Scope — GA4 MCP Agent Skill">
+<meta name="twitter:description" content="When to use session-scoped vs first-user vs event-scoped GA4 dimensions, and why mixing them returns API errors.">
+<meta name="twitter:image" content="https://ga4mcp.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="alternate" type="text/plain" href="https://ga4mcp.com/llms.txt" title="llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Attribution Scope — GA4 MCP Agent Skill","description":"When to use session-scoped vs first-user vs event-scoped GA4 dimensions, and why mixing them returns API errors.","url":"https://ga4mcp.com/skills/attribution-scope/","inLanguage":"en","license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Surendran B"},"isPartOf":{"@type":"WebSite","name":"GA4 MCP Server","url":"https://ga4mcp.com/"},"about":{"@type":"SoftwareApplication","name":"GA4 MCP Server","codeRepository":"https://github.com/surendranb/google-analytics-mcp"}}</script>
+  <!-- PostHog Tracking -->
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getActiveEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RX65PWDDEQ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/"><svg class="mark" width="26" height="26" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"> <!-- bars mark: rising series on a common baseline; capsule ends, no gradients --> <rect x="14" y="54" width="16" height="38" rx="8" fill="#8bd3dd"/> <rect x="42" y="40" width="16" height="52" rx="8" fill="#f582ae"/> <rect x="70" y="26" width="16" height="66" rx="8" fill="#001858"/> </svg><span>GA4 MCP</span></a>
+    <nav class="main" aria-label="Main">
+      <ul>
+        <li><a href="/setup">Setup</a></li>
+        <li><a href="/schema">Filter schema</a></li>
+        <li><a href="/iam">IAM</a></li>
+        <li><a href="/skills/" aria-current="page">Skills</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="wrap">
+  <article class="prose">
+    <a class="back" href="/skills/">← All skills</a>
+<h1 id="attribution-scope">Attribution Scope</h1>
+<p>GA4 has three distinct attribution scopes. Using the wrong scope gives
+misleading results. Choose based on the question you are answering.</p>
+<h2 id="the-three-scopes">The three scopes</h2>
+<div class="tscroll"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Dimension prefix</th>
+<th>Question it answers</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Session</strong></td>
+<td><code>session</code></td>
+<td>Where did THIS session come from?</td>
+<td>Traffic Acquisition — volume, engagement, conversions by source</td>
+</tr>
+<tr>
+<td><strong>First-user</strong></td>
+<td><code>firstUser</code></td>
+<td>Which channel originally acquired this user?</td>
+<td>User Acquisition — who brought in new users</td>
+</tr>
+<tr>
+<td><strong>Event/attribution</strong></td>
+<td><em>(no prefix)</em></td>
+<td>Which channel gets credit for this conversion?</td>
+<td>Advertising reports — AI-weighted conversion credit allocation</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dimensions-by-scope">Dimensions by scope</h2>
+<p><strong>Session scope</strong> — use for traffic analysis:
+- <code>sessionDefaultChannelGroup</code>
+- <code>sessionSource</code>
+- <code>sessionMedium</code>
+- <code>sessionCampaignName</code>
+- <code>sessionSourceMedium</code></p>
+<p><strong>First-user scope</strong> — use for acquisition analysis:
+- <code>firstUserDefaultChannelGroup</code>
+- <code>firstUserSource</code>
+- <code>firstUserMedium</code>
+- <code>firstUserCampaignName</code></p>
+<p><strong>Event/attribution scope</strong> — use only in advertising/conversion contexts:
+- <code>defaultChannelGroup</code> <em>(no prefix)</em>
+- <code>source</code> <em>(no prefix)</em>
+- <code>medium</code> <em>(no prefix)</em></p>
+<h2 id="how-to-choose">How to choose</h2>
+<p><strong>"Where is my traffic coming from?"</strong> → session scope</p>
+<pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;, &quot;sessionSource&quot;, &quot;sessionMedium&quot;]
+metrics: [&quot;sessions&quot;, &quot;totalUsers&quot;, &quot;engagedSessions&quot;, &quot;keyEvents&quot;]
+</code></pre>
+<p><strong>"Which channels are bringing in new users?"</strong> → first-user scope</p>
+<pre><code>dimensions: [&quot;firstUserDefaultChannelGroup&quot;, &quot;firstUserSource&quot;]
+metrics: [&quot;newUsers&quot;, &quot;totalUsers&quot;]
+</code></pre>
+<p><strong>"How should I attribute conversion credit across channels?"</strong> → event scope
+(Use only with advertising campaign analysis; this is AI-weighted attribution.)</p>
+<h2 id="common-mistake">Common mistake</h2>
+<p>A user acquired via Instagram who later converts via Google Organic will show:
+- <code>sessionDefaultChannelGroup = "Organic Search"</code> (where this session came from)
+- <code>firstUserDefaultChannelGroup = "Organic Social"</code> (where they were first acquired)</p>
+<p>These are different questions. Mixing scopes in one query produces meaningless results.
+Never combine <code>sessionSource</code> with <code>firstUserMedium</code> in the same report.</p>
+<h2 id="nested-filters">Nested filters</h2>
+<p>When filtering, use the same scope as your dimensions:</p>
+<pre><code class="language-json">// Filtering traffic acquisition report — use session-scoped dimension
+{&quot;filter&quot;: {&quot;fieldName&quot;: &quot;sessionDefaultChannelGroup&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;Organic Search&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}}}
+
+// NOT source (attribution scope) — wrong scope for this report
+{&quot;filter&quot;: {&quot;fieldName&quot;: &quot;source&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;google&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}}}
+</code></pre>
+    <p class="doc-note">Load it in a session with <code>search_skills("attribution-scope")</code>, or read the MCP resource <code>skill://attribution-scope</code>. Source: <a href="https://github.com/surendranb/google-analytics-mcp/blob/main/skills/attribution-scope/SKILL.md">skills/attribution-scope/SKILL.md</a>.</p>
+  </article>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>GA4 MCP Server</strong> — Model Context Protocol server for Google Analytics 4. MIT licensed. Not affiliated with Google.</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/setup">Setup</a></li>
+        <li><a href="/schema">Filter schema</a></li>
+        <li><a href="/iam">IAM</a></li>
+        <li><a href="/skills/">Skills</a></li>
+        <li><a href="/llms.txt">llms.txt</a></li>
+        <li><a href="/robots.txt">robots.txt</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+        <li><a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></li>
+        <li><a href="https://pypi.org/project/google-analytics-mcp/">PyPI</a></li>
+        <li><a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp">npm</a></li>
+      </ul>
+    </nav>
+    <p class="foot-legal">&copy; 2026 Surendran Balachandran · GA4 MCP is open source under the MIT License.</p>
+  </div>
+</footer>
+</body>
+</html>
