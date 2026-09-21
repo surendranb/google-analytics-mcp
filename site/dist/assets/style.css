@@ -230,8 +230,12 @@ pre {
   background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
   border-radius: 10px; font-size: .86rem; line-height: 1.55;
 }
-pre code { font-family: var(--mono); color: var(--ink); background: none; border: 0; padding: 0; }
-code { font-family: var(--mono); font-size: .88em; background: var(--accent-wash); color: var(--accent-text); border: 1px solid var(--accent-border); border-radius: 5px; padding: .06em .34em; }
+pre code { font-family: var(--mono); color: var(--ink); background: none; border: 0; padding: 0; overflow-wrap: normal; }
+code { font-family: var(--mono); font-size: .88em; background: var(--accent-wash); color: var(--accent-text); border: 1px solid var(--accent-border); border-radius: 5px; padding: .06em .34em; overflow-wrap: anywhere; }
+/* Unbreakable inline-code tokens (OAuth scope URLs, GOOGLE_APPLICATION_CREDENTIALS) wrap at any
+   viewport instead of widening the document. Fenced blocks and table cells are exempt: pre keeps
+   its own overflow-x scroll and tables keep scrolling inside .tscroll, both unchanged. */
+td code, th code { overflow-wrap: normal; }
 .cmd { margin-bottom: 1.15rem; }
 .cmd caption, .cmd figcaption { caption-side: top; text-align: left; font-size: .84rem; color: var(--muted); padding-top: .35rem; }
 
