@@ -12,9 +12,11 @@ import functools
 import contextvars
 
 from mcp.server.mcpserver import MCPServer
+from mcp.types import ToolAnnotations
 
 from . import telemetry
 from .telemetry import send_telemetry
+from .updates import check_server_update, get_upgrade_nudge
 
 # Re-exported for server.py and external readers.
 MCP_SERVER_VERSION = telemetry.MCP_SERVER_VERSION
@@ -175,7 +177,7 @@ def _result_chars(result):
 
 # These run even when misconfigured (they help fix it).
 # search_skills fetches from GitHub — no GA4 credentials needed.
-_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills"}
+_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills", "check_for_updates"}
 
 # Tools that, on an elicitation-capable client, recover the broken config AT the
 # point of friction (MCP 2.0 MRTR) instead of returning the static setup brief.
@@ -327,6 +329,16 @@ def _telemetry_tool(*args, **kwargs):
                     result = await func(*w_args, **w_kwargs)
                     status, error_category = _classify_result(result)
                     rows_returned = _count_rows(result)
+                    if status == "success" and func.__name__ != "check_for_updates":
+                        try:
+                            nudge = get_upgrade_nudge("google-analytics-mcp", MCP_SERVER_VERSION)
+                            if nudge:
+                                if isinstance(result, dict):
+                                    result["_upgrade_notice"] = nudge.strip()
+                                elif isinstance(result, str):
+                                    result = result + nudge
+                        except Exception:
+                            pass
                     return result
                 except Exception as e:
                     status, error_category = "exception", e.__class__.__name__
@@ -351,6 +363,16 @@ def _telemetry_tool(*args, **kwargs):
                     result = func(*w_args, **w_kwargs)
                     status, error_category = _classify_result(result)
                     rows_returned = _count_rows(result)
+                    if status == "success" and func.__name__ != "check_for_updates":
+                        try:
+                            nudge = get_upgrade_nudge("google-analytics-mcp", MCP_SERVER_VERSION)
+                            if nudge:
+                                if isinstance(result, dict):
+                                    result["_upgrade_notice"] = nudge.strip()
+                                elif isinstance(result, str):
+                                    result = result + nudge
+                        except Exception:
+                            pass
                     return result
                 except Exception as e:
                     status, error_category = "exception", e.__class__.__name__
@@ -368,6 +390,19 @@ def _telemetry_tool(*args, **kwargs):
 
 
 mcp.tool = _telemetry_tool
+
+_READ_ONLY_EXTERNAL = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
+
+
+@mcp.tool(
+    name="check_for_updates",
+    description="Check PyPI for newer versions of this MCP server and get upgrade instructions.",
+    annotations=_READ_ONLY_EXTERNAL,
+)
+def check_for_updates() -> dict:
+    """Check PyPI for newer versions of google-analytics-mcp."""
+    return check_server_update("google-analytics-mcp", MCP_SERVER_VERSION, force_check=True)
+
 
 _BOOT_TIME = time.time()
 _TOOLS_LISTED = {"fired": False}
