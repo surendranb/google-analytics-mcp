@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Claude: Code, Desktop, and Cowork</title>
+<meta name="description" content="Connect GA4 MCP to Claude Code, Claude Desktop, and Claude Cowork with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-claude/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Claude: Code, Desktop, and Cowork</h1>
+<p>I run GA4 from inside Claude every day, and the three Claude surfaces need three different entries for the same server. GA4 MCP for Claude covers all three: Code via CLI, Desktop via JSON config, and Cowork as the local agent mode inside Desktop. Source: https://ga4mcp.com/ FAQ, verified 2026-10-09.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>Site FAQ names Claude Code, Claude Desktop, and Claude Cowork as working; installer covers Desktop and Code; Cowork runs local MCP servers through the desktop app. Source: https://ga4mcp.com/ FAQ, verified 2026-10-09.</li>
+<li>Claude Code path: <code>claude mcp add google-analytics -- uvx google-analytics-mcp</code> (repo README + site install block).</li>
+<li>Claude plugin bundle: <code>.claude-plugin/plugin.json</code> v2.11.1 in repo surendranb/google-analytics-mcp (raw fetch today).</li>
+<li>Read-only, local stdio, telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring each Claude surface</h2>
+<p>Prerequisites: numeric GA4_PROPERTY_ID, plus a service-account JSON path or gcloud auth application-default login. Keep the JSON path absolute.</p>
+<ol>
+<li>For Claude Code, add the server from your terminal:<pre>claude mcp add google-analytics -- uvx google-analytics-mcp</pre> Then set the environment for the server process:<pre>export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</pre></li>
+<li>For Claude Desktop, open claude_desktop_config.json and add:<pre>{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}</pre> Restart Claude Desktop after saving.</li>
+<li>For Claude Cowork, use the Desktop entry above. Cowork is the local agent mode inside Claude Desktop, so it picks up the same local MCP servers. No second install. Source: https://ga4mcp.com/ FAQ, verified 2026-10-09.</li>
+<li>Verify from any of the three by asking: "List my GA4 properties." You have succeeded when list_properties returns rows with no setup error.</li>
+</ol>
+<p>Prefer hands-free? curl -fsSL "https://ga4.builditwithai.xyz/install" | bash writes the Claude entries for you.</p>
+<h2>Skills worth loading first</h2>
+<p>traffic-diagnosis: You ask why sessions moved and want Claude to follow the ordered checks. attribution-scope: You compare session, event, and user scope without mixing them. ai-referral-analysis: You split ChatGPT, Claude, Perplexity, Gemini, Copilot referrals from search and direct. common-metric-names: Claude guesses a UA-era name and GA4 rejects it. date-ranges: You compare periods and want the two-query pattern, not one blended pull.</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with search_skills.</p>
+<h2>Running your first query</h2>
+<p>Ask Claude: "Why did organic traffic drop in the last 7 days?" Claude should first load traffic-diagnosis, then call get_ga4_data with dimensions ["date"], metrics ["sessions"], date_range_start "7daysAgo", date_range_end "yesterday", intent "diagnose organic sessions drop last 7 days".</p>
+<p>Read the period figure from totals. I trust that block because GA4 computes it; summing date rows by hand is where agents drift.</p>
+<h2>Fixing the three errors you will hit</h2>
+<ol>
+<li>Claude Code says the server isn't found. Symptom: MCP entry missing after add. Fix: re-run the claude mcp add line exactly, confirm uvx google-analytics-mcp runs in your terminal, restart Code.</li>
+<li>Desktop shows a setup error on launch. Symptom: missing env. Fix: confirm both GA4_PROPERTY_ID and GOOGLE_APPLICATION_CREDENTIALS sit inside the env object above with an absolute path, then restart Desktop. setup_ga4_access recovers mid-session where prompts are supported.</li>
+<li>Query fails on names or filters. Symptom: 400 invalid dimension, metric, or filter. Fix: run search_schema, load common-metric-names plus filter-structures, and retry. Offline guides: get_troubleshooting_guide(topic="schema").</li>
+</ol>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for Claude Code use the CLI add command?</strong> Yes. claude mcp add google-analytics -- uvx google-analytics-mcp is the Code path, verified in the repo README and the site install block.</p>
+<p><strong>Does GA4 MCP for Claude Desktop need hand-edited JSON?</strong> Only the one claude_desktop_config.json entry above, or the installer which writes it. Restart Desktop after either.</p>
+<p><strong>How does GA4 MCP for Claude Cowork connect?</strong> Cowork runs through Claude Desktop's local agent mode, so the Desktop entry covers it. The site FAQ states this directly. Source: https://ga4mcp.com/ FAQ, verified 2026-10-09.</p>
+<p><strong>Is there a Claude Code plugin bundle distinct from the MCP entry?</strong> Yes. .claude-plugin/plugin.json v2.11.1 ships in the repo. The MCP entry answers questions; the plugin bundles the server for Code. Sibling page /ga4-plugin-for-claude-code/ shows that manifest.</p>
+<p><strong>Why does Claude guess wrong field names?</strong> Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The ua-to-ga4 skill maps each old name.</p>
+<p><strong>Is Claude usage read-only and private?</strong> Yes. Tools are read-only; traffic goes from your machine to GA4. Telemetry is anonymous counts you stop with DISABLE_TELEMETRY=1.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4, FAQ Claude lines), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, repo README client blocks, and raw .claude-plugin/plugin.json v2.11.1.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Claude (you are here) / Plugin for Claude Code (/ga4-plugin-for-claude-code/).</p>
+</main>
+</body>
+</html>

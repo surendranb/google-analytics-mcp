@@ -23,6 +23,33 @@
   - [Traffic Diagnosis](/skills/traffic-diagnosis/SKILL.md)
   - [UA to GA4 Migration](/skills/ua-to-ga4/SKILL.md)
 
+- **Harness Guides**
+  - [Every Harness Hub](/ga4-mcp-for-every-harness.md)
+  - [Claude](/ga4-mcp-for-claude.md)
+  - [Codex](/ga4-mcp-for-codex.md)
+  - [Cursor](/ga4-mcp-for-cursor.md)
+  - [Antigravity](/ga4-mcp-for-antigravity.md)
+  - [Antigravity IDE](/ga4-mcp-for-antigravity-ide.md)
+  - [Copilot](/ga4-mcp-for-copilot.md)
+  - [DeepSeek](/ga4-mcp-for-deepseek.md)
+  - [Devin Desktop](/ga4-mcp-for-devin-desktop.md)
+  - [Gemini](/ga4-mcp-for-gemini.md)
+  - [Goose](/ga4-mcp-for-goose.md)
+  - [Hermes](/ga4-mcp-for-hermes.md)
+  - [Kiro](/ga4-mcp-for-kiro.md)
+  - [OpenClaw](/ga4-mcp-for-openclaw.md)
+  - [OpenCode](/ga4-mcp-for-opencode.md)
+  - [Pi](/ga4-mcp-for-pi.md)
+  - [VS Code](/ga4-mcp-for-vscode.md)
+  - [ZCode](/ga4-mcp-for-zcode.md)
+  - [Zed](/ga4-mcp-for-zed.md)
+
+- **Plugins**
+  - [Plugins Hub](/ga4-plugins.md)
+  - [Plugin for Claude Code](/ga4-plugin-for-claude-code.md)
+  - [Plugin for Gemini](/ga4-plugin-for-gemini.md)
+  - [Plugin for Harness](/ga4-plugin-for-harness.md)
+
 - **Legal**
   - [Privacy Policy](/privacy.html)
   - [Terms of Service](/terms.html)

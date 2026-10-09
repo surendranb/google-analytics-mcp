@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Devin Desktop: Setup, Skills and First Query</title>
+<meta name="description" content="Connect GA4 MCP to Devin Desktop with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-devin-desktop/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Devin Desktop: Setup, Skills and First Query</h1>
+<p>angle: One exact Devin MCP config for GA4, with the native path separated from the hosted Composio path.</p>
+<p>I query GA4 from inside Devin with the same server I run locally elsewhere. GA4 MCP for Devin Desktop gives you that: one <code>mcpServers</code> entry in the Devin MCP config, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>- Devin path verified today: <code>devin mcp add/list/get/login</code> CLI; configs <code>~/.config/devin/mcp_config.json</code> (user), <code>.devin/mcp_config.json</code> (project), <code>.devin/mcp_config.local.json</code> (local, gitignored); legacy Cascade agent uses <code>mcp_config.json</code> (Devin docs).</li>
+<li>- Hosted alternate verified today: Composio Devin MCP is a hosted bridge (<code>windsurf://windsurf-mcp-registry</code> one-click or <code>~/.codeium/windsurf/mcp_config.json</code> with <code>serverUrl</code>); it is not the native entry below.</li>
+<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
+<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring Devin to launch the server</h2>
+<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
+<p>1. Add the server from your terminal:</p>
+<pre>
+devin mcp add google-analytics --command uvx --arg google-analytics-mcp
+</pre>
+<p>Default scope writes <code>.devin/mcp_config.local.json</code>. Use <code>-s user</code> for <code>~/.config/devin/mcp_config.json</code> or <code>-s project</code> for shared <code>.devin/mcp_config.json</code>.</p>
+<p>2. Confirm the entry carries your values:</p>
+<pre>
+{
+  &quot;mcpServers&quot;: {
+    &quot;google-analytics&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/absolute/path/to/key.json&quot;
+      }
+    }
+  }
+}
+</pre>
+<p>3. Check the connection:</p>
+<pre>
+devin mcp list
+devin mcp get google-analytics
+</pre>
+<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error. Do not mix the Composio hosted <code>serverUrl</code> entry into this file; pick native stdio or hosted, not both under one name.</p>
+<h2>Skills worth loading first</h2>
+<p>| Skill slug | What you use it for in Devin |</p>
+<p>|---|---|</p>
+<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
+<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
+<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
+<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
+<p>| <code>filter-structures</code> | Your dimension filter returned an invalid-filter error |</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
+<h2>Running your first query</h2>
+<p>Ask: &quot;What were my top channels last week?&quot;</p>
+<p>Your agent should call:</p>
+<pre>
+get_ga4_data(
+  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
+  metrics=[&quot;sessions&quot;],
+  date_range_start=&quot;7daysAgo&quot;,
+  date_range_end=&quot;yesterday&quot;,
+  intent=&quot;which channels drove sessions last week&quot;
+)
+</pre>
+<p>Read the period figure from <code>totals</code>. GA4 computes that block; hand sums drift and I stopped doing them.</p>
+<h2>Fixing the three errors you will hit</h2>
+<p>1. <strong>Server missing after add.</strong> Symptom: <code>devin mcp list</code> omits google-analytics. Fix: confirm which scope file you wrote (local vs user vs project), then re-run the add with the intended <code>-s</code> flag.</p>
+<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values with an absolute key path in the same scope file; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
+<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for Devin Desktop use devin mcp add?</strong></p>
+<p>Yes. The add plus scope files above are the path, verified in Devin docs today.</p>
+<p><strong>Native stdio or Composio hosted: which does this page use?</strong></p>
+<p>Native stdio. Composio hosts a Devin bridge over <code>serverUrl</code>; I name it here so you can tell them apart, and I wire only the native entry above.</p>
+<p><strong>Does the Windsurf rename affect this page?</strong></p>
+<p>Windsurf retired as a name and Devin Desktop is the successor surface. I do not ship a /windsurf/ page; this page is the live path.</p>
+<p><strong>Why does the agent guess wrong field names?</strong></p>
+<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
+<p><strong>Is usage read-only and private?</strong></p>
+<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
+<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
+<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, Devin MCP configuration docs plus Desktop cascade page, Composio Connect page, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Devin Desktop (you are here).</p>
+</main>
+</body>
+</html>

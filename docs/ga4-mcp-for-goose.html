@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Goose: Setup, Skills and First Query</title>
+<meta name="description" content="Connect GA4 MCP to Goose with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-goose/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Goose: Setup, Skills and First Query</h1>
+<p>angle: One exact Goose extensions block for GA4, so YAML config stops getting guessed from JSON clients.</p>
+<p>I query GA4 from inside Goose with the same server I run in Pi and OpenCode. GA4 MCP for Goose gives you that: one entry under <code>extensions</code> in <code>~/.config/goose/config.yaml</code>, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>- Goose path verified today: <code>~/.config/goose/config.yaml</code> with <code>extensions</code> entries; stdio <code>cmd</code>/<code>args</code>/<code>envs</code> plus <code>type: stdio</code>; <code>goose configure</code> wizard adds extensions (Goose configuration docs).</li>
+<li>- Native note verified today: Block Goose is Apache 2.0 with native MCP integration in CLI plus Desktop.</li>
+<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
+<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring Goose to launch the server</h2>
+<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
+<p>1. Run the wizard or edit the file directly. Wizard:</p>
+<pre>
+goose configure
+</pre>
+<p>Choose Add Extension, Command-line (stdio), and answer with the values in step 2.</p>
+<p>2. Direct edit of <code>~/.config/goose/config.yaml</code>:</p>
+<pre>
+extensions:
+  google-analytics:
+    name: google-analytics
+    cmd: uvx
+    args: [&quot;google-analytics-mcp&quot;]
+    envs:
+      GA4_PROPERTY_ID: &quot;123456789&quot;
+      GOOGLE_APPLICATION_CREDENTIALS: &quot;/absolute/path/to/key.json&quot;
+    type: stdio
+    enabled: true
+    timeout: 300
+</pre>
+<p>Goose uses <code>extensions</code> with <code>cmd</code>/<code>envs</code>, not <code>mcpServers</code> with <code>command</code>/<code>env</code>; I keep the keys exact so JSON snippets do not get pasted raw.</p>
+<p>3. Restart Goose so it picks up the new extension.</p>
+<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
+<h2>Skills worth loading first</h2>
+<p>| Skill slug | What you use it for in Goose |</p>
+<p>|---|---|</p>
+<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
+<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
+<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
+<p>| <code>geo-device-segmentation</code> | You split users by country, city, device |</p>
+<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
+<h2>Running your first query</h2>
+<p>Ask: &quot;What were my top channels last week?&quot;</p>
+<p>Your agent should call:</p>
+<pre>
+get_ga4_data(
+  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
+  metrics=[&quot;sessions&quot;],
+  date_range_start=&quot;7daysAgo&quot;,
+  date_range_end=&quot;yesterday&quot;,
+  intent=&quot;which channels drove sessions last week&quot;
+)
+</pre>
+<p>Read the period figure from <code>totals</code>. GA4 computes that block; hand sums drift and I stopped doing them.</p>
+<h2>Fixing the three errors you will hit</h2>
+<p>1. <strong>Extension missing after edit.</strong> Symptom: Goose lists no google-analytics extension. Fix: confirm the file is <code>~/.config/goose/config.yaml</code> with top-level <code>extensions</code> (not <code>mcpServers</code>), valid YAML, then restart Goose.</p>
+<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>envs</code> values with an absolute key path; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
+<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for Goose use config.yaml?</strong></p>
+<p>Yes. <code>~/.config/goose/config.yaml</code> with the <code>extensions</code> block above, verified in Goose configuration docs today.</p>
+<p><strong>Why cmd and envs instead of command and env?</strong></p>
+<p>Goose YAML uses <code>cmd</code>/<code>envs</code>; JSON clients use <code>command</code>/<code>env</code>. The names differ by client and I keep each page exact.</p>
+<p><strong>Does goose configure cover this server?</strong></p>
+<p>Yes as a wizard. It writes the same extension entry; the YAML above is the auditable form.</p>
+<p><strong>Why does the agent guess wrong field names?</strong></p>
+<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
+<p><strong>Is usage read-only and private?</strong></p>
+<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
+<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
+<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, Goose configuration docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Goose (you are here).</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Zed: Setup, Skills and First Query</title>
+<meta name="description" content="Connect GA4 MCP to Zed with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-zed/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Zed: Setup, Skills and First Query</h1>
+<p>angle: One exact Zed context_servers block for GA4, so the AI settings clicks land in the right JSON.</p>
+<p>I query GA4 from inside Zed with the same server I run in Cursor and VS Code. GA4 MCP for Zed gives you that: one entry under <code>context_servers</code> in Zed settings, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>- Installer auto-configures Zed (site Works with list, verified today).</li>
+<li>- Zed path verified today: Settings, AI, MCP Servers, Add Server, Add Local Server or Install from Extensions; settings file entries under <code>context_servers</code> with <code>command</code>/<code>args</code>/<code>env</code>; green indicator means connected (zed.dev MCP docs).</li>
+<li>- Repo: https://github.com/surendranb/google-analytics-mcp. <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
+<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring Zed to launch the server</h2>
+<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
+<p>1. Open Settings, AI, MCP Servers in Zed. Click Add Server, choose Add Local Server.</p>
+<p>2. Paste this entry (Zed uses <code>context_servers</code>, not <code>mcpServers</code>):</p>
+<pre>
+{
+  &quot;context_servers&quot;: {
+    &quot;google-analytics&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/absolute/path/to/key.json&quot;
+      }
+    }
+  }
+}
+</pre>
+<p>3. Watch the indicator dot beside the server name. Green means connected; grey means the command or env needs a second look.</p>
+<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error. Hands-free alternative: <code>curl -fsSL &quot;https://ga4.builditwithai.xyz/install&quot; | bash</code> writes the Zed entry.</p>
+<h2>Skills worth loading first</h2>
+<p>| Skill slug | What you use it for in Zed |</p>
+<p>|---|---|</p>
+<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
+<p>| <code>content-performance</code> | You want top pages and weak pages split out |</p>
+<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
+<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
+<p>| <code>filter-structures</code> | Your dimension filter returned an invalid-filter error |</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
+<h2>Running your first query</h2>
+<p>Ask: &quot;Which pages earned the most engaged sessions last week?&quot;</p>
+<p>Your agent should first load <code>content-performance</code>, then call:</p>
+<pre>
+get_ga4_data(
+  dimensions=[&quot;pagePath&quot;],
+  metrics=[&quot;sessions&quot;],
+  date_range_start=&quot;7daysAgo&quot;,
+  date_range_end=&quot;yesterday&quot;,
+  intent=&quot;top pages by sessions last week&quot;
+)
+</pre>
+<p>Read the period figure from <code>totals</code>. GA4 computes it; I stopped hand-summing after watching agents drift.</p>
+<h2>Fixing the three errors you will hit</h2>
+<p>1. <strong>Grey indicator after save.</strong> Symptom: Zed shows the server disconnected. Fix: confirm <code>uvx google-analytics-mcp</code> runs in your terminal, the JSON key is <code>context_servers</code>, then reload Zed.</p>
+<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values with an absolute key path; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
+<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for Zed use context_servers?</strong></p>
+<p>Yes. Zed settings use <code>context_servers</code> with <code>command</code>/<code>args</code>/<code>env</code>, verified in zed.dev MCP docs today. Other clients use <code>mcpServers</code>; Zed is the exception and I keep the key exact.</p>
+<p><strong>Does the installer cover Zed?</strong></p>
+<p>Yes. The site names Zed in the auto-configure list.</p>
+<p><strong>Add Local Server or Install from Extensions?</strong></p>
+<p>Add Local Server with the block above. Install from Extensions fits registry servers; this server wires as a custom local entry.</p>
+<p><strong>Why does the agent guess wrong field names?</strong></p>
+<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
+<p><strong>Is usage read-only and private?</strong></p>
+<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
+<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
+<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4, Zed line), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, zed.dev MCP docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Zed (you are here).</p>
+</main>
+</body>
+</html>
