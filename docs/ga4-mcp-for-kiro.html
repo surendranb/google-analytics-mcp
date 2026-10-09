@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Kiro: Setup, Skills and First Query</title>
+<meta name="description" content="Connect GA4 MCP to Kiro with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-kiro/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Kiro: Setup, Skills and First Query</h1>
+<p>angle: One exact Kiro mcp.json block for GA4, with workspace and user scopes kept distinct.</p>
+<p>I query GA4 from inside Kiro with the same server I run in Cursor and VS Code. GA4 MCP for Kiro gives you that: one <code>mcpServers</code> entry in <code>.kiro/settings/mcp.json</code>, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>- Kiro path verified today: workspace <code>.kiro/settings/mcp.json</code> plus user <code>~/.kiro/settings/mcp.json</code>, merged with workspace winning; local <code>command</code>/<code>args</code>/<code>env</code> plus remote <code>url</code>/<code>headers</code>; command palette Kiro: Open workspace/user MCP config (Kiro MCP docs).</li>
+<li>- Steering note verified today: <code>.kiro/steering/</code> plus root <code>AGENTS.md</code> carry project rules; MCP servers stay in <code>mcp.json</code>, never in steering files.</li>
+<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
+<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring Kiro to launch the server</h2>
+<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
+<p>1. Open the command palette (<code>Cmd+Shift+P</code> / <code>Ctrl+Shift+P</code>), search MCP, pick Kiro: Open workspace MCP config for one project or Kiro: Open user MCP config for every workspace.</p>
+<p>2. Add the server:</p>
+<pre>
+{
+  &quot;mcpServers&quot;: {
+    &quot;google-analytics&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/absolute/path/to/key.json&quot;
+      },
+      &quot;disabled&quot;: false
+    }
+  }
+}
+</pre>
+<p>Workspace <code>.kiro/settings/mcp.json</code> wins over user <code>~/.kiro/settings/mcp.json</code> on name collisions.</p>
+<p>3. Save the file (<code>Cmd+S</code>); Kiro reconnects automatically. No restart dance.</p>
+<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
+<h2>Skills worth loading first</h2>
+<p>| Skill slug | What you use it for in Kiro |</p>
+<p>|---|---|</p>
+<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
+<p>| <code>content-performance</code> | You want top pages and weak pages split out |</p>
+<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
+<p>| <code>compatible-combinations</code> | Your dimensions and metrics returned a 400 incompatibility |</p>
+<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
+<h2>Running your first query</h2>
+<p>Ask: &quot;Which pages earned the most engaged sessions last week?&quot;</p>
+<p>Your agent should first load <code>content-performance</code>, then call:</p>
+<pre>
+get_ga4_data(
+  dimensions=[&quot;pagePath&quot;],
+  metrics=[&quot;sessions&quot;],
+  date_range_start=&quot;7daysAgo&quot;,
+  date_range_end=&quot;yesterday&quot;,
+  intent=&quot;top pages by sessions last week&quot;
+)
+</pre>
+<p>Read the period figure from <code>totals</code>. GA4 computes it; I stopped hand-summing after watching agents drift.</p>
+<h2>Fixing the three errors you will hit</h2>
+<p>1. <strong>Server disabled after save.</strong> Symptom: Kiro lists google-analytics as disabled. Fix: confirm <code>&quot;disabled&quot;: false</code> in the same scope file you edited (workspace vs user), save again.</p>
+<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values with an absolute key path in the winning scope file; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
+<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>filter-structures</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for Kiro use .kiro/settings/mcp.json?</strong></p>
+<p>Yes. Workspace <code>.kiro/settings/mcp.json</code> or user <code>~/.kiro/settings/mcp.json</code>, verified in Kiro MCP docs today.</p>
+<p><strong>Do steering files configure MCP?</strong></p>
+<p>No. Steering plus <code>AGENTS.md</code> carry rules; <code>mcp.json</code> carries servers. I keep them in separate files.</p>
+<p><strong>Does the installer cover Kiro?</strong></p>
+<p>The site auto-configure list does not name Kiro. I show the hand block because it is exact and auditable.</p>
+<p><strong>Why does the agent guess wrong field names?</strong></p>
+<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
+<p><strong>Is usage read-only and private?</strong></p>
+<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
+<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
+<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, Kiro MCP configuration docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Kiro (you are here).</p>
+</main>
+</body>
+</html>

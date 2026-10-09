@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Gemini: Setup, Skills and First Query</title>
+<meta name="description" content="Connect GA4 MCP to Gemini with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-gemini/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Gemini: Setup, Skills and First Query</h1>
+<p>angle: One exact settings.json block for Gemini CLI, with the extension versions kept distinct.</p>
+<p>I query GA4 from inside Gemini CLI with the same server I run in Claude and OpenCode. GA4 MCP for Gemini gives you that: one <code>mcpServers</code> entry in <code>~/.gemini/settings.json</code>, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>- Site names Gemini CLI with the extension in the repo (verified today in Works with list).</li>
+<li>- Gemini path verified today: <code>~/.gemini/settings.json</code> (project <code>.gemini/settings.json</code> overrides) with <code>mcpServers</code> command/args/env; <code>gemini mcp add</code> writes entries (geminicli.com docs).</li>
+<li>- Extension versions kept distinct: repo root <code>gemini-extension.json</code> v2.11.1; nested <code>gemini-extension/gemini-extension.json</code> v2.5.0 with <code>mcpServer</code> command <code>uvx --from google-analytics-mcp ga4-mcp-server</code> (both raw fetched today).</li>
+<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label for installs.</li>
+<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring Gemini CLI to launch the server</h2>
+<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
+<p>1. Open <code>~/.gemini/settings.json</code> and add the server:</p>
+<pre>
+{
+  &quot;mcpServers&quot;: {
+    &quot;google-analytics&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/absolute/path/to/key.json&quot;
+      },
+      &quot;timeout&quot;: 30000
+    }
+  }
+}
+</pre>
+<p>2. Alternative: let the CLI write it:</p>
+<pre>
+gemini mcp add google-analytics uvx google-analytics-mcp
+</pre>
+<p>Then add the two <code>env</code> values above by hand.</p>
+<p>3. Extension alternative: the repo ships <code>gemini-extension.json</code> v2.11.1 at root and v2.5.0 nested. The nested bundle runs <code>uvx --from google-analytics-mcp ga4-mcp-server</code> with the same two env keys. Pick the settings block or the extension, not both at once.</p>
+<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
+<h2>Skills worth loading first</h2>
+<p>| Skill slug | What you use it for in Gemini |</p>
+<p>|---|---|</p>
+<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
+<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
+<p>| <code>common-metric-names</code> | Gemini guessed a UA-era name and GA4 rejected it |</p>
+<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
+<p>| <code>ai-referral-analysis</code> | You split Gemini, ChatGPT, Claude, Perplexity, Copilot referrals from search |</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
+<h2>Running your first query</h2>
+<p>Ask: &quot;Why did organic traffic drop in the last 7 days?&quot;</p>
+<p>Your agent should first load <code>traffic-diagnosis</code>, then call:</p>
+<pre>
+get_ga4_data(
+  dimensions=[&quot;date&quot;],
+  metrics=[&quot;sessions&quot;],
+  date_range_start=&quot;7daysAgo&quot;,
+  date_range_end=&quot;yesterday&quot;,
+  intent=&quot;diagnose organic sessions drop last 7 days&quot;
+)
+</pre>
+<p>Read the period figure from <code>totals</code>. GA4 computes it; summing rows by hand is where I watched agents drift.</p>
+<h2>Fixing the three errors you will hit</h2>
+<p>1. <strong>Server absent after edit.</strong> Symptom: Gemini lists no google-analytics server. Fix: confirm the file is <code>~/.gemini/settings.json</code> with top-level <code>mcpServers</code>, valid JSON, then restart the CLI.</p>
+<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values present with an absolute key path, or run <code>gcloud auth application-default login</code> for ADC expiry (<code>503 reauthentication needed</code>). <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
+<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for Gemini use settings.json?</strong></p>
+<p>Yes. <code>~/.gemini/settings.json</code> with the <code>mcpServers</code> block above is the path, verified in geminicli.com docs today.</p>
+<p><strong>Which Gemini extension version do I quote?</strong></p>
+<p>Both, distinctly. Root <code>gemini-extension.json</code> is v2.11.1; nested <code>gemini-extension/gemini-extension.json</code> is v2.5.0. They are separate manifests; I never merge their numbers.</p>
+<p><strong>Does the ChatGPT app path apply here?</strong></p>
+<p>No. ChatGPT app limits are stated per page only when touched; this page covers Gemini CLI alone. Batch 2 gives zero hours to chatgpt rows (no local stdio path, honest hold).</p>
+<p><strong>Why does Gemini guess wrong field names?</strong></p>
+<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
+<p><strong>Is usage read-only and private?</strong></p>
+<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
+<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
+<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4, Gemini CLI line), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, geminicli.com MCP docs, and repo raw <code>gemini-extension.json</code> v2.11.1 plus nested v2.5.0 and <code>pyproject.toml</code> 2.11.5.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Gemini (you are here).</p>
+</main>
+</body>
+</html>

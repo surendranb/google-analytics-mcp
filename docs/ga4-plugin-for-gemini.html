@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 Plugin for Gemini CLI</title>
+<meta name="description" content="Install the GA4 plugin for Gemini CLI with root v2.11.1 and nested v2.5.0 disambiguated.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-plugin-for-gemini/">
+</head>
+<body>
+<main>
+<h1>GA4 Plugin for Gemini CLI</h1>
+<p>I tripped over the two Gemini files once, so this page keeps them apart. GA4 plugin for Gemini CLI uses the root manifest at v2.11.1; the nested file under gemini-extension/ is a separate v2.5.0 document you quote only with its path.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>Root <code>gemini-extension.json</code> <strong>v2.11.1</strong> (repo surendranb/google-analytics-mcp, raw fetch 2026-10-09; mcp.command uvx, args ["google-analytics-mcp"], settings GA4_PROPERTY_ID + GOOGLE_APPLICATION_CREDENTIALS).</li>
+<li>Nested <code>gemini-extension/gemini-extension.json</code> <strong>v2.5.0</strong> (raw fetch 2026-10-09, distinct file; mcpServer.command uvx, args ["--from", "google-analytics-mcp", "ga4-mcp-server"]).</li>
+<li>Site lists server <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (https://ga4mcp.com/ today).</li>
+<li>Installer https://ga4.builditwithai.xyz/install; repo https://github.com/surendranb/google-analytics-mcp.</li>
+<li>Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Installing the Gemini plugin</h2>
+<p>Prerequisites: Gemini CLI installed, uvx on PATH, numeric GA4_PROPERTY_ID, absolute service-account JSON path.</p>
+<ol>
+<li>Install the root extension manifest (gemini-extension.json v2.11.1) through your Gemini CLI extension flow.</li>
+<li>Provide the two settings the manifest declares:<pre>export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</pre> The nested v2.5.0 file templates these as ${GOOGLE_APPLICATION_CREDENTIALS} and ${GA4_PROPERTY_ID}; same keys, same meaning.</li>
+<li>When you wire by hand instead, use the nested file's explicit server shape:<pre>{
+  "command": "uvx",
+  "args": ["--from", "google-analytics-mcp", "ga4-mcp-server"],
+  "env": {
+    "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json",
+    "GA4_PROPERTY_ID": "123456789"
+  }
+}</pre></li>
+<li>Verify inside Gemini CLI by asking: "List my GA4 properties." You have succeeded when list_properties returns rows.</li>
+</ol>
+<h2>Skills worth loading first</h2>
+<p>ai-referral-analysis: You split Gemini, ChatGPT, Claude, Perplexity, Copilot referrals. channel-acquisition: You split source, medium, channel group. common-metric-names: Gemini's model guesses a UA-era name. geo-device-segmentation: You cut by country, city, device, OS. date-ranges: You compare periods with two queries.</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with search_skills.</p>
+<h2>Running your first query</h2>
+<p>Ask: "How much traffic came from AI assistants last week?" Gemini should load ai-referral-analysis, then call get_ga4_data with dimensions ["sessionSource"], metrics ["sessions"], date_range_start "7daysAgo", date_range_end "yesterday", intent "AI assistant referral sessions last week".</p>
+<p>Read totals for the period figure. I read that block because GA4 computes it; summed rows mislead once a filter narrows the set.</p>
+<h2>Fixing the three errors you will hit</h2>
+<ol>
+<li>Extension installs but GA4 tools missing. Symptom: no get_ga4_data. Fix: run uvx --from google-analytics-mcp ga4-mcp-server in a terminal to prove the runtime, restart Gemini CLI, re-enable the extension.</li>
+<li>Setup error on first query. Symptom: missing property or key. Fix: re-export both values with an absolute key path in the launching shell. Mirror: https://ga4mcp.com/setup/.</li>
+<li>400 on names or filters. Symptom: invalid dimension, metric, or filter. Fix: search_schema, load common-metric-names and filter-structures, retry. Offline: get_troubleshooting_guide(topic="schema").</li>
+</ol>
+<h2>FAQ</h2>
+<p><strong>What is the GA4 plugin for Gemini version?</strong> Root gemini-extension.json v2.11.1. Always quote the path; the nested file differs.</p>
+<p><strong>What is gemini-extension/gemini-extension.json v2.5.0 then?</strong> A separate manifest under gemini-extension/ with the explicit uvx --from server shape. Use it when you hand-wire; use the root file version when you cite the extension.</p>
+<p><strong>What command does the Gemini manifest run?</strong> Root: uvx args ["google-analytics-mcp"]. Nested: uvx args ["--from", "google-analytics-mcp", "ga4-mcp-server"]. Both verified by raw fetch today.</p>
+<p><strong>Where do GA4_PROPERTY_ID and credentials go?</strong> Both manifests declare the same two keys. Export them in the launching shell with an absolute key path; the ID is numeric, not G-.</p>
+<p><strong>Is Gemini usage read-only?</strong> Yes. Reports and metadata reads only. Nothing writes GA4 configuration.</p>
+<p><strong>How do I stop telemetry from Gemini runs?</strong> Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1. Anonymous counts stop, and the local ID file stops.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against root gemini-extension.json v2.11.1, nested gemini-extension/gemini-extension.json v2.5.0, https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / Plugins hub (/ga4-plugins/) / GA4 Plugin for Gemini (you are here).</p>
+</main>
+</body>
+</html>

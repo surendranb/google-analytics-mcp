@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 Plugin for Harness: OpenClaw and Any Generic Runner</title>
+<meta name="description" content="Wire the v2.4.1 OpenClaw GA4 plugin manifest into any generic harness over stdio.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-plugin-for-harness/">
+</head>
+<body>
+<main>
+<h1>GA4 Plugin for Harness: OpenClaw and Any Generic Runner</h1>
+<p>I wanted one plugin file I could point any harness at without rewriting per client. GA4 plugin for harness is that pattern: the OpenClaw manifest at its exact version, with the stdio shape any generic runner reuses.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>Manifest <code>plugins/openclaw/plugin.json</code> <strong>v2.4.1</strong> (repo surendranb/google-analytics-mcp, raw fetch 2026-10-09).</li>
+<li>Entry ga4-mcp-server, transport stdio, env GOOGLE_APPLICATION_CREDENTIALS + GA4_PROPERTY_ID, tools get_ga4_data, search_schema, get_property_schema, list_metric_categories, list_dimension_categories.</li>
+<li>Server base: site <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (https://ga4mcp.com/ today).</li>
+<li>Runtimes: <code>uvx google-analytics-mcp</code>, <code>npx -y @surendranb/google-analytics-mcp</code>, installer <code>https://ga4.builditwithai.xyz/install</code>.</li>
+<li>Read-only. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Installing the generic harness plugin</h2>
+<p>Prerequisites: a runner that loads a plugin manifest and launches local stdio servers, numeric GA4_PROPERTY_ID, absolute service-account JSON path.</p>
+<ol>
+<li>Point your runner at the manifest:<pre>plugins/openclaw/plugin.json  (v2.4.1)</pre></li>
+<li>Confirm the manifest's server entry resolves to a launchable command in your environment:<pre>uvx google-analytics-mcp</pre> ga4-mcp-server is the entry name in the manifest; the launch command above is the runtime I verified.</li>
+<li>Export env for the runner process:<pre>export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</pre></li>
+<li>Verify by asking: "List my GA4 properties." You have succeeded when list_properties returns rows.</li>
+</ol>
+<p>For runners without a plugin host, skip the manifest and register the same command plus env as a plain stdio MCP server.</p>
+<h2>Skills worth loading first</h2>
+<p>traffic-diagnosis: Ordered checks for a move in sessions. compatible-combinations: The manifest's five tools still enforce 400 pairing rules. filter-structures: Generic runners mistype dimensionFilter most. channel-acquisition: Source, medium, channel-group splits. ai-referral-analysis: Splitting assistant referrals from search.</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with search_skills.</p>
+<h2>Running your first query</h2>
+<p>Ask: "What were my top channels last week?" The runner should call get_ga4_data with dimensions ["sessionDefaultChannelGroup"], metrics ["sessions"], date_range_start "7daysAgo", date_range_end "yesterday", intent "which channels drove sessions last week".</p>
+<p>Read totals. I treat that block as the period figure because GA4 computes it; summing rows by hand breaks under the 2,500-row guard.</p>
+<h2>Fixing the three errors you will hit</h2>
+<ol>
+<li>Runner can't resolve the entry. Symptom: ga4-mcp-server not found. Fix: confirm the uvx runtime above launches, then map entry to command in your runner's plugin config.</li>
+<li>Setup error on first tool call. Symptom: missing property or key. Fix: re-export both env values with an absolute key path, restart the runner. Mirror: https://ga4mcp.com/setup/.</li>
+<li>400 on names, pairs, or filters. Symptom: invalid field or incompatible combo. Fix: search_schema, load common-metric-names, compatible-combinations, filter-structures. Offline: get_troubleshooting_guide(topic="schema").</li>
+</ol>
+<h2>FAQ</h2>
+<p><strong>What is the GA4 plugin for harness version?</strong> v2.4.1 at plugins/openclaw/plugin.json, raw-fetched today. It is the generic pattern page even though the path names OpenClaw.</p>
+<p><strong>Does this plugin work outside OpenClaw?</strong> Yes. Transport is stdio with two env keys, so any runner that launches local MCP servers can reuse the shape. The manifest lists its five tools; the full server exposes 11.</p>
+<p><strong>Why does the manifest list five tools when the server has eleven?</strong> The manifest scopes the harness to discovery plus reporting. I quote the manifest list for the plugin and the 11-count for the server.</p>
+<p><strong>What command does the harness entry run?</strong> Entry ga4-mcp-server over stdio. I verified uvx google-analytics-mcp as the launch runtime; keep entry and command distinct when you wire a new runner.</p>
+<p><strong>Is harness usage read-only?</strong> Yes. Report and metadata reads only. No GA4 configuration writes.</p>
+<p><strong>How do I stop telemetry on a shared runner?</strong> Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 in the runner's environment. No queries or credentials leave in telemetry either way.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against raw plugins/openclaw/plugin.json v2.4.1, https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / Plugins hub (/ga4-plugins/) / GA4 Plugin for Harness (you are here).</p>
+</main>
+</body>
+</html>

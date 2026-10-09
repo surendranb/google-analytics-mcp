@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for Cursor</title>
+<meta name="description" content="Wire GA4 MCP into Cursor via mcp.json with a verified block and checks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-cursor/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for Cursor</h1>
+<p>I use Cursor when the question sits next to code, and I want GA4 numbers in the same window. GA4 MCP for Cursor gives you that: the stdio server wired through Cursor's mcp.json with your property ID and key path.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>Installer auto-configures Cursor (site install section, verified today). Manual path below matches repo README section B for Cursor and Antigravity.</li>
+<li>Runtime: <code>uvx google-analytics-mcp</code>. Alt runtime: <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>Repo: https://github.com/surendranb/google-analytics-mcp. Skills index https://ga4mcp.com/skills/.</li>
+<li>Read-only. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Connecting Cursor with mcp.json</h2>
+<p>Prerequisites: Cursor installed, uvx on PATH (verify with uvx --version), numeric GA4_PROPERTY_ID, absolute service-account JSON path.</p>
+<ol>
+<li>Open Cursor Settings, MCP, and locate mcp.json (project or global, per your setup).</li>
+<li>Add the GA4 entry:<pre>{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}</pre></li>
+<li>Save, restart Cursor's MCP host or reload the window, and confirm google-analytics shows as connected with its tools listed.</li>
+<li>Verify by asking: "List my GA4 properties." You have succeeded when list_properties returns rows and search_schema("sessions") ranks field names.</li>
+</ol>
+<p>Hands-free alternative:</p>
+<pre>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</pre>
+<h2>Skills worth loading first</h2>
+<p>content-performance: You want top and weak pages with engagement behind them. channel-acquisition: You split sessions by source, medium, channel group. common-metric-names: Cursor's model guesses a UA name and GA4 rejects it. filter-structures: Your dimensionFilter shape returns invalid-filter. bot-traffic-detection: You want bots and scrapers out before you read a drop.</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with search_skills.</p>
+<h2>Running your first query</h2>
+<p>Ask: "Which pages earned the most engaged sessions last week, excluding bots?" Cursor's agent should load content-performance and bot-traffic-detection, then call get_ga4_data with dimensions ["pagePath"], metrics ["sessions"], date_range_start "7daysAgo", date_range_end "yesterday", intent "top pages by sessions last week".</p>
+<p>Read the period figure from totals. I keep that habit because GA4's aggregation is the period truth; hand sums drift when row caps apply.</p>
+<h2>Fixing the three errors you will hit</h2>
+<ol>
+<li>Cursor shows the server as unreachable. Symptom: red entry in MCP settings. Fix: run uvx google-analytics-mcp in a terminal to prove the runtime works, check the command spelling is uvx, then reload Cursor.</li>
+<li>Setup error about missing env. Symptom: server starts but tools refuse. Fix: confirm GA4_PROPERTY_ID is numeric and GOOGLE_APPLICATION_CREDENTIALS is an absolute existing path inside mcp.json, then reload. Mirror steps at https://ga4mcp.com/setup/.</li>
+<li>400 on dimensions, metrics, or filters. Symptom: invalid name or incompatible combo. Fix: search_schema, then load common-metric-names and compatible-combinations. Guides work offline via get_troubleshooting_guide(topic="schema").</li>
+</ol>
+<h2>FAQ</h2>
+<p><strong>Where does GA4 MCP for Cursor config live?</strong> In Cursor's mcp.json, under mcpServers.google-analytics as shown above. The installer writes it when you'd rather not hand-edit.</p>
+<p><strong>Does the Cursor entry differ from Claude Desktop?</strong> Only the file name and host. Command, args, and env keys match. I keep them identical so I can copy between clients.</p>
+<p><strong>Can Cursor use npx instead of uvx?</strong> Yes. Swap command to npx with args ["-y", "@surendranb/google-analytics-mcp"]. I use uvx because it matches the repo default.</p>
+<p><strong>How do I confirm Cursor loaded the 11 tools?</strong> Open MCP settings and expand google-analytics. You should see get_ga4_data, search_schema, search_skills, and the rest. If the count looks short, reload the window.</p>
+<p><strong>Is Cursor usage read-only?</strong> Yes. The server reads reports and metadata. It never writes GA4 configuration.</p>
+<p><strong>How do I stop telemetry from Cursor runs?</strong> Add DISABLE_TELEMETRY 1 to the entry's env, or export DO_NOT_TRACK=1 for the host process.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4, installer client list names Cursor), repo README Cursor block, https://ga4mcp.com/setup/, https://ga4mcp.com/skills/.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Cursor (you are here) / Plugins (/ga4-plugins/).</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GA4 MCP for DeepSeek: Setup, Skills and First Query</title>
+<meta name="description" content="Connect GA4 MCP to DeepSeek with verified config blocks.">
+<link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-deepseek/">
+</head>
+<body>
+<main>
+<h1>GA4 MCP for DeepSeek: Setup, Skills and First Query</h1>
+<p>angle: One exact dsh-mcp-client entry for DeepSeek Harness, so one plugin instance maps to one GA4 server.</p>
+<p>I query GA4 from inside DeepSeek Harness with the same server I run elsewhere. GA4 MCP for DeepSeek gives you that: one <code>@deepseek-ai/dsh-mcp-client</code> entry in your patch layer, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
+<h2>Proof strip</h2>
+<ul>
+<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
+<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
+<li>- Harness path verified today: one plugin instance equals one MCP server, mounted in <code>cordis.yml</code>/<code>patch</code>; <code>@deepseek-ai/dsh-mcp-client</code> with <code>serverName</code>, <code>transport: stdio</code>, <code>command</code>, <code>args</code>, <code>env</code>; tools surface as <code>mcp__&lt;serverName&gt;__&lt;tool&gt;</code> (DeepSeek Harness MCP docs).</li>
+<li>- Home verified today: <code>DSH_HOME</code> defaults to <code>~/.dsh</code>; user patch <code>cordis.patch.yml</code>; <code>dsh web --dump-config</code> inspects the composed tree.</li>
+<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
+<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
+</ul>
+<h2>Configuring DeepSeek Harness to launch the server</h2>
+<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
+<p>1. Add one entry to your patch layer (<code>cordis.patch.yml</code> or <code>--patch</code> overlay):</p>
+<pre>
+- id: mcp-ga4
+  name: &#x27;@deepseek-ai/dsh-mcp-client&#x27;
+  config:
+    serverName: ga4
+    transport: stdio
+    command: uvx
+    args: [&#x27;google-analytics-mcp&#x27;]
+    env:
+      GA4_PROPERTY_ID: &#x27;123456789&#x27;
+      GOOGLE_APPLICATION_CREDENTIALS: &#x27;/absolute/path/to/key.json&#x27;
+</pre>
+<p>2. Keep the global-mode note straight: stock <code>uvx</code> inherits a scrubbed host env, so the explicit <code>env</code> block above is the auditable path; do not rely on shell exports alone reaching the subprocess.</p>
+<p>3. Inspect the composed tree:</p>
+<pre>
+dsh web --dump-config
+</pre>
+<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error. [NEEDS SOURCE] marks any <code>~/.dsh</code> global-mode filename beyond the patch entry, since only the plugin entry shape was fetched this run.</p>
+<h2>Skills worth loading first</h2>
+<p>| Skill slug | What you use it for in DeepSeek |</p>
+<p>|---|---|</p>
+<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
+<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
+<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
+<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
+<p>| <code>ecommerce-analysis</code> | You read revenue, conversion rate, AOV from ecommerce events |</p>
+<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
+<h2>Running your first query</h2>
+<p>Ask: &quot;What were my top channels last week?&quot;</p>
+<p>Your agent should call:</p>
+<pre>
+get_ga4_data(
+  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
+  metrics=[&quot;sessions&quot;],
+  date_range_start=&quot;7daysAgo&quot;,
+  date_range_end=&quot;yesterday&quot;,
+  intent=&quot;which channels drove sessions last week&quot;
+)
+</pre>
+<p>Read the period figure from <code>totals</code>. GA4 computes that block; hand sums drift and I stopped doing them.</p>
+<h2>Fixing the three errors you will hit</h2>
+<p>1. <strong>Tools never appear as mcp__ga4__*.</strong> Symptom: harness starts, no GA4 tools. Fix: confirm one entry per server with unique <code>serverName: ga4</code>, transport <code>stdio</code>, then restart the harness.</p>
+<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values in the entry with an absolute key path; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
+<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
+<h2>FAQ</h2>
+<p><strong>Does GA4 MCP for DeepSeek use dsh-mcp-client?</strong></p>
+<p>Yes. One <code>@deepseek-ai/dsh-mcp-client</code> entry per server in the patch layer, verified in DeepSeek Harness MCP docs today.</p>
+<p><strong>What are the tools named?</strong></p>
+<p><code>mcp__ga4__&lt;tool&gt;</code> for <code>serverName: ga4</code>. The name derives from <code>(serverName, rawName)</code>; a second live instance with the same <code>serverName</code> fails by design.</p>
+<p><strong>Does Grok get the same entry?</strong></p>
+<p>No. Batch 2 gives zero hours to grok rows (no MCP client proof, honest hold). This page covers DeepSeek Harness alone.</p>
+<p><strong>Why does the agent guess wrong field names?</strong></p>
+<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
+<p><strong>Is usage read-only and private?</strong></p>
+<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
+<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
+<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
+<h2>Freshness and machine links</h2>
+<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, DeepSeek Harness MCP plus boot-config docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
+<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
+<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
+<h2>Breadcrumb</h2>
+<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for DeepSeek (you are here).</p>
+</main>
+</body>
+</html>
