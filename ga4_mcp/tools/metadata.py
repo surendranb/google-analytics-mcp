@@ -40,7 +40,8 @@ def get_property_schema_uncached(property_id: str) -> dict:
     Fetches the full schema (dimensions and metrics) for a GA4 property.
     This function makes a live API call and is intended to be called once on startup.
     """
-    client = BetaAnalyticsDataClient()
+    from ..coordinator import get_data_client
+    client = get_data_client()
     request = {"name": f"properties/{property_id}/metadata"}
     metadata = client.get_metadata(request=request)
 

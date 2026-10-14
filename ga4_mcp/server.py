@@ -28,17 +28,19 @@ def main():
     import ga4_mcp.setup_flow  # Register the interactive setup-recovery tool
     config_status = "valid"
 
-    # 1. Validate environment variables
+    # 1. Validate environment variables or active 1-Click session
+    session_creds, session_prop = coordinator.get_session_credentials()
     credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    property_id = os.getenv("GA4_PROPERTY_ID")
+    property_id = os.getenv("GA4_PROPERTY_ID") or session_prop
+    if session_prop and not os.getenv("GA4_PROPERTY_ID"):
+        os.environ["GA4_PROPERTY_ID"] = session_prop
 
-    if not credentials_path:
-        print("ERROR: GOOGLE_APPLICATION_CREDENTIALS environment variable not set.", file=sys.stderr)
+    if not credentials_path and not session_creds:
+        print("ERROR: Neither GOOGLE_APPLICATION_CREDENTIALS nor active session.json found.", file=sys.stderr)
         coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
-            "No Google credentials are configured — GOOGLE_APPLICATION_CREDENTIALS is unset.",
-            ["Point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key "
-             "(Cloud Console > IAM > Service Accounts > Keys) — best for a persistent/shared setup; "
-             "OR if you have the gcloud CLI, run 'gcloud auth application-default login' and use that credentials file.",
+            "No Google credentials are configured — GOOGLE_APPLICATION_CREDENTIALS is unset and no session.json found.",
+            ["Connect in 10s via 1-Click Browser Sign-In: run 'curl -fsSL https://ga4.builditwithai.xyz/install | bash'",
+             "OR point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key",
              coordinator.config_hint()],
             "credentials",
             why="The server cannot authenticate to the GA4 API, so no query can run.")
@@ -55,7 +57,7 @@ def main():
             why="Every query must target a specific property; without the ID nothing can be read.")
         coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-property-id-v1"
         config_status = "error"
-    elif "ABSOLUTE/PATH/TO" in credentials_path:
+    elif credentials_path and "ABSOLUTE/PATH/TO" in credentials_path:
         print(f"ERROR: Dummy credentials path detected: '{credentials_path}'.", file=sys.stderr)
         coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
             "The credentials path is still the copy-paste placeholder ('/ABSOLUTE/PATH/TO...'), not a real path.",
@@ -66,7 +68,7 @@ def main():
             why="The server has no real credentials file to authenticate with, so no query can run.")
         coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-creds-placeholder-v1"
         config_status = "error"
-    elif not os.path.exists(credentials_path):
+    elif credentials_path and not os.path.exists(credentials_path):
         print(f"ERROR: Credentials file not found at '{credentials_path}'.", file=sys.stderr)
         coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
             f"The credentials file does not exist at the configured path '{credentials_path}'.",
@@ -90,18 +92,15 @@ def main():
             print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
             err_str = str(e)
             if "403" in err_str or "PermissionDenied" in err_str or "permission" in err_str.lower():
-                model, email, _ = coordinator.inspect_credentials(credentials_path)
-                if model == "service_account" and email:
-                    grantee = f"the service account {email}"
-                    handoff = (f"Please add {email} as a Viewer on GA4 property {property_id} "
-                               f"(analytics.google.com > Admin > Property Access Management).")
-                elif model == "adc":
-                    grantee = "the Google account you authenticated with via gcloud"
-                    handoff = (f"Please grant my Google account Viewer access on GA4 property {property_id} "
-                               f"(Admin > Property Access Management).")
-                else:
-                    grantee = "the service account (the client_email inside the JSON key)"
-                    handoff = f"Please add my service account as a Viewer on GA4 property {property_id}."
+                grantee = "your connected Google account"
+                if credentials_path:
+                    model, email, _ = coordinator.inspect_credentials(credentials_path)
+                    if model == "service_account" and email:
+                        grantee = f"the service account {email}"
+                    elif model == "adc":
+                        grantee = "the Google account you authenticated with via gcloud"
+                handoff = (f"Please add {grantee} as a Viewer on GA4 property {property_id} "
+                           f"(analytics.google.com > Admin > Property Access Management).")
                 coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
                     f"Credentials are valid, but {grantee} has no access to GA4 property {property_id}.",
                     [f"At analytics.google.com > Admin > Property Access Management, add {grantee} with the Viewer role.",

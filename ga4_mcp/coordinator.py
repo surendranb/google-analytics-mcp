@@ -10,6 +10,7 @@ import time
 import inspect
 import functools
 import contextvars
+import urllib.request
 
 from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
@@ -124,6 +125,60 @@ def inspect_credentials(path):
         return ("unreadable", None, False)
     except Exception:
         return ("unknown", None, False)
+
+
+_SESSION_ACCESS_TOKEN = None
+_SESSION_TOKEN_EXPIRY = 0.0
+
+
+def get_session_credentials():
+    """Load credentials from ~/.config/ga4-mcp/session.json via Cloudflare token gateway.
+    Returns (Credentials, property_id) or (None, None)."""
+    global _SESSION_ACCESS_TOKEN, _SESSION_TOKEN_EXPIRY
+    session_file = os.getenv("GA4_SESSION_FILE", os.path.expanduser("~/.config/ga4-mcp/session.json"))
+    if not os.path.exists(session_file):
+        return None, None
+    try:
+        with open(session_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        token = data.get("token")
+        gw_url = data.get("gateway_url", "https://ga4-gateway.reachsuren.workers.dev").rstrip("/")
+        prop_id = data.get("property_id")
+        if not token:
+            return None, None
+
+        now = time.time()
+        if not _SESSION_ACCESS_TOKEN or now >= _SESSION_TOKEN_EXPIRY:
+            req = urllib.request.Request(
+                f"{gw_url}/api/v1/token",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "User-Agent": f"google-analytics-mcp/{MCP_SERVER_VERSION}"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                token_data = json.loads(resp.read().decode("utf-8"))
+            _SESSION_ACCESS_TOKEN = token_data.get("access_token")
+            expires_in = int(token_data.get("expires_in", 3600))
+            _SESSION_TOKEN_EXPIRY = now + expires_in - 300  # refresh 5 min early
+
+        if not _SESSION_ACCESS_TOKEN:
+            return None, None
+
+        from google.oauth2.credentials import Credentials
+        return Credentials(token=_SESSION_ACCESS_TOKEN), prop_id
+    except Exception:
+        return None, None
+
+
+def get_data_client():
+    """Instantiate BetaAnalyticsDataClient with session credentials or default ADC."""
+    from google.analytics.data_v1beta import BetaAnalyticsDataClient
+    creds, _ = get_session_credentials()
+    if creds:
+        return BetaAnalyticsDataClient(credentials=creds)
+    return BetaAnalyticsDataClient()
+
 
 # S3: tool bodies note the version tag of the error brief they are about to
 # return (note_brief_version); the telemetry wrapper picks it up per call and
@@ -507,14 +562,17 @@ def reinitialize():
     import os
     from .tools import metadata, reporting
 
+    sess_creds, sess_prop = get_session_credentials()
     creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    prop = os.getenv("GA4_PROPERTY_ID")
-    if not creds:
+    prop = os.getenv("GA4_PROPERTY_ID") or sess_prop
+    if sess_prop and not os.getenv("GA4_PROPERTY_ID"):
+        os.environ["GA4_PROPERTY_ID"] = sess_prop
+
+    if not creds and not sess_creds:
         SERVER_INIT_ERROR = build_guided_init_error(
-            "No Google credentials are configured — GOOGLE_APPLICATION_CREDENTIALS is unset.",
-            ["Point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key "
-             "(Cloud Console > IAM > Service Accounts > Keys) — best for a persistent/shared setup; "
-             "OR if you have the gcloud CLI, run 'gcloud auth application-default login' and use that credentials file.",
+            "No Google credentials are configured — GOOGLE_APPLICATION_CREDENTIALS is unset and no active session found.",
+            ["Connect in 10s via 1-Click Browser Sign-In: run 'curl -fsSL https://ga4.builditwithai.xyz/install | bash'",
+             "OR point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key",
              config_hint(AGENT_NAME)],
             "credentials",
             why="The server cannot authenticate to the GA4 API, so no query can run.")
@@ -532,7 +590,7 @@ def reinitialize():
         SERVER_INIT_ERROR_CATEGORY = "InitError"
         SERVER_INIT_BRIEF_VERSION = "ga4-reinit-property-v1"
         return False, "property-id", "property id not set"
-    if not os.path.exists(creds):
+    if creds and not os.path.exists(creds):
         SERVER_INIT_ERROR = build_guided_init_error(
             f"The credentials file does not exist at the configured path '{creds}'.",
             ["Verify the file exists at that exact absolute path (check the filename, folder, and any typo).",
@@ -555,18 +613,15 @@ def reinitialize():
     except Exception as e:
         err = str(e)
         if "403" in err or "PermissionDenied" in err or "permission" in err.lower():
-            model, email, _ = inspect_credentials(creds)
-            if model == "service_account" and email:
-                grantee = f"the service account {email}"
-                handoff = (f"Please add {email} as a Viewer on GA4 property {prop} "
-                           f"(analytics.google.com > Admin > Property Access Management).")
-            elif model == "adc":
-                grantee = "the Google account you authenticated with via gcloud"
-                handoff = (f"Please grant my Google account Viewer access on GA4 property {prop} "
-                           f"(Admin > Property Access Management).")
-            else:
-                grantee = "the service account (the client_email inside the JSON key)"
-                handoff = f"Please add my service account as a Viewer on GA4 property {prop}."
+            grantee = "the connected Google user"
+            if creds:
+                model, email, _ = inspect_credentials(creds)
+                if model == "service_account" and email:
+                    grantee = f"the service account {email}"
+                elif model == "adc":
+                    grantee = "the Google account you authenticated with via gcloud"
+            handoff = (f"Please add {grantee} as a Viewer on GA4 property {prop} "
+                       f"(analytics.google.com > Admin > Property Access Management).")
             SERVER_INIT_ERROR = build_guided_init_error(
                 f"Credentials are valid, but {grantee} has no access to GA4 property {prop}.",
                 [f"At analytics.google.com > Admin > Property Access Management, add {grantee} with the Viewer role.",
