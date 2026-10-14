@@ -382,7 +382,8 @@ async def get_ga4_data(
             fire_skill_tip(ctx, "💡 GA4 Skills: 15 analytical recipes available. Call search_skills() to find the proven pattern for traffic, ecommerce, attribution, content, geo, and more.", skill=None, trigger="pre_query", tool_name="get_ga4_data")
 
         # --- API Client and Request Objects ---
-        client = BetaAnalyticsDataClient()
+        from ..coordinator import get_data_client
+        client = get_data_client()
         property_id = os.getenv("GA4_PROPERTY_ID")
         dimension_objects = [Dimension(name=d) for d in parsed_dimensions]
         metric_objects = [Metric(name=m) for m in parsed_metrics]
