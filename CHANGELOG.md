@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.6] - 2026-10-14
+
+### Added
+- **1-Click Browser OAuth Session Support**: Added native integration with the Cloudflare OAuth token gateway (`~/.config/ga4-mcp/session.json`). Agents can authenticate with GA4 without service accounts or `GOOGLE_APPLICATION_CREDENTIALS` (SUR-411).
+- **Automated Token Refresh**: Cached access tokens are refreshed automatically 5 minutes before expiration via the token gateway.
+- **Auto-Discovery Property Wiring**: MCP server automatically discovers and wires `GA4_PROPERTY_ID` from the session file if not explicitly set in the harness environment.
+
 ## [2.8.4] - 2026-07-29
 
 ### Improved
