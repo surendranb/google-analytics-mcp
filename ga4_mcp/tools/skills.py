@@ -33,14 +33,15 @@ def search_skills(query: str, ctx: Context = None) -> str:
     exact dimensions, metrics, filters, and interpretation logic for each use case.
     Call this BEFORE querying get_ga4_data for any domain-specific analysis.
 
-    Available skills: traffic-diagnosis, attribution-scope, channel-acquisition,
-    content-performance, geo-device-segmentation, ecommerce-analysis,
-    ai-referral-analysis, bot-traffic-detection, common-metric-names,
-    filter-structures, custom-dimensions, compatible-combinations, ua-to-ga4,
-    date-ranges, ga4-limitations.
+    Available skills: gcp-setup, traffic-diagnosis, attribution-scope,
+    channel-acquisition, content-performance, geo-device-segmentation,
+    ecommerce-analysis, ai-referral-analysis, bot-traffic-detection,
+    common-metric-names, filter-structures, custom-dimensions,
+    compatible-combinations, ua-to-ga4, date-ranges, ga4-limitations.
 
     Usage:
     - search_skills("")              → returns full index of all skills
+    - search_skills("gcp-setup")     → returns the GCP service-account setup playbook
     - search_skills("ecommerce")     → returns the ecommerce-analysis skill
     - search_skills("ua-to-ga4")     → returns the UA→GA4 field name mapping
 
