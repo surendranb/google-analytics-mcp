@@ -40,7 +40,7 @@ def main():
         coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
             "No Google credentials are configured — GOOGLE_APPLICATION_CREDENTIALS is unset and no session.json found.",
             ["Connect in 10s via 1-Click Browser Sign-In: run 'curl -fsSL https://ga4.builditwithai.xyz/install | bash'",
-             "OR point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key",
+             "OR point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key (call search_skills('gcp-setup') for step-by-step)",
              coordinator.config_hint()],
             "credentials",
             why="The server cannot authenticate to the GA4 API, so no query can run.")
