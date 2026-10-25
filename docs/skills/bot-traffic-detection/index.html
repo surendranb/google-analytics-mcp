@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bot Traffic Detection — GA4 MCP skill</title>
+<meta name="description" content="Identify and exclude bot, scraper, and spam sessions from GA4 data.">
+<link rel="canonical" href="https://ga4mcp.com/skills/bot-traffic-detection/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Bot Traffic Detection — GA4 MCP skill">
+<meta property="og:description" content="Identify and exclude bot, scraper, and spam sessions from GA4 data.">
+<meta property="og:url" content="https://ga4mcp.com/skills/bot-traffic-detection/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Bot Traffic Detection — GA4 MCP skill","description":"Identify and exclude bot, scraper, and spam sessions from GA4 data.","url":"https://ga4mcp.com/skills/bot-traffic-detection/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/" class="is-active">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/" class="is-active" aria-current="page">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>Bot Traffic Detection</h1><p>Identify and exclude bot, scraper, and spam sessions from GA4 data.</p>
+<h2>When to use</h2>
+<ul><li>Traffic has unexplained spikes that don't correlate with any activity</li><li>Bounce rate is 0% or near-100% across many sessions</li><li>Sessions show 0 engagement time but high pageview counts</li><li>Referrers look suspicious (random domains, unrecognised TLDs)</li><li>You want to establish a clean baseline before any analysis</li></ul>
+<h2>How to detect</h2>
+<h3>Step 1 — Check engagement time distribution</h3>
+<p>Query sessions with very low or zero engagement:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;, &quot;sessionSource&quot;, &quot;sessionMedium&quot;]
+metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;, &quot;bounceRate&quot;, &quot;screenPageViewsPerSession&quot;]
+date_range: last 7–14 days</code></pre></div>
+<p>Bot signals: <code>userEngagementDuration</code> near 0, <code>screenPageViewsPerSession</code> exactly 1, <code>bounceRate</code> at 1.0 (100%).</p>
+<h3>Step 2 — Inspect referrer sources</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionSource&quot;, &quot;sessionMedium&quot;, &quot;sessionDefaultChannelGroup&quot;]
+metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;, &quot;newUsers&quot;]
+dimension_filter: sessionMedium = &quot;referral&quot;</code></pre></div>
+<p>Flag sources where <code>userEngagementDuration / sessions</code> &lt; 2 seconds.</p>
+<h3>Step 3 — Check hostname</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;hostname&quot;]
+metrics: [&quot;sessions&quot;, &quot;screenPageViews&quot;]</code></pre></div>
+<p>Bot traffic often hits unexpected hostnames (staging domains, raw IPs, or hostnames you don't own). Filter to your known production hostnames.</p>
+<h3>Step 4 — Geographic anomalies</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;country&quot;, &quot;city&quot;, &quot;sessionSource&quot;]
+metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;]
+dimension_filter: country = [countries with no expected traffic]</code></pre></div>
+<p>Clusters of sessions from unexpected countries with 0 engagement = bot signal.</p>
+<h2>Exclusion approach</h2>
+<p>GA4 does not have a native bot filter toggle beyond the automatic Google filter. To exclude suspected bot traffic from your analysis, add a dimension filter:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimension_filter: {
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;sessionDefaultChannelGroup&quot;,
+    &quot;stringFilter&quot;: {&quot;matchType&quot;: &quot;EXACT&quot;, &quot;value&quot;: &quot;Direct&quot;}
+  }
+}</code></pre></div>
+<p>…combined with a metric filter on <code>userEngagementDuration &gt; 0</code>.</p>
+<p>Note: GA4 already filters known bots automatically. What remains are unknown/new bots and scrapers that mimic real browser behaviour.</p>
+<h2>What to report</h2>
+<ul><li>Total suspicious sessions as % of all sessions</li><li>Top suspicious sources with their engagement metrics</li><li>Whether the pattern is new (spike) or chronic (baseline contamination)</li></ul></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

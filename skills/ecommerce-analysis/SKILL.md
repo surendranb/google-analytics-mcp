@@ -48,7 +48,7 @@ order_by: ecommercePurchases DESC
 ```
 
 Drop-off between stages = `1 - (next_stage / current_stage)`.
-The biggest drop-off is the highest-leverage fix.
+Fix the biggest drop-off first.
 
 ## Step 3 — Top products
 ```

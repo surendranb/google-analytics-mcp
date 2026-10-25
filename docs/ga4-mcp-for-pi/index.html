@@ -2,31 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for Pi: Setup, Skills and First Query</title>
-<meta name="description" content="Connect GA4 MCP to Pi with verified config blocks.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP for Pi</title>
+<meta name="description" content="Add the GA4 MCP server to Pi with one mcpServers entry in the agent directory, or with pi mcp add. Tools appear as mcp__ga4__get_ga4_data.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-pi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP for Pi">
+<meta property="og:description" content="Add the GA4 MCP server to Pi with one mcpServers entry in the agent directory, or with pi mcp add. Tools appear as mcp__ga4__get_ga4_data.">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-pi/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for Pi","description":"Add the GA4 MCP server to Pi with one mcpServers entry in the agent directory, or with pi mcp add. Tools appear as mcp__ga4__get_ga4_data.","url":"https://ga4mcp.com/ga4-mcp-for-pi/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for Pi: Setup, Skills and First Query</h1>
-<p>angle: One exact Pi mcp.json block for GA4, so the agent-dir file stops getting confused with Claude paths.</p>
-<p>I query GA4 from inside Pi with the same server I run in OpenCode. GA4 MCP for Pi gives you that: one entry in the agent-dir <code>mcp.json</code>, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
-<li>- Pi path verified today: Pi reads <code>&lt;agent-dir&gt;/mcp.json</code> with <code>mcpServers</code> command/args; stdio, Streamable HTTP, SSE shapes; <code>/codemcp</code> manages servers (pi-codemcp docs).</li>
-<li>- Native note verified today: Pi is a minimal terminal harness with MCP server integration; <code>pi-mcp</code> bridges configured stdio/HTTP servers into Pi tools.</li>
-<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
-<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
-</ul>
-<h2>Configuring Pi to launch the server</h2>
-<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
-<p>1. Open your agent-dir <code>mcp.json</code> and add:</p>
-<pre>
-{
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/" class="is-active" aria-current="page">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>GA4 MCP for Pi</h1>
+<p>Pi reads MCP servers from a JSON file beside its agent configuration, and also takes them from the command line. Two files matter, and the project one only counts after you trust the project.</p>
+<h2>The entry</h2>
+<p>In your agent directory's <code>mcp.json</code>:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
   &quot;mcpServers&quot;: {
-    &quot;google-analytics&quot;: {
+    &quot;ga4&quot;: {
       &quot;command&quot;: &quot;uvx&quot;,
       &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
       &quot;env&quot;: {
@@ -35,57 +53,47 @@
       }
     }
   }
-}
-</pre>
-<p>A root-level server map without the <code>mcpServers</code> wrapper is also accepted; I show the wrapped shape because it ports cleanly from Claude configs.</p>
-<p>2. For stdio servers, Pi passes a small safe base plus allow-listed vars (<code>MY_PI_CHILD_ENV_ALLOWLIST</code> / <code>MY_PI_MCP_ENV_ALLOWLIST</code>) plus explicit <code>env</code> above. Prefer explicit <code>env</code> for the two GA4 values.</p>
-<p>3. Open <code>/codemcp</code> in Pi to confirm the server, or restart Pi and check the tool list.</p>
-<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
-<h2>Skills worth loading first</h2>
-<p>| Skill slug | What you use it for in Pi |</p>
-<p>|---|---|</p>
-<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
-<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
-<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
-<p>| <code>compatible-combinations</code> | Your dimensions and metrics returned a 400 incompatibility |</p>
-<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
-<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
-<h2>Running your first query</h2>
-<p>Ask: &quot;What were my top channels last week?&quot;</p>
-<p>Your agent should call:</p>
-<pre>
-get_ga4_data(
-  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
-  metrics=[&quot;sessions&quot;],
-  date_range_start=&quot;7daysAgo&quot;,
-  date_range_end=&quot;yesterday&quot;,
-  intent=&quot;which channels drove sessions last week&quot;
-)
-</pre>
-<p>Read the period figure from <code>totals</code>. GA4 computes that block; hand sums drift and I stopped doing them.</p>
-<h2>Fixing the three errors you will hit</h2>
-<p>1. <strong>Server missing after edit.</strong> Symptom: <code>/codemcp</code> omits google-analytics. Fix: confirm the file is the agent-dir <code>mcp.json</code> Pi reads, valid JSON, then restart Pi and trust the project where prompted.</p>
-<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values with an absolute key path and allow-list coverage; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
-<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>filter-structures</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
-<h2>FAQ</h2>
-<p><strong>Does GA4 MCP for Pi use mcp.json?</strong></p>
-<p>Yes. Agent-dir <code>mcp.json</code> with the <code>mcpServers</code> block above, verified in pi-codemcp docs today.</p>
-<p><strong>Do I need a Pi extension for MCP?</strong></p>
-<p>No for the server entry. <code>pi-mcp</code> and <code>pi-codemcp</code> add discovery and code-mode surfaces; the block above is the wiring either way.</p>
-<p><strong>Does the installer cover Pi?</strong></p>
-<p>The site auto-configure list does not name Pi. I show the hand block because it is exact and auditable.</p>
-<p><strong>Why does the agent guess wrong field names?</strong></p>
-<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
-<p><strong>Is usage read-only and private?</strong></p>
-<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
-<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
-<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, Pi package plus pi-codemcp MCP docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
-<h2>Breadcrumb</h2>
-<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Pi (you are here).</p>
-</main>
+}</code></pre></div>
+<p>Two locations, matching Pi's own wording of <code>&lt;agent-dir&gt;/mcp.json</code>:</p>
+<div class="tw"><table><thead><tr><th>Scope</th><th>Path</th></tr></thead><tbody><tr><td>User</td><td><code>~/.pi/agent/mcp.json</code></td></tr><tr><td>Project</td><td><code>.pi/mcp.json</code> in the project root</td></tr></tbody></table></div>
+<p>The project file is only read once Pi trusts that project. If the server works in one repository and not another, trust is the reason.</p>
+<h2>From the command line</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>pi mcp add ga4 --command uvx --arg google-analytics-mcp --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json</code></pre></div>
+<p><code>pi mcp</code> also lists and removes servers. Note that <code>--arg</code> repeats once per argument rather than taking a single string.</p>
+<div class="note"><span class="note__label">Note</span><p>there is no <code>/codemcp</code> command and no <code>pi-mcp</code> package. An earlier version of this page named both; neither exists. The interactive command is <code>/mcp</code>, and <code>codemode</code> is a tool-exposure mode rather than a slash command.</p></div>
+<h2>Managing at runtime</h2>
+<p>Inside a Pi session, <code>/mcp</code> is the interactive surface: inspect connected servers, reconnect one, change how its tools are exposed, or disable it for the session.</p>
+<p>That is the fastest way to check whether the entry loaded at all. A server listed with zero tools means the process launched and exited — run <code>uvx google-analytics-mcp</code> in a terminal to see why.</p>
+<h2>Tool names</h2>
+<p>Pi prefixes MCP tools as <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>, so with the server named <code>ga4</code> above the agent calls <code>mcp__ga4__get_ga4_data</code>. Naming the server <code>ga4</code> rather than <code>google-analytics</code> keeps the tool names short enough to read in a transcript.</p>
+<h2>Verify</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>Then <code>/mcp</code> to confirm the server is connected rather than merely configured.</p>
+<h2>Next</h2>
+<p><a href="/setup/">Install</a> for the two values, <a href="/skills/">skills</a> for what to load before an analytical question.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

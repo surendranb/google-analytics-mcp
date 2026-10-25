@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom Dimensions and Event Parameters — GA4 MCP skill</title>
+<meta name="description" content="How to find and query property-specific custom dimensions in GA4.">
+<link rel="canonical" href="https://ga4mcp.com/skills/custom-dimensions/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Custom Dimensions and Event Parameters — GA4 MCP skill">
+<meta property="og:description" content="How to find and query property-specific custom dimensions in GA4.">
+<meta property="og:url" content="https://ga4mcp.com/skills/custom-dimensions/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Custom Dimensions and Event Parameters — GA4 MCP skill","description":"How to find and query property-specific custom dimensions in GA4.","url":"https://ga4mcp.com/skills/custom-dimensions/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/" class="is-active">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/" class="is-active" aria-current="page">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>Custom Dimensions and Event Parameters</h1><p>How to find and query property-specific custom dimensions in GA4.</p>
+<h2>The core rule</h2>
+<p>Custom dimensions are <strong>property-specific</strong>. Never guess their names. Always call <code>search_schema(&quot;custom&quot;)</code> first — it will show every registered custom dimension for this exact property.</p>
+<h2>Two valid syntaxes</h2>
+<p>GA4 supports two ways to access custom data:</p>
+<p><strong>Registered custom dimensions</strong> — appear in the schema by their registered name. Find them with <code>search_schema</code>. Use the name exactly as returned.</p>
+<p><strong>Unregistered event parameters</strong> — accessed inline with:</p>
+<ul><li><code>customEvent:parameter_name</code> for event-scoped parameters</li><li><code>customUser:property_name</code> for user-scoped properties</li></ul>
+<p>The <code>parameter_name</code> must exactly match what your tracking code sends. If the property has not collected this parameter, the API returns an error.</p>
+<h2>Why guessing fails</h2>
+<p>The model cannot know what custom parameters a GA4 property uses — they are defined by the site's own tracking code and GA4 Admin settings. <code>customEvent:page_category</code> works on one property and fails on another depending on whether that property's tracking sends a <code>page_category</code> parameter.</p>
+<h2>Workflow</h2>
+<ol><li>Call <code>search_schema(&quot;custom&quot;)</code> — lists all registered custom dimensions.</li><li>If the one you need appears, use its exact API name.</li><li>If it does not appear, ask the user what event parameter name their</li></ol>
+<p>   tracking code uses, then query with <code>customEvent:that_name</code>.</p>
+<ol><li>If the query still fails, the parameter is not collected by this property.</li></ol>
+<h2>Scope matters</h2>
+<div class="tw"><table><thead><tr><th>Scope</th><th>Syntax</th><th>Use for</th></tr></thead><tbody><tr><td>Event</td><td><code>customEvent:name</code></td><td>per-hit data (page category, product id, etc.)</td></tr><tr><td>User</td><td><code>customUser:name</code></td><td>user attributes (plan, cohort, customer type)</td></tr><tr><td>Session</td><td>registered name only</td><td>session-level custom groupings</td></tr></tbody></table></div>
+<p>Mixing scopes can cause incompatibility errors — see the <code>compatible-combinations</code> skill.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

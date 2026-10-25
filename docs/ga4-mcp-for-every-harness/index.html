@@ -2,94 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for Every Harness</title>
-<meta name="description" content="One verified GA4 MCP install path for Claude, Cursor, Codex, and any stdio MCP client.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP client setup — the config each one expects</title>
+<meta name="description" content="Eleven client guides, each with the config shape that client documents. MCP is not portable: four of these use a different root key, so a snippet from one…">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-every-harness/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP client setup — the config each one expects">
+<meta property="og:description" content="Eleven client guides, each with the config shape that client documents. MCP is not portable: four of these use a different root key, so a snippet from one…">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-every-harness/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP client setup — the config each one expects","description":"Eleven client guides, each with the config shape that client documents. MCP is not portable: four of these use a different root key, so a snippet from one…","url":"https://ga4mcp.com/ga4-mcp-for-every-harness/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for Every Harness</h1>
-<p>I built this server so I could ask plain questions of GA4 from inside my agent and get numbers I can trust. GA4 MCP for every harness gives you that: one MCP server that talks to your GA4 property from Claude, Cursor, Codex, Gemini CLI, and any client that launches a local stdio server.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
-<li>Installer auto-configures Claude Desktop, Claude Code, Cursor, VS Code (Cline, Roo Code), Continue.dev, OpenCode, Windsurf, Zed, and Google Antigravity.</li>
-<li>Repo: https://github.com/surendranb/google-analytics-mcp (242 stars, 48 forks at fetch today). Docs: https://ga4mcp.com/setup/, skills index https://ga4mcp.com/skills/.</li>
-<li>Read-only. Queries run from your machine to the GA4 Data API. Telemetry is anonymous diagnostics only; <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code> stops it.</li>
-</ul>
-<h2>Getting your client connected</h2>
-<p>Prerequisites: a numeric GA4 property ID (Admin, Property details, not the <code>G-</code> ID), plus either a service-account JSON key or <code>gcloud auth application-default login</code>.</p>
-<ol>
-<li>Set the two values your server needs:<pre>export GA4_PROPERTY_ID="123456789"
-export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</pre></li>
-<li>Run the installer, which writes the client entry for you:<pre>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</pre></li>
-<li>Restart your client and ask for the property list to verify: "List my GA4 properties, then show sessions by channel for the last 7 days."</li>
-</ol>
-<p>You have succeeded when the agent calls <code>list_properties</code> and <code>get_ga4_data</code> without a setup error.</p>
-<p>Manual fallback when you prefer to wire the entry by hand:</p>
-<pre>{
-  "mcpServers": {
-    "google-analytics": {
-      "command": "uvx",
-      "args": ["google-analytics-mcp"],
-      "env": {
-        "GA4_PROPERTY_ID": "123456789",
-        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
-      }
-    }
-  }
-}</pre>
-<h2>Skills worth loading first</h2>
-<p>traffic-diagnosis: You saw a spike or drop and want the ordered checks. channel-acquisition: You want sessions and users split by source, medium, channel group. ai-referral-analysis: You want traffic from ChatGPT, Claude, Perplexity, Gemini, Copilot split out. common-metric-names: Your field name failed and you want the working GA4 name. compatible-combinations: Your dimensions and metrics returned a 400 incompatibility.</p>
-<p>Full set of 15 lives at https://ga4mcp.com/skills/ and loads via search_skills.</p>
-<h2>Running your first query</h2>
-<p>Ask: "What were my top channels last week?" Your agent should call get_ga4_data with dimensions ["sessionDefaultChannelGroup"], metrics ["sessions"], date_range_start "7daysAgo", date_range_end "yesterday", intent "which channels drove sessions last week".</p>
-<p>Read the period figure from the totals block. GA4 computes that block; don't sum the rows by hand. The site states this pattern directly, and it avoids the row-sum mistakes I kept seeing.</p>
-<h2>Fixing the three errors you will hit</h2>
-<ol>
-<li>Missing property ID or credentials. Symptom: setup error on boot. Fix: set GA4_PROPERTY_ID and GOOGLE_APPLICATION_CREDENTIALS as above, restart the client, or let setup_ga4_access collect them mid-session where your client supports prompts.</li>
-<li>403 permission error. Symptom: credentials load but GA4 refuses. Fix: add the service-account client_email as Viewer on the GA4 property (Admin, Property Access Management). For expired local ADC (503 reauthentication needed), run gcloud auth application-default login. Guide: get_troubleshooting_guide(topic="iam").</li>
-<li>Invalid dimension or metric. Symptom: 400 naming error. Fix: call search_schema, or load common-metric-names and compatible-combinations before retrying. Guide: get_troubleshooting_guide(topic="schema").</li>
-</ol>
-<h2>FAQ</h2>
-<p><strong>What does GA4 MCP for every harness actually cover?</strong> The stdio server plus the installer entries above. If your client launches a local MCP server, it can run this one.</p>
-<p><strong>Which harness should I pick: Claude, Cursor, or Codex?</strong> Pick the client you already work in. The query path is the same; only the config file differs. Claude, Cursor, and Codex pages under this hub show each exact block.</p>
-<p><strong>Plugin or MCP server: which do I need?</strong> The MCP server answers questions. A plugin bundles that server for one harness with preset skills. Start with the server; add a plugin when you want the bundle. The plugins hub at /ga4-plugins/ lists each bundle with its version.</p>
-<p><strong>Does it write to my GA4 property?</strong> No. Every tool is read-only. It reads metadata and reports; it doesn't change configuration.</p>
-<p><strong>What telemetry does it send, and how do I stop it?</strong> Anonymous tool, latency, and error-code counts only. No queries, credentials, or analytics data. Set DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1.</p>
-<p><strong>Where do I go when the query fails?</strong> Run get_troubleshooting_guide, then search_schema for the field name. The setup mirror lives at https://ga4mcp.com/setup/.</p>
-<h2>Harness pages under this hub</h2>
-<ul>
-<li><a href="/ga4-mcp-for-claude/">GA4 MCP for Claude</a></li>
-<li><a href="/ga4-mcp-for-codex/">GA4 MCP for Codex</a></li>
-<li><a href="/ga4-mcp-for-cursor/">GA4 MCP for Cursor</a></li>
-<li><a href="/ga4-plugin-for-claude-code/">GA4 Plugin for Claude Code</a></li>
-<li><a href="/ga4-plugin-for-gemini/">GA4 Plugin for Gemini</a></li>
-<li><a href="/ga4-plugin-for-harness/">GA4 Plugin for Harness</a></li>
-<li><a href="/ga4-plugins/">GA4 Plugins</a></li>
-<li><a href="/ga4-mcp-for-antigravity-ide/">GA4 MCP for Antigravity IDE</a></li>
-<li><a href="/ga4-mcp-for-antigravity/">GA4 MCP for Antigravity</a></li>
-<li><a href="/ga4-mcp-for-copilot/">GA4 MCP for Copilot</a></li>
-<li><a href="/ga4-mcp-for-deepseek/">GA4 MCP for DeepSeek</a></li>
-<li><a href="/ga4-mcp-for-devin-desktop/">GA4 MCP for Devin Desktop</a></li>
-<li><a href="/ga4-mcp-for-gemini/">GA4 MCP for Gemini</a></li>
-<li><a href="/ga4-mcp-for-goose/">GA4 MCP for Goose</a></li>
-<li><a href="/ga4-mcp-for-hermes/">GA4 MCP for Hermes</a></li>
-<li><a href="/ga4-mcp-for-kiro/">GA4 MCP for Kiro</a></li>
-<li><a href="/ga4-mcp-for-openclaw/">GA4 MCP for OpenClaw</a></li>
-<li><a href="/ga4-mcp-for-opencode/">GA4 MCP for OpenCode</a></li>
-<li><a href="/ga4-mcp-for-pi/">GA4 MCP for Pi</a></li>
-<li><a href="/ga4-mcp-for-vscode/">GA4 MCP for VS Code</a></li>
-<li><a href="/ga4-mcp-for-zcode/">GA4 MCP for ZCode</a></li>
-<li><a href="/ga4-mcp-for-zed/">GA4 MCP for Zed</a></li>
-</ul>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, and repo raw files named in sibling pages. Repo main pyproject.toml read 2.11.5 today, ahead of the site's 2.11.4 label; I quote the site label for installs. GSC demand figures from the brief were out of scope for this writer run and don't appear above.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json, https://ga4mcp.com/sitemap.xml.</p>
-<h2>Breadcrumb</h2>
-<p>Home https://ga4mcp.com/ / GA4 MCP for Every Harness (you are here) / Claude (/ga4-mcp-for-claude/) / Cursor (/ga4-mcp-for-cursor/) / Codex (/ga4-mcp-for-codex/) / Plugins (/ga4-plugins/).</p>
-</main>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/" class="is-active" aria-current="page">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>Every client, and the config it actually wants</h1>
+<p>Most MCP installation guides give you one JSON block and tell you it works everywhere. It does not. Across the seventeen clients below there are six different root keys, four different names for the environment object, and four file formats.</p>
+<p>Copying a Claude Desktop snippet into Hermes produces a file that parses and registers no servers. Copying one into OpenCode produces a server that never appears. Neither reports an error.</p>
+<div class="tw"><table><thead><tr><th>What varies</th><th>Values across these clients</th></tr></thead><tbody><tr><td>Root key</td><td><code>mcpServers</code> (most clients), <code>servers</code> (VS Code), <code>context_servers</code> (Zed), <code>mcp</code> (OpenCode), <code>mcp_servers</code> (Hermes), <code>mcp.servers</code> (OpenClaw, ZCode)</td></tr><tr><td>Environment key</td><td><code>env</code> (most), <code>envs</code> (Goose), <code>environment</code> (OpenCode), <code>env</code> plus <code>env_vars</code> (Codex)</td></tr><tr><td>Command shape</td><td>String everywhere except OpenCode, which takes an array</td></tr><tr><td>File format</td><td>JSON (most), TOML (Codex), YAML (Goose, Hermes, DeepSeek)</td></tr></tbody></table></div>
+<p>Every block on the pages below is quoted from that vendor's own documentation, with the source page named. Where a vendor has not published a path, this site says so instead of inventing one.</p>
+<div class="tw"><table><thead><tr><th>Client</th><th>What the page covers</th></tr></thead><tbody><tr><td><a href="/ga4-mcp-for-claude/">Claude</a></td><td>Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Both configs quoted from Anthropic's documentation.</td></tr><tr><td><a href="/ga4-mcp-for-cursor/">Cursor</a></td><td>Add the GA4 MCP server to Cursor with a project or global mcp.json entry. Includes the type-field inconsistency Cursor's own docs carry.</td></tr><tr><td><a href="/ga4-mcp-for-vscode/">VS Code</a></td><td>The GA4 MCP server in VS Code agent mode. Note the root key: .vscode/mcp.json uses servers, while .mcp.json uses mcpServers. Copying between them silently fails.</td></tr><tr><td><a href="/ga4-mcp-for-codex/">Codex</a></td><td>Add the GA4 MCP server to OpenAI Codex. Codex uses TOML, not JSON, and splits environment handling into env and env_vars — the two are not interchangeable.</td></tr><tr><td><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></td><td>Add the GA4 MCP server to Gemini CLI. The scope flag defaults to project, so the entry lands in .gemini/settings.json and not your home directory.</td></tr><tr><td><a href="/ga4-mcp-for-antigravity/">Antigravity</a></td><td>Add the GA4 MCP server to Antigravity, App, IDE or CLI. All three read the same mcp_config.json schema, and the App registers servers through the settings UI.</td></tr><tr><td><a href="/ga4-mcp-for-zed/">Zed</a></td><td>Add the GA4 MCP server to Zed. Zed calls them context servers, not mcpServers, and the entry lives in Zed's own settings file.</td></tr><tr><td><a href="/ga4-mcp-for-goose/">Goose</a></td><td>Add the GA4 MCP server to Goose. Goose uses YAML, calls the command cmd, and calls the environment block envs. All three differ from the usual shape.</td></tr><tr><td><a href="/ga4-mcp-for-kiro/">Kiro</a></td><td>Add the GA4 MCP server to Kiro. Kiro hot-reloads mcp.json on save, so no restart is needed, and it carries per-tool approval settings the other clients do not.</td></tr><tr><td><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></td><td>Add the GA4 MCP server to Devin Desktop, the client formerly named Windsurf. Includes the config path conflict between two live vendor pages.</td></tr><tr><td><a href="/ga4-mcp-for-opencode/">OpenCode</a></td><td>Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.</td></tr><tr><td><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></td><td>Add the GA4 MCP server to DeepSeek Harness with one entry in your patch layer. Tools then appear as mcp__ga4__get_ga4_data inside the session.</td></tr><tr><td><a href="/ga4-mcp-for-pi/">Pi</a></td><td>Add the GA4 MCP server to Pi with one mcpServers entry in the agent directory, or with pi mcp add. Tools appear as mcp__ga4__get_ga4_data.</td></tr><tr><td><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></td><td>Add the GA4 MCP server to OpenClaw with openclaw mcp add, stored under mcp.servers in ~/.openclaw/openclaw.json. No plugin needed.</td></tr><tr><td><a href="/ga4-mcp-for-hermes/">Hermes</a></td><td>Add the GA4 MCP server to Hermes Agent. The root key is mcp_servers in YAML, not mcpServers in JSON, so a Claude snippet silently adds nothing.</td></tr><tr><td><a href="/ga4-mcp-for-zcode/">ZCode</a></td><td>Add the GA4 MCP server to ZCode. Servers live under mcp.servers in ~/.zcode/cli/config.json, and a competing .agents/mcp.json is skipped entirely, not merged.</td></tr><tr><td><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></td><td>The Antigravity IDE uses the same mcp_config.json schema as the App and CLI. Manage it from the agent panel's MCP Servers screen, or edit the file directly.</td></tr></tbody></table></div>
+<h2>If your client is not here</h2>
+<p>It probably still works. The server speaks MCP over stdio, which is the transport every client here uses. Start from the shape used by the client closest to yours, run <code>uvx google-analytics-mcp</code> in a terminal to confirm the server itself is fine, and then find where your client keeps its server list.</p>
+<p>The server itself is client-agnostic. It speaks MCP over stdio. The only thing that changes per client is where the entry lives and what the surrounding keys are called.</p>
+<h2>Next</h2>
+<p>Whichever client you pick, the credentials and verification steps are the same. Read <a href="/setup/">install</a> for those, then <a href="/iam/">permissions</a> when the first query returns a 403.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

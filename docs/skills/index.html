@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 skills — sixteen analytical recipes for your agent</title>
+<meta name="description" content="Sixteen playbooks that ship inside the GA4 MCP server. Each one fixes the dimensions, metrics and interpretation rules for one job, and loads only when…">
+<link rel="canonical" href="https://ga4mcp.com/skills/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 skills — sixteen analytical recipes for your agent">
+<meta property="og:description" content="Sixteen playbooks that ship inside the GA4 MCP server. Each one fixes the dimensions, metrics and interpretation rules for one job, and loads only when…">
+<meta property="og:url" content="https://ga4mcp.com/skills/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 skills — sixteen analytical recipes for your agent","description":"Sixteen playbooks that ship inside the GA4 MCP server. Each one fixes the dimensions, metrics and interpretation rules for one job, and loads only when…","url":"https://ga4mcp.com/skills/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/" class="is-active">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/" class="is-active" aria-current="page">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>Skills</h1>
+<p>A skill is a short playbook that ships inside the package. The agent calls <code>search_skills</code> with a keyword, gets one back as markdown, and follows it. Nothing is fetched over the network, so it works with no API access and no credentials.</p>
+<p>The point is to replace improvisation. Ask a general model why traffic dropped and it will invent a method. Ask it to run <code>traffic-diagnosis</code> and it runs the same six checks every time, in the same order, because the method is data instead of a guess.</p>
+<h2>How the agent uses them</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>search_skills(&quot;drop&quot;)</code></pre></div>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>search_skills(&quot;traffic-diagnosis&quot;)</code></pre></div>
+<p>An empty query returns the index. The full text of a skill arrives as markdown, and the agent uses the dimensions and metrics named inside it rather than choosing its own.</p>
+<h2>When to load one</h2>
+<p>Before any question that involves interpretation, not just retrieval. &quot;How many sessions yesterday&quot; needs no skill. &quot;Why did sessions drop&quot;, &quot;which channel is worth more&quot;, &quot;is this bot traffic&quot; all do.</p>
+<h3>Set it up</h3>
+<div class="tw"><table><tbody><tr><td><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></td><td>Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.</td></tr></tbody></table></div>
+<h3>Diagnose a change</h3>
+<div class="tw"><table><tbody><tr><td><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></td><td>Systematically diagnose why traffic changed — spike, drop, or shift in mix. Follow these steps in order. Each step narrows the hypothesis.</td></tr><tr><td><a href="/skills/content-performance/">Content Performance Analysis</a></td><td>Identify top-performing pages, find underperforming content, and understand engagement patterns across your site.</td></tr><tr><td><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></td><td>Identify and exclude bot, scraper, and spam sessions from GA4 data.</td></tr><tr><td><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></td><td>Break down user behaviour by country, city, device category, and OS to understand regional patterns and optimise for your key markets.</td></tr><tr><td><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></td><td>Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.</td></tr></tbody></table></div>
+<h3>Measure a channel</h3>
+<div class="tw"><table><tbody><tr><td><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></td><td>Revenue, conversion rate, AOV, and funnel drop-off using GA4 ecommerce events.</td></tr><tr><td><a href="/skills/attribution-scope/">Attribution Scope</a></td><td>GA4 has three distinct attribution scopes. Using the wrong scope gives misleading results. Choose based on the question you are answering.</td></tr><tr><td><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></td><td>Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.</td></tr><tr><td><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></td><td>How to find and query property-specific custom dimensions in GA4.</td></tr></tbody></table></div>
+<h3>Get the query right</h3>
+<div class="tw"><table><tbody><tr><td><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></td><td>The correct GA4 Data API names for fields models most often get wrong. Use these before calling `get_ga4_data` — wrong names return a hard error.</td></tr><tr><td><a href="/skills/filter-structures/">Filter Structures</a></td><td>The correct shape for `dimension_filter` in `get_ga4_data`. Wrong structure returns an \&quot;Invalid dimension_filter\&quot; error. Use these templates.</td></tr><tr><td><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></td><td>GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: \&quot;The request's dimensions &amp; metrics are incompatible.\</td></tr><tr><td><a href="/skills/date-ranges/">Date Ranges</a></td><td>How to specify date ranges in `get_ga4_data` and how to structure period-over-period comparisons.</td></tr><tr><td><a href="/skills/ga4-limitations/">GA4 API Limitations</a></td><td>What this MCP **cannot** do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.</td></tr><tr><td><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></td><td>Universal Analytics (UA) and GA4 use different names for equivalent concepts. UA was sunset on 2023-07-01; models trained before or around then guess UA field names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed \&quot;conversions\&quot; to \&quot;key events\&quot; (see the conversions rows below). If a name feels obviously right but returns \&quot;Invalid metric/dimension\&quot;, assume your training predates the change and verify with `search_schema`. This skill gives the correct GA4 Data API name for every common UA metric and dimension.</td></tr></tbody></table></div>
+<h2>Next</h2>
+<p><a href="/schema/">Query shapes</a> covers the filter syntax these skills assume. If a skill names a metric your property does not have, <code>search_schema</code> will tell you what that property calls it.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

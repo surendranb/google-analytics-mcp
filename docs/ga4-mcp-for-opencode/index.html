@@ -2,29 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for OpenCode: Setup, Skills and First Query</title>
-<meta name="description" content="Connect GA4 MCP to OpenCode with verified config blocks.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP for OpenCode</title>
+<meta name="description" content="Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-opencode/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP for OpenCode">
+<meta property="og:description" content="Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-opencode/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for OpenCode","description":"Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.","url":"https://ga4mcp.com/ga4-mcp-for-opencode/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for OpenCode: Setup, Skills and First Query</h1>
-<p>angle: One exact opencode.jsonc block for OpenCode, so local stdio setup stops getting guessed.</p>
-<p>I query GA4 from inside OpenCode with the same server I run in Claude and Cursor. GA4 MCP for OpenCode gives you that: one stdio entry in <code>opencode.jsonc</code>, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
-<li>- Installer auto-configures OpenCode among Claude Desktop, Claude Code, Cursor, VS Code (Cline, Roo Code), Continue.dev, Windsurf, Zed, and Google Antigravity (site Works with list, verified today).</li>
-<li>- OpenCode path verified today: <code>opencode.jsonc</code> under <code>mcp</code> with local type and <code>command</code> array; <code>opencode mcp list</code> and <code>opencode mcp auth list</code> manage entries (opencode.ai docs).</li>
-<li>- Repo: https://github.com/surendranb/google-analytics-mcp. Main <code>pyproject.toml</code> reads 2.11.5 today, ahead of the site 2.11.4 label; I quote the site label for installs.</li>
-<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
-</ul>
-<h2>Configuring OpenCode to launch the server</h2>
-<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
-<p>1. Open your <code>opencode.jsonc</code> (global <code>~/.config/opencode/opencode.json</code> or project root) and add the server under <code>mcp</code>:</p>
-<pre>
-{
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/" class="is-active" aria-current="page">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>GA4 MCP for OpenCode</h1>
+<p>OpenCode's MCP config is the furthest from the Claude Desktop baseline in this whole set. Four things are named differently, and a standard snippet will not load.</p>
+<h2>The entry</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
   &quot;$schema&quot;: &quot;https://opencode.ai/config.json&quot;,
   &quot;mcp&quot;: {
     &quot;google-analytics&quot;: {
@@ -37,62 +54,58 @@
       }
     }
   }
-}
-</pre>
-<p>2. Prefer the hands-free path? Run the installer, which writes the OpenCode entry for you:</p>
-<pre>
-curl -fsSL &quot;https://ga4.builditwithai.xyz/install&quot; | bash
-</pre>
-<p>3. Confirm the entry loads:</p>
-<pre>
-opencode mcp list
-</pre>
-<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
-<h2>Skills worth loading first</h2>
-<p>| Skill slug | What you use it for in OpenCode |</p>
-<p>|---|---|</p>
-<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
-<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
-<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
-<p>| <code>compatible-combinations</code> | Your dimensions and metrics returned a 400 incompatibility |</p>
-<p>| <code>filter-structures</code> | Your dimension filter returned an invalid-filter error |</p>
-<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
-<h2>Running your first query</h2>
-<p>Ask: &quot;What were my top channels last week?&quot;</p>
-<p>Your agent should call:</p>
-<pre>
-get_ga4_data(
-  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
-  metrics=[&quot;sessions&quot;],
-  date_range_start=&quot;7daysAgo&quot;,
-  date_range_end=&quot;yesterday&quot;,
-  intent=&quot;which channels drove sessions last week&quot;
-)
-</pre>
-<p>Read the period figure from the <code>totals</code> block. GA4 computes that block; I stopped summing date rows by hand after watching agents drift on the math.</p>
-<h2>Fixing the three errors you will hit</h2>
-<p>1. <strong>Server missing from <code>opencode mcp list</code>.</strong> Symptom: entry absent after edit. Fix: validate the JSONC parses, confirm the block sits under <code>mcp</code> with <code>type</code> local, restart OpenCode.</p>
-<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm <code>GA4_PROPERTY_ID</code> is numeric and <code>GOOGLE_APPLICATION_CREDENTIALS</code> is an absolute path in <code>environment</code>, then restart. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
-<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>filter-structures</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
-<h2>FAQ</h2>
-<p><strong>Does GA4 MCP for OpenCode use opencode.jsonc?</strong></p>
-<p>Yes. The <code>mcp</code> block above is the path, verified in opencode.ai docs today. Global file covers every project; project file covers one checkout.</p>
-<p><strong>Does the installer cover OpenCode?</strong></p>
-<p>Yes. The site names OpenCode in the auto-configure list. I still show the hand block because edited JSON is easier to audit.</p>
-<p><strong>Plugin or MCP server: which do I need?</strong></p>
-<p>The MCP server answers questions. Start with the server; add a bundle only when a harness ships one. The hub at /ga4-mcp-for-every-harness/ explains the split.</p>
-<p><strong>Why does OpenCode guess wrong field names?</strong></p>
-<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
-<p><strong>Is usage read-only and private?</strong></p>
-<p>Yes. Tools read metadata and reports; they change nothing in GA4. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
-<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
-<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here so commands match the published label.</p>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4, Works with OpenCode line), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, opencode.ai MCP servers docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
-<h2>Breadcrumb</h2>
-<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for OpenCode (you are here).</p>
-</main>
+}</code></pre></div>
+<p>Read the four differences carefully, because each one fails silently:</p>
+<div class="tw"><table><thead><tr><th>Elsewhere</th><th>OpenCode</th></tr></thead><tbody><tr><td><code>mcpServers</code></td><td><code>mcp</code></td></tr><tr><td><code>&quot;type&quot;: &quot;stdio&quot;</code></td><td><code>&quot;type&quot;: &quot;local&quot;</code></td></tr><tr><td><code>&quot;command&quot;: &quot;uvx&quot;</code> plus a separate <code>args</code> array</td><td>one <code>command</code> array holding the executable and its arguments</td></tr><tr><td><code>env</code></td><td><code>environment</code></td></tr></tbody></table></div>
+<p>There is no <code>args</code> key. The executable and every argument live in the same array.</p>
+<h2>Where the file lives</h2>
+<ul><li><strong>Global:</strong> <code>~/.config/opencode/opencode.json</code></li><li><strong>Project:</strong> <code>opencode.json</code> in the working directory</li></ul>
+<p>Both accept JSON or JSONC. A project file takes precedence over the global one.</p>
+<h2>Verify</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>Then confirm the server appears in OpenCode's MCP list. If it does not, check the <code>type</code> value first — <code>&quot;stdio&quot;</code> is valid everywhere else and invalid here.</p>
+<h2>A note on multiple properties</h2>
+<p>OpenCode's project-scoped config makes it easy to run one entry per property, which is useful if you work across several sites. Each entry gets its own key and its own <code>GA4_PROPERTY_ID</code>:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;mcp&quot;: {
+    &quot;ga4-studio&quot;: {
+      &quot;type&quot;: &quot;local&quot;,
+      &quot;command&quot;: [&quot;uvx&quot;, &quot;google-analytics-mcp&quot;],
+      &quot;environment&quot;: { &quot;GA4_PROPERTY_ID&quot;: &quot;111111111&quot;, &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/keys/studio.json&quot; }
+    },
+    &quot;ga4-client&quot;: {
+      &quot;type&quot;: &quot;local&quot;,
+      &quot;command&quot;: [&quot;uvx&quot;, &quot;google-analytics-mcp&quot;],
+      &quot;environment&quot;: { &quot;GA4_PROPERTY_ID&quot;: &quot;222222222&quot;, &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/keys/client.json&quot; }
+    }
+  }
+}</code></pre></div>
+<p>The agent then sees two servers with the same tools and different data, which is usually clearer than one server whose property changes between sessions.</p>
+<h2>Next</h2>
+<p><a href="/setup/">Setup</a> for the two values, <a href="/iam/">permissions</a> when the first query returns a 403.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

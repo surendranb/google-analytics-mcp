@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ga4mcp.com/sitemap.xml

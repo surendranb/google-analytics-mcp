@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GCP Service Account Setup for GA4 MCP — GA4 MCP skill</title>
+<meta name="description" content="Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.">
+<link rel="canonical" href="https://ga4mcp.com/skills/gcp-setup/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GCP Service Account Setup for GA4 MCP — GA4 MCP skill">
+<meta property="og:description" content="Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.">
+<meta property="og:url" content="https://ga4mcp.com/skills/gcp-setup/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GCP Service Account Setup for GA4 MCP — GA4 MCP skill","description":"Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.","url":"https://ga4mcp.com/skills/gcp-setup/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/" class="is-active">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/" class="is-active" aria-current="page">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>GCP Service Account Setup for GA4 MCP</h1><p>Step-by-step playbook to authenticate the GA4 MCP server using a Google Cloud Platform (GCP) Service Account.</p>
+<p>This is the standard, enterprise-grade authentication method:</p>
+<ul><li><strong>Offline &amp; Headless</strong>: Requires no interactive browser popups or OAuth consent screens.</li><li><strong>Persistent</strong>: Service account JSON keys never expire (unlike user OAuth tokens).</li><li><strong>Least-Privilege</strong>: Grants read-only Viewer access exclusively to the target GA4 property.</li></ul>
+<hr>
+<h2>1. Quick Setup via <code>gcloud</code> CLI (Fastest — 60 Seconds)</h2>
+<p>If you have the <code>gcloud</code> CLI installed, run these 4 commands in your terminal:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code># 1. Set your target GCP Project ID
+export GCP_PROJECT_ID=&quot;$(gcloud config get-value project)&quot;
+
+# 2. Enable the Google Analytics Data API v1beta
+gcloud services enable analyticsdata.googleapis.com --project=&quot;$GCP_PROJECT_ID&quot;
+
+# 3. Create a dedicated Service Account for the MCP server
+gcloud iam service-accounts create ga4-mcp-reader \
+  --display-name=&quot;GA4 MCP Reader&quot; \
+  --description=&quot;Read-only service account for GA4 Model Context Protocol&quot; \
+  --project=&quot;$GCP_PROJECT_ID&quot;
+
+# 4. Generate and download the JSON key file
+mkdir -p ~/.config/ga4-mcp
+gcloud iam service-accounts keys create ~/.config/ga4-mcp/service-account.json \
+  --iam-account=&quot;ga4-mcp-reader@${GCP_PROJECT_ID}.iam.gserviceaccount.com&quot; \
+  --project=&quot;$GCP_PROJECT_ID&quot;</code></pre></div>
+<p>Your service account email will be: <code>ga4-mcp-reader@&lt;YOUR_PROJECT_ID&gt;.iam.gserviceaccount.com</code></p>
+<hr>
+<h2>2. Manual Setup via Google Cloud Console (GUI Path)</h2>
+<p>If you do not have <code>gcloud</code> CLI installed:</p>
+<ol><li><strong>Open Google Cloud Console</strong>:</li></ol>
+<p>   Go to <a href="https://console.cloud.google.com">console.cloud.google.com</a> and create or select a project.</p>
+<ol><li><strong>Enable the API</strong>:</li></ol>
+<p>   Navigate to <strong>APIs &amp; Services</strong> &gt; <strong>Library</strong>, search for <strong>Google Analytics Data API</strong>, and click <strong>Enable</strong>.</p>
+<ol><li><strong>Create Service Account</strong>:</li></ol>
+<p>   Navigate to <strong>IAM &amp; Admin</strong> &gt; <strong>Service Accounts</strong>, click <strong>+ Create Service Account</strong>.    - Name: <code>ga4-mcp-reader</code>    - Description: <code>Read-only GA4 MCP reader</code>    - Role: Skip GCP role assignment (GA4 permissions are managed inside Google Analytics, not GCP). Click <strong>Done</strong>.</p>
+<ol><li><strong>Download JSON Key</strong>:</li></ol>
+<p>   Click on the newly created service account &gt; go to the <strong>Keys</strong> tab &gt; click <strong>Add Key</strong> &gt; <strong>Create new key</strong> &gt; select <strong>JSON</strong> &gt; click <strong>Create</strong>.    Save the downloaded file to a permanent path, e.g.:    <code>~/.config/ga4-mcp/service-account.json</code></p>
+<hr>
+<h2>3. Grant Viewer Access in Google Analytics</h2>
+<blockquote><p>⚠️ <strong>CRITICAL STEP</strong>: The service account cannot read your analytics until you explicitly add its email as a Viewer in Google Analytics.</p></blockquote>
+<ol><li>Open <a href="https://analytics.google.com">analytics.google.com</a>.</li><li>Click the gear icon (<strong>Admin</strong>) in the bottom-left corner.</li><li>Under the <strong>Property</strong> column, click <strong>Property access management</strong>.</li><li>Click the blue <strong>+</strong> button in the top-right corner and select <strong>Add users</strong>.</li><li>Enter the service account email (e.g. <code>ga4-mcp-reader@your-project.iam.gserviceaccount.com</code> or the <code>client_email</code> value inside your JSON key).</li><li>Under Standard roles, select <strong>Viewer</strong> (read-only).</li><li>Uncheck &quot;Notify SDK users by email&quot; and click <strong>Add</strong>.</li></ol>
+<hr>
+<h2>4. Find Your Numeric GA4 Property ID</h2>
+<p>GA4 requires the numeric <strong>Property ID</strong>, NOT the data stream Measurement ID:</p>
+<ul><li>❌ <strong>Wrong</strong>: <code>G-ABC123XYZ</code> (Measurement ID — for website tracking tags, rejected by API)</li><li>✔️ <strong>Correct</strong>: <code>123456789</code> (Numeric Property ID — for Data API queries)</li></ul>
+<p><strong>Where to find it</strong>:</p>
+<ol><li>In Google Analytics, click <strong>Admin</strong> (gear icon).</li><li>Under Property, click <strong>Property details</strong>.</li><li>The numeric <strong>Property ID</strong> is displayed in the top right (e.g., <code>362847407</code>).</li></ol>
+<hr>
+<h2>5. Configure Your MCP Client Harness</h2>
+<p>Update your client configuration file with the absolute path to your JSON key and your numeric Property ID.</p>
+<h3>Claude Desktop</h3>
+<p>File: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> (macOS) or <code>%APPDATA%\Claude\claude_desktop_config.json</code> (Windows)</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;mcpServers&quot;: {
+    &quot;google-analytics&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/Users/YOUR_USER/.config/ga4-mcp/service-account.json&quot;,
+        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;
+      }
+    }
+  }
+}</code></pre></div>
+<h3>Cursor</h3>
+<p>File: <code>~/.cursor/mcp.json</code> or <code>.cursor/mcp.json</code> in your workspace:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;mcpServers&quot;: {
+    &quot;google-analytics&quot;: {
+      &quot;command&quot;: &quot;uvx&quot;,
+      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+      &quot;env&quot;: {
+        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/Users/YOUR_USER/.config/ga4-mcp/service-account.json&quot;,
+        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;
+      }
+    }
+  }
+}</code></pre></div>
+<h3>Claude Code CLI</h3>
+<p>Run directly:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>claude mcp add google-analytics -- uvx google-analytics-mcp -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json -e GA4_PROPERTY_ID=123456789</code></pre></div>
+<hr>
+<h2>6. How to Verify It Works</h2>
+<p>Run this one-liner in your terminal to verify end-to-end connectivity without restarting your IDE:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>GOOGLE_APPLICATION_CREDENTIALS=&quot;/path/to/service-account.json&quot; \
+GA4_PROPERTY_ID=&quot;123456789&quot; \
+uvx google-analytics-mcp</code></pre></div>
+<p><strong>Expected output</strong>:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Starting GA4 MCP server...
+Fetching schema for property '123456789'...
+Schema loaded successfully.</code></pre></div>
+<p>If you see <code>Schema loaded successfully</code>, your service account is 100% operational.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

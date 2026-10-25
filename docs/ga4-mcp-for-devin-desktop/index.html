@@ -2,34 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for Devin Desktop: Setup, Skills and First Query</title>
-<meta name="description" content="Connect GA4 MCP to Devin Desktop with verified config blocks.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP for Devin Desktop</title>
+<meta name="description" content="Add the GA4 MCP server to Devin Desktop, the client formerly named Windsurf. Includes the config path conflict between two live vendor pages.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-devin-desktop/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP for Devin Desktop">
+<meta property="og:description" content="Add the GA4 MCP server to Devin Desktop, the client formerly named Windsurf. Includes the config path conflict between two live vendor pages.">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-devin-desktop/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for Devin Desktop","description":"Add the GA4 MCP server to Devin Desktop, the client formerly named Windsurf. Includes the config path conflict between two live vendor pages.","url":"https://ga4mcp.com/ga4-mcp-for-devin-desktop/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for Devin Desktop: Setup, Skills and First Query</h1>
-<p>angle: One exact Devin MCP config for GA4, with the native path separated from the hosted Composio path.</p>
-<p>I query GA4 from inside Devin with the same server I run locally elsewhere. GA4 MCP for Devin Desktop gives you that: one <code>mcpServers</code> entry in the Devin MCP config, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
-<li>- Devin path verified today: <code>devin mcp add/list/get/login</code> CLI; configs <code>~/.config/devin/mcp_config.json</code> (user), <code>.devin/mcp_config.json</code> (project), <code>.devin/mcp_config.local.json</code> (local, gitignored); legacy Cascade agent uses <code>mcp_config.json</code> (Devin docs).</li>
-<li>- Hosted alternate verified today: Composio Devin MCP is a hosted bridge (<code>windsurf://windsurf-mcp-registry</code> one-click or <code>~/.codeium/windsurf/mcp_config.json</code> with <code>serverUrl</code>); it is not the native entry below.</li>
-<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
-<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
-</ul>
-<h2>Configuring Devin to launch the server</h2>
-<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
-<p>1. Add the server from your terminal:</p>
-<pre>
-devin mcp add google-analytics --command uvx --arg google-analytics-mcp
-</pre>
-<p>Default scope writes <code>.devin/mcp_config.local.json</code>. Use <code>-s user</code> for <code>~/.config/devin/mcp_config.json</code> or <code>-s project</code> for shared <code>.devin/mcp_config.json</code>.</p>
-<p>2. Confirm the entry carries your values:</p>
-<pre>
-{
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/" class="is-active" aria-current="page">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>GA4 MCP for Devin Desktop</h1>
+<p>Devin Desktop is the current name for Windsurf. The rename happened on 2 June 2026, so older guides and forum answers still call it Windsurf. The config schema did not change with the name.</p>
+<h2>The entry</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
   &quot;mcpServers&quot;: {
     &quot;google-analytics&quot;: {
       &quot;command&quot;: &quot;uvx&quot;,
@@ -40,59 +52,45 @@ devin mcp add google-analytics --command uvx --arg google-analytics-mcp
       }
     }
   }
-}
-</pre>
-<p>3. Check the connection:</p>
-<pre>
-devin mcp list
-devin mcp get google-analytics
-</pre>
-<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error. Do not mix the Composio hosted <code>serverUrl</code> entry into this file; pick native stdio or hosted, not both under one name.</p>
-<h2>Skills worth loading first</h2>
-<p>| Skill slug | What you use it for in Devin |</p>
-<p>|---|---|</p>
-<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
-<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
-<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
-<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
-<p>| <code>filter-structures</code> | Your dimension filter returned an invalid-filter error |</p>
-<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
-<h2>Running your first query</h2>
-<p>Ask: &quot;What were my top channels last week?&quot;</p>
-<p>Your agent should call:</p>
-<pre>
-get_ga4_data(
-  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
-  metrics=[&quot;sessions&quot;],
-  date_range_start=&quot;7daysAgo&quot;,
-  date_range_end=&quot;yesterday&quot;,
-  intent=&quot;which channels drove sessions last week&quot;
-)
-</pre>
-<p>Read the period figure from <code>totals</code>. GA4 computes that block; hand sums drift and I stopped doing them.</p>
-<h2>Fixing the three errors you will hit</h2>
-<p>1. <strong>Server missing after add.</strong> Symptom: <code>devin mcp list</code> omits google-analytics. Fix: confirm which scope file you wrote (local vs user vs project), then re-run the add with the intended <code>-s</code> flag.</p>
-<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values with an absolute key path in the same scope file; for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
-<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
-<h2>FAQ</h2>
-<p><strong>Does GA4 MCP for Devin Desktop use devin mcp add?</strong></p>
-<p>Yes. The add plus scope files above are the path, verified in Devin docs today.</p>
-<p><strong>Native stdio or Composio hosted: which does this page use?</strong></p>
-<p>Native stdio. Composio hosts a Devin bridge over <code>serverUrl</code>; I name it here so you can tell them apart, and I wire only the native entry above.</p>
-<p><strong>Does the Windsurf rename affect this page?</strong></p>
-<p>Windsurf retired as a name and Devin Desktop is the successor surface. I do not ship a /windsurf/ page; this page is the live path.</p>
-<p><strong>Why does the agent guess wrong field names?</strong></p>
-<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
-<p><strong>Is usage read-only and private?</strong></p>
-<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
-<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
-<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, Devin MCP configuration docs plus Desktop cascade page, Composio Connect page, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
-<h2>Breadcrumb</h2>
-<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Devin Desktop (you are here).</p>
-</main>
+}</code></pre></div>
+<p>Root key <code>mcpServers</code>, standard <code>env</code> object. Nothing unusual in the shape.</p>
+<h2>The path problem, stated plainly</h2>
+<p>Devin's own documentation gives two different paths for the same file, and both pages are live today:</p>
+<ul><li>The Cascade MCP page says <code>~/.config/devin/mcp_config.json</code> on macOS and Linux, and <code>%APPDATA%\devin\mcp_config.json</code> on Windows.</li><li>The Devin Desktop FAQ says the MCP config is <code>~/.codeium/mcp_config.json</code>, and adds that the <code>~/.codeium/</code> directory structure is not changing in this release.</li></ul>
+<p>Rather than pick one and hope, check which file exists on your machine:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>ls -la ~/.config/devin/mcp_config.json ~/.codeium/mcp_config.json</code></pre></div>
+<p>Edit whichever one is present. If neither exists, create the <code>.config/devin</code> one and restart the app — the newer path is the one on the MCP page.</p>
+<div class="note"><span class="note__label">Note</span><p>if you are migrating from Windsurf and MCP servers still work, you are on the <code>.codeium</code> path and can leave it alone. The rename did not move it.</p></div>
+<h2>Verify</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>Then open the MCP panel in Cascade and confirm the server is running. Devin shows a failed launch there, which distinguishes a bad config from a bad credential — a distinction the other clients here generally do not make.</p>
+<h2>If you are on Windsurf</h2>
+<p>Windsurf, before the rename, used the same <code>mcpServers</code> shape. Older Windsurf documentation and this page are compatible; only the file path differs by app version.</p>
+<h2>Next</h2>
+<p><a href="/setup/">Setup</a> for the two values, <a href="/skills/">skills</a> for what to load before asking a question that needs interpretation.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

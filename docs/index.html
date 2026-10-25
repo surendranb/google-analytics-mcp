@@ -1,88 +1,176 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Google Analytics MCP Server</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Documentation and setup guide for the GA4 MCP Server">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  
-  <!-- Docsify-Themeable (Premium Dark) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
-  
-  <style>
-    /* Custom tweaks for a premium look */
-    :root {
-      --theme-color: #38bdf8;
-      --base-font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --base-font-size: 16px;
-      --sidebar-width: 18rem;
-      --cover-background-color: #0f172a;
-      --cover-button-primary-background: #38bdf8;
-      --cover-button-primary-color: #0f172a;
-      --cover-button-primary-border: 1px solid #38bdf8;
-      --cover-button-background: transparent;
-      --cover-button-border: 1px solid rgba(255, 255, 255, 0.2);
-      --cover-button-color: #f8fafc;
-      --sidebar-background: #1e293b;
-    }
-    .app-name-link {
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-    main {
-      padding-top: 2rem;
-    }
-    .sidebar>h1 {
-      margin: 1.5rem 0;
-    }
-  </style>
-
-  <!-- PostHog Tracking -->
-  <script>
-    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    posthog.init('phc_Aik6H3pf5P9dPBrWLjd6N3wzsVAD6tJnmmEhFwW8Pzsi',{api_host:'https://us.i.posthog.com', person_profiles: 'identified_only'})
-  </script>
-
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-RX65PWDDEQ');
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP — Google Analytics 4 for any AI client</title>
+<meta name="description" content="Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.">
+<link rel="canonical" href="https://ga4mcp.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP — Google Analytics 4 for any AI client">
+<meta property="og:description" content="Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.">
+<meta property="og:url" content="https://ga4mcp.com/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GA4 MCP — Google Analytics 4 for any AI client","description":"Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.","url":"https://ga4mcp.com/","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","softwareVersion":"2.11.6","license":"https://opensource.org/licenses/MIT","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 </head>
 <body>
-  <div id="app">Loading GA4 MCP Docs...</div>
-  <script>
-    window.$docsify = {
-      name: 'GA4 MCP Server',
-      repo: 'https://github.com/surendranb/google-analytics-mcp',
-      loadSidebar: true,
-      subMaxLevel: 2,
-      themeColor: '#38bdf8',
-      auto2top: true,
-      search: 'auto',
-      copyCode: {
-        buttonText : 'Copy',
-        errorText  : 'Error',
-        successText: 'Copied'
-      }
-    }
-  </script>
-  <!-- Docsify Core -->
-  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-  <!-- Docsify-Themeable -->
-  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
-  <!-- Search Plugin -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-  <!-- Docsify plugins -->
-  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
-  <!-- Syntax highlighting -->
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame frame--full">
+    
+    <main id="main">
+<section class="hero">
+<div class="hero__grid">
+<div>
+<p class="eyebrow">v2.11.6 · MIT · local stdio · read-only</p>
+<h1>Ask GA4 a question. Get the answer an analyst would give.</h1>
+<p class="lede">One MCP server for Claude, Cursor, Codex, Gemini CLI and twelve more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.</p>
+<div class="hero__cta">
+<a class="btn btn--primary" href="/setup/">Install in one line</a>
+<a class="btn btn--ghost" href="/skills/">See the 16 skills</a>
+</div>
+</div>
+<div class="card">
+<p class="card__h">Install</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</code></pre></div>
+<p style="font-size:.85rem;color:var(--ink-55);margin:.7rem 0 0">Finds your client, writes the entry, checks the credentials.</p>
+</div>
+</div>
+</section>
+<div class="stats">
+<div class="stat"><div class="stat__n">12</div><div class="stat__l">tools</div></div>
+<div class="stat"><div class="stat__n">16</div><div class="stat__l">analytical skills</div></div>
+<div class="stat"><div class="stat__n">17</div><div class="stat__l">client guides</div></div>
+<div class="stat"><div class="stat__n">0</div><div class="stat__l">writes to your property</div></div>
+</div>
+<section class="section">
+<h2 class="section__h">An agent with a GA4 tool guesses. That is the whole problem.</h2>
+<p class="section__sub">Three failures show up every time someone points a general-purpose model at the Analytics Data API.</p>
+<div class="grid3">
+<div class="feat"><h3>It invents field names</h3><p>Models are trained on Universal Analytics vocabulary. <code>pageviews</code> instead of <code>screenPageViews</code>. The API returns a 400 and the agent retries with another guess.</p></div>
+<div class="feat"><h3>It invents a method</h3><p>Ask why traffic dropped and it will produce a plausible five-step analysis that never checks whether the drop was one channel or all of them.</p></div>
+<div class="feat"><h3>It does the arithmetic itself</h3><p>Pull seven daily rows, ask for the week, and the model sums them in its head. Rates do not sum. The number is wrong and looks fine.</p></div>
+</div>
+</section>
+<section class="section">
+<h2 class="section__h">What this server does about it</h2>
+<p class="section__sub">Three mechanisms, all of them inside the tool call. Nothing here depends on the model behaving well.</p>
+<div class="grid3">
+<div class="feat"><h3>Schema check before the query</h3><p><code>get_ga4_data</code> validates every dimension and metric name against your live property. A wrong name comes back with the reason and the correct spelling, not a 400 and a retry loop.</p></div>
+<div class="feat"><h3>Skills loaded on demand</h3><p>Sixteen recipes ship in the package — traffic diagnosis, ecommerce, attribution scope, AI referral split. The agent loads one before it analyzes, so the method is fixed instead of improvised.</p></div>
+<div class="feat"><h3>Totals computed by GA4</h3><p>Every multi-row pull returns a <code>totals</code> block that GA4 computed server-side. The model reads the period figure instead of adding up rows and drifting.</p></div>
+</div>
+</section>
+<section class="section">
+<h2 class="section__h">What it does when the setup is broken</h2>
+<p class="section__sub">Most failures are not analysis failures. They are a missing property ID, an expired token, or a service account that was never added to the property. The server handles all three inside the session.</p>
+<div class="grid3">
+<div class="feat"><h3>Setup recovery mid-session</h3><p><code>setup_ga4_access</code> collects the missing value and reconnects without a restart. No client config editing, no reinstall.</p></div>
+<div class="feat"><h3>Guides bundled offline</h3><p><code>get_troubleshooting_guide</code> serves the setup, IAM and schema fix paths from inside the package. It works with no network and no API access.</p></div>
+<div class="feat"><h3>Row guard before the pull</h3><p>Large queries are estimated first and warn above 2,500 rows, so one careless question does not fill the context window with raw rows.</p></div>
+</div>
+</section>
+<section class="section">
+<h2 class="section__h">Against Google's own server</h2>
+<p class="section__sub">Google ships an official Analytics MCP server, and it is genuinely good. Here is the honest split.</p>
+<div class="compare">
+<div>
+<h4>Google's Analytics MCP</h4>
+<ul>
+<li>Admin API plus Data API: accounts, properties, Google Ads links, core and funnel reports, realtime.</li>
+<li>Hosted remote endpoint at <code>analyticsdata.googleapis.com/mcp/v1</code> — no local install at all.</li>
+<li>Apache-2.0, labelled Experimental, maintained by the Analytics organisation.</li>
+<li>Best choice when you want zero install and a vendor-maintained toolset.</li>
+</ul>
+</div>
+<div>
+<h4>This server</h4>
+<ul>
+<li>Reporting and metadata, with the analysis layer attached: 16 skills, schema validation, GA4-computed totals, row guard.</li>
+<li>Local stdio over your own credentials. Nothing leaves your machine except GA4 API calls.</li>
+<li>MIT, one maintainer, and a fix path for the three errors that actually stop people.</li>
+<li>Best choice when the agent has to reason about the numbers, not just fetch them.</li>
+</ul>
+</div>
+</div>
+</section>
+<section class="section">
+<h2 class="section__h">Sixteen skills, loaded only when needed</h2>
+<p class="section__sub">Each one is a short playbook with the exact dimensions, metrics and interpretation rules for one job. The agent calls <code>search_skills</code>, gets one back, and follows it.</p>
+<div class="tw"><table><thead><tr><th>Skill</th><th>What it settles</th></tr></thead><tbody>
+<tr><td><a href="/skills/traffic-diagnosis/">Traffic diagnosis</a></td><td>Whether a change is real, and which channel moved first</td></tr>
+<tr><td><a href="/skills/ecommerce-analysis/">Ecommerce</a></td><td>Revenue, conversion rate, AOV and funnel drop-off</td></tr>
+<tr><td><a href="/skills/ai-referral-analysis/">AI referrals</a></td><td>Splitting ChatGPT, Claude, Perplexity and Gemini traffic from organic</td></tr>
+<tr><td><a href="/skills/attribution-scope/">Attribution scope</a></td><td>Why session, event and user numbers never match</td></tr>
+<tr><td><a href="/skills/common-metric-names/">Metric names</a></td><td>The GA4 name for the UA name the model guessed</td></tr>
+<tr><td><a href="/skills/">All sixteen</a></td><td>Including filters, date ranges, custom dimensions, bot traffic</td></tr>
+</tbody></table></div>
+</section>
+<section class="section">
+<h2 class="section__h">Your client is on the list</h2>
+<p class="section__sub">The installer writes the entry for eight of them. Codex, Gemini CLI, Goose and Kiro take one config block each, quoted from that vendor's own documentation.</p>
+<div class="grid3">
+<div class="feat"><h3>Auto-configured</h3><p>Claude Desktop and Code, Cursor, VS Code (Cline, Roo Code), Continue.dev, OpenCode, Devin Desktop (formerly Windsurf), Zed, Google Antigravity.</p></div>
+<div class="feat"><h3>One block, copied from the vendor</h3><p>Codex writes TOML, Goose writes YAML, Gemini CLI and Kiro write JSON. Each guide shows the exact shape that client expects.</p></div>
+<div class="feat"><h3>Start here</h3><p><a href="/ga4-mcp-for-every-harness/">The client hub</a> has every guide, or go straight to <a href="/ga4-mcp-for-claude/">Claude</a> or <a href="/ga4-mcp-for-cursor/">Cursor</a>.</p></div>
+</div>
+</section>
+<section class="section">
+<h2 class="section__h">Install</h2>
+<ol class="steps">
+<li><h3>Run the installer</h3><div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</code></pre></div><p>It detects your client, checks for <code>uv</code>, and writes the server entry. Restart the client afterwards.</p></li>
+<li><h3>Give it two values</h3><div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</code></pre></div><p>Both live inside the client's server entry. The property ID is the numeric one from Admin, Property details — not the <code>G-</code> measurement ID.</p></li>
+<li><h3>Ask a question that needs a real answer</h3><div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Why did organic sessions drop in the last 7 days?</code></pre></div><p>You have succeeded when the agent loads the <code>traffic-diagnosis</code> skill and calls <code>get_ga4_data</code> without a setup error. <a href="/setup/">Full setup guide</a>.</p></li>
+</ol>
+</section>
+<section class="section">
+<h2 class="section__h">The parts people get stuck on</h2>
+<div class="grid3">
+<div class="feat"><h3><a href="/iam/">The 403 that is not a bug</a></h3><p>The service account is valid but was never added to the property. Nine steps in the Analytics UI, with the exact role.</p></div>
+<div class="feat"><h3><a href="/schema/">The filter shape</a></h3><p><code>dimension_filter</code> follows the Data API v1beta schema, not SQL. Working templates for string, list, numeric and AND/OR groups.</p></div>
+<div class="feat"><h3><a href="/setup/">The property ID</a></h3><p>Most setup failures are the measurement ID pasted where the property ID belongs. One paragraph explains the difference.</p></div>
+</div>
+</section>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

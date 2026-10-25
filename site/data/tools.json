@@ -1,0 +1,237 @@
+{
+  "generated": "2026-10-25",
+  "source": "live tools/list from google-analytics-mcp 2.11.6",
+  "count": 12,
+  "tools": [
+    {
+      "name": "check_for_updates",
+      "description": "Check PyPI for newer versions of this MCP server and get upgrade instructions.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object",
+        "title": "check_for_updatesArguments"
+      },
+      "summary": "Check PyPI for newer versions of this MCP server and get upgrade instructions."
+    },
+    {
+      "name": "list_properties",
+      "description": "List all GA4 properties associated with an account.",
+      "inputSchema": {
+        "properties": {
+          "account_id": {
+            "default": "",
+            "title": "Account Id",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "title": "list_propertiesArguments"
+      },
+      "summary": "List all GA4 properties associated with an account."
+    },
+    {
+      "name": "search_schema",
+      "description": "Search for a keyword across all dimensions and metrics for this property. Returns a ranked list of up to 10 matching fields scored by relevance. Returns: {\"top_results\": {\"DIMENSION: api_name\": score, \"METRIC: api_name\": score, ...}} Use this when you have a concept (\"engagement\", \"revenue\", \"channel\") and need exact API field names before calling get_ga4_data. Use list_dimension_categories or list_metric_categories instead if you want to browse all available fields without a specific keyword. Args: keyword: One or more keywords to search for (e.g., \"user\", \"campaign revenue\").",
+      "inputSchema": {
+        "properties": {
+          "keyword": {
+            "title": "Keyword",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyword"
+        ],
+        "type": "object",
+        "title": "search_schemaArguments"
+      },
+      "summary": "Search for a keyword across all dimensions and metrics for this property."
+    },
+    {
+      "name": "get_property_schema",
+      "description": "Returns the complete schema for the configured GA4 property, including all available dimensions and metrics (standard and custom). Warning: This can be a very large object (10k+ tokens). Use search_schema for most discovery tasks.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object",
+        "title": "get_property_schemaArguments"
+      },
+      "summary": "Returns the complete schema for the configured GA4 property, including all available dimensions and metrics (standard and custom)."
+    },
+    {
+      "name": "list_dimension_categories",
+      "description": "List all dimension categories for this GA4 property, with a count of dimensions in each category. Returns: {\"dimension_categories\": {\"Category Name\": count, ...}} Use this as the first step in dimension exploration \u2014 browse categories, then call get_dimensions_by_category with the name that fits your analysis. Use search_schema instead if you already have a keyword to search for.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object",
+        "title": "list_dimension_categoriesArguments"
+      },
+      "summary": "List all dimension categories for this GA4 property, with a count of dimensions in each category."
+    },
+    {
+      "name": "list_metric_categories",
+      "description": "List all metric categories for this GA4 property, with a count of metrics in each category. Returns: {\"metric_categories\": {\"Category Name\": count, ...}} Use this as the first step in metric exploration \u2014 browse categories, then call get_metrics_by_category with the name that fits your analysis. Use search_schema instead if you already have a keyword to search for.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object",
+        "title": "list_metric_categoriesArguments"
+      },
+      "summary": "List all metric categories for this GA4 property, with a count of metrics in each category."
+    },
+    {
+      "name": "get_dimensions_by_category",
+      "description": "Return all dimensions in a specific category with their API names and descriptions. Returns: {\"dimension_api_name\": \"description\", ...} The category name must exactly match a value returned by list_dimension_categories. Use search_schema instead if you already have a keyword \u2014 it is faster and more targeted than browsing by category. Args: category: Exact category name from list_dimension_categories (case-insensitive).",
+      "inputSchema": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category"
+        ],
+        "type": "object",
+        "title": "get_dimensions_by_categoryArguments"
+      },
+      "summary": "Return all dimensions in a specific category with their API names and descriptions."
+    },
+    {
+      "name": "get_metrics_by_category",
+      "description": "Return all metrics in a specific category with their API names and descriptions. Returns: {\"metric_api_name\": \"description\", ...} The category name must exactly match a value returned by list_metric_categories. Use search_schema instead if you already have a keyword \u2014 it is faster and more targeted than browsing by category. Args: category: Exact category name from list_metric_categories (case-insensitive).",
+      "inputSchema": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category"
+        ],
+        "type": "object",
+        "title": "get_metrics_by_categoryArguments"
+      },
+      "summary": "Return all metrics in a specific category with their API names and descriptions."
+    },
+    {
+      "name": "get_ga4_data",
+      "description": "Retrieve GA4 data with built-in intelligence for better and safer results. Returns on success: {\"data\": [...], \"metadata\": {...}, \"_skills_tip\": \"...\"}. For multi-row pulls (a time series like ['date'], or any breakdown) the result also carries \"totals\": {metric: value} \u2014 GA4 server-side aggregates across all rows. Read the period figure from \"totals\"; do NOT sum the rows yourself. (Additive metrics sum; rate metrics are period-computed by GA4.) Returns on volume warning: {\"warning\": \"...\", \"estimated_rows\": N, \"suggestions\": [...]} Returns on error: {\"error\": \"...\"} CRITICAL WORKFLOW \u2014 follow this sequence every time: 1. DISCOVER FIELDS: NEVER guess dimension or metric names. Call `search_schema`, `list_dimension_categories`, or `list_metric_categories` FIRST to verify exact API names for this property. Guessing costs you a failed round-trip. 2. DISCOVER PATTERN: For any domain-specific analysis, call `search_skills('<topic>')` BEFORE querying to get the proven methodology \u2014 correct dimensions, metrics, filters, and how to interpret the result. One extra call prevents multiple failures. Use for: traffic diagnosis, attribution, ecommerce, channel acquisition, content performance, geo/device segmentation, AI referrals, bot detection. 3. RETRIEVE: Call get_ga4_data with the verified fields and the skill's pattern. 4. TROUBLESHOOT: On schema error, invalid field, or filter parse error \u2014 do NOT retry by guessing. Your training may predate current GA4 (UA was sunset 2023-07-01). Call `search_schema('<keyword>')` to find the current name in THIS property, or `search_skills('ua-to-ga4' | 'common-metric-names' | 'filter-structures')` for the mapping. FIELD NAMES \u2014 GA4 API names vs common wrong guesses: - 'screenPageViews' not 'uniquePageviews' or 'pageViews' - 'totalUsers' not 'users' - 'keyEvents' not 'conversions' or 'goalCompletionsAll' - 'sessionKeyEventRate' not 'sessionConversionRate' or 'conversionRate' (GA4 renamed conversions\u2192key events, 2024) - 'userEngagementDuration' not 'timeOnPage' or 'avgTimeOnPage' - 'averageSessionDuration' not 'avgSessionDuration' - 'itemsViewed' not 'itemViews' - 'ecommercePurchases' not 'purchases' - 'sessionDefaultChannelGroup' not 'sessionDefaultChannelGrouping' - 'sessionSource'/'sessionMedium' not 'source'/'medium' - All names are camelCase \u2014 never snake_case (page_path \u2192 pagePath, event_name \u2192 eventName) - 'bounceRate' and 'newUsers' are correct as-is DATE RANGES: - Format: 'YYYY-MM-DD' or relative strings: '7daysAgo', '30daysAgo', 'yesterday', 'today' - 'NdaysAgo' counts back from today, excluding today. 'yesterday' = last complete day. - Period comparison (YoY, WoW): run two separate queries with different date ranges, then compare the results. The API does not support multi-period in one call. SCOPE RULES \u2014 incompatible combinations return a 400 error: - Session dims (sessionSource, sessionMedium, sessionCampaignName) \u2192 use with sessions, bounceRate, sessionKeyEventRate. NOT with eventCount. - Event dims (eventName) \u2192 use with eventCount. NOT with sessions. - User dims (firstUserSource, firstUserMedium) \u2192 use with totalUsers, newUsers. NOT sessions. - Safe with any metric: date, deviceCategory, country, city, pagePath, pageTitle. FILTER STRUCTURE: - Simple: {\"filter\": {\"fieldName\": \"sessionSource\", \"stringFilter\": {\"value\": \"google\", \"matchType\": \"CONTAINS\"}}} - AND: {\"andGroup\": {\"expressions\": [{\"filter\": {...}}, {\"filter\": {...}}]}} - OR: {\"orGroup\": {\"expressions\": [{\"filter\": {...}}, {\"filter\": {...}}]}} - NOT: {\"notExpression\": {\"filter\": {...}}} - Wrong keys that break filters: and_filter\u2192andGroup, or_filter\u2192orGroup, not_filter\u2192notExpression, filters\u2192expressions, field\u2192fieldName Args: dimensions: GA4 dimension names (verified via schema tools, e.g. [\"date\", \"city\"]). metrics: GA4 metric names (verified via schema tools, e.g. [\"totalUsers\", \"sessions\"]). date_range_start: Start date \u2014 'YYYY-MM-DD' or '7daysAgo', '30daysAgo', 'yesterday'. date_range_end: End date \u2014 'YYYY-MM-DD' or 'yesterday', 'today'. dimension_filter: Optional FilterExpression dict. camelCase and snake_case both accepted. limit: Max rows to return. Defaults to 1000. estimate_only: If True, returns only estimated row count without fetching data. proceed_with_large_dataset: Set True to bypass the 2500-row volume warning. enable_aggregation: If True, asks GA4 for server-side metric totals whenever a dimension splits the data across rows (e.g. a 7-day ['date'] pull), returned in a \"totals\" block so the model needn't sum rows. Default True. intent: Short plain-English description of what the user is trying to learn. E.g. \"which channels drive most signups\", \"bot traffic audit for last month\".",
+      "inputSchema": {
+        "properties": {
+          "dimensions": {
+            "default": [
+              "date"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "metrics": {
+            "default": [
+              "totalUsers",
+              "newUsers",
+              "sessions"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "date_range_start": {
+            "default": "7daysAgo",
+            "title": "Date Range Start",
+            "type": "string"
+          },
+          "date_range_end": {
+            "default": "yesterday",
+            "title": "Date Range End",
+            "type": "string"
+          },
+          "dimension_filter": {
+            "additionalProperties": true,
+            "default": null,
+            "title": "Dimension Filter",
+            "type": "object"
+          },
+          "limit": {
+            "default": 1000,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "estimate_only": {
+            "default": false,
+            "title": "Estimate Only",
+            "type": "boolean"
+          },
+          "proceed_with_large_dataset": {
+            "default": false,
+            "title": "Proceed With Large Dataset",
+            "type": "boolean"
+          },
+          "enable_aggregation": {
+            "default": true,
+            "title": "Enable Aggregation",
+            "type": "boolean"
+          },
+          "intent": {
+            "default": null,
+            "title": "Intent",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "title": "get_ga4_dataArguments"
+      },
+      "summary": "Retrieve GA4 data with built-in intelligence for better and safer results."
+    },
+    {
+      "name": "get_troubleshooting_guide",
+      "description": "Returns the troubleshooting/setup guide for a topic, served from inside the server (no network needed). Use whenever you hit a schema error, dimension_filter parse error, IAM / 403 authorization error, or a boot-time setup error. Args: topic: One of \"setup\", \"iam\", or \"schema\".",
+      "inputSchema": {
+        "properties": {
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "type": "object",
+        "title": "get_troubleshooting_guideArguments"
+      },
+      "summary": "Returns the troubleshooting/setup guide for a topic, served from inside the server (no network needed)."
+    },
+    {
+      "name": "search_skills",
+      "description": "Fetch analytical recipes and how-to guides from the GA4 skills library. Skills are domain-specific playbooks for common GA4 analysis patterns \u2014 exact dimensions, metrics, filters, and interpretation logic for each use case. Call this BEFORE querying get_ga4_data for any domain-specific analysis. Available skills: traffic-diagnosis, attribution-scope, channel-acquisition, content-performance, geo-device-segmentation, ecommerce-analysis, ai-referral-analysis, bot-traffic-detection, common-metric-names, filter-structures, custom-dimensions, compatible-combinations, ua-to-ga4, date-ranges, ga4-limitations. Usage: - search_skills(\"\") \u2192 returns full index of all skills - search_skills(\"ecommerce\") \u2192 returns the ecommerce-analysis skill - search_skills(\"ua-to-ga4\") \u2192 returns the UA\u2192GA4 field name mapping Args: query: A skill name (exact slug) or empty string to browse the full index.",
+      "inputSchema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object",
+        "title": "search_skillsArguments"
+      },
+      "summary": "Fetch analytical recipes and how-to guides from the GA4 skills library."
+    },
+    {
+      "name": "setup_ga4_access",
+      "description": "Interactively fix a broken GA4 MCP setup (missing property ID, missing or expired credentials, or missing GA4 access) by asking the user for the needed input through the client, then re-initializing without a restart. Call this whenever a configuration or authentication error is reported.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object",
+        "title": "setup_ga4_accessArguments"
+      },
+      "summary": "Interactively fix a broken GA4 MCP setup (missing property ID, missing or expired credentials, or missing GA4 access) by asking the user for the needed input through..."
+    }
+  ]
+}

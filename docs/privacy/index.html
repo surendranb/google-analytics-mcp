@@ -1,387 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - GA4 MCP</title>
-  <meta name="description" content="Privacy Policy and Google API User Data Limited Use Disclosure for GA4 MCP.">
-  <style>
-    :root {
-      --bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --headline: #0f172a;
-      --border: #e2e8f0;
-      --callout-bg: #f8fafc;
-      --callout-border: #3b82f6;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font-sans);
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
-      padding: 3rem 1.5rem;
-    }
-
-    .container {
-      max-width: 780px;
-      margin: 0 auto;
-    }
-
-    .header-nav {
-      margin-bottom: 2.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .header-nav a {
-      color: #2563eb;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .header-nav a:hover {
-      text-decoration: underline;
-    }
-
-    h1 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      color: var(--headline);
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-    }
-
-    .meta {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    h2 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--headline);
-      margin: 2rem 0 0.75rem;
-    }
-
-    h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--headline);
-      margin: 1.25rem 0 0.5rem;
-    }
-
-    p, ul, ol {
-      font-size: 1rem;
-      color: var(--text);
-      margin-bottom: 1.25rem;
-    }
-
-    ul, ol {
-      padding-left: 1.5rem;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-    }
-
-    code {
-      font-family: var(--font-mono);
-      font-size: 0.9em;
-      background: #f1f5f9;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-    }
-
-    a {
-      color: #2563eb;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .callout {
-      background: var(--callout-bg);
-      border-left: 4px solid var(--callout-border);
-      padding: 1.25rem 1.5rem;
-      border-radius: 0 6px 6px 0;
-      margin: 1.75rem 0;
-    }
-
-    .callout strong {
-      color: var(--headline);
-    }
-
-    .summary-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left: 5px solid #2563eb;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0 2.5rem;
-    }
-
-    .summary-card h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 0 0 0.75rem;
-    }
-
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      font-size: 0.925rem;
-    }
-
-    .summary-table th, .summary-table td {
-      border: 1px solid #cbd5e1;
-      padding: 0.65rem 0.85rem;
-      text-align: left;
-      vertical-align: top;
-      line-height: 1.5;
-    }
-
-    .summary-table th {
-      background-color: #f1f5f9;
-      color: #0f172a;
-      font-weight: 700;
-      width: 38%;
-    }
-
-    .summary-table td {
-      background-color: #ffffff;
-      color: #1e293b;
-    }
-
-    .footer {
-      margin-top: 4rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-  </style>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-RX65PWDDEQ');
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — what the GA4 MCP server sends</title>
+<meta name="description" content="The server runs locally, reads your Analytics data with your credentials, and sends anonymous usage counts you can switch off with one environment variable.">
+<link rel="canonical" href="https://ga4mcp.com/privacy/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Privacy — what the GA4 MCP server sends">
+<meta property="og:description" content="The server runs locally, reads your Analytics data with your credentials, and sends anonymous usage counts you can switch off with one environment variable.">
+<meta property="og:url" content="https://ga4mcp.com/privacy/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Privacy — what the GA4 MCP server sends","description":"The server runs locally, reads your Analytics data with your credentials, and sends anonymous usage counts you can switch off with one environment variable.","url":"https://ga4mcp.com/privacy/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-  <div class="container">
-    <div class="header-nav">
-      <a href="/">&larr; Back to GA4 MCP Documentation</a>
-      <a href="https://github.com/surendranb/google-analytics-mcp" target="_blank" rel="noopener">GitHub</a>
-    </div>
-
-    <h1>Privacy Policy</h1>
-    <div class="meta">
-      <strong>Effective Date:</strong> September 17, 2026 &bull; 
-      <strong>Application:</strong> GA4 MCP (Google Analytics Model Context Protocol Server) &bull; 
-      <strong>Maintainer:</strong> Surendran Balachandran (<a href="mailto:reachsuren@gmail.com">reachsuren@gmail.com</a>)
-    </div>
-
-    <p>
-      At GA4 MCP (accessible at <a href="https://ga4mcp.com">https://ga4mcp.com</a> and via open-source package repositories), we treat privacy as an architectural guarantee. This Privacy Policy details how GA4 MCP accesses, processes, and protects your data when you use the open-source software and connect your Google Analytics accounts.
-    </p>
-
-    <div class="summary-card">
-      <h2>Summary of Google User Data Handling &amp; Protection (At a Glance)</h2>
-      <p>
-        GA4 MCP connects your local AI agent (Claude Desktop, Cursor, Cline, etc.) directly to Google Analytics. We implement a strict <strong>Zero-Knowledge, Zero-Server-Storage</strong> architecture:
-      </p>
-      <table class="summary-table">
-        <tr>
-          <th>Verification &amp; Privacy Item</th>
-          <th>GA4 MCP Architectural Guarantee</th>
-        </tr>
-        <tr>
-          <td><strong>Do we touch or store your analytics data?</strong></td>
-          <td><strong>No.</strong> Analytics queries execute directly between your local computer and Google APIs over TLS. Zero analytics reporting payloads ever touch, transit, or persist on our servers.</td>
-        </tr>
-        <tr>
-          <td><strong>How is sensitive data protected?</strong></td>
-          <td><strong>Strict Encryption:</strong> We use encryption to protect your information. All data in transit uses HTTPS (TLS 1.2 / TLS 1.3). Data at rest (OAuth tokens) is stored solely on your local workstation with restricted operating system permissions (Unix <code>chmod 0600</code>) and OS disk encryption.</td>
-        </tr>
-        <tr>
-          <td><strong>Where do OAuth tokens reside?</strong></td>
-          <td><strong>Exclusively on your local machine</strong> (<code>~/.config/ga4-mcp/session.json</code>). Our cloud gateway is an ephemeral in-memory relay that executes an atomic code exchange and immediately purges all credentials from memory with zero database storage.</td>
-        </tr>
-        <tr>
-          <td><strong>How do you delete data or revoke access?</strong></td>
-          <td><strong>Immediate user control:</strong> Delete all local tokens at any time via <code>rm -rf ~/.config/ga4-mcp</code>, or revoke access immediately in your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Permissions Settings</a>.</td>
-        </tr>
-        <tr>
-          <td><strong>Are AI models trained on your data?</strong></td>
-          <td><strong>Never.</strong> Google Analytics user data accessed via Google APIs is never used to develop, improve, or train non-personalized AI or ML models.</td>
-        </tr>
-        <tr>
-          <td><strong>Is Google user data sold or transferred?</strong></td>
-          <td><strong>Never.</strong> We do not sell, rent, disclose, or transfer Google user data to third parties, data brokers, or advertisers under any circumstances.</td>
-        </tr>
-      </table>
-    </div>
-
-    <h2>1. Information We Access</h2>
-    <p>
-      When you choose to authenticate via 1-Click Google Sign-In, GA4 MCP requests the following permissions from your Google Account:
-    </p>
-    <ul>
-      <li>
-        <strong>Google Analytics Read-Only Access (<code>https://www.googleapis.com/auth/analytics.readonly</code>):</strong> 
-        This scope allows your local AI agent (Claude Desktop, Cursor, Claude Code, Cline, etc.) to read Google Analytics 4 property metadata, report schemas, and traffic/conversion reports solely in response to prompts you explicitly initiate.
-      </li>
-      <li>
-        <strong>Basic Profile &amp; Email (<code>openid</code>, <code>profile</code>, <code>email</code>):</strong>
-        Used solely to identify which Google account you have connected in your local environment display.
-      </li>
-    </ul>
-
-    <h2>2. How Your Data Is Used</h2>
-    <p>
-      Your Google Analytics data is queried in real time directly from your local workstation:
-    </p>
-    <ul>
-      <li><strong>Local Agent Query Execution:</strong> When you prompt an AI model in your IDE (e.g. "What were my top referral channels this week?"), the local GA4 MCP server constructs a read query and transmits it directly to Google's official Analytics Data API.</li>
-      <li><strong>Immediate In-Context Analysis:</strong> The returned data is delivered directly into your local IDE or terminal session so the model can answer your question.</li>
-    </ul>
-
-    <h2>3. Google API Services User Data Policy Compliance (Limited Use Disclosure)</h2>
-    <p>
-      GA4 MCP's use and transfer of information received from Google APIs to any other app adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.
-    </p>
-    <p>Specifically:</p>
-    <ul>
-      <li>
-        <strong>No Third-Party Data Transfer or Sale:</strong> We do not transfer, disclose, share, or sell your Google user data to any third parties, data brokers, or advertising networks for purposes other than providing the core analytics services requested.
-      </li>
-      <li>
-        <strong>No Advertising:</strong> We do not use or transfer your Google Analytics data to serve personalized, re-targeted, or interest-based advertisements.
-      </li>
-      <li>
-        <strong>No Non-Personalized AI/ML Model Training:</strong> Google user data and analytics information accessed via Google APIs is <strong>never</strong> used to develop, improve, fine-tune, or train non-personalized AI and/or machine learning models, foundational models, or public LLMs.
-      </li>
-      <li>
-        <strong>No Human Review:</strong> No human (including GA4 MCP maintainers or server administrators) has access to or reads your Google Analytics data, reports, or tokens. Queries execute entirely programmatically between your local machine and Google.
-      </li>
-    </ul>
-
-    <h2>4. Data Protection Mechanisms for Sensitive Data</h2>
-    <p>
-      GA4 MCP implements comprehensive technical and operational safeguards to protect sensitive Google user data (including OAuth tokens and analytics reporting data):
-    </p>
-    <ul>
-      <li>
-        <strong>Security Procedures in Place:</strong> Strict security procedures and organizational controls are in place to ensure the confidentiality, integrity, and availability of all data processed by GA4 MCP.
-      </li>
-      <li>
-        <strong>We Use Encryption to Protect Your Information:</strong> Industry-standard cryptographic protocols are enforced at every stage of data handling, both in transit and at rest.
-      </li>
-    </ul>
-
-    <h3>A. Protection of Data in Transit</h3>
-    <ul>
-      <li>
-        <strong>Strict TLS Encryption:</strong> All communications between your local workstation, the Google Analytics APIs (<code>analyticsdata.googleapis.com</code>, <code>analyticsadmin.googleapis.com</code>), and Google OAuth 2.0 endpoints are encrypted in transit using Transport Layer Security (TLS 1.2 and TLS 1.3) over HTTPS.
-      </li>
-      <li>
-        <strong>No Unencrypted Channels:</strong> Plaintext HTTP transmissions of sensitive data or authentication tokens are strictly disallowed across all components of the application.
-      </li>
-    </ul>
-
-    <h3>B. Protection of Data at Rest</h3>
-    <ul>
-      <li>
-        <strong>Local Workstation Storage &amp; Restricted File Permissions:</strong> Your sensitive authentication credentials (OAuth refresh tokens and access tokens) reside exclusively on your local filesystem at <code>~/.config/ga4-mcp/session.json</code> (or <code>vault.json</code>). This file is created with restricted operating system permissions (Unix <code>chmod 0600</code>), ensuring that only your local operating system user account has read/write access.
-      </li>
-      <li>
-        <strong>Operating System Full-Disk Encryption:</strong> Stored credentials benefit from your workstation's underlying hardware and operating system disk encryption mechanisms (such as macOS FileVault, Windows BitLocker, or Linux LUKS).
-      </li>
-    </ul>
-
-    <h3>C. Stateless Ephemeral Edge Gateway (Zero Server Storage)</h3>
-    <ul>
-      <li>
-        <strong>Ephemeral Relay Only:</strong> During 1-Click Browser Sign-in, Google redirects an authorization code to our gateway (<code>ga4-gateway.reachsuren.workers.dev</code>). The gateway executes an atomic exchange with Google's OAuth token endpoint, returns the resulting token bundle directly to your local loopback listener (<code>http://127.0.0.1:18443</code>), and immediately wipes the tokens from memory.
-      </li>
-      <li>
-        <strong>Zero Persistent Databases:</strong> The edge gateway maintains <strong>zero persistent databases, zero caches, and zero credential logs</strong>. No sensitive Google tokens or user information are ever persisted on our cloud servers.
-      </li>
-      <li>
-        <strong>Direct Analytics Payloads:</strong> All Google Analytics Data API queries and reporting payloads stream directly between your local machine and Google's servers. Reporting payloads never traverse or get retained on any intermediary servers.
-      </li>
-    </ul>
-
-    <h2>5. Data Retention and Deletion</h2>
-    <p>
-      We believe in absolute data minimization and transparent data lifecycles:
-    </p>
-    <ul>
-      <li>
-        <strong>Retention Period:</strong> We store your personal information and authentication tokens locally on your machine only for the length of time needed to fulfill the analytical purposes outlined in this privacy policy, or until you choose to delete them or revoke access.
-      </li>
-      <li>
-        <strong>Zero Server Retention:</strong> Our edge infrastructure retains zero Google user data, zero analytics payloads, and zero credentials (0 seconds retention).
-      </li>
-      <li>
-        <strong>Disposal &amp; Deletion Upon Expiry:</strong> When your data retention period expires or when you choose to discontinue using GA4 MCP, all local data can be permanently deleted immediately.
-      </li>
-      <li>
-        <strong>How to Delete Local Data:</strong> You can delete all local tokens, configurations, and cached schemas at any time by executing:
-        <br>
-        <code>rm -rf ~/.config/ga4-mcp</code>
-      </li>
-      <li>
-        <strong>How to Revoke Google Account Access:</strong> You can revoke GA4 MCP's authorization at any time directly from your Google Account by visiting <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Permissions Settings</a> and selecting "Remove Access". Once revoked, all existing OAuth tokens are permanently invalidated by Google.
-      </li>
-    </ul>
-
-    <h2>6. Alternative Offline Service Account Authentication</h2>
-    <p>
-      If you prefer not to use OAuth, GA4 MCP fully supports 100% offline authentication using your own Google Cloud Service Account key (<code>GOOGLE_APPLICATION_CREDENTIALS</code>) or Google Cloud Application Default Credentials (ADC). In this mode, no network connection to our OAuth gateway is ever initiated, and all authentication occurs directly between your workstation and Google Cloud.
-    </p>
-
-    <h2>7. Security Inquiries &amp; Incident Contact</h2>
-    <p>
-      For privacy inquiries, security questions, or data protection reports, please contact the maintainer directly:
-    </p>
-    <p>
-      <strong>Surendran Balachandran</strong><br>
-      Maintainer, GA4 MCP<br>
-      Email: <a href="mailto:reachsuren@gmail.com">reachsuren@gmail.com</a><br>
-      GitHub: <a href="https://github.com/surendranb/google-analytics-mcp" target="_blank" rel="noopener">https://github.com/surendranb/google-analytics-mcp</a>
-    </p>
-
-    <div class="footer">
-      <div>&copy; 2026 Surendran Balachandran &bull; 100% Free &amp; Open Source (MIT License)</div>
-      <div><a href="/">Home</a> &bull; <a href="https://github.com/surendranb/google-analytics-mcp">GitHub</a></div>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/" class="is-active" aria-current="page">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>Privacy</h1>
+<p>Short version: the server runs on your machine, talks to Google with your credentials, never writes to your property, and sends anonymous usage counts that you can turn off with one variable.</p>
+<h2>What stays local</h2>
+<p>Your credentials, your service-account key, your property ID, and every report the server returns. Queries go from your machine to <code>analyticsdata.googleapis.com</code> and the rows come back to your machine. Nothing passes through studio infrastructure.</p>
+<h2>What is sent</h2>
+<p>The server posts anonymous usage events to <code>ga4.builditwithai.xyz</code>, a Cloudflare Worker that forwards them to the studio's analytics. One event per lifecycle step, not per query.</p>
+<p>Each event carries:</p>
+<ul><li>a random installation identifier, generated on first run. It is not derived from your machine, your Google account, or your credentials</li><li>the event name — for example <code>mcp_started</code>, <code>tool_executed</code>, <code>server_first_install</code></li><li>the tool name that ran, and whether it succeeded</li><li>an error category on failure, such as <code>InitError</code> or <code>IAMError</code></li><li>duration in milliseconds</li><li>the client name and version the server was launched by</li><li>the server version</li></ul>
+<h2>What is not sent</h2>
+<ul><li>your credentials, tokens, or key file path</li><li>your GA4 property ID — numeric IDs are redacted to <code>&lt;id&gt;</code> before sending</li><li>report rows, metrics, dimensions, or anything the GA4 API returned</li><li>file paths, email addresses, or hostnames</li></ul>
+<p>One caveat worth stating: <code>get_ga4_data</code> accepts an optional <code>intent</code> string that describes the question in plain English. That string is recorded with the tool event so the studio can tell which questions the server answers badly. If your intent text contains something you would not send, omit it. The field is optional and the tool works without it.</p>
+<h2>Turning it off</h2>
+<p>Any one of these does it:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export DISABLE_TELEMETRY=1</code></pre></div>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export DO_NOT_TRACK=1</code></pre></div>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export NO_TELEMETRY=1</code></pre></div>
+<p>The check happens before any network call, so with one of them set the server makes no request to studio infrastructure at all. It still works exactly the same.</p>
+<h2>Third parties</h2>
+<p>The site at ga4mcp.com uses Google Analytics and Microsoft Clarity to count page views. The MCP server itself does not load either, and neither is involved in a query.</p>
+<h2>Contact</h2>
+<p>Open an issue at <a href="https://github.com/surendranb/google-analytics-mcp">github.com/surendranb/google-analytics-mcp</a> for any question about this page.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
     </div>
   </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

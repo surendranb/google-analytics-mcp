@@ -2,90 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for ZCode: Setup, Skills and First Query</title>
-<meta name="description" content="Connect GA4 MCP to ZCode with verified config blocks.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP for ZCode</title>
+<meta name="description" content="Add the GA4 MCP server to ZCode. Servers live under mcp.servers in ~/.zcode/cli/config.json, and a competing .agents/mcp.json is skipped entirely, not merged.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-zcode/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP for ZCode">
+<meta property="og:description" content="Add the GA4 MCP server to ZCode. Servers live under mcp.servers in ~/.zcode/cli/config.json, and a competing .agents/mcp.json is skipped entirely, not merged.">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-zcode/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for ZCode","description":"Add the GA4 MCP server to ZCode. Servers live under mcp.servers in ~/.zcode/cli/config.json, and a competing .agents/mcp.json is skipped entirely, not merged.","url":"https://ga4mcp.com/ga4-mcp-for-zcode/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for ZCode: Setup, Skills and First Query</h1>
-<p>angle: One exact ZCode MCP block for GA4, with the sync-to-remote step stated plainly.</p>
-<p>I query GA4 from inside ZCode with the same server I run in Zed and Cursor. GA4 MCP for ZCode gives you that: one entry in Settings, MCP, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
-<li>- ZCode path verified today: Settings, MCP, Add, New MCP Server form or Full configuration mode paste; accepts both <code>{&quot;server-name&quot;: {...}}</code> and <code>{&quot;mcpServers&quot;: {...}}</code> shapes; remote HTTP/SSE plus OAuth button flow (zcode.z.ai MCP docs).</li>
-<li>- Remote note verified today: workspace MCP trusted by default (v3.2.3 changelog); Sync MCP moves user-level config to SSH/WSL remotes on demand, never automatically.</li>
-<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
-<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
-</ul>
-<h2>Configuring ZCode to launch the server</h2>
-<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute.</p>
-<p>1. Open ZCode Settings, MCP Servers. Click Add, New MCP Server.</p>
-<p>2. Switch to Full configuration mode and paste:</p>
-<pre>
-{
-  &quot;mcpServers&quot;: {
-    &quot;google-analytics&quot;: {
-      &quot;command&quot;: &quot;uvx&quot;,
-      &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
-      &quot;env&quot;: {
-        &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
-        &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/absolute/path/to/key.json&quot;
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/" class="is-active" aria-current="page">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>GA4 MCP for ZCode</h1>
+<p>ZCode is Z.ai's coding harness. It reads MCP servers from two possible file locations per scope, and the precedence rule between them is the thing that catches people: it is not a merge.</p>
+<h2>The entry</h2>
+<p>In <code>~/.zcode/cli/config.json</code>:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;mcp&quot;: {
+    &quot;servers&quot;: {
+      &quot;ga4&quot;: {
+        &quot;command&quot;: &quot;uvx&quot;,
+        &quot;args&quot;: [&quot;google-analytics-mcp&quot;],
+        &quot;env&quot;: {
+          &quot;GA4_PROPERTY_ID&quot;: &quot;123456789&quot;,
+          &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;: &quot;/absolute/path/to/key.json&quot;
+        }
       }
     }
   }
-}
-</pre>
-<p>The form fields map to the same keys: Name google-analytics, Scope User, Type stdio, Command uvx, Args <code>google-analytics-mcp</code>, Timeout 30000.</p>
-<p>3. Save and return to the list. Remote workers: use Sync MCP from the workspace header or the MCP settings page to move the user-level entry to SSH/WSL; project-level and plugin-provided entries stay out of sync scope.</p>
-<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
-<h2>Skills worth loading first</h2>
-<p>| Skill slug | What you use it for in ZCode |</p>
-<p>|---|---|</p>
-<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
-<p>| <code>channel-acquisition</code> | You want sessions split by source, medium, channel group |</p>
-<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
-<p>| <code>compatible-combinations</code> | Your dimensions and metrics returned a 400 incompatibility |</p>
-<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
-<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
-<h2>Running your first query</h2>
-<p>Ask: &quot;What were my top channels last week?&quot;</p>
-<p>Your agent should call:</p>
-<pre>
-get_ga4_data(
-  dimensions=[&quot;sessionDefaultChannelGroup&quot;],
-  metrics=[&quot;sessions&quot;],
-  date_range_start=&quot;7daysAgo&quot;,
-  date_range_end=&quot;yesterday&quot;,
-  intent=&quot;which channels drove sessions last week&quot;
-)
-</pre>
-<p>Read the period figure from <code>totals</code>. GA4 computes that block; hand sums drift and I stopped doing them.</p>
-<h2>Fixing the three errors you will hit</h2>
-<p>1. <strong>Tool count shows 0.</strong> Symptom: server connects, no tools listed. Fix: confirm command <code>uvx</code> plus args, Node/Python present on the machine running the agent, restart ZCode.</p>
-<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values with an absolute key path; on a synced remote, confirm the secret moved verbatim and the remote path exists. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
-<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>filter-structures</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
-<h2>FAQ</h2>
-<p><strong>Does GA4 MCP for ZCode use Full configuration mode?</strong></p>
-<p>That is the auditable path. Paste the block above; the form writes the same keys. Verified in zcode.z.ai MCP docs today.</p>
-<p><strong>Does Sync MCP copy secrets?</strong></p>
-<p>Yes, verbatim, to hosts you pick. I sync only to hosts I trust, and I re-check the remote key path after sync.</p>
-<p><strong>Is the workspace server trusted by default?</strong></p>
-<p>Yes, since v3.2.3. That flag covers workspace entries; it never replaces the <code>env</code> values above.</p>
-<p><strong>Why does the agent guess wrong field names?</strong></p>
-<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
-<p><strong>Is usage read-only and private?</strong></p>
-<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
-<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
-<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, zcode.z.ai MCP services plus remote-development sync docs and v3.2.3 changelog, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
-<h2>Breadcrumb</h2>
-<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for ZCode (you are here).</p>
-</main>
+}</code></pre></div>
+<p>Note <code>mcp.servers</code>, two levels deep. Not <code>mcpServers</code>.</p>
+<h2>The four locations</h2>
+<div class="tw"><table><thead><tr><th>Scope</th><th>File</th><th>Root key</th></tr></thead><tbody><tr><td>User</td><td><code>~/.zcode/cli/config.json</code></td><td><code>mcp.servers</code></td></tr><tr><td>Workspace</td><td><code>&lt;project&gt;/.zcode/config.json</code></td><td><code>mcp.servers</code></td></tr><tr><td>User, compatibility</td><td><code>~/.agents/mcp.json</code></td><td><code>mcpServers</code></td></tr><tr><td>Workspace, compatibility</td><td><code>&lt;project&gt;/.agents/mcp.json</code></td><td><code>mcpServers</code></td></tr></tbody></table></div>
+<p>ZCode also reads the <code>.agents</code> files, which use the plain <code>mcpServers</code> shape shared with several other clients. Useful if you already maintain one, and a trap if you maintain both.</p>
+<h2>The precedence rule</h2>
+<p>Within a single scope, <code>.zcode/config.json</code> wins <strong>wholesale</strong>. If it contains any server at all, the matching <code>.agents/mcp.json</code> at that scope is skipped entirely — not merged, not combined.</p>
+<p>So a user who adds GA4 to <code>~/.agents/mcp.json</code> while <code>~/.zcode/cli/config.json</code> already holds one server sees no GA4 tools, with no error. Either consolidate into the <code>.zcode</code> file, or keep the <code>.agents</code> file as the only source at that scope.</p>
+<h2>Legacy keys</h2>
+<p>ZCode accepts a set of older key names and translates them: <code>environment</code> is read as <code>env</code>, <code>http_headers</code> as <code>headers</code>, <code>enable</code> as <code>enabled</code>, and <code>type: &quot;remote&quot;</code> as <code>type: &quot;http&quot;</code>. The current schema takes <code>env</code>, and <code>type</code> accepts <code>http</code>, <code>sse</code> or <code>stdio</code>.</p>
+<p>Writing <code>env</code> is the right choice for a new entry. The legacy names work, but they are compatibility rather than the current shape.</p>
+<h2>Verify</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>If the tool list is empty, check which file ZCode actually loaded. A populated <code>.zcode/config.json</code> hides <code>.agents/mcp.json</code> at the same scope, and that is by design rather than a bug.</p>
+<h2>Next</h2>
+<p><a href="/setup/">Install</a> for the two values, <a href="/skills/">skills</a> for what to load before an analytical question.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix the GA4 permission error</title>
+<meta name="description" content="The service account is valid but not authorised on the property. Nine steps in the Analytics UI, plus what to check when the change has not taken effect yet.">
+<link rel="canonical" href="https://ga4mcp.com/iam/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Fix the GA4 permission error">
+<meta property="og:description" content="The service account is valid but not authorised on the property. Nine steps in the Analytics UI, plus what to check when the change has not taken effect yet.">
+<meta property="og:url" content="https://ga4mcp.com/iam/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Fix the GA4 permission error","description":"The service account is valid but not authorised on the property. Nine steps in the Analytics UI, plus what to check when the change has not taken effect yet.","url":"https://ga4mcp.com/iam/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/" class="is-active" aria-current="page">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>The 403 that is not a bug</h1>
+<p>If you see this error, the credentials worked. The query reached Google and Google said no:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>IAM Error: The service account does not have Viewer access to the GA4 property</code></pre></div>
+<p>Nothing is wrong with your JSON key, your file path, or your property ID. The service account exists, it authenticated, and it has no permission on that property. Adding it is nine clicks.</p>
+<h2>The nine steps</h2>
+<p>You need the <code>client_email</code> value from your service-account JSON key. It looks like <code>my-agent@my-project.iam.gserviceaccount.com</code>. Open the key file in any text editor and copy that field — not <code>client_id</code>, not the private key.</p>
+<ol><li>Open <a href="https://analytics.google.com">analytics.google.com</a>.</li><li>Select the property whose ID matches your <code>GA4_PROPERTY_ID</code>.</li><li>Click <strong>Admin</strong>, the gear at the bottom left.</li><li>In the <strong>Property</strong> column, click <strong>Property access management</strong>.</li><li>Click the blue <strong>+</strong> at the top right, then <strong>Add users</strong>.</li><li>Paste the <code>client_email</code> into the email field.</li><li>Leave <strong>Notify new users by email</strong> switched off. It is a robot address and the mail bounces.</li><li>Under <strong>Direct roles</strong>, tick <strong>Viewer</strong>. Do not tick Administrator.</li><li>Click <strong>Add</strong>.</li></ol>
+<p>Retry the query. It works immediately — there is no propagation delay on property access.</p>
+<h2>When Viewer is not enough</h2>
+<p>The server is read-only, so Viewer covers every tool it ships. Two situations need more:</p>
+<ul><li>You are querying <strong>real-time reports</strong> on a property where the service account was added to an account rather than a property. Add it at the property level instead.</li><li>You are using <code>list_properties</code> across several properties. The service account needs access to each one it should see. It returns only what it can read, and an empty list means zero properties, not a broken install.</li></ul>
+<div class="note"><span class="note__label">Note</span><p>these steps change a permission on a live Google property. If you are not the property owner, someone who is has to do this. There is no API path around it and no workaround that keeps Viewer off.</p></div>
+<h2>Still failing after the add</h2>
+<p>Work through these in order. Each one has a distinct error message.</p>
+<p><strong><code>PERMISSION_DENIED</code> with a property ID in the message.</strong> The property ID in your config is not the one you granted access to. Compare the two numbers digit by digit. This is common when someone has both a GA4 and an old UA property with similar names.</p>
+<p><strong><code>API has not been used in project ... before or it is disabled</code>.</strong> The Analytics Data API is off. Enable it in the Google Cloud console under <strong>APIs &amp; Services → Library</strong>.</p>
+<p><strong><code>invalid_grant</code> or <code>ADCExpired</code>.</strong> Your <code>gcloud</code> session expired. Run <code>gcloud auth application-default login</code> again. If you use a JSON key, this error means the key was deleted or rotated.</p>
+<p><strong><code>The caller does not have permission</code> on <code>list_properties</code>.</strong> The service account has no access at the account level. This is expected and harmless if the property-level grant above is in place.</p>
+<h2>Let the agent check for you</h2>
+<p>If the client can reach the server at all, this returns the same decision tree offline:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>get_troubleshooting_guide(topic=&quot;iam&quot;)</code></pre></div>
+<p>And <code>setup_ga4_access</code> walks the fix in-session where the client supports prompts.</p>
+<h2>Next</h2>
+<p>If permissions are fine and queries still fail, the problem is a field name or a filter shape. Read <a href="/schema/">query shapes</a>.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

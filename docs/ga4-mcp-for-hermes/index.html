@@ -2,93 +2,96 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for Hermes: Setup, Skills and First Query</title>
-<meta name="description" content="Connect GA4 MCP to Hermes with verified config blocks.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP for Hermes</title>
+<meta name="description" content="Add the GA4 MCP server to Hermes Agent. The root key is mcp_servers in YAML, not mcpServers in JSON, so a Claude snippet silently adds nothing.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-hermes/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP for Hermes">
+<meta property="og:description" content="Add the GA4 MCP server to Hermes Agent. The root key is mcp_servers in YAML, not mcpServers in JSON, so a Claude snippet silently adds nothing.">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-hermes/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for Hermes","description":"Add the GA4 MCP server to Hermes Agent. The root key is mcp_servers in YAML, not mcpServers in JSON, so a Claude snippet silently adds nothing.","url":"https://ga4mcp.com/ga4-mcp-for-hermes/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for Hermes: Setup, Skills and First Query</h1>
-<p>angle: One exact config.yaml block for Hermes, so the YAML shape stops getting confused with JSON clients.</p>
-<p>I query GA4 from inside Hermes with the same server I run in Claude Code. GA4 MCP for Hermes gives you that: one entry under <code>mcp_servers</code> in <code>~/.hermes/config.yaml</code>, your property ID plus credentials in <code>env</code>, then plain questions answered from your own property schema.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>- Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>- One-line installer: <code>https://ga4.builditwithai.xyz/install</code>. Runtimes: <code>uvx google-analytics-mcp</code> and <code>npx -y @surendranb/google-analytics-mcp</code>.</li>
-<li>- Hermes path verified today: <code>~/.hermes/config.yaml</code> under <code>mcp_servers</code> with <code>command</code>/<code>args</code>/<code>env</code> for stdio and <code>url</code> for HTTP; <code>hermes mcp add/test</code>, <code>hermes chat</code>; standard install ships MCP, no extra step (Hermes MCP docs).</li>
-<li>- Mapping verified today: <code>~/.claude.json</code> <code>mcpServers</code> maps to Hermes <code>mcp_servers</code>; <code>hermes import-agent claude-code</code> migrates it.</li>
-<li>- Repo <code>pyproject.toml</code> reads 2.11.5 today, ahead of site 2.11.4; I quote the site label.</li>
-<li>- Read-only, local stdio. Telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
-</ul>
-<h2>Configuring Hermes to launch the server</h2>
-<p>Prerequisites: numeric <code>GA4_PROPERTY_ID</code> (Admin, Property details, not the <code>G-</code> ID), plus a service-account JSON path or <code>gcloud auth application-default login</code>. Keep the JSON path absolute. Secrets belong in <code>~/.hermes/.env</code>; non-secret settings belong in <code>config.yaml</code>.</p>
-<p>1. Open <code>~/.hermes/config.yaml</code> and add:</p>
-<pre>
-mcp_servers:
-  google-analytics:
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/" class="is-active" aria-current="page">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>GA4 MCP for Hermes</h1>
+<p>Hermes is Nous Research's agent harness. It configures MCP servers in YAML, and the root key is <code>mcp_servers</code> — snake case. A Claude Desktop snippet pasted here produces a file that parses fine and registers nothing.</p>
+<h2>The entry</h2>
+<p>In <code>~/.hermes/config.yaml</code>:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">yaml</span><button class="cb__copy" type="button">Copy</button></div><pre><code>mcp_servers:
+  ga4:
     command: &quot;uvx&quot;
-    args: [&quot;google-analytics-mcp&quot;]
-    env:
-      GA4_PROPERTY_ID: &quot;123456789&quot;
-      GOOGLE_APPLICATION_CREDENTIALS: &quot;/absolute/path/to/key.json&quot;
-</pre>
-<p>2. Command alternative:</p>
-<pre>
-hermes mcp add google-analytics --command uvx --args google-analytics-mcp
-</pre>
-<p>Then add the two <code>env</code> values in <code>config.yaml</code> by hand.</p>
-<p>3. Test the connection:</p>
-<pre>
-hermes mcp test google-analytics
-hermes chat
-</pre>
-<p>Exit 0 means the server connected and listed tools.</p>
-<p>4. Verify by asking: &quot;List my GA4 properties.&quot; You have succeeded when <code>list_properties</code> returns rows with no setup error.</p>
-<h2>Skills worth loading first</h2>
-<p>| Skill slug | What you use it for in Hermes |</p>
-<p>|---|---|</p>
-<p>| <code>traffic-diagnosis</code> | You saw sessions move and want the ordered checks |</p>
-<p>| <code>common-metric-names</code> | Your field name failed and you want the working GA4 name |</p>
-<p>| <code>bot-traffic-detection</code> | You strip bot, scraper, spam sessions before reading a trend |</p>
-<p>| <code>date-ranges</code> | You compare two periods and want the two-query pattern |</p>
-<p>| <code>filter-structures</code> | Your dimension filter returned an invalid-filter error |</p>
-<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with <code>search_skills(&quot;&lt;slug&gt;&quot;)</code>.</p>
-<h2>Running your first query</h2>
-<p>Ask: &quot;Did bots inflate last week&#x27;s sessions?&quot;</p>
-<p>Your agent should first load <code>bot-traffic-detection</code>, then call:</p>
-<pre>
-get_ga4_data(
-  dimensions=[&quot;date&quot;],
-  metrics=[&quot;sessions&quot;],
-  date_range_start=&quot;7daysAgo&quot;,
-  date_range_end=&quot;yesterday&quot;,
-  intent=&quot;check sessions trend last 7 days before bot split&quot;
-)
-</pre>
-<p>Read the period figure from <code>totals</code>. GA4 computes it; I stopped hand-summing after watching agents drift.</p>
-<h2>Fixing the three errors you will hit</h2>
-<p>1. <strong>No MCP servers configured.</strong> Symptom: Hermes reports no servers. Fix: confirm the key is <code>mcp_servers</code> with underscore in <code>~/.hermes/config.yaml</code> (not <code>mcpServers</code>), YAML indent exact, then restart.</p>
-<p>2. <strong>Setup error on first call.</strong> Symptom: missing property or credentials. Fix: confirm both <code>env</code> values resolve (<code>${VAR}</code> and <code>${env:VAR}</code> both read process env plus <code>.env</code>); for ADC expiry run <code>gcloud auth application-default login</code>. <code>setup_ga4_access</code> recovers mid-session where prompts are supported.</p>
-<p>3. <strong>Invalid dimension, metric, or filter.</strong> Symptom: 400 naming error. Fix: run <code>search_schema(&quot;&lt;keyword&gt;&quot;)</code>, load <code>common-metric-names</code> plus <code>compatible-combinations</code>, retry. Offline guide: <code>get_troubleshooting_guide(topic=&quot;schema&quot;)</code>.</p>
-<h2>FAQ</h2>
-<p><strong>Does GA4 MCP for Hermes use config.yaml?</strong></p>
-<p>Yes. <code>~/.hermes/config.yaml</code> under <code>mcp_servers</code>, verified in Hermes MCP docs today. YAML, not JSON; the underscore key matters.</p>
-<p><strong>Does hermes import-agent claude-code move my GA4 entry?</strong></p>
-<p>Yes. It migrates <code>mcpServers</code> plus skills and instructions from Claude Code into <code>mcp_servers</code> automatically.</p>
-<p><strong>Does the standard install include MCP?</strong></p>
-<p>Yes. No extra package step. The <code>uv pip install -e .[mcp]</code> line in older guides covers source checkouts without extras.</p>
-<p><strong>Why does the agent guess wrong field names?</strong></p>
-<p>Training predates GA4 renames (UA sunset 2023-07-01; conversions renamed to key events 2024-05-06). The <code>ua-to-ga4</code> skill maps each old name.</p>
-<p><strong>Is usage read-only and private?</strong></p>
-<p>Yes. Tools read metadata and reports; they change nothing. Traffic runs from your machine to the GA4 Data API. Anonymous counts stop with <code>DISABLE_TELEMETRY=1</code>.</p>
-<p><strong>Why does the repo read 2.11.5 when the site says 2.11.4?</strong></p>
-<p>Main moved ahead of the site label at fetch today. I quote 2.11.4 for installs and state the gap here.</p>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, Hermes MCP plus config-reference docs, and repo raw <code>pyproject.toml</code> 2.11.5.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
-<h2>Breadcrumb</h2>
-<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Hermes (you are here).</p>
-</main>
+    args: [&quot;google-analytics-mcp&quot;]</code></pre></div>
+<p>That is the shape Hermes documents. Note the two differences from the common JSON form: the root key is <code>mcp_servers</code>, and the file is YAML, so indentation carries the structure.</p>
+<h2>Credentials</h2>
+<p>Hermes' documented example shows <code>command</code> and <code>args</code> only. It does not publish an environment key for this block, and this server cannot run without two values.</p>
+<p>The reliable route is to export them before launching Hermes, so the server process inherits them:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export GA4_PROPERTY_ID=&quot;123456789&quot;
+export GOOGLE_APPLICATION_CREDENTIALS=&quot;/absolute/path/to/key.json&quot;</code></pre></div>
+<p>Launch Hermes from that shell. Application default credentials work here too — run <code>gcloud auth application-default login</code> once and you can drop the second variable.</p>
+<div class="note"><span class="note__label">Note</span><p>if a future Hermes release documents an <code>env</code> key, prefer it over shell inheritance. This page states shell export because that is what the vendor documents today.</p></div>
+<h2>Migrating from Claude</h2>
+<p>Hermes ships a migration command that rewrites a Claude configuration into its own shape:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>hermes import-agent claude-code</code></pre></div>
+<p>It maps Claude's <code>mcpServers</code> in <code>~/.claude.json</code> onto <code>mcp_servers</code> in <code>config.yaml</code>. Worth running even if you only want the shape as a reference — the output shows exactly how Hermes expects a server to look.</p>
+<p>There is also a picker and a catalog:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>hermes mcp</code></pre></div>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>hermes mcp install ga4</code></pre></div>
+<p>The catalog holds entries from Hermes' own <code>optional-mcps</code> directory. If GA4 is not in it, the manual block above is the path.</p>
+<h2>Do not confuse the packages</h2>
+<p><code>hermes-mcp</code> on PyPI is the opposite direction: an MCP server that exposes a Hermes agent to other clients. Installing it does not give Hermes access to Analytics.</p>
+<h2>Verify</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>If the agent has no GA4 tools at all, check the root key first. <code>mcpServers</code> in that file is valid YAML and completely inert.</p>
+<h2>Next</h2>
+<p><a href="/setup/">Install</a> for the two values, <a href="/schema/">query shapes</a> when a query fails on a filter.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>

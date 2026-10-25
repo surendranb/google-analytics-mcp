@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install GA4 MCP — setup guide</title>
+<meta name="description" content="Install the Google Analytics 4 MCP server, connect a service account, and verify it works. Three install routes, the two values it needs, and the four…">
+<link rel="canonical" href="https://ga4mcp.com/setup/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Install GA4 MCP — setup guide">
+<meta property="og:description" content="Install the Google Analytics 4 MCP server, connect a service account, and verify it works. Three install routes, the two values it needs, and the four…">
+<meta property="og:url" content="https://ga4mcp.com/setup/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Install GA4 MCP — setup guide","description":"Install the Google Analytics 4 MCP server, connect a service account, and verify it works. Three install routes, the two values it needs, and the four…","url":"https://ga4mcp.com/setup/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/" class="is-active">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/" class="is-active" aria-current="page">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>Install GA4 MCP</h1>
+<p>This guide takes you from nothing to a working GA4 query inside your agent. It assumes you have a Google Analytics 4 property and a client that speaks MCP.</p>
+<h2>What you need first</h2>
+<p>Three things, and only the first one is easy to get wrong.</p>
+<p><strong>A GA4 property ID.</strong> It is a number like <code>123456789</code>. You find it in Analytics under <strong>Admin → Property details</strong>. It is not the <code>G-XXXXXXXXXX</code> measurement ID, and it is not the numeric stream ID. Pasting the measurement ID is the single most common setup failure.</p>
+<p><strong>A Google Cloud project</strong> with the Analytics Data API enabled.</p>
+<p><strong>Credentials,</strong> picked in the next section. Either a service-account JSON key or the local <code>gcloud</code> login works.</p>
+<h2>Step 1 — Install the server</h2>
+<p>Three routes. Pick one.</p>
+<p>The installer is the one that also writes your client entry:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>curl -fsSL &quot;https://ga4.builditwithai.xyz/install&quot; | bash</code></pre></div>
+<p>It detects your client, checks for <code>uv</code>, installs the package, and writes the MCP server entry. It covers Claude Desktop, Claude Code, Cursor, VS Code with Cline or Roo Code, Continue.dev, OpenCode, Windsurf, Zed and Google Antigravity.</p>
+<p>If you would rather not run a script, use a runtime directly:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>uvx google-analytics-mcp</code></pre></div>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>npx -y @surendranb/google-analytics-mcp</code></pre></div>
+<p>Both are the same server. <code>uvx</code> is faster to start after the first run; <code>npx</code> needs Node already installed.</p>
+<div class="note"><span class="note__label">Note</span><p>the installer writes the entry, not the credentials. You still set the two values in Step 2.</p></div>
+<h2>Step 2 — Connect it to your property</h2>
+<p>The server reads two environment variables. Both belong inside the client's server entry, not in your shell profile, unless you launch the client from a shell that has them.</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export GA4_PROPERTY_ID=&quot;123456789&quot;
+export GOOGLE_APPLICATION_CREDENTIALS=&quot;/absolute/path/to/service-account.json&quot;</code></pre></div>
+<p>The credentials path must be absolute. A relative path resolves against whatever directory the client happens to start in, which is not the one you expect.</p>
+<p><strong>If you use a service account,</strong> create it in the Google Cloud console under <strong>IAM &amp; Admin → Service Accounts</strong>, then <strong>Keys → Add key → JSON</strong>. That key file is what the path points at. The service account also has to be added to the GA4 property itself — that is a separate step and it is where most people stop. The <a href="/iam/">permissions guide</a> walks through it.</p>
+<p><strong>If you use <code>gcloud</code> instead,</strong> run this once and skip the key file entirely:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>gcloud auth application-default login</code></pre></div>
+<p>Then omit <code>GOOGLE_APPLICATION_CREDENTIALS</code>. The server picks up application default credentials.</p>
+<div class="note note--teal"><span class="note__label">Tip</span><p>the property ID is numeric and has no prefix. If yours starts with <code>G-</code>, you have the measurement ID, and every query will fail with a permissions error that has nothing to do with permissions.</p></div>
+<h2>Step 3 — Verify it actually works</h2>
+<p>Open your client and ask this exact question:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>You have succeeded when the agent calls <code>list_properties</code> and returns rows. A setup error at this point is one of four things, and the next section names all of them.</p>
+<p>Then ask one question that exercises the analysis layer:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Why did organic sessions drop in the last 7 days?</code></pre></div>
+<p>A working install loads the <code>traffic-diagnosis</code> skill, calls <code>get_ga4_data</code>, and answers with a <code>totals</code> block rather than a summary of daily rows.</p>
+<h2>When it fails</h2>
+<div class="tw"><table><thead><tr><th>What you see</th><th>What it means</th><th>Where to go</th></tr></thead><tbody><tr><td><code>InitError</code> on startup</td><td>One or both environment variables are missing or outside the server's <code>env</code> block</td><td><a href="/setup/#when-it-fails">Setup errors</a></td></tr><tr><td><code>IAMError</code> or <code>403</code></td><td>The service account is valid but was never added to the property</td><td><a href="/iam/">Permissions guide</a></td></tr><tr><td><code>ADCExpired</code> or <code>503</code></td><td>The <code>gcloud</code> login expired</td><td>Run <code>gcloud auth application-default login</code> again</td></tr><tr><td><code>400</code> invalid dimension or metric</td><td>The field name is a UA name or a guess</td><td><a href="/schema/">Query shapes</a> and <code>search_schema</code></td></tr></tbody></table></div>
+<p>The server also carries these fix paths inside the package, so an agent can resolve most of them without a browser:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>get_troubleshooting_guide(topic=&quot;setup&quot; | &quot;iam&quot; | &quot;schema&quot;)</code></pre></div>
+<h2>Or let the agent fix it</h2>
+<p>If the client supports prompts, <code>setup_ga4_access</code> collects the missing value and reconnects without a restart. That is usually faster than editing config by hand.</p>
+<h2>Next</h2>
+<p>Read <a href="/ga4-mcp-for-every-harness/">your client's guide</a> for the exact config shape it expects, since four of the eleven clients use a different key than the rest. Then read the <a href="/skills/">skills index</a> to see what the agent can do once it is connected.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

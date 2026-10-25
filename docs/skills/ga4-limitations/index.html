@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 API Limitations — GA4 MCP skill</title>
+<meta name="description" content="What this MCP **cannot** do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.">
+<link rel="canonical" href="https://ga4mcp.com/skills/ga4-limitations/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 API Limitations — GA4 MCP skill">
+<meta property="og:description" content="What this MCP **cannot** do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.">
+<meta property="og:url" content="https://ga4mcp.com/skills/ga4-limitations/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 API Limitations — GA4 MCP skill","description":"What this MCP **cannot** do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.","url":"https://ga4mcp.com/skills/ga4-limitations/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/" class="is-active">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/" class="is-active" aria-current="page">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>GA4 API Limitations</h1><p>What this MCP <strong>cannot</strong> do via the GA4 Data API, and where to go instead. Attempting these will either fail or produce meaningless aggregate data.</p>
+<h2>Not available via this MCP</h2>
+<div class="tw"><table><thead><tr><th>Analysis type</th><th>Why not available</th><th>Where to do it instead</th></tr></thead><tbody><tr><td>Funnel analysis (drop-off by step)</td><td><code>runFunnelReport</code> exists in the API but is not exposed by this MCP</td><td>GA4 UI → Explore → Funnel Exploration</td></tr><tr><td>Cohort retention (week N return rate)</td><td><code>runCohortReport</code> not exposed</td><td>GA4 UI → Explore → Cohort Exploration</td></tr><tr><td>User path / flow analysis</td><td>Not available in aggregate API</td><td>GA4 UI → Explore → Path Exploration</td></tr><tr><td>Per-user event sequences</td><td>API returns aggregate rows only — no individual user journeys</td><td>BigQuery export (raw events)</td></tr><tr><td>Real-time custom breakdowns</td><td>Realtime API is limited to last 30 minutes, basic dimensions</td><td>GA4 UI → Realtime report</td></tr><tr><td>Raw event-level data</td><td>Data API aggregates; no row-level access</td><td>BigQuery export</td></tr><tr><td>Segment overlap / Venn analysis</td><td>Not a native API feature</td><td>BigQuery or GA4 Explore comparisons</td></tr><tr><td>Custom channel group definitions</td><td>Read-only via API; custom groups must be created in UI</td><td>GA4 UI → Admin → Custom Channel Groups</td></tr></tbody></table></div>
+<h2>What IS available (and often underused)</h2>
+<ul><li><strong>Period-over-period in one call</strong>: pass two <code>date_ranges</code> — GA4 returns both periods in a single response (use <code>date_range_start</code>/<code>date_range_end</code> for each; call twice if two-range isn't supported)</li><li><strong>Ecommerce metrics</strong>: full purchase funnel metrics (<code>itemsViewed</code>, <code>itemsAddedToCart</code>, <code>itemsPurchased</code>, <code>purchaseRevenue</code>, <code>cartToViewRate</code>) — aggregate only, not per-session funnel</li><li><strong>Search Console integration</strong>: available as a linked report in GA4 UI but the Search Console data is on a separate API — not queryable via this MCP (use Google Search Console API directly)</li><li><strong>Custom dimensions and metrics</strong>: available if defined in the property — they appear in the schema alongside standard fields</li><li><strong>Attribution modeling comparisons</strong>: not directly queryable — data-driven vs last-click is set at the property level, not a query-time parameter</li></ul>
+<h2>When a user asks for funnel or cohort analysis</h2>
+<p>Tell them: the GA4 Data API returns aggregate metrics, not event sequences. For funnel drop-off between specific steps, use GA4 Explore → Funnel Exploration. For cohort retention (week 1 / week 2 return), use GA4 Explore → Cohort Exploration. These analyses require the GA4 UI or a BigQuery export, not the Data API.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

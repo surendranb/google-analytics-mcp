@@ -1,0 +1,3346 @@
+# GA4 MCP Server — full text
+Version 2.11.6, updated 2026-10-25. https://ga4mcp.com
+
+
+
+# GA4 MCP client setup — the config each one expects
+URL: https://ga4mcp.com/ga4-mcp-for-every-harness/
+
+
+# Every client, and the config it actually wants
+
+Most MCP installation guides give you one JSON block and tell you it works everywhere. It does not. Across the seventeen clients below there are six different root keys, four different names for the environment object, and four file formats.
+
+Copying a Claude Desktop snippet into Hermes produces a file that parses and registers no servers. Copying one into OpenCode produces a server that never appears. Neither reports an error.
+
+| What varies | Values across these clients |
+|---|---|
+| Root key | `mcpServers` (most clients), `servers` (VS Code), `context_servers` (Zed), `mcp` (OpenCode), `mcp_servers` (Hermes), `mcp.servers` (OpenClaw, ZCode) |
+| Environment key | `env` (most), `envs` (Goose), `environment` (OpenCode), `env` plus `env_vars` (Codex) |
+| Command shape | String everywhere except OpenCode, which takes an array |
+| File format | JSON (most), TOML (Codex), YAML (Goose, Hermes, DeepSeek) |
+
+Every block on the pages below is quoted from that vendor's own documentation, with the source page named. Where a vendor has not published a path, this site says so instead of inventing one.
+
+<!--CLIENTS-->
+
+## If your client is not here
+
+It probably still works. The server speaks MCP over stdio, which is the transport every client here uses. Start from the shape used by the client closest to yours, run `uvx google-analytics-mcp` in a terminal to confirm the server itself is fine, and then find where your client keeps its server list.
+
+The server itself is client-agnostic. It speaks MCP over stdio. The only thing that changes per client is where the entry lives and what the surrounding keys are called.
+
+## Next
+
+Whichever client you pick, the credentials and verification steps are the same. Read [install](/setup/) for those, then [permissions](/iam/) when the first query returns a 403.
+
+
+
+# GA4 MCP for Antigravity IDE
+URL: https://ga4mcp.com/ga4-mcp-for-antigravity-ide/
+
+
+# GA4 MCP for Antigravity IDE
+
+The Antigravity IDE shares one MCP schema with the App and the CLI. Google's own documentation states it plainly: `mcp_config.json` follows a standardised schema, and the root object holds an `mcpServers` map.
+
+What differs in the IDE is the management surface, not the file.
+
+## The entry
+
+```json
+{
+  "mcpServers": {
+    "ga4": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+## The two files
+
+| Scope | Path |
+|---|---|
+| Global, every project | `~/.gemini/config/mcp_config.json` |
+| This workspace | `<workspace>/.agents/mcp_config.json` |
+
+The global path sits under `.gemini`, not a directory named after Antigravity. That surprises people who go looking for `~/.antigravity`.
+
+## Managing it from the IDE
+
+The IDE has a UI for the same file:
+
+1. Open the agent side panel.
+2. Click the `…` menu.
+3. Choose **MCP Servers**.
+4. Choose **Manage MCP Servers**.
+5. Choose **View raw config** to see or edit the file.
+
+That screen is the fastest way to find which of the two files is actually loaded, because it shows the resolved config rather than the one you think you edited.
+
+> **Tip:** if you edit the workspace file and nothing changes, the global file probably wins for that project. Check the raw config view before assuming the entry was ignored.
+
+## Remote servers are Streamable HTTP only
+
+Worth knowing if you were planning to point the IDE at a hosted endpoint: it accepts Streamable HTTP with `serverUrl` (`url` also works). Legacy HTTP with SSE and `httpUrl` are explicitly unsupported.
+
+This server is local stdio, so none of that applies — but it explains why a hosted Analytics MCP endpoint may or may not drop into the IDE depending on how it is served.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+Then check the MCP Servers list in the agent panel. A server that shows as installed with no tools means the process exited after launching; run `uvx google-analytics-mcp` in a terminal to see the error.
+
+## Next
+
+[Antigravity App and CLI](/ga4-mcp-for-antigravity/) for the other two surfaces, [install](/setup/) for the credentials.
+
+
+
+# GA4 MCP for Google Antigravity
+URL: https://ga4mcp.com/ga4-mcp-for-antigravity/
+
+
+# GA4 MCP for Google Antigravity
+
+Antigravity ships as an app, an IDE and a CLI, and all three use the same `mcp_config.json` schema and the same two file paths. What differs is only how you get the entry in.
+
+## App and IDE: use the settings UI
+
+In the Antigravity app, servers are added through **Settings → Customizations → Installed MCP Servers**. That flow writes the config for you, which is the safer route because Antigravity does not publish an absolute path for the file on every platform.
+
+Paste the entry below into that UI.
+
+## The entry
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+The root key is `mcpServers`, the same as Claude Desktop, Cursor and Gemini CLI. `env` sits inside the server object.
+
+## Where the file lives
+
+Two paths, both shared across the App, the IDE and the CLI:
+
+| Scope | Path |
+|---|---|
+| Global, every project | `~/.gemini/config/mcp_config.json` |
+| This workspace | `<workspace>/.agents/mcp_config.json` |
+
+The global path sits under `.gemini`, not a directory named after Antigravity. If you went looking for `~/.antigravity` and found nothing, that is why.
+
+The settings screen writes one of these two files. Editing the file by hand works equally well, and the [IDE guide](/ga4-mcp-for-antigravity-ide/) shows where the IDE exposes the raw config.
+
+## Verify
+
+In the agent panel:
+
+```text
+List my GA4 properties.
+```
+
+Then confirm the server shows as connected in the MCP servers list under Customizations. A server that appears but exposes no tools usually means the process launched and exited — run `uvx google-analytics-mcp` in a terminal to see why.
+
+## Using the CLI surface
+
+The CLI reads the same schema. Because the client is Google's own, an alternative worth knowing: Google publishes a hosted Analytics MCP endpoint at `analyticsdata.googleapis.com/mcp/v1` that needs no local process at all. It exposes reporting and metadata tools and nothing else. Use it if you want zero install; use this server when you want the skill layer and the setup recovery.
+
+## Next
+
+[Setup](/setup/) for the two values, [permissions](/iam/) when the first query returns a 403.
+
+
+
+# GA4 MCP for Claude — Code and Desktop
+URL: https://ga4mcp.com/ga4-mcp-for-claude/
+
+
+# GA4 MCP for Claude
+
+Claude has two surfaces that run local MCP servers, and they take different configuration. Claude Code is a CLI and registers the server from your terminal. Claude Desktop reads a JSON file.
+
+## Prerequisites
+
+You need the numeric property ID and either a service-account key path or a `gcloud` login. Both are covered in [install](/setup/). Keep the key path absolute.
+
+## Claude Code
+
+One command:
+
+```bash
+claude mcp add google-analytics -- uvx google-analytics-mcp
+```
+
+The `--` matters. Everything after it is passed to the server untouched, so a future flag on the server is not swallowed by the CLI parser.
+
+To pass the two environment variables at registration time instead of exporting them:
+
+```bash
+claude mcp add --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json --transport stdio google-analytics -- uvx google-analytics-mcp
+```
+
+If you would rather hand it a full entry as JSON:
+
+```bash
+claude mcp add-json google-analytics '{"type":"stdio","command":"uvx","args":["google-analytics-mcp"],"env":{"GA4_PROPERTY_ID":"123456789","GOOGLE_APPLICATION_CREDENTIALS":"/absolute/path/to/key.json"}}'
+```
+
+Claude Code stores project-scoped servers in `.mcp.json` at the repository root, and user-scoped ones in `~/.claude.json`. Either is fine; project scope is the better default for a server that belongs to one analytics property.
+
+## Claude Desktop
+
+Open the config file. On macOS it is here:
+
+```text
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+On Windows it is `%APPDATA%\Claude\claude_desktop_config.json`. You can also reach it from the app: **Settings → Developer → Edit Config**.
+
+Add the entry:
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Save, then quit Claude Desktop completely and reopen it. A window close is not a restart; the server list is read at launch.
+
+## Verify
+
+Ask this in either surface:
+
+```text
+List my GA4 properties.
+```
+
+Success is `list_properties` returning rows with no setup error. An empty list means the credentials work but the service account has access to no properties — see [permissions](/iam/).
+
+## The two failures specific to Claude
+
+**The server does not appear in Claude Code.** Run `uvx google-analytics-mcp` on its own in a terminal. If that fails, the CLI is not the problem and no amount of re-registering will fix it. Usually `uv` is missing from the PATH that the client inherits.
+
+**Claude Desktop shows a setup error on launch.** The `env` block is outside the server object, or the credentials path is relative. Both variables must sit inside the same object as `command`, and the path must start with `/` on macOS or a drive letter on Windows.
+
+> **Note:** the installer at `/setup/` writes both entries for you, which avoids the JSON entirely.
+
+## Next
+
+[Skills](/skills/) explains what to load before asking an analytical question. [Query shapes](/schema/) covers the filter syntax when a query fails on structure rather than credentials.
+
+
+
+# GA4 MCP for Codex CLI
+URL: https://ga4mcp.com/ga4-mcp-for-codex/
+
+
+# GA4 MCP for Codex
+
+Codex is the one client in this set that configures MCP servers in TOML rather than JSON, and the one that splits environment handling into two separate keys. Both trip people up.
+
+## One command
+
+```bash
+codex mcp add google-analytics --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json -- uvx google-analytics-mcp
+```
+
+As with Claude Code, the `--` separates Codex's own flags from the command it will launch.
+
+## The file
+
+Codex reads `~/.codex/config.toml` for every session, and `.codex/config.toml` inside a project that Codex has been told to trust. Project config only applies to trusted projects, which is a deliberate security boundary rather than a bug.
+
+```toml
+[mcp_servers.google-analytics]
+command = "uvx"
+args = ["google-analytics-mcp"]
+
+[mcp_servers.google-analytics.env]
+GA4_PROPERTY_ID = "123456789"
+GOOGLE_APPLICATION_CREDENTIALS = "/absolute/path/to/key.json"
+```
+
+That is the whole entry. TOML table headers do the work that JSON braces do elsewhere.
+
+## env versus env_vars
+
+This is the part that catches people, and it is specific to Codex.
+
+- `env` **sets** a value. Use it when you want to write the value in the file.
+- `env_vars` **allows an existing environment variable through** to the server. Use it when the value lives in your shell or a secret manager and you do not want it in the file.
+
+So these two entries do different things:
+
+```toml
+[mcp_servers.google-analytics.env]
+GA4_PROPERTY_ID = "123456789"
+```
+
+```toml
+[mcp_servers.google-analytics]
+env_vars = ["GA4_PROPERTY_ID", "GOOGLE_APPLICATION_CREDENTIALS"]
+```
+
+The first hardcodes the property ID. The second forwards whatever the shell has. Both are valid; putting a bare value inside `env_vars` is not, because that key takes names and not assignments.
+
+A common arrangement is a hardcoded property ID plus a forwarded credentials path:
+
+```toml
+[mcp_servers.google-analytics]
+command = "uvx"
+args = ["google-analytics-mcp"]
+env_vars = ["GOOGLE_APPLICATION_CREDENTIALS"]
+
+[mcp_servers.google-analytics.env]
+GA4_PROPERTY_ID = "123456789"
+```
+
+## Verify
+
+Start Codex and ask:
+
+```text
+List my GA4 properties.
+```
+
+Then check that the tool appears in Codex's MCP list. If the entry loads but every call fails with a setup error, one of the two variables is missing — the TOML parsed, the `env` table did not apply.
+
+## Next
+
+[Install](/setup/) for the two values, [permissions](/iam/) for the 403 that means the service account is not on the property yet.
+
+
+
+# GA4 MCP for Cursor
+URL: https://ga4mcp.com/ga4-mcp-for-cursor/
+
+
+# GA4 MCP for Cursor
+
+Cursor reads MCP servers from a JSON file and supports an environment object per server. Setup is one entry and a restart.
+
+## Where the file lives
+
+Cursor accepts two locations:
+
+- **Project:** `.cursor/mcp.json` in the repository root. Committed with the project, shared with anyone who clones it.
+- **Global:** `~/.cursor/mcp.json`. Applies to every workspace on the machine.
+
+Use the project file when the server is tied to one analytics property. Use the global file when you want GA4 available everywhere and you accept that the credentials path is machine-specific.
+
+## The entry
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Save the file. Cursor picks up changes to the MCP config without a full restart, but the first registration needs one — reload the window from the command palette.
+
+## About the type field
+
+Cursor's configuration reference marks `type` as a required field on stdio servers, with the value `"stdio"`. Every copy-paste example on the same page omits it.
+
+In practice the field is optional and Cursor infers stdio when `command` is present. If the server does not appear, add it explicitly:
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+That is the shape the reference documents, and it is the one to prefer when something is not working.
+
+## Keeping secrets out of the file
+
+Cursor also supports `envFile`, which reads variables from a dotenv file instead of inlining them. That keeps the credentials path out of a committed `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "envFile": ".env.local"
+    }
+  }
+}
+```
+
+With `GA4_PROPERTY_ID` and `GOOGLE_APPLICATION_CREDENTIALS` set in `.env.local`, which stays out of version control.
+
+## Verify
+
+In Cursor's agent panel:
+
+```text
+List my GA4 properties.
+```
+
+If the tool list is empty, the file did not parse. Cursor silently ignores a malformed `mcp.json` rather than reporting an error, so validate the JSON before assuming the server is at fault.
+
+## Next
+
+[Install](/setup/) covers the credentials, [permissions](/iam/) covers the 403 you will hit if the service account was never added to the property.
+
+
+
+# GA4 MCP for DeepSeek Harness
+URL: https://ga4mcp.com/ga4-mcp-for-deepseek/
+
+
+# GA4 MCP for DeepSeek Harness
+
+DeepSeek Harness mounts MCP servers as config entries in its composed tree, not through a settings screen. One entry in your patch layer adds the server, and its tools appear inside the session.
+
+## The entry
+
+Add this to your patch layer:
+
+```yaml
+- id: mcp-ga4
+  name: '@deepseek-ai/dsh-mcp-client'
+  config:
+    serverName: ga4
+    transport: stdio
+    command: uvx
+    args: ['google-analytics-mcp']
+    env:
+      GA4_PROPERTY_ID: '123456789'
+      GOOGLE_APPLICATION_CREDENTIALS: '/absolute/path/to/key.json'
+```
+
+The package is `@deepseek-ai/dsh-mcp-client`, scoped. There is an unscoped `dsh-mcp-client` on npm published by someone else as a name reservation — it is not the DeepSeek client and installing it gives you nothing.
+
+## Where the patch goes
+
+`DSH_HOME` defaults to `~/.dsh`. Two patch files are read, in this order:
+
+- `$DSH_HOME/cordis.patch.yml` applies to every profile
+- `$DSH_HOME/profiles/<profile>/cordis.patch.yml` applies to one
+
+An explicit `--patch` overlay wins over both. If you only run one profile, the first file is the simplest place.
+
+## Reading environment from the shell
+
+The `env` block takes literals, and DeepSeek's config supports a JavaScript tag if you would rather not write the path into the file:
+
+```yaml
+    env:
+      GA4_PROPERTY_ID: '123456789'
+      GOOGLE_APPLICATION_CREDENTIALS: !!js process.env.GOOGLE_APPLICATION_CREDENTIALS
+```
+
+That keeps the credentials path out of a file you might commit. The property ID stays literal; it is not a secret.
+
+## Tool names inside the session
+
+Tools surface as `mcp__<serverName>__<tool>`. With `serverName: ga4` above, the agent sees:
+
+```text
+mcp__ga4__get_ga4_data
+mcp__ga4__search_schema
+mcp__ga4__list_properties
+```
+
+If you mount two properties, give them different `serverName` values and the tool lists stay separable.
+
+## Verify
+
+Check the composed config first, before you start a session:
+
+```bash
+dsh web --dump-config
+```
+
+The `mcp-ga4` entry and its resolved `env` should appear in the output. Then ask:
+
+```text
+List my GA4 properties.
+```
+
+## Next
+
+[Install](/setup/) for the two values, [query shapes](/schema/) when a call fails on a filter rather than credentials.
+
+
+
+# GA4 MCP for Devin Desktop
+URL: https://ga4mcp.com/ga4-mcp-for-devin-desktop/
+
+
+# GA4 MCP for Devin Desktop
+
+Devin Desktop is the current name for Windsurf. The rename happened on 2 June 2026, so older guides and forum answers still call it Windsurf. The config schema did not change with the name.
+
+## The entry
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Root key `mcpServers`, standard `env` object. Nothing unusual in the shape.
+
+## The path problem, stated plainly
+
+Devin's own documentation gives two different paths for the same file, and both pages are live today:
+
+- The Cascade MCP page says `~/.config/devin/mcp_config.json` on macOS and Linux, and `%APPDATA%\devin\mcp_config.json` on Windows.
+- The Devin Desktop FAQ says the MCP config is `~/.codeium/mcp_config.json`, and adds that the `~/.codeium/` directory structure is not changing in this release.
+
+Rather than pick one and hope, check which file exists on your machine:
+
+```bash
+ls -la ~/.config/devin/mcp_config.json ~/.codeium/mcp_config.json
+```
+
+Edit whichever one is present. If neither exists, create the `.config/devin` one and restart the app — the newer path is the one on the MCP page.
+
+> **Note:** if you are migrating from Windsurf and MCP servers still work, you are on the `.codeium` path and can leave it alone. The rename did not move it.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+Then open the MCP panel in Cascade and confirm the server is running. Devin shows a failed launch there, which distinguishes a bad config from a bad credential — a distinction the other clients here generally do not make.
+
+## If you are on Windsurf
+
+Windsurf, before the rename, used the same `mcpServers` shape. Older Windsurf documentation and this page are compatible; only the file path differs by app version.
+
+## Next
+
+[Setup](/setup/) for the two values, [skills](/skills/) for what to load before asking a question that needs interpretation.
+
+
+
+# GA4 MCP for Gemini CLI
+URL: https://ga4mcp.com/ga4-mcp-for-gemini/
+
+
+# GA4 MCP for Gemini CLI
+
+Gemini CLI reads MCP servers from a `settings.json` file and can also register them from the command line. The one behaviour worth knowing before you start: the default scope is **project**, not user.
+
+## One command
+
+```bash
+gemini mcp add -e GA4_PROPERTY_ID=123456789 -e GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json google-analytics uvx google-analytics-mcp
+```
+
+The shape is `gemini mcp add [options] <name> <command> [args...]`, so the server name comes before the command and anything after it becomes an argument to the server.
+
+Add `--scope user` if you want the entry in your home directory instead of the current project:
+
+```bash
+gemini mcp add --scope user -e GA4_PROPERTY_ID=123456789 -e GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json google-analytics uvx google-analytics-mcp
+```
+
+Without that flag the entry goes to `.gemini/settings.json` inside the directory you ran it from. That is the single most common surprise: it works in one repository and appears missing in the next.
+
+## The file
+
+User scope is `~/.gemini/settings.json`. Project scope is `.gemini/settings.json`.
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+The root key is `mcpServers`, which matches Claude Desktop and Cursor. Gemini additionally accepts three optional keys on a stdio server that the others do not:
+
+- `cwd` — working directory for the spawned process
+- `timeout` — milliseconds before the client gives up on a call
+- `trust` — skip the confirmation prompt for tool calls
+
+For a read-only analytics server, `"trust": true` removes a confirmation click per query and changes nothing about what the server can do.
+
+## A project-scoped example
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      },
+      "trust": true,
+      "timeout": 30000
+    }
+  }
+}
+```
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+If Gemini reports no GA4 tools, check the scope before anything else. Run `gemini mcp list` and confirm which file the entry actually landed in.
+
+## Next
+
+[Setup](/setup/) for credentials, [skills](/skills/) for the recipes the agent can load once it is connected.
+
+
+
+# GA4 MCP for Goose
+URL: https://ga4mcp.com/ga4-mcp-for-goose/
+
+
+# GA4 MCP for Goose
+
+Goose is the only client here that configures MCP servers in YAML, and it renames two fields you would otherwise expect. `cmd` instead of `command`, `envs` instead of `env`.
+
+## The file
+
+`~/.config/goose/config.yaml`
+
+Add an `extensions` block. If the file already has one, add the server under it rather than creating a second `extensions` key.
+
+```yaml
+extensions:
+  google-analytics:
+    name: Google Analytics
+    cmd: uvx
+    args: [google-analytics-mcp]
+    enabled: true
+    envs:
+      GA4_PROPERTY_ID: "123456789"
+      GOOGLE_APPLICATION_CREDENTIALS: "/absolute/path/to/key.json"
+    type: stdio
+```
+
+Every one of the five keys matters:
+
+- `cmd` — the executable. `command` is silently ignored.
+- `args` — a YAML flow sequence, so it stays on one line in brackets.
+- `envs` — plural. `env` is silently ignored, and the server starts without credentials and fails at the first query.
+- `type` — `stdio` for a local process.
+- `enabled` — Goose writes `false` here when you disable an extension, and the server will not launch.
+
+## One-off without the file
+
+For a single session, Goose takes the command inline:
+
+```bash
+goose session --with-extension "GA4_PROPERTY_ID=123456789 GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json uvx google-analytics-mcp"
+```
+
+That form passes the environment through the shell rather than YAML, which makes it the fastest way to confirm the server works before you edit a config file.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+Then check the extension list. Goose reports a broken extension on startup, which makes it friendlier than most clients here — you get an error instead of silence.
+
+## Next
+
+[Setup](/setup/) for the two values, [permissions](/iam/) when the first query returns a 403 rather than a setup error.
+
+
+
+# GA4 MCP for Hermes
+URL: https://ga4mcp.com/ga4-mcp-for-hermes/
+
+
+# GA4 MCP for Hermes
+
+Hermes is Nous Research's agent harness. It configures MCP servers in YAML, and the root key is `mcp_servers` — snake case. A Claude Desktop snippet pasted here produces a file that parses fine and registers nothing.
+
+## The entry
+
+In `~/.hermes/config.yaml`:
+
+```yaml
+mcp_servers:
+  ga4:
+    command: "uvx"
+    args: ["google-analytics-mcp"]
+```
+
+That is the shape Hermes documents. Note the two differences from the common JSON form: the root key is `mcp_servers`, and the file is YAML, so indentation carries the structure.
+
+## Credentials
+
+Hermes' documented example shows `command` and `args` only. It does not publish an environment key for this block, and this server cannot run without two values.
+
+The reliable route is to export them before launching Hermes, so the server process inherits them:
+
+```bash
+export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"
+```
+
+Launch Hermes from that shell. Application default credentials work here too — run `gcloud auth application-default login` once and you can drop the second variable.
+
+> **Note:** if a future Hermes release documents an `env` key, prefer it over shell inheritance. This page states shell export because that is what the vendor documents today.
+
+## Migrating from Claude
+
+Hermes ships a migration command that rewrites a Claude configuration into its own shape:
+
+```bash
+hermes import-agent claude-code
+```
+
+It maps Claude's `mcpServers` in `~/.claude.json` onto `mcp_servers` in `config.yaml`. Worth running even if you only want the shape as a reference — the output shows exactly how Hermes expects a server to look.
+
+There is also a picker and a catalog:
+
+```bash
+hermes mcp
+```
+
+```bash
+hermes mcp install ga4
+```
+
+The catalog holds entries from Hermes' own `optional-mcps` directory. If GA4 is not in it, the manual block above is the path.
+
+## Do not confuse the packages
+
+`hermes-mcp` on PyPI is the opposite direction: an MCP server that exposes a Hermes agent to other clients. Installing it does not give Hermes access to Analytics.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+If the agent has no GA4 tools at all, check the root key first. `mcpServers` in that file is valid YAML and completely inert.
+
+## Next
+
+[Install](/setup/) for the two values, [query shapes](/schema/) when a query fails on a filter.
+
+
+
+# GA4 MCP for Kiro
+URL: https://ga4mcp.com/ga4-mcp-for-kiro/
+
+
+# GA4 MCP for Kiro
+
+Kiro reads MCP servers from `mcp.json` and reloads the file the moment you save it. That is the main practical difference from the rest of this set — you will not be restarting the editor.
+
+## Where the file lives
+
+- **Workspace:** `.kiro/settings/mcp.json` inside the project.
+- **User:** `~/.kiro/settings/mcp.json`, applied everywhere.
+
+Workspace scope wins when both exist.
+
+## The entry
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      },
+      "disabled": false,
+      "autoApprove": ["list_properties", "search_schema", "get_ga4_data"]
+    }
+  }
+}
+```
+
+The root key is `mcpServers`. The three optional keys are Kiro-specific:
+
+- `disabled` — set `true` to keep the entry but stop it launching.
+- `autoApprove` — tool names that run without a confirmation prompt. For a read-only analytics server there is no reason to confirm each call.
+- `disabledTools` — the inverse. Useful for hiding `check_for_updates` or `setup_ga4_access` from an agent you want focused on reporting.
+
+Kiro also expands environment placeholders, so a credentials path can come from the shell:
+
+```json
+"env": {
+  "GA4_PROPERTY_ID": "123456789",
+  "GOOGLE_APPLICATION_CREDENTIALS": "${GOOGLE_APPLICATION_CREDENTIALS}"
+}
+```
+
+## From the CLI
+
+```bash
+kiro-cli mcp add --name google-analytics --scope global --command uvx --args google-analytics-mcp --env GA4_PROPERTY_ID=123456789
+```
+
+`--args` takes one argument per flag, so a server with several arguments needs the flag repeated rather than a single space-separated string.
+
+## Verify
+
+Save the file, then ask:
+
+```text
+List my GA4 properties.
+```
+
+The server should appear without a restart. If it does not, check the MCP servers panel — Kiro reports a launch failure there rather than failing silently, which it can do because it is watching the process rather than reading a file once.
+
+## Next
+
+[Setup](/setup/) for the two values, [permissions](/iam/) for the 403 that means the service account is not on the property.
+
+
+
+# GA4 MCP for OpenClaw
+URL: https://ga4mcp.com/ga4-mcp-for-openclaw/
+
+
+# GA4 MCP for OpenClaw
+
+OpenClaw is an MCP client directly, so the server needs no plugin. One command writes the entry.
+
+## Add the server
+
+```bash
+openclaw mcp add ga4 --command uvx --arg google-analytics-mcp
+```
+
+`--arg` repeats once per server argument. That writes an entry under `mcp.servers` in `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "ga4": {
+        "command": "uvx",
+        "args": ["google-analytics-mcp"],
+        "env": {
+          "GA4_PROPERTY_ID": "123456789",
+          "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+        }
+      }
+    }
+  }
+}
+```
+
+Edit the file to add the two `env` values — the server will not start usefully without them. The root key is `mcp.servers`, two levels deep, not `mcpServers` at the top.
+
+## Check it launched
+
+```bash
+openclaw mcp doctor ga4 --probe
+```
+
+`--probe` is the part that matters. Without it you get configuration validation; with it, OpenClaw actually starts the process and reports whether the handshake completes. A server that configures cleanly and fails the probe is almost always a missing environment variable.
+
+## Where the file lives
+
+`~/.openclaw/openclaw.json`. OpenClaw also discovers plugins from configured paths, workspace roots and global plugin roots, but MCP servers are separate from plugins and live in this one file.
+
+## About the plugin route
+
+The repository ships a file at `plugins/openclaw/plugin.json`. It is not an installable OpenClaw manifest. OpenClaw's documented manifest is `openclaw.plugin.json`, and its required fields are `id` and `configSchema` — neither of which that file has.
+
+Use `openclaw mcp add` above. A plugin is only worth building if you want to distribute a bundle; a single local server does not need one.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+If `doctor` reports the server running and the tools still do not appear in a session, the property ID is wrong rather than the config. Read [install](/setup/) for the difference between the property ID and the measurement ID.
+
+## Next
+
+[Install](/setup/) for credentials, [skills](/skills/) for the recipes the agent can load once connected.
+
+
+
+# GA4 MCP for OpenCode
+URL: https://ga4mcp.com/ga4-mcp-for-opencode/
+
+
+# GA4 MCP for OpenCode
+
+OpenCode's MCP config is the furthest from the Claude Desktop baseline in this whole set. Four things are named differently, and a standard snippet will not load.
+
+## The entry
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "google-analytics": {
+      "type": "local",
+      "command": ["uvx", "google-analytics-mcp"],
+      "enabled": true,
+      "environment": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Read the four differences carefully, because each one fails silently:
+
+| Elsewhere | OpenCode |
+|---|---|
+| `mcpServers` | `mcp` |
+| `"type": "stdio"` | `"type": "local"` |
+| `"command": "uvx"` plus a separate `args` array | one `command` array holding the executable and its arguments |
+| `env` | `environment` |
+
+There is no `args` key. The executable and every argument live in the same array.
+
+## Where the file lives
+
+- **Global:** `~/.config/opencode/opencode.json`
+- **Project:** `opencode.json` in the working directory
+
+Both accept JSON or JSONC. A project file takes precedence over the global one.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+Then confirm the server appears in OpenCode's MCP list. If it does not, check the `type` value first — `"stdio"` is valid everywhere else and invalid here.
+
+## A note on multiple properties
+
+OpenCode's project-scoped config makes it easy to run one entry per property, which is useful if you work across several sites. Each entry gets its own key and its own `GA4_PROPERTY_ID`:
+
+```json
+{
+  "mcp": {
+    "ga4-studio": {
+      "type": "local",
+      "command": ["uvx", "google-analytics-mcp"],
+      "environment": { "GA4_PROPERTY_ID": "111111111", "GOOGLE_APPLICATION_CREDENTIALS": "/keys/studio.json" }
+    },
+    "ga4-client": {
+      "type": "local",
+      "command": ["uvx", "google-analytics-mcp"],
+      "environment": { "GA4_PROPERTY_ID": "222222222", "GOOGLE_APPLICATION_CREDENTIALS": "/keys/client.json" }
+    }
+  }
+}
+```
+
+The agent then sees two servers with the same tools and different data, which is usually clearer than one server whose property changes between sessions.
+
+## Next
+
+[Setup](/setup/) for the two values, [permissions](/iam/) when the first query returns a 403.
+
+
+
+# GA4 MCP for Pi
+URL: https://ga4mcp.com/ga4-mcp-for-pi/
+
+
+# GA4 MCP for Pi
+
+Pi reads MCP servers from a JSON file beside its agent configuration, and also takes them from the command line. Two files matter, and the project one only counts after you trust the project.
+
+## The entry
+
+In your agent directory's `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "ga4": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Two locations, matching Pi's own wording of `<agent-dir>/mcp.json`:
+
+| Scope | Path |
+|---|---|
+| User | `~/.pi/agent/mcp.json` |
+| Project | `.pi/mcp.json` in the project root |
+
+The project file is only read once Pi trusts that project. If the server works in one repository and not another, trust is the reason.
+
+## From the command line
+
+```bash
+pi mcp add ga4 --command uvx --arg google-analytics-mcp --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json
+```
+
+`pi mcp` also lists and removes servers. Note that `--arg` repeats once per argument rather than taking a single string.
+
+> **Note:** there is no `/codemcp` command and no `pi-mcp` package. An earlier version of this page named both; neither exists. The interactive command is `/mcp`, and `codemode` is a tool-exposure mode rather than a slash command.
+
+## Managing at runtime
+
+Inside a Pi session, `/mcp` is the interactive surface: inspect connected servers, reconnect one, change how its tools are exposed, or disable it for the session.
+
+That is the fastest way to check whether the entry loaded at all. A server listed with zero tools means the process launched and exited — run `uvx google-analytics-mcp` in a terminal to see why.
+
+## Tool names
+
+Pi prefixes MCP tools as `mcp__<server>__<tool>`, so with the server named `ga4` above the agent calls `mcp__ga4__get_ga4_data`. Naming the server `ga4` rather than `google-analytics` keeps the tool names short enough to read in a transcript.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+Then `/mcp` to confirm the server is connected rather than merely configured.
+
+## Next
+
+[Install](/setup/) for the two values, [skills](/skills/) for what to load before an analytical question.
+
+
+
+# GA4 MCP for VS Code and Copilot
+URL: https://ga4mcp.com/ga4-mcp-for-vscode/
+
+
+# GA4 MCP for VS Code
+
+VS Code's agent mode runs MCP servers, and the configuration has one trap that catches almost everyone: the root key depends on which file you are editing.
+
+## Pick the right file first
+
+| File | Root key | Scope |
+|---|---|---|
+| `.vscode/mcp.json` | `servers` | This workspace |
+| `.mcp.json` at the workspace root | `mcpServers` | This workspace, portable shape |
+| `~/.copilot/mcp-config.json` | `mcpServers` | Every workspace for this user |
+
+The two workspace files are not interchangeable. A config that works in one is silently ignored in the other, because the top-level key does not match what that file expects. This is the single most common reason a working snippet "does nothing" in VS Code.
+
+## The workspace entry
+
+In `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "google-analytics": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Note `servers`, and note that `type` is required here.
+
+## The portable entry
+
+In `.mcp.json` at the workspace root:
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+Use this one if you want the same file to work in other clients that read `.mcp.json`.
+
+## The CLI route
+
+One command, no file editing:
+
+```bash
+code --add-mcp '{"name":"google-analytics","type":"stdio","command":"uvx","args":["google-analytics-mcp"],"env":{"GA4_PROPERTY_ID":"123456789","GOOGLE_APPLICATION_CREDENTIALS":"/absolute/path/to/key.json"}}'
+```
+
+Note that the CLI object uses `name` rather than a keyed object — it is a different shape from the file, not a copy of it.
+
+## Environment variable substitution
+
+`.vscode/mcp.json` can read values from your environment instead of hardcoding a credentials path:
+
+```json
+{
+  "servers": {
+    "google-analytics": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "${env:GA4_PROPERTY_ID}",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${env:GOOGLE_APPLICATION_CREDENTIALS}"
+      }
+    }
+  }
+}
+```
+
+The `${env:NAME}` form is specific to `.vscode/mcp.json`. The portable `.mcp.json` uses `${NAME}` instead. Another reason not to move a block between the two files.
+
+## If you use Cline or Roo Code
+
+Those are extensions with their own MCP settings, not consumers of `.vscode/mcp.json`. The installer writes their entries separately, so the fastest path is:
+
+```bash
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+```
+
+## Verify
+
+Open the agent panel and ask for something that forces a tool call:
+
+```text
+List my GA4 properties.
+```
+
+Then check the server shows as running in the MCP servers view. A server that is listed but stopped is almost always a launch failure — run `uvx google-analytics-mcp` in a terminal to see the real error.
+
+## Next
+
+[Setup](/setup/) for credentials, [query shapes](/schema/) when the first query fails on a filter.
+
+
+
+# GA4 MCP for ZCode
+URL: https://ga4mcp.com/ga4-mcp-for-zcode/
+
+
+# GA4 MCP for ZCode
+
+ZCode is Z.ai's coding harness. It reads MCP servers from two possible file locations per scope, and the precedence rule between them is the thing that catches people: it is not a merge.
+
+## The entry
+
+In `~/.zcode/cli/config.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "ga4": {
+        "command": "uvx",
+        "args": ["google-analytics-mcp"],
+        "env": {
+          "GA4_PROPERTY_ID": "123456789",
+          "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+        }
+      }
+    }
+  }
+}
+```
+
+Note `mcp.servers`, two levels deep. Not `mcpServers`.
+
+## The four locations
+
+| Scope | File | Root key |
+|---|---|---|
+| User | `~/.zcode/cli/config.json` | `mcp.servers` |
+| Workspace | `<project>/.zcode/config.json` | `mcp.servers` |
+| User, compatibility | `~/.agents/mcp.json` | `mcpServers` |
+| Workspace, compatibility | `<project>/.agents/mcp.json` | `mcpServers` |
+
+ZCode also reads the `.agents` files, which use the plain `mcpServers` shape shared with several other clients. Useful if you already maintain one, and a trap if you maintain both.
+
+## The precedence rule
+
+Within a single scope, `.zcode/config.json` wins **wholesale**. If it contains any server at all, the matching `.agents/mcp.json` at that scope is skipped entirely — not merged, not combined.
+
+So a user who adds GA4 to `~/.agents/mcp.json` while `~/.zcode/cli/config.json` already holds one server sees no GA4 tools, with no error. Either consolidate into the `.zcode` file, or keep the `.agents` file as the only source at that scope.
+
+## Legacy keys
+
+ZCode accepts a set of older key names and translates them: `environment` is read as `env`, `http_headers` as `headers`, `enable` as `enabled`, and `type: "remote"` as `type: "http"`. The current schema takes `env`, and `type` accepts `http`, `sse` or `stdio`.
+
+Writing `env` is the right choice for a new entry. The legacy names work, but they are compatibility rather than the current shape.
+
+## Verify
+
+```text
+List my GA4 properties.
+```
+
+If the tool list is empty, check which file ZCode actually loaded. A populated `.zcode/config.json` hides `.agents/mcp.json` at the same scope, and that is by design rather than a bug.
+
+## Next
+
+[Install](/setup/) for the two values, [skills](/skills/) for what to load before an analytical question.
+
+
+
+# GA4 MCP for Zed
+URL: https://ga4mcp.com/ga4-mcp-for-zed/
+
+
+# GA4 MCP for Zed
+
+Zed calls MCP servers **context servers**, and that is not just naming. The root key in the settings file is `context_servers`, so a snippet from any other client will not load.
+
+## Open the settings file
+
+From the command palette, run:
+
+```text
+zed: open settings file
+```
+
+That opens `settings.json` for Zed. Add a top-level `context_servers` key.
+
+## The entry
+
+```json
+{
+  "context_servers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GA4_PROPERTY_ID": "123456789",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/absolute/path/to/key.json"
+      }
+    }
+  }
+}
+```
+
+If your settings file already has content, add `context_servers` alongside it rather than replacing the file. Zed's settings hold the editor configuration and the AI configuration in the same document.
+
+## What is different here
+
+Three things, compared with the majority shape:
+
+- The root key is `context_servers`, not `mcpServers`.
+- There is no `type` field. Zed infers stdio from the presence of `command`.
+- The file is Zed's single settings document, not a dedicated MCP file. A trailing comma anywhere in it breaks every setting, not just this one.
+
+> **Tip:** if Zed shows no GA4 tools after saving, the settings file probably failed to parse. Zed reports a JSON error at the top of the editor for a malformed settings file, and a server that simply never appears is the symptom.
+
+## Verify
+
+Open the agent panel and ask:
+
+```text
+List my GA4 properties.
+```
+
+The server appears in the context server list when it launched successfully. A listed server with no tools means the process started and exited — check `uvx google-analytics-mcp` in a terminal.
+
+## Next
+
+[Install](/setup/) for the two values, [skills](/skills/) for what to load before asking an analytical question.
+
+
+
+# GA4 plugin for Claude Code
+URL: https://ga4mcp.com/ga4-plugin-for-claude-code/
+
+
+# GA4 plugin for Claude Code
+
+Claude Code can install an MCP server from a plugin manifest instead of from a CLI command. The bundle ships in the repository at `.claude-plugin/plugin.json`.
+
+## What the manifest declares
+
+```json
+{
+  "name": "google-analytics-mcp",
+  "version": "2.11.1",
+  "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "author": { "name": "Surendran B", "url": "https://github.com/surendranb" },
+  "homepage": "https://ga4.builditwithai.xyz",
+  "repository": "https://github.com/surendranb/google-analytics-mcp",
+  "license": "MIT",
+  "mcpServers": {
+    "google-analytics-mcp": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"]
+    }
+  }
+}
+```
+
+That is the whole file. The `mcpServers` block is what Claude Code launches; everything above it is metadata.
+
+## Plugin or plain entry
+
+Both end up in the same place: a server named `google-analytics-mcp` launched with `uvx`. The difference is who writes it.
+
+- A **plugin** is for distribution. Someone else adds the bundle and Claude Code reads the command from the manifest.
+- A **plain entry** is for your own machine, and it can inline the two environment values so nothing prompts.
+
+If you are setting this up once, the plain entry is fewer steps:
+
+```bash
+claude mcp add --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json --transport stdio google-analytics -- uvx google-analytics-mcp
+```
+
+The [Claude guide](/ga4-mcp-for-claude/) covers both Claude surfaces in full.
+
+## Version note
+
+The plugin manifest tracks its own version number, which is not the server version. Today the manifest reads `2.11.1` while the server is on 2.11.6. The manifest version controls the bundle, not the package that `uvx` resolves — that always pulls the latest release. Read the version from the server, not from the bundle, when you need to know what is running.
+
+## Next
+
+[Plugins overview](/ga4-plugins/) or the [Gemini bundle](/ga4-plugin-for-gemini/).
+
+
+
+# GA4 extension for Gemini CLI
+URL: https://ga4mcp.com/ga4-plugin-for-gemini/
+
+
+# GA4 extension for Gemini CLI
+
+Gemini CLI calls these bundles extensions. The manifest lives at the repository root as `gemini-extension.json`.
+
+## What the manifest declares
+
+```json
+{
+  "name": "google-analytics-mcp",
+  "version": "2.11.1",
+  "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "author": "Surendran B",
+  "homepage": "https://ga4.builditwithai.xyz",
+  "repository": "https://github.com/surendranb/google-analytics-mcp",
+  "license": "MIT",
+  "mcp": {
+    "command": "uvx",
+    "args": ["google-analytics-mcp"]
+  },
+  "settings": [
+    {
+      "name": "GA4_PROPERTY_ID",
+      "description": "Numeric GA4 property ID (e.g. 123456789)",
+      "required": true,
+      "type": "string"
+    },
+    {
+      "name": "GOOGLE_APPLICATION_CREDENTIALS",
+      "description": "Path to service account JSON key file",
+      "required": true,
+      "type": "string"
+    }
+  ]
+}
+```
+
+The `settings` array is the part that matters. It tells Gemini CLI to ask for both values during install, so you never open `settings.json` by hand. Both are marked `required: true`, and the extension will not finish installing without them.
+
+## Extension or settings file
+
+Use the extension when you want Gemini CLI to prompt for the values. Use the [settings file](/ga4-mcp-for-gemini/) when you would rather write them yourself, or when you need to set `trust` and `timeout` — the extension manifest has no equivalent for those.
+
+## Next
+
+[Gemini CLI guide](/ga4-mcp-for-gemini/) for the full settings shape, or [plugins overview](/ga4-plugins/).
+
+
+
+# Fix the GA4 permission error
+URL: https://ga4mcp.com/iam/
+
+
+# The 403 that is not a bug
+
+If you see this error, the credentials worked. The query reached Google and Google said no:
+
+```text
+IAM Error: The service account does not have Viewer access to the GA4 property
+```
+
+Nothing is wrong with your JSON key, your file path, or your property ID. The service account exists, it authenticated, and it has no permission on that property. Adding it is nine clicks.
+
+## The nine steps
+
+You need the `client_email` value from your service-account JSON key. It looks like `my-agent@my-project.iam.gserviceaccount.com`. Open the key file in any text editor and copy that field — not `client_id`, not the private key.
+
+1. Open [analytics.google.com](https://analytics.google.com).
+2. Select the property whose ID matches your `GA4_PROPERTY_ID`.
+3. Click **Admin**, the gear at the bottom left.
+4. In the **Property** column, click **Property access management**.
+5. Click the blue **+** at the top right, then **Add users**.
+6. Paste the `client_email` into the email field.
+7. Leave **Notify new users by email** switched off. It is a robot address and the mail bounces.
+8. Under **Direct roles**, tick **Viewer**. Do not tick Administrator.
+9. Click **Add**.
+
+Retry the query. It works immediately — there is no propagation delay on property access.
+
+## When Viewer is not enough
+
+The server is read-only, so Viewer covers every tool it ships. Two situations need more:
+
+- You are querying **real-time reports** on a property where the service account was added to an account rather than a property. Add it at the property level instead.
+- You are using `list_properties` across several properties. The service account needs access to each one it should see. It returns only what it can read, and an empty list means zero properties, not a broken install.
+
+> **Note:** these steps change a permission on a live Google property. If you are not the property owner, someone who is has to do this. There is no API path around it and no workaround that keeps Viewer off.
+
+## Still failing after the add
+
+Work through these in order. Each one has a distinct error message.
+
+**`PERMISSION_DENIED` with a property ID in the message.** The property ID in your config is not the one you granted access to. Compare the two numbers digit by digit. This is common when someone has both a GA4 and an old UA property with similar names.
+
+**`API has not been used in project ... before or it is disabled`.** The Analytics Data API is off. Enable it in the Google Cloud console under **APIs & Services → Library**.
+
+**`invalid_grant` or `ADCExpired`.** Your `gcloud` session expired. Run `gcloud auth application-default login` again. If you use a JSON key, this error means the key was deleted or rotated.
+
+**`The caller does not have permission` on `list_properties`.** The service account has no access at the account level. This is expected and harmless if the property-level grant above is in place.
+
+## Let the agent check for you
+
+If the client can reach the server at all, this returns the same decision tree offline:
+
+```text
+get_troubleshooting_guide(topic="iam")
+```
+
+And `setup_ga4_access` walks the fix in-session where the client supports prompts.
+
+## Next
+
+If permissions are fine and queries still fail, the problem is a field name or a filter shape. Read [query shapes](/schema/).
+
+
+
+# GA4 MCP — Google Analytics 4 for any AI client
+URL: https://ga4mcp.com/
+
+
+<section class="hero">
+<div class="hero__grid">
+<div>
+<p class="eyebrow">v2.11.6 · MIT · local stdio · read-only</p>
+<h1>Ask GA4 a question. Get the answer an analyst would give.</h1>
+<p class="lede">One MCP server for Claude, Cursor, Codex, Gemini CLI and twelve more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.</p>
+<div class="hero__cta">
+<a class="btn btn--primary" href="/setup/">Install in one line</a>
+<a class="btn btn--ghost" href="/skills/">See the 16 skills</a>
+</div>
+</div>
+<div class="card">
+<p class="card__h">Install</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</code></pre></div>
+<p style="font-size:.85rem;color:var(--ink-55);margin:.7rem 0 0">Finds your client, writes the entry, checks the credentials.</p>
+</div>
+</div>
+</section>
+
+<div class="stats">
+<div class="stat"><div class="stat__n">12</div><div class="stat__l">tools</div></div>
+<div class="stat"><div class="stat__n">16</div><div class="stat__l">analytical skills</div></div>
+<div class="stat"><div class="stat__n">17</div><div class="stat__l">client guides</div></div>
+<div class="stat"><div class="stat__n">0</div><div class="stat__l">writes to your property</div></div>
+</div>
+
+<section class="section">
+<h2 class="section__h">An agent with a GA4 tool guesses. That is the whole problem.</h2>
+<p class="section__sub">Three failures show up every time someone points a general-purpose model at the Analytics Data API.</p>
+<div class="grid3">
+<div class="feat"><h3>It invents field names</h3><p>Models are trained on Universal Analytics vocabulary. <code>pageviews</code> instead of <code>screenPageViews</code>. The API returns a 400 and the agent retries with another guess.</p></div>
+<div class="feat"><h3>It invents a method</h3><p>Ask why traffic dropped and it will produce a plausible five-step analysis that never checks whether the drop was one channel or all of them.</p></div>
+<div class="feat"><h3>It does the arithmetic itself</h3><p>Pull seven daily rows, ask for the week, and the model sums them in its head. Rates do not sum. The number is wrong and looks fine.</p></div>
+</div>
+</section>
+
+<section class="section">
+<h2 class="section__h">What this server does about it</h2>
+<p class="section__sub">Three mechanisms, all of them inside the tool call. Nothing here depends on the model behaving well.</p>
+<div class="grid3">
+<div class="feat"><h3>Schema check before the query</h3><p><code>get_ga4_data</code> validates every dimension and metric name against your live property. A wrong name comes back with the reason and the correct spelling, not a 400 and a retry loop.</p></div>
+<div class="feat"><h3>Skills loaded on demand</h3><p>Sixteen recipes ship in the package — traffic diagnosis, ecommerce, attribution scope, AI referral split. The agent loads one before it analyzes, so the method is fixed instead of improvised.</p></div>
+<div class="feat"><h3>Totals computed by GA4</h3><p>Every multi-row pull returns a <code>totals</code> block that GA4 computed server-side. The model reads the period figure instead of adding up rows and drifting.</p></div>
+</div>
+</section>
+
+<section class="section">
+<h2 class="section__h">What it does when the setup is broken</h2>
+<p class="section__sub">Most failures are not analysis failures. They are a missing property ID, an expired token, or a service account that was never added to the property. The server handles all three inside the session.</p>
+<div class="grid3">
+<div class="feat"><h3>Setup recovery mid-session</h3><p><code>setup_ga4_access</code> collects the missing value and reconnects without a restart. No client config editing, no reinstall.</p></div>
+<div class="feat"><h3>Guides bundled offline</h3><p><code>get_troubleshooting_guide</code> serves the setup, IAM and schema fix paths from inside the package. It works with no network and no API access.</p></div>
+<div class="feat"><h3>Row guard before the pull</h3><p>Large queries are estimated first and warn above 2,500 rows, so one careless question does not fill the context window with raw rows.</p></div>
+</div>
+</section>
+
+<section class="section">
+<h2 class="section__h">Against Google's own server</h2>
+<p class="section__sub">Google ships an official Analytics MCP server, and it is genuinely good. Here is the honest split.</p>
+<div class="compare">
+<div>
+<h4>Google's Analytics MCP</h4>
+<ul>
+<li>Admin API plus Data API: accounts, properties, Google Ads links, core and funnel reports, realtime.</li>
+<li>Hosted remote endpoint at <code>analyticsdata.googleapis.com/mcp/v1</code> — no local install at all.</li>
+<li>Apache-2.0, labelled Experimental, maintained by the Analytics organisation.</li>
+<li>Best choice when you want zero install and a vendor-maintained toolset.</li>
+</ul>
+</div>
+<div>
+<h4>This server</h4>
+<ul>
+<li>Reporting and metadata, with the analysis layer attached: 16 skills, schema validation, GA4-computed totals, row guard.</li>
+<li>Local stdio over your own credentials. Nothing leaves your machine except GA4 API calls.</li>
+<li>MIT, one maintainer, and a fix path for the three errors that actually stop people.</li>
+<li>Best choice when the agent has to reason about the numbers, not just fetch them.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section class="section">
+<h2 class="section__h">Sixteen skills, loaded only when needed</h2>
+<p class="section__sub">Each one is a short playbook with the exact dimensions, metrics and interpretation rules for one job. The agent calls <code>search_skills</code>, gets one back, and follows it.</p>
+<div class="tw"><table><thead><tr><th>Skill</th><th>What it settles</th></tr></thead><tbody>
+<tr><td><a href="/skills/traffic-diagnosis/">Traffic diagnosis</a></td><td>Whether a change is real, and which channel moved first</td></tr>
+<tr><td><a href="/skills/ecommerce-analysis/">Ecommerce</a></td><td>Revenue, conversion rate, AOV and funnel drop-off</td></tr>
+<tr><td><a href="/skills/ai-referral-analysis/">AI referrals</a></td><td>Splitting ChatGPT, Claude, Perplexity and Gemini traffic from organic</td></tr>
+<tr><td><a href="/skills/attribution-scope/">Attribution scope</a></td><td>Why session, event and user numbers never match</td></tr>
+<tr><td><a href="/skills/common-metric-names/">Metric names</a></td><td>The GA4 name for the UA name the model guessed</td></tr>
+<tr><td><a href="/skills/">All sixteen</a></td><td>Including filters, date ranges, custom dimensions, bot traffic</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="section">
+<h2 class="section__h">Your client is on the list</h2>
+<p class="section__sub">The installer writes the entry for eight of them. Codex, Gemini CLI, Goose and Kiro take one config block each, quoted from that vendor's own documentation.</p>
+<div class="grid3">
+<div class="feat"><h3>Auto-configured</h3><p>Claude Desktop and Code, Cursor, VS Code (Cline, Roo Code), Continue.dev, OpenCode, Devin Desktop (formerly Windsurf), Zed, Google Antigravity.</p></div>
+<div class="feat"><h3>One block, copied from the vendor</h3><p>Codex writes TOML, Goose writes YAML, Gemini CLI and Kiro write JSON. Each guide shows the exact shape that client expects.</p></div>
+<div class="feat"><h3>Start here</h3><p><a href="/ga4-mcp-for-every-harness/">The client hub</a> has every guide, or go straight to <a href="/ga4-mcp-for-claude/">Claude</a> or <a href="/ga4-mcp-for-cursor/">Cursor</a>.</p></div>
+</div>
+</section>
+
+<section class="section">
+<h2 class="section__h">Install</h2>
+<ol class="steps">
+<li><h3>Run the installer</h3><div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</code></pre></div><p>It detects your client, checks for <code>uv</code>, and writes the server entry. Restart the client afterwards.</p></li>
+<li><h3>Give it two values</h3><div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</code></pre></div><p>Both live inside the client's server entry. The property ID is the numeric one from Admin, Property details — not the <code>G-</code> measurement ID.</p></li>
+<li><h3>Ask a question that needs a real answer</h3><div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Why did organic sessions drop in the last 7 days?</code></pre></div><p>You have succeeded when the agent loads the <code>traffic-diagnosis</code> skill and calls <code>get_ga4_data</code> without a setup error. <a href="/setup/">Full setup guide</a>.</p></li>
+</ol>
+</section>
+
+<section class="section">
+<h2 class="section__h">The parts people get stuck on</h2>
+<div class="grid3">
+<div class="feat"><h3><a href="/iam/">The 403 that is not a bug</a></h3><p>The service account is valid but was never added to the property. Nine steps in the Analytics UI, with the exact role.</p></div>
+<div class="feat"><h3><a href="/schema/">The filter shape</a></h3><p><code>dimension_filter</code> follows the Data API v1beta schema, not SQL. Working templates for string, list, numeric and AND/OR groups.</p></div>
+<div class="feat"><h3><a href="/setup/">The property ID</a></h3><p>Most setup failures are the measurement ID pasted where the property ID belongs. One paragraph explains the difference.</p></div>
+</div>
+</section>
+
+
+
+# GA4 MCP plugins for Claude Code and Gemini CLI
+URL: https://ga4mcp.com/ga4-plugins/
+
+
+# Plugins
+
+A plugin is a manifest that tells a client how to launch the server and what values it needs. It is not a different server. It is the same `uvx google-analytics-mcp` with the configuration attached, so the client can install and prompt for the two values in one flow instead of asking you to edit a JSON file.
+
+Two clients support a plugin bundle today.
+
+<!--PLUGINS-->
+
+## When a plugin is worth it
+
+If you install the server once, on one machine, the plain config entry is simpler and this page adds nothing. A plugin pays off when you want the client to ask for `GA4_PROPERTY_ID` and the credentials path itself, or when you are distributing the setup to other people and do not want them editing config files.
+
+## What is inside
+
+Both bundles carry the same two declarations:
+
+```json
+{
+  "mcp": {
+    "command": "uvx",
+    "args": ["google-analytics-mcp"]
+  },
+  "settings": [
+    { "name": "GA4_PROPERTY_ID", "required": true, "type": "string" },
+    { "name": "GOOGLE_APPLICATION_CREDENTIALS", "required": true, "type": "string" }
+  ]
+}
+```
+
+The `settings` array is what makes the client prompt. The `mcp` block is what it launches. Everything else is metadata — name, version, license, repository.
+
+## Next
+
+If you would rather not use a bundle, the per-client guides show the raw config: [Claude](/ga4-mcp-for-claude/), [Gemini CLI](/ga4-mcp-for-gemini/), or the [full client list](/ga4-mcp-for-every-harness/).
+
+
+
+# Privacy — what the GA4 MCP server sends
+URL: https://ga4mcp.com/privacy/
+
+
+# Privacy
+
+Short version: the server runs on your machine, talks to Google with your credentials, never writes to your property, and sends anonymous usage counts that you can turn off with one variable.
+
+## What stays local
+
+Your credentials, your service-account key, your property ID, and every report the server returns. Queries go from your machine to `analyticsdata.googleapis.com` and the rows come back to your machine. Nothing passes through studio infrastructure.
+
+## What is sent
+
+The server posts anonymous usage events to `ga4.builditwithai.xyz`, a Cloudflare Worker that forwards them to the studio's analytics. One event per lifecycle step, not per query.
+
+Each event carries:
+
+- a random installation identifier, generated on first run. It is not derived from your machine, your Google account, or your credentials
+- the event name — for example `mcp_started`, `tool_executed`, `server_first_install`
+- the tool name that ran, and whether it succeeded
+- an error category on failure, such as `InitError` or `IAMError`
+- duration in milliseconds
+- the client name and version the server was launched by
+- the server version
+
+## What is not sent
+
+- your credentials, tokens, or key file path
+- your GA4 property ID — numeric IDs are redacted to `<id>` before sending
+- report rows, metrics, dimensions, or anything the GA4 API returned
+- file paths, email addresses, or hostnames
+
+One caveat worth stating: `get_ga4_data` accepts an optional `intent` string that describes the question in plain English. That string is recorded with the tool event so the studio can tell which questions the server answers badly. If your intent text contains something you would not send, omit it. The field is optional and the tool works without it.
+
+## Turning it off
+
+Any one of these does it:
+
+```bash
+export DISABLE_TELEMETRY=1
+```
+
+```bash
+export DO_NOT_TRACK=1
+```
+
+```bash
+export NO_TELEMETRY=1
+```
+
+The check happens before any network call, so with one of them set the server makes no request to studio infrastructure at all. It still works exactly the same.
+
+## Third parties
+
+The site at ga4mcp.com uses Google Analytics and Microsoft Clarity to count page views. The MCP server itself does not load either, and neither is involved in a query.
+
+## Contact
+
+Open an issue at [github.com/surendranb/google-analytics-mcp](https://github.com/surendranb/google-analytics-mcp) for any question about this page.
+
+
+
+# GA4 query shapes — filters, field names and totals
+URL: https://ga4mcp.com/schema/
+
+
+# Query shapes
+
+`get_ga4_data` takes filters in the shape of the Google Analytics Data API v1beta schema. It is not SQL, and it is not a query string. This page is the six shapes that cover every filter you will write, copied exactly.
+
+## The rule that prevents most errors
+
+**One top-level key per expression.** A filter expression has exactly one of these keys, and nothing else beside it:
+
+- `filter` — a single condition
+- `andGroup` — all conditions must match
+- `orGroup` — any condition may match
+- `notExpression` — invert one condition
+
+Two keys in the same object is the most common 400. The server translates between `camelCase` and `snake_case`, so `fieldName` and `field_name` both work, but the structure still has to be right.
+
+## Exact match on a string
+
+Cities that are exactly London:
+
+```json
+{
+  "filter": {
+    "fieldName": "city",
+    "stringFilter": {
+      "matchType": "EXACT",
+      "value": "London"
+    }
+  }
+}
+```
+
+`matchType` accepts `EXACT`, `BEGINS_WITH`, `ENDS_WITH`, `CONTAINS`, `FULL_REGEXP` and `PARTIAL_REGEXP`. Regex values are case-sensitive by default; add `"caseSensitive": false` to the `stringFilter` object to relax it.
+
+## A value from a list
+
+Any of three countries, in one condition rather than three:
+
+```json
+{
+  "filter": {
+    "fieldName": "country",
+    "inListFilter": {
+      "values": ["United States", "United Kingdom", "Canada"]
+    }
+  }
+}
+```
+
+`inListFilter` is the one to reach for when the model would otherwise write an `orGroup` of exact matches. It is shorter, and it cannot be malformed by nesting.
+
+## A numeric threshold
+
+Metrics only. Users above 100, in `metric_filter`:
+
+```json
+{
+  "filter": {
+    "fieldName": "activeUsers",
+    "numericFilter": {
+      "operation": "GREATER_THAN",
+      "value": {
+        "int64Value": "100"
+      }
+    }
+  }
+}
+```
+
+Operations are `EQUAL`, `LESS_THAN`, `LESS_THAN_OR_EQUAL`, `GREATER_THAN`, `GREATER_THAN_OR_EQUAL` and `BETWEEN`. For `BETWEEN`, the value object holds `fromValue` and `toValue` instead of a single `int64Value`.
+
+## All conditions must hold
+
+London, on mobile:
+
+```json
+{
+  "andGroup": {
+    "expressions": [
+      {
+        "filter": {
+          "fieldName": "city",
+          "stringFilter": {
+            "matchType": "EXACT",
+            "value": "London"
+          }
+        }
+      },
+      {
+        "filter": {
+          "fieldName": "deviceCategory",
+          "stringFilter": {
+            "matchType": "EXACT",
+            "value": "Mobile"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+The `expressions` array is required and the key is `andGroup`, not `and`. Writing `"and": [...]` is invalid.
+
+## Excluding one condition
+
+Everything except direct traffic:
+
+```json
+{
+  "notExpression": {
+    "filter": {
+      "fieldName": "sessionDefaultChannelGroup",
+      "stringFilter": {
+        "matchType": "EXACT",
+        "value": "Direct"
+      }
+    }
+  }
+}
+```
+
+`notExpression` wraps exactly one expression. To exclude two things, use `notExpression` around an `orGroup`.
+
+## Field names come from your property, not from training
+
+If you get an invalid dimension or metric error, the name you used does not exist in that property. It is usually a Universal Analytics name — `pageviews`, `users`, `conversions` — and GA4 renamed all three.
+
+Use the search tool before typing a name:
+
+```text
+search_schema(keyword="conversions")
+```
+
+That returns `keyEvents` today, not `conversions`, because GA4 renamed the concept in 2024. The server validates field names against the live property before the query runs, so a wrong name comes back with the reason and a candidate instead of a bare 400.
+
+For a whole category at once, `list_dimension_categories` and `list_metric_categories` return counts first; then `get_dimensions_by_category` gives you the names.
+
+## Rows, totals and the reason both exist
+
+Every multi-row pull returns a `totals` block that GA4 computed server-side, alongside the rows. Read the period figure from `totals`. Do not add up daily rows in the model — rates do not sum, and a seven-day total built by arithmetic is wrong while looking reasonable.
+
+Large queries are estimated before they run and warn above 2,500 rows. If you need more than that, narrow the date range or the dimensions rather than forcing it through; a wide pull with no aggregation fills the context window and answers nothing.
+
+## Next
+
+If the query runs but the answer is nonsense, the problem is method rather than syntax. Read the [skills index](/skills/) and pick the recipe that matches the question.
+
+
+
+# Install GA4 MCP — setup guide
+URL: https://ga4mcp.com/setup/
+
+
+# Install GA4 MCP
+
+This guide takes you from nothing to a working GA4 query inside your agent. It assumes you have a Google Analytics 4 property and a client that speaks MCP.
+
+## What you need first
+
+Three things, and only the first one is easy to get wrong.
+
+**A GA4 property ID.** It is a number like `123456789`. You find it in Analytics under **Admin → Property details**. It is not the `G-XXXXXXXXXX` measurement ID, and it is not the numeric stream ID. Pasting the measurement ID is the single most common setup failure.
+
+**A Google Cloud project** with the Analytics Data API enabled.
+
+**Credentials,** picked in the next section. Either a service-account JSON key or the local `gcloud` login works.
+
+## Step 1 — Install the server
+
+Three routes. Pick one.
+
+The installer is the one that also writes your client entry:
+
+```bash
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+```
+
+It detects your client, checks for `uv`, installs the package, and writes the MCP server entry. It covers Claude Desktop, Claude Code, Cursor, VS Code with Cline or Roo Code, Continue.dev, OpenCode, Windsurf, Zed and Google Antigravity.
+
+If you would rather not run a script, use a runtime directly:
+
+```bash
+uvx google-analytics-mcp
+```
+
+```bash
+npx -y @surendranb/google-analytics-mcp
+```
+
+Both are the same server. `uvx` is faster to start after the first run; `npx` needs Node already installed.
+
+> **Note:** the installer writes the entry, not the credentials. You still set the two values in Step 2.
+
+## Step 2 — Connect it to your property
+
+The server reads two environment variables. Both belong inside the client's server entry, not in your shell profile, unless you launch the client from a shell that has them.
+
+```bash
+export GA4_PROPERTY_ID="123456789"
+export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/service-account.json"
+```
+
+The credentials path must be absolute. A relative path resolves against whatever directory the client happens to start in, which is not the one you expect.
+
+**If you use a service account,** create it in the Google Cloud console under **IAM & Admin → Service Accounts**, then **Keys → Add key → JSON**. That key file is what the path points at. The service account also has to be added to the GA4 property itself — that is a separate step and it is where most people stop. The [permissions guide](/iam/) walks through it.
+
+**If you use `gcloud` instead,** run this once and skip the key file entirely:
+
+```bash
+gcloud auth application-default login
+```
+
+Then omit `GOOGLE_APPLICATION_CREDENTIALS`. The server picks up application default credentials.
+
+> **Tip:** the property ID is numeric and has no prefix. If yours starts with `G-`, you have the measurement ID, and every query will fail with a permissions error that has nothing to do with permissions.
+
+## Step 3 — Verify it actually works
+
+Open your client and ask this exact question:
+
+```text
+List my GA4 properties.
+```
+
+You have succeeded when the agent calls `list_properties` and returns rows. A setup error at this point is one of four things, and the next section names all of them.
+
+Then ask one question that exercises the analysis layer:
+
+```text
+Why did organic sessions drop in the last 7 days?
+```
+
+A working install loads the `traffic-diagnosis` skill, calls `get_ga4_data`, and answers with a `totals` block rather than a summary of daily rows.
+
+## When it fails
+
+| What you see | What it means | Where to go |
+|---|---|---|
+| `InitError` on startup | One or both environment variables are missing or outside the server's `env` block | [Setup errors](/setup/#when-it-fails) |
+| `IAMError` or `403` | The service account is valid but was never added to the property | [Permissions guide](/iam/) |
+| `ADCExpired` or `503` | The `gcloud` login expired | Run `gcloud auth application-default login` again |
+| `400` invalid dimension or metric | The field name is a UA name or a guess | [Query shapes](/schema/) and `search_schema` |
+
+The server also carries these fix paths inside the package, so an agent can resolve most of them without a browser:
+
+```text
+get_troubleshooting_guide(topic="setup" | "iam" | "schema")
+```
+
+## Or let the agent fix it
+
+If the client supports prompts, `setup_ga4_access` collects the missing value and reconnects without a restart. That is usually faster than editing config by hand.
+
+## Next
+
+Read [your client's guide](/ga4-mcp-for-every-harness/) for the exact config shape it expects, since four of the eleven clients use a different key than the rest. Then read the [skills index](/skills/) to see what the agent can do once it is connected.
+
+
+
+# GA4 skills — sixteen analytical recipes for your agent
+URL: https://ga4mcp.com/skills/
+
+
+# Skills
+
+A skill is a short playbook that ships inside the package. The agent calls `search_skills` with a keyword, gets one back as markdown, and follows it. Nothing is fetched over the network, so it works with no API access and no credentials.
+
+The point is to replace improvisation. Ask a general model why traffic dropped and it will invent a method. Ask it to run `traffic-diagnosis` and it runs the same six checks every time, in the same order, because the method is data instead of a guess.
+
+## How the agent uses them
+
+```text
+search_skills("drop")
+```
+
+```text
+search_skills("traffic-diagnosis")
+```
+
+An empty query returns the index. The full text of a skill arrives as markdown, and the agent uses the dimensions and metrics named inside it rather than choosing its own.
+
+## When to load one
+
+Before any question that involves interpretation, not just retrieval. "How many sessions yesterday" needs no skill. "Why did sessions drop", "which channel is worth more", "is this bot traffic" all do.
+
+<!--SKILLS-->
+
+## Next
+
+[Query shapes](/schema/) covers the filter syntax these skills assume. If a skill names a metric your property does not have, `search_schema` will tell you what that property calls it.
+
+
+
+# Terms of use
+URL: https://ga4mcp.com/terms/
+
+
+# Terms of use
+
+The GA4 MCP server is open source under the MIT licence. This page summarises what that means in practice; the licence text in the repository is the binding version.
+
+## Licence
+
+MIT. You can use, copy, modify, merge, publish, distribute, sublicense and sell copies. The copyright notice and permission notice must travel with the software.
+
+## No warranty
+
+The software is provided "as is", without warranty of any kind. The author is not liable for any claim, damage, or other liability arising from its use. Analytics numbers drive decisions, and a wrong number is expensive — verify anything that matters against the Analytics interface before you act on it.
+
+## Not affiliated with Google
+
+This is an independent community project by Surendran B, published under BuildItWithAI. It is not made, endorsed, or supported by Google. "Google Analytics" and "GA4" are trademarks of Google LLC and are used here only to describe what the software connects to.
+
+## Your responsibilities
+
+- Use credentials for a property you are entitled to read.
+- Keep your own use within [Google's Analytics terms](https://marketingplatform.google.com/about/analytics/terms/us/) and the Data API terms.
+- Do not use the server to work around an access control Google has put in place.
+
+## Read-only by design
+
+The server calls the Analytics Data API only. It cannot create, modify, or delete anything in your property, and it has no tools that attempt to. If a future release adds a write capability, it will be documented as one and off by default.
+
+## Changes
+
+The project is developed in the open. Breaking changes are noted in the repository changelog and in the release notes on GitHub.
+
+## Contact
+
+Issues and questions: [github.com/surendranb/google-analytics-mcp](https://github.com/surendranb/google-analytics-mcp).
+
+
+
+# AI Referral Analysis (skill: ai-referral-analysis)
+URL: https://ga4mcp.com/skills/ai-referral-analysis/
+
+Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini,
+Copilot, and others — and understand how it behaves compared to other channels.
+
+## When to use
+- You want to quantify how much of your traffic comes from AI assistants
+- You're tracking whether AI-driven discovery is growing over time
+- You want to compare AI referral quality (engagement, conversion) to SEO or direct
+
+## Known AI referral sources
+These domains appear as `sessionSource` in GA4 when users click links from AI tools:
+
+| Tool | Source domains |
+|---|---|
+| ChatGPT | `chatgpt.com`, `chat.openai.com` |
+| Claude | `claude.ai` |
+| Perplexity | `perplexity.ai` |
+| Gemini | `gemini.google.com` |
+| Copilot | `copilot.microsoft.com`, `bing.com` (when AI-driven) |
+| You.com | `you.com` |
+| Grok | `grok.x.ai`, `x.com` |
+
+## Step 1 — Volume and trend
+```
+dimensions: ["date", "sessionSource"]
+metrics: ["sessions", "newUsers", "userEngagementDuration", "screenPageViews"]
+dimension_filter: sessionSource contains "chatgpt.com" OR "perplexity.ai" OR
+                  "claude.ai" OR "gemini.google.com" OR "copilot.microsoft.com"
+date_range: last 30–90 days
+```
+
+Use `date` as a dimension to see the growth trend.
+
+## Step 2 — Quality comparison
+Compare AI referral quality against your other top channels:
+
+```
+dimensions: ["sessionDefaultChannelGroup", "sessionSource"]
+metrics: ["sessions", "userEngagementDuration", "screenPageViewsPerSession",
+          "keyEvents", "bounceRate"]
+date_range: last 30 days
+```
+
+Then filter the results to AI sources and compare engagement metrics
+against `Organic Search` and `Direct`.
+
+## Step 3 — Which pages AI drives traffic to
+```
+dimensions: ["sessionSource", "landingPage"]
+metrics: ["sessions", "userEngagementDuration", "keyEvents"]
+dimension_filter: sessionSource contains "chatgpt.com" OR "perplexity.ai" OR "claude.ai"
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+This shows which content AI tools are citing and sending users to.
+
+## What to report
+- AI referral as % of total sessions (and % of total new users)
+- Month-over-month growth rate for AI referral traffic
+- Engagement quality: AI vs Organic Search (userEngagementDuration, keyEvents)
+- Top landing pages receiving AI referral traffic
+- Which AI tool sends the most traffic
+
+
+
+# Attribution Scope (skill: attribution-scope)
+URL: https://ga4mcp.com/skills/attribution-scope/
+
+GA4 has three distinct attribution scopes. Using the wrong scope gives
+misleading results. Choose based on the question you are answering.
+
+## The three scopes
+
+| Scope | Dimension prefix | Question it answers | When to use |
+|---|---|---|---|
+| **Session** | `session` | Where did THIS session come from? | Traffic Acquisition — volume, engagement, conversions by source |
+| **First-user** | `firstUser` | Which channel originally acquired this user? | User Acquisition — who brought in new users |
+| **Event/attribution** | *(no prefix)* | Which channel gets credit for this conversion? | Advertising reports — AI-weighted conversion credit allocation |
+
+## Dimensions by scope
+
+**Session scope** — use for traffic analysis:
+- `sessionDefaultChannelGroup`
+- `sessionSource`
+- `sessionMedium`
+- `sessionCampaignName`
+- `sessionSourceMedium`
+
+**First-user scope** — use for acquisition analysis:
+- `firstUserDefaultChannelGroup`
+- `firstUserSource`
+- `firstUserMedium`
+- `firstUserCampaignName`
+
+**Event/attribution scope** — use only in advertising/conversion contexts:
+- `defaultChannelGroup` *(no prefix)*
+- `source` *(no prefix)*
+- `medium` *(no prefix)*
+
+## How to choose
+
+**"Where is my traffic coming from?"** → session scope
+```
+dimensions: ["sessionDefaultChannelGroup", "sessionSource", "sessionMedium"]
+metrics: ["sessions", "totalUsers", "engagedSessions", "keyEvents"]
+```
+
+**"Which channels are bringing in new users?"** → first-user scope
+```
+dimensions: ["firstUserDefaultChannelGroup", "firstUserSource"]
+metrics: ["newUsers", "totalUsers"]
+```
+
+**"How should I attribute conversion credit across channels?"** → event scope
+(Use only with advertising campaign analysis; this is AI-weighted attribution.)
+
+## Common mistake
+
+A user acquired via Instagram who later converts via Google Organic will show:
+- `sessionDefaultChannelGroup = "Organic Search"` (where this session came from)
+- `firstUserDefaultChannelGroup = "Organic Social"` (where they were first acquired)
+
+These are different questions. Mixing scopes in one query produces meaningless results.
+Never combine `sessionSource` with `firstUserMedium` in the same report.
+
+## Nested filters
+
+When filtering, use the same scope as your dimensions:
+```json
+// Filtering traffic acquisition report — use session-scoped dimension
+{"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Search", "matchType": "EXACT"}}}
+
+// NOT source (attribution scope) — wrong scope for this report
+{"filter": {"fieldName": "source", "stringFilter": {"value": "google", "matchType": "EXACT"}}}
+```
+
+
+
+# Bot Traffic Detection (skill: bot-traffic-detection)
+URL: https://ga4mcp.com/skills/bot-traffic-detection/
+
+Identify and exclude bot, scraper, and spam sessions from GA4 data.
+
+## When to use
+- Traffic has unexplained spikes that don't correlate with any activity
+- Bounce rate is 0% or near-100% across many sessions
+- Sessions show 0 engagement time but high pageview counts
+- Referrers look suspicious (random domains, unrecognised TLDs)
+- You want to establish a clean baseline before any analysis
+
+## How to detect
+
+### Step 1 — Check engagement time distribution
+Query sessions with very low or zero engagement:
+
+```
+dimensions: ["sessionDefaultChannelGroup", "sessionSource", "sessionMedium"]
+metrics: ["sessions", "userEngagementDuration", "bounceRate", "screenPageViewsPerSession"]
+date_range: last 7–14 days
+```
+
+Bot signals: `userEngagementDuration` near 0, `screenPageViewsPerSession` exactly 1,
+`bounceRate` at 1.0 (100%).
+
+### Step 2 — Inspect referrer sources
+```
+dimensions: ["sessionSource", "sessionMedium", "sessionDefaultChannelGroup"]
+metrics: ["sessions", "userEngagementDuration", "newUsers"]
+dimension_filter: sessionMedium = "referral"
+```
+
+Flag sources where `userEngagementDuration / sessions` < 2 seconds.
+
+### Step 3 — Check hostname
+```
+dimensions: ["hostname"]
+metrics: ["sessions", "screenPageViews"]
+```
+
+Bot traffic often hits unexpected hostnames (staging domains, raw IPs,
+or hostnames you don't own). Filter to your known production hostnames.
+
+### Step 4 — Geographic anomalies
+```
+dimensions: ["country", "city", "sessionSource"]
+metrics: ["sessions", "userEngagementDuration"]
+dimension_filter: country = [countries with no expected traffic]
+```
+
+Clusters of sessions from unexpected countries with 0 engagement = bot signal.
+
+## Exclusion approach
+GA4 does not have a native bot filter toggle beyond the automatic Google filter.
+To exclude suspected bot traffic from your analysis, add a dimension filter:
+
+```
+dimension_filter: {
+  "filter": {
+    "fieldName": "sessionDefaultChannelGroup",
+    "stringFilter": {"matchType": "EXACT", "value": "Direct"}
+  }
+}
+```
+…combined with a metric filter on `userEngagementDuration > 0`.
+
+Note: GA4 already filters known bots automatically. What remains are
+unknown/new bots and scrapers that mimic real browser behaviour.
+
+## What to report
+- Total suspicious sessions as % of all sessions
+- Top suspicious sources with their engagement metrics
+- Whether the pattern is new (spike) or chronic (baseline contamination)
+
+
+
+# Channel Acquisition Analysis (skill: channel-acquisition)
+URL: https://ga4mcp.com/skills/channel-acquisition/
+
+Break down sessions and users by traffic source, medium, and channel group
+to understand where your audience comes from and which channels perform best.
+
+## Correct dimension names
+| Concept | GA4 API name |
+|---|---|
+| Channel group | `sessionDefaultChannelGroup` |
+| Source | `sessionSource` |
+| Medium | `sessionMedium` |
+| Source / Medium | `sessionSourceMedium` |
+| Campaign name | `sessionCampaignName` |
+| Campaign ID | `sessionCampaignId` |
+| Ad content | `sessionManualAdContent` |
+
+Do not use `sessionDefaultChannelGrouping` — it does not exist.
+Do not combine `sessionCampaignName` with user-scoped metrics like `totalUsers`.
+
+## Step 1 — Channel overview
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["sessions", "totalUsers", "newUsers", "userEngagementDuration",
+          "screenPageViewsPerSession", "bounceRate"]
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+## Step 2 — Source / medium detail
+```
+dimensions: ["sessionSource", "sessionMedium"]
+metrics: ["sessions", "newUsers", "userEngagementDuration", "keyEvents"]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 25
+```
+
+## Step 3 — Campaign performance (paid)
+```
+dimensions: ["sessionCampaignName", "sessionDefaultChannelGroup"]
+metrics: ["sessions", "newUsers", "keyEvents", "userEngagementDuration"]
+dimension_filter: {
+  "filter": {
+    "fieldName": "sessionMedium",
+    "stringFilter": {"matchType": "EXACT", "value": "cpc"}
+  }
+}
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+## Step 4 — Trend by channel over time
+```
+dimensions: ["date", "sessionDefaultChannelGroup"]
+metrics: ["sessions", "newUsers"]
+date_range: last 90 days
+order_by: date ASC
+```
+
+## What to report
+- Top 5 channels by sessions and by new users
+- Engagement quality per channel (userEngagementDuration per session)
+- Which channel drives the most key events (conversions)
+- Week-over-week or month-over-month trend for top channels
+
+
+
+# Common Metric & Dimension Names (skill: common-metric-names)
+URL: https://ga4mcp.com/skills/common-metric-names/
+
+The correct GA4 Data API names for fields models most often get wrong.
+Use these before calling `get_ga4_data` — wrong names return a hard error.
+
+> ⚠️ **YOUR TRAINING DATA IS OUTDATED**: Universal Analytics was sunset
+> 2023-07-01, and on 2024-05-06 Google Analytics 4 renamed all conversion metrics to **"key events"**
+> (`conversions` → `keyEvents`, `conversionRate` → `sessionKeyEventRate`).
+> Querying `conversions` will fail with an `Invalid metric` error. Always use `keyEvents`.
+
+## Metrics — correct API names
+
+| What you mean | Wrong (will fail) | Correct API name |
+|---|---|---|
+| Goal completions / conversions (RENAMED 2024) | `conversions`, `goals`, `conversion` | `keyEvents` |
+| Total users | `users`, `totalVisitors` | `totalUsers` |
+| Active users (rolling 30-day ≈ MAU) | `MAU`, `monthlyActiveUsers`, `activeVisitors` | `active28DayUsers` |
+| Active users (rolling 7-day ≈ WAU) | `WAU`, `weeklyActiveUsers` | `active7DayUsers` |
+| Active users (rolling 1-day ≈ DAU) | `DAU`, `dailyActiveUsers` | `active1DayUsers` |
+| Distinct users in the queried range | `uniqueUsers` | `activeUsers` |
+| Page views | `pageViews`, `pageviews`, `page_views` | `screenPageViews` |
+| E-commerce purchases | `purchases`, `transactions` | `ecommercePurchases` |
+| Product views | `itemViews`, `productViews` | `itemsViewed` |
+| Items added to cart | `addToCarts`, `cartAdds` | `itemsAddedToCart` |
+| Revenue | `revenue`, `ecommerceRevenue` | `purchaseRevenue` |
+| Avg session duration | `avgSessionDuration`, `avgTimeOnSite` | `averageSessionDuration` |
+| Total engagement time | `engagementDuration`, `timeOnSite` | `userEngagementDuration` |
+| Session key event rate (was "conversion rate", renamed 2024) | `conversionRate`, `goalConversionRate`, `sessionConversionRate` | `sessionKeyEventRate` |
+| User key event rate | `userConversionRate` | `userKeyEventRate` |
+| Engaged sessions | `qualifiedSessions`, `validSessions` | `engagedSessions` |
+| Pages per session | `pagesPerSession`, `pageDepth` | `screenPageViewsPerSession` |
+
+## Dimensions — correct API names
+
+| What you mean | Wrong (will fail) | Correct API name |
+|---|---|---|
+| Traffic channel group | `sessionDefaultChannelGrouping`, `channelGrouping` | `sessionDefaultChannelGroup` |
+| Landing page + query | `landingPage` (often wrong scope) | `landingPagePlusQueryString` |
+| Page path | `pagePath`, `page` | `pagePath` |
+| Page path + query | `pagePathPlusQueryString` | `unifiedPagePathScreen` |
+| Session source | `source` (wrong scope — see attribution-scope skill) | `sessionSource` |
+| Session medium | `medium` (wrong scope) | `sessionMedium` |
+| Device type | `device`, `deviceType` | `deviceCategory` |
+| Operating system | `os` | `operatingSystem` |
+| Browser | `userAgent` | `browser` |
+| Week of year | `week`, `weekNumber` | `week` (this one IS correct) |
+
+## Note on active users (MAU / WAU / DAU)
+
+GA4 has no `MAU`, `WAU`, `DAU`, `monthlyActiveUsers`, or `dailyActiveUsers` metric —
+these hard-error. Use the rolling n-day metrics: `active1DayUsers` (≈ DAU),
+`active7DayUsers` (≈ WAU), `active28DayUsers` (≈ MAU). Each counts distinct users
+active in the N days *ending on that date* (a rolling window, not a calendar bucket).
+`activeUsers` = distinct users in the queried range. Never sum daily `activeUsers`
+across rows to get a period total — it double-counts users active on multiple days.
+For a monthly total, query `activeUsers` once over the whole range (no date dimension),
+or use `active28DayUsers` for a rolling month. Stickiness ratios `dauPerMau`,
+`dauPerWau`, `wauPerMau` are also available as metrics.
+
+## Note on bounce rate
+
+GA4 bounce rate = sessions with NO engaged session (opposite of GA3 logic).
+A bounce rate of 60% means 60% of sessions had no engagement — that is high.
+In GA3, bounce rate meant single-page sessions. Do not compare GA3 and GA4 bounce rates.
+
+## When you hit a schema error
+
+If `get_ga4_data` returns "Invalid dimension" or "Invalid metric", do not guess
+alternatives. Use `search_schema` with a keyword to find the correct name, or
+check this skill's table above.
+
+
+
+# Compatible Dimension and Metric Combinations (skill: compatible-combinations)
+URL: https://ga4mcp.com/skills/compatible-combinations/
+
+GA4 enforces strict rules about which dimensions and metrics can appear
+in the same request. Incompatible combinations return a 400 error:
+"The request's dimensions & metrics are incompatible."
+
+## The core rule
+
+GA4 data is scoped at three levels: **event**, **session**, and **user**.
+Mixing dimensions and metrics from incompatible scopes causes errors.
+
+| Scope | Example dimensions | Example metrics |
+|---|---|---|
+| Event | `eventName`, `customEvent:*` | `eventCount` |
+| Session | `sessionDefaultChannelGroup`, `sessionSource`, `sessionCampaignName` | `sessions`, `bounceRate`, `sessionKeyEventRate` |
+| User | `firstUserDefaultChannelGroup`, `firstUserSource` | `totalUsers`, `newUsers` |
+
+## Most common incompatible pairs
+
+| Dimension | Incompatible metric | Use instead |
+|---|---|---|
+| `sessionSource` / `sessionMedium` / `sessionCampaignName` | `eventCount` | `sessions` |
+| `eventName` | `sessions` | `eventCount` |
+| `promotionId` / `promotionName` | most session/user metrics | only pair with `promotionViews`, `promotionClicks` |
+| `itemId` / `itemName` | `sessions`, `totalUsers` | `itemsViewed`, `addToCarts`, `ecommercePurchases` |
+| `firstUserSource` / `firstUserMedium` | `sessions` | `totalUsers`, `newUsers` |
+
+## When you hit this error
+
+The GA4 error message names the exact field to remove:
+`"Please remove eventCount to make the request compatible for example."`
+
+Read the message literally — remove that field and replace it with a
+scope-compatible equivalent.
+
+## Safe combinations (always work)
+
+- `date` + any metric
+- `deviceCategory` + any metric
+- `country` / `city` + any metric
+- `pagePath` / `pageTitle` + `screenPageViews`, `totalUsers`, `sessions`
+- `sessionDefaultChannelGroup` + `sessions`, `totalUsers`, `bounceRate`
+
+## Ecommerce-specific
+
+Ecommerce metrics (`ecommercePurchases`, `purchaseRevenue`, `addToCarts`,
+`itemsViewed`) are event-scoped. Pair them with event-scoped or
+`date`/`deviceCategory`/geo dimensions — not with session campaign dimensions.
+
+
+
+# Content Performance Analysis (skill: content-performance)
+URL: https://ga4mcp.com/skills/content-performance/
+
+Identify top-performing pages, find underperforming content, and understand
+engagement patterns across your site.
+
+## When to use
+- You want to know which pages drive the most traffic and engagement
+- You want to find pages with high views but low engagement (poor content fit)
+- You want to identify content that drives conversions or return visits
+
+## Correct dimension and metric names
+| Concept | GA4 API name |
+|---|---|
+| Page path | `pagePath` |
+| Page title | `pageTitle` |
+| Landing page | `landingPage` |
+| Page views | `screenPageViews` |
+| Unique page views (users) | `totalUsers` |
+| Engagement rate | `engagementRate` |
+| Avg engagement time | `userEngagementDuration` |
+| Scroll depth | `scrolledUsers` (if scroll event is tracked) |
+| Entries (landing views) | `sessions` with `landingPage` dimension |
+
+Do not use `pageviews` — the correct metric is `screenPageViews`.
+
+## Step 1 — Top pages by traffic
+```
+dimensions: ["pagePath", "pageTitle"]
+metrics: ["screenPageViews", "totalUsers", "userEngagementDuration",
+          "engagementRate", "bounceRate"]
+date_range: last 30 days
+order_by: screenPageViews DESC
+limit: 25
+```
+
+## Step 2 — Landing page performance
+Which pages do users enter your site through, and how well do they engage:
+
+```
+dimensions: ["landingPage"]
+metrics: ["sessions", "newUsers", "userEngagementDuration",
+          "engagementRate", "keyEvents"]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 25
+```
+
+## Step 3 — Underperforming content (high views, low engagement)
+Run Step 1, then flag pages where:
+- `screenPageViews` is in the top 50% AND
+- `engagementRate` is below 0.3 (30%) OR `userEngagementDuration` < 30 seconds
+
+These pages attract traffic but fail to hold attention — candidates for
+content improvement or better internal linking.
+
+## Step 4 — Content trend over time
+```
+dimensions: ["date", "pagePath"]
+metrics: ["screenPageViews", "totalUsers"]
+dimension_filter: pagePath contains "/blog" (or your content path)
+date_range: last 90 days
+order_by: date ASC
+```
+
+## What to report
+- Top 10 pages by views and by engagement time
+- Top 5 landing pages and their conversion rate
+- 3–5 underperforming pages (high traffic, low engagement) as actionable findings
+- Any page with a notable trend (growing or declining) over the period
+
+
+
+# Custom Dimensions and Event Parameters (skill: custom-dimensions)
+URL: https://ga4mcp.com/skills/custom-dimensions/
+
+How to find and query property-specific custom dimensions in GA4.
+
+## The core rule
+
+Custom dimensions are **property-specific**. Never guess their names.
+Always call `search_schema("custom")` first — it will show every registered
+custom dimension for this exact property.
+
+## Two valid syntaxes
+
+GA4 supports two ways to access custom data:
+
+**Registered custom dimensions** — appear in the schema by their registered name.
+Find them with `search_schema`. Use the name exactly as returned.
+
+**Unregistered event parameters** — accessed inline with:
+- `customEvent:parameter_name` for event-scoped parameters
+- `customUser:property_name` for user-scoped properties
+
+The `parameter_name` must exactly match what your tracking code sends.
+If the property has not collected this parameter, the API returns an error.
+
+## Why guessing fails
+
+The model cannot know what custom parameters a GA4 property uses —
+they are defined by the site's own tracking code and GA4 Admin settings.
+`customEvent:page_category` works on one property and fails on another
+depending on whether that property's tracking sends a `page_category` parameter.
+
+## Workflow
+
+1. Call `search_schema("custom")` — lists all registered custom dimensions.
+2. If the one you need appears, use its exact API name.
+3. If it does not appear, ask the user what event parameter name their
+   tracking code uses, then query with `customEvent:that_name`.
+4. If the query still fails, the parameter is not collected by this property.
+
+## Scope matters
+
+| Scope | Syntax | Use for |
+|---|---|---|
+| Event | `customEvent:name` | per-hit data (page category, product id, etc.) |
+| User | `customUser:name` | user attributes (plan, cohort, customer type) |
+| Session | registered name only | session-level custom groupings |
+
+Mixing scopes can cause incompatibility errors — see the `compatible-combinations` skill.
+
+
+
+# Date Ranges (skill: date-ranges)
+URL: https://ga4mcp.com/skills/date-ranges/
+
+How to specify date ranges in `get_ga4_data` and how to structure
+period-over-period comparisons.
+
+## Valid formats
+
+```
+date_range_start / date_range_end accept:
+  "YYYY-MM-DD"   — absolute date, e.g. "2024-01-15"
+  "today"        — current day (partial — use carefully)
+  "yesterday"    — last complete day
+  "NdaysAgo"     — N days back from today, e.g. "7daysAgo", "30daysAgo", "90daysAgo"
+```
+
+`NdaysAgo` excludes today. `7daysAgo` to `yesterday` = last 7 complete days.
+
+## Common windows
+
+| Window | start | end |
+|---|---|---|
+| Last 7 days | `7daysAgo` | `yesterday` |
+| Last 28 days | `28daysAgo` | `yesterday` |
+| Last 90 days | `90daysAgo` | `yesterday` |
+| This month | `YYYY-MM-01` | `today` |
+| Last month | `YYYY-MM-01` (prior) | `YYYY-MM-last-day` (prior) |
+| Year to date | `YYYY-01-01` | `yesterday` |
+
+## Period-over-period comparison
+
+The GA4 Data API does not support multi-period in a single call. Run two
+separate `get_ga4_data` calls, then compare the results.
+
+**Example: week-over-week**
+
+Call 1 — this week:
+```
+date_range_start: "7daysAgo"
+date_range_end:   "yesterday"
+```
+
+Call 2 — last week:
+```
+date_range_start: "14daysAgo"
+date_range_end:   "8daysAgo"
+```
+
+**Example: year-over-year for July**
+
+Call 1 — this year:
+```
+date_range_start: "2025-07-01"
+date_range_end:   "2025-07-31"
+```
+
+Call 2 — last year:
+```
+date_range_start: "2024-07-01"
+date_range_end:   "2024-07-31"
+```
+
+Then compute the delta: `(current - prior) / prior * 100` for each metric.
+
+## Partial-day reads
+
+`today` includes only the hours elapsed so far. Comparing `today` to `yesterday`
+is misleading — yesterday is a full day, today is partial.
+
+For intra-day analysis, use `today` for both start and end and note the
+IST hours covered in your interpretation.
+
+## Common mistakes
+
+- `"last7days"` is NOT valid — use `"7daysAgo"`
+- `"last-week"` is NOT valid — use absolute dates or `NdaysAgo`
+- Do not use `date_range_end: "today"` when comparing to a prior complete period
+- `"0daysAgo"` = today (same as `"today"`)
+
+
+
+# Ecommerce Analysis (skill: ecommerce-analysis)
+URL: https://ga4mcp.com/skills/ecommerce-analysis/
+
+Revenue, conversion rate, AOV, and funnel drop-off using GA4 ecommerce events.
+
+## When to use
+- You have purchase, add_to_cart, begin_checkout events in GA4
+- You want to measure revenue, conversion rate, or average order value
+- You want to find where users drop off in the purchase funnel
+
+## Correct metric and dimension names
+GA4 ecommerce uses specific API names — do not guess:
+
+| Concept | GA4 API name |
+|---|---|
+| Revenue | `purchaseRevenue` |
+| Transactions | `ecommercePurchases` |
+| AOV | `averagePurchaseRevenue` |
+| Add to cart | `addToCarts` |
+| Checkout started | `checkouts` |
+| Cart-to-view rate | `cartToViewRate` |
+| Purchase-to-view rate | `purchaseToViewRate` |
+| Item views | `itemsViewed` |
+| Item revenue | `itemRevenue` |
+| Items purchased | `itemsPurchased` |
+| Product name | `itemName` |
+| Product category | `itemCategory` |
+| Transaction ID | `transactionId` |
+
+## Step 1 — Revenue overview
+```
+dimensions: ["date"]
+metrics: ["ecommercePurchases", "purchaseRevenue", "averagePurchaseRevenue"]
+date_range: last 30 days
+order_by: date ASC
+```
+
+## Step 2 — Funnel: views → cart → checkout → purchase
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["itemsViewed", "addToCarts", "checkouts", "ecommercePurchases",
+          "cartToViewRate", "purchaseToViewRate"]
+date_range: last 30 days
+order_by: ecommercePurchases DESC
+```
+
+Drop-off between stages = `1 - (next_stage / current_stage)`.
+Fix the biggest drop-off first.
+
+## Step 3 — Top products
+```
+dimensions: ["itemName", "itemCategory"]
+metrics: ["itemsViewed", "addToCarts", "itemsPurchased", "itemRevenue"]
+date_range: last 30 days
+order_by: itemRevenue DESC
+```
+
+## Step 4 — Revenue by channel
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["ecommercePurchases", "purchaseRevenue", "averagePurchaseRevenue"]
+date_range: last 30 days
+order_by: purchaseRevenue DESC
+```
+
+## Incompatible combinations to avoid
+- `itemId` or `itemSku` cannot be combined with session-level metrics
+- `ecommercePurchases` cannot be combined with `eventCount` in the same query
+- Use separate queries for item-level and session-level analysis
+
+## What to report
+- Revenue trend over the period
+- Funnel conversion rates and biggest drop-off point
+- Top 10 products by revenue
+- Best-performing acquisition channel by revenue and AOV
+
+
+
+# Filter Structures (skill: filter-structures)
+URL: https://ga4mcp.com/skills/filter-structures/
+
+The correct shape for `dimension_filter` in `get_ga4_data`.
+Wrong structure returns an "Invalid dimension_filter" error. Use these templates.
+
+## The one rule
+
+Every leaf filter **must** be wrapped in a `"filter"` key. `fieldName` never appears at the top level.
+
+```json
+// WRONG — fieldName at top level
+{"fieldName": "sessionSource", "stringFilter": {"value": "google"}}
+
+// CORRECT — wrapped in "filter"
+{"filter": {"fieldName": "sessionSource", "stringFilter": {"value": "google"}}}
+```
+
+## Template: single field filter
+
+```json
+{
+  "filter": {
+    "fieldName": "DIMENSION_NAME",
+    "stringFilter": {
+      "value": "VALUE",
+      "matchType": "EXACT"
+    }
+  }
+}
+```
+
+`matchType` options: `EXACT`, `BEGINS_WITH`, `ENDS_WITH`, `CONTAINS`, `FULL_REGEXP`, `PARTIAL_REGEXP`
+
+## Template: AND — all conditions must match
+
+```json
+{
+  "andGroup": {
+    "expressions": [
+      {"filter": {"fieldName": "deviceCategory", "stringFilter": {"value": "mobile", "matchType": "EXACT"}}},
+      {"filter": {"fieldName": "country", "stringFilter": {"value": "United States", "matchType": "EXACT"}}}
+    ]
+  }
+}
+```
+
+## Template: OR — any condition matches
+
+```json
+{
+  "orGroup": {
+    "expressions": [
+      {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Search", "matchType": "EXACT"}}},
+      {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Social", "matchType": "EXACT"}}}
+    ]
+  }
+}
+```
+
+## Template: NOT — exclude matching sessions
+
+```json
+{
+  "notExpression": {
+    "filter": {
+      "fieldName": "sessionDefaultChannelGroup",
+      "stringFilter": {"value": "Direct", "matchType": "EXACT"}
+    }
+  }
+}
+```
+
+## Template: IN LIST — match any of several values
+
+```json
+{
+  "filter": {
+    "fieldName": "country",
+    "inListFilter": {
+      "values": ["United States", "United Kingdom", "Canada"]
+    }
+  }
+}
+```
+
+## Common wrong keys → correct keys
+
+| Wrong key | Correct key |
+|---|---|
+| `and_filter` | `andGroup` |
+| `or_filter` | `orGroup` |
+| `not_filter` | `notExpression` |
+| `filters` | `expressions` |
+| `field` | `fieldName` |
+| `stringFilter.exact` | `stringFilter.value` |
+
+## Field names are always camelCase
+
+> ⚠️ **CRITICAL FILTER TRAP**: Field names in `dimension_filter` (inside `fieldName`) MUST be exact camelCase. Passing `page_path` or `session_default_channel_group` will fail with an `Unknown field for FilterExpression` error.
+
+| Wrong (snake_case) | Correct (camelCase) |
+|---|---|
+| `page_path` | `pagePath` |
+| `session_default_channel_group` | `sessionDefaultChannelGroup` |
+| `session_source` | `sessionSource` |
+| `session_source_medium` | `sessionSourceMedium` |
+| `session_campaign_name` | `sessionCampaignName` |
+| `landing_page` | `landingPage` |
+| `device_category` | `deviceCategory` |
+| `event_name` | `eventName` |
+
+If you use snake_case in `fieldName`, the filter will fail with an "Unknown field" error. Do NOT retry snake_case.
+
+## Note
+
+Only dimensions can be filtered with `dimension_filter`. To filter on metric
+values (e.g. sessions > 100), you must do this in post-processing — the GA4
+Data API does not support metric filters in `RunReport`.
+
+
+
+# GA4 API Limitations (skill: ga4-limitations)
+URL: https://ga4mcp.com/skills/ga4-limitations/
+
+What this MCP **cannot** do via the GA4 Data API, and where to go instead.
+Attempting these will either fail or produce meaningless aggregate data.
+
+## Not available via this MCP
+
+| Analysis type | Why not available | Where to do it instead |
+|---|---|---|
+| Funnel analysis (drop-off by step) | `runFunnelReport` exists in the API but is not exposed by this MCP | GA4 UI → Explore → Funnel Exploration |
+| Cohort retention (week N return rate) | `runCohortReport` not exposed | GA4 UI → Explore → Cohort Exploration |
+| User path / flow analysis | Not available in aggregate API | GA4 UI → Explore → Path Exploration |
+| Per-user event sequences | API returns aggregate rows only — no individual user journeys | BigQuery export (raw events) |
+| Real-time custom breakdowns | Realtime API is limited to last 30 minutes, basic dimensions | GA4 UI → Realtime report |
+| Raw event-level data | Data API aggregates; no row-level access | BigQuery export |
+| Segment overlap / Venn analysis | Not a native API feature | BigQuery or GA4 Explore comparisons |
+| Custom channel group definitions | Read-only via API; custom groups must be created in UI | GA4 UI → Admin → Custom Channel Groups |
+
+## What IS available (and often underused)
+
+- **Period-over-period in one call**: pass two `date_ranges` — GA4 returns both periods in a single response (use `date_range_start`/`date_range_end` for each; call twice if two-range isn't supported)
+- **Ecommerce metrics**: full purchase funnel metrics (`itemsViewed`, `itemsAddedToCart`, `itemsPurchased`, `purchaseRevenue`, `cartToViewRate`) — aggregate only, not per-session funnel
+- **Search Console integration**: available as a linked report in GA4 UI but the Search Console data is on a separate API — not queryable via this MCP (use Google Search Console API directly)
+- **Custom dimensions and metrics**: available if defined in the property — they appear in the schema alongside standard fields
+- **Attribution modeling comparisons**: not directly queryable — data-driven vs last-click is set at the property level, not a query-time parameter
+
+## When a user asks for funnel or cohort analysis
+
+Tell them: the GA4 Data API returns aggregate metrics, not event sequences.
+For funnel drop-off between specific steps, use GA4 Explore → Funnel Exploration.
+For cohort retention (week 1 / week 2 return), use GA4 Explore → Cohort Exploration.
+These analyses require the GA4 UI or a BigQuery export, not the Data API.
+
+
+
+# GCP Service Account Setup for GA4 MCP (skill: gcp-setup)
+URL: https://ga4mcp.com/skills/gcp-setup/
+
+Step-by-step playbook to authenticate the GA4 MCP server using a Google Cloud Platform (GCP) Service Account.
+
+This is the standard, enterprise-grade authentication method:
+- **Offline & Headless**: Requires no interactive browser popups or OAuth consent screens.
+- **Persistent**: Service account JSON keys never expire (unlike user OAuth tokens).
+- **Least-Privilege**: Grants read-only Viewer access exclusively to the target GA4 property.
+
+---
+
+## 1. Quick Setup via `gcloud` CLI (Fastest — 60 Seconds)
+
+If you have the `gcloud` CLI installed, run these 4 commands in your terminal:
+
+```bash
+# 1. Set your target GCP Project ID
+export GCP_PROJECT_ID="$(gcloud config get-value project)"
+
+# 2. Enable the Google Analytics Data API v1beta
+gcloud services enable analyticsdata.googleapis.com --project="$GCP_PROJECT_ID"
+
+# 3. Create a dedicated Service Account for the MCP server
+gcloud iam service-accounts create ga4-mcp-reader \
+  --display-name="GA4 MCP Reader" \
+  --description="Read-only service account for GA4 Model Context Protocol" \
+  --project="$GCP_PROJECT_ID"
+
+# 4. Generate and download the JSON key file
+mkdir -p ~/.config/ga4-mcp
+gcloud iam service-accounts keys create ~/.config/ga4-mcp/service-account.json \
+  --iam-account="ga4-mcp-reader@${GCP_PROJECT_ID}.iam.gserviceaccount.com" \
+  --project="$GCP_PROJECT_ID"
+```
+
+Your service account email will be:
+`ga4-mcp-reader@<YOUR_PROJECT_ID>.iam.gserviceaccount.com`
+
+---
+
+## 2. Manual Setup via Google Cloud Console (GUI Path)
+
+If you do not have `gcloud` CLI installed:
+
+1. **Open Google Cloud Console**:
+   Go to [console.cloud.google.com](https://console.cloud.google.com) and create or select a project.
+2. **Enable the API**:
+   Navigate to **APIs & Services** > **Library**, search for **Google Analytics Data API**, and click **Enable**.
+3. **Create Service Account**:
+   Navigate to **IAM & Admin** > **Service Accounts**, click **+ Create Service Account**.
+   - Name: `ga4-mcp-reader`
+   - Description: `Read-only GA4 MCP reader`
+   - Role: Skip GCP role assignment (GA4 permissions are managed inside Google Analytics, not GCP). Click **Done**.
+4. **Download JSON Key**:
+   Click on the newly created service account > go to the **Keys** tab > click **Add Key** > **Create new key** > select **JSON** > click **Create**.
+   Save the downloaded file to a permanent path, e.g.:
+   `~/.config/ga4-mcp/service-account.json`
+
+---
+
+## 3. Grant Viewer Access in Google Analytics
+
+> ⚠️ **CRITICAL STEP**: The service account cannot read your analytics until you explicitly add its email as a Viewer in Google Analytics.
+
+1. Open [analytics.google.com](https://analytics.google.com).
+2. Click the gear icon (**Admin**) in the bottom-left corner.
+3. Under the **Property** column, click **Property access management**.
+4. Click the blue **+** button in the top-right corner and select **Add users**.
+5. Enter the service account email (e.g. `ga4-mcp-reader@your-project.iam.gserviceaccount.com` or the `client_email` value inside your JSON key).
+6. Under Standard roles, select **Viewer** (read-only).
+7. Uncheck "Notify SDK users by email" and click **Add**.
+
+---
+
+## 4. Find Your Numeric GA4 Property ID
+
+GA4 requires the numeric **Property ID**, NOT the data stream Measurement ID:
+
+- ❌ **Wrong**: `G-ABC123XYZ` (Measurement ID — for website tracking tags, rejected by API)
+- ✔️ **Correct**: `123456789` (Numeric Property ID — for Data API queries)
+
+**Where to find it**:
+1. In Google Analytics, click **Admin** (gear icon).
+2. Under Property, click **Property details**.
+3. The numeric **Property ID** is displayed in the top right (e.g., `362847407`).
+
+---
+
+## 5. Configure Your MCP Client Harness
+
+Update your client configuration file with the absolute path to your JSON key and your numeric Property ID.
+
+### Claude Desktop
+File: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/Users/YOUR_USER/.config/ga4-mcp/service-account.json",
+        "GA4_PROPERTY_ID": "123456789"
+      }
+    }
+  }
+}
+```
+
+### Cursor
+File: `~/.cursor/mcp.json` or `.cursor/mcp.json` in your workspace:
+
+```json
+{
+  "mcpServers": {
+    "google-analytics": {
+      "command": "uvx",
+      "args": ["google-analytics-mcp"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/Users/YOUR_USER/.config/ga4-mcp/service-account.json",
+        "GA4_PROPERTY_ID": "123456789"
+      }
+    }
+  }
+}
+```
+
+### Claude Code CLI
+Run directly:
+```bash
+claude mcp add google-analytics -- uvx google-analytics-mcp -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json -e GA4_PROPERTY_ID=123456789
+```
+
+---
+
+## 6. How to Verify It Works
+
+Run this one-liner in your terminal to verify end-to-end connectivity without restarting your IDE:
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json" \
+GA4_PROPERTY_ID="123456789" \
+uvx google-analytics-mcp
+```
+
+**Expected output**:
+```
+Starting GA4 MCP server...
+Fetching schema for property '123456789'...
+Schema loaded successfully.
+```
+
+If you see `Schema loaded successfully`, your service account is 100% operational.
+
+
+
+# Geo and Device Segmentation (skill: geo-device-segmentation)
+URL: https://ga4mcp.com/skills/geo-device-segmentation/
+
+Break down user behaviour by country, city, device category, and OS
+to understand regional patterns and optimise for your key markets.
+
+## Correct dimension names
+| Concept | GA4 API name |
+|---|---|
+| Country | `country` |
+| City | `city` |
+| Region | `region` |
+| Device category | `deviceCategory` |
+| Operating system | `operatingSystem` |
+| OS version | `operatingSystemVersion` |
+| Browser | `browser` |
+| Screen resolution | `screenResolution` |
+| Language | `language` |
+
+Device category values: `desktop`, `mobile`, `tablet`.
+
+## Step 1 — Country breakdown
+```
+dimensions: ["country"]
+metrics: ["totalUsers", "sessions", "userEngagementDuration",
+          "screenPageViewsPerSession", "keyEvents"]
+date_range: last 30 days
+order_by: totalUsers DESC
+limit: 20
+```
+
+## Step 2 — Device split
+```
+dimensions: ["deviceCategory"]
+metrics: ["sessions", "totalUsers", "engagementRate",
+          "userEngagementDuration", "bounceRate"]
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+## Step 3 — Country + device cross-tab
+Understand device preferences by market:
+
+```
+dimensions: ["country", "deviceCategory"]
+metrics: ["sessions", "userEngagementDuration", "bounceRate"]
+dimension_filter: country IN [your top 5 countries from Step 1]
+date_range: last 30 days
+order_by: sessions DESC
+```
+
+Note: combining country + deviceCategory + additional dimensions in one query
+may exceed GA4's cardinality limit. Keep to 2–3 dimensions max.
+
+## Step 4 — Single-country deep dive
+For a specific country (e.g. Japan):
+
+```
+dimensions: ["city", "deviceCategory"]
+metrics: ["sessions", "totalUsers", "userEngagementDuration", "keyEvents"]
+dimension_filter: {
+  "filter": {
+    "fieldName": "country",
+    "stringFilter": {"matchType": "EXACT", "value": "Japan"}
+  }
+}
+date_range: last 30 days
+order_by: sessions DESC
+limit: 20
+```
+
+## Step 5 — Browser and OS (for technical optimisation)
+```
+dimensions: ["browser", "operatingSystem", "deviceCategory"]
+metrics: ["sessions", "bounceRate", "userEngagementDuration"]
+date_range: last 30 days
+order_by: sessions DESC
+limit: 20
+```
+
+## What to report
+- Top 10 countries by users and their engagement quality
+- Mobile vs desktop vs tablet split (sessions and engagement rate)
+- Any country where engagement is significantly below average — flagged for investigation
+- Device preferences by your top 3 markets if they differ meaningfully
+
+
+
+# Traffic Change Diagnosis (skill: traffic-diagnosis)
+URL: https://ga4mcp.com/skills/traffic-diagnosis/
+
+Systematically diagnose why traffic changed — spike, drop, or shift in mix.
+Follow these steps in order. Each step narrows the hypothesis.
+
+## Step 1 — Establish the baseline
+
+Compare the period in question to the equivalent prior period:
+```
+dimensions: ["date"]
+metrics: ["sessions", "totalUsers", "newUsers", "engagedSessions", "keyEvents"]
+date_range: affected period + same-length prior period
+```
+
+Measure: absolute change, % change, and whether all metrics moved together.
+If sessions dropped but engagement rate improved, volume dropped but quality held — different cause than if everything dropped proportionally.
+
+## Step 2 — Isolate which channel changed
+
+```
+dimensions: ["sessionDefaultChannelGroup"]
+metrics: ["sessions", "totalUsers", "engagedSessions", "engagementRate"]
+date_range: affected period vs prior period
+```
+
+Which channel account for most of the change? Narrow to that channel before going deeper.
+
+## Step 3 — Check time pattern (sudden vs gradual)
+
+```
+dimensions: ["date", "sessionDefaultChannelGroup"]
+metrics: ["sessions"]
+date_range: last 28 days
+```
+
+- **Sudden single-day spike/drop** → campaign launch/end, deploy, media mention, bot flood
+- **Gradual decline over weeks** → SEO decay, seasonal drift, quality score drop
+- **Step change that persists** → tracking change, filter change, channel definition update
+
+## Step 4 — Fingerprint the cause
+
+Run queries matching the suspected cause:
+
+**Bot flood** — see `bot-traffic-detection` skill:
+- `engagementRate` near 0, `averageSessionDuration` ≈ 0
+- Unusual hostname or country concentration
+
+**Campaign start/end**:
+```
+dimensions: ["sessionCampaignName", "sessionSource", "sessionMedium"]
+metrics: ["sessions", "keyEvents", "engagementRate"]
+dimension_filter: sessionDefaultChannelGroup IN ["Paid Search", "Paid Social", "Display"]
+```
+
+**SEO change (organic)**:
+```
+dimensions: ["sessionDefaultChannelGroup", "landingPagePlusQueryString"]
+metrics: ["sessions", "engagementRate", "keyEvents"]
+dimension_filter: sessionDefaultChannelGroup = "Organic Search"
+date_range: 90 days (to see gradual trend)
+```
+
+**Technical/tracking change** — all channels drop equally at the same moment.
+Check with `dimensions: ["date"]` — a vertical drop on a single date across all channels
+points to a tag firing issue or consent mode change.
+
+## Step 5 — Conclude
+
+State:
+1. What changed (metric + magnitude)
+2. Which channel drove it
+3. When it started (sudden or gradual)
+4. Most likely cause (from fingerprinting)
+5. One action: investigate further / fix tracking / pause campaign / accept as seasonal
+
+## What not to do
+
+Do not conclude "traffic dropped" from a single metric in isolation.
+Do not compare to the prior week without accounting for day-of-week patterns
+(Monday always differs from Sunday — compare Monday-to-Monday or full weeks).
+
+
+
+# UA to GA4 Field Name Mapping (skill: ua-to-ga4)
+URL: https://ga4mcp.com/skills/ua-to-ga4/
+
+Universal Analytics (UA) and GA4 use different names for equivalent concepts.
+UA was sunset on 2023-07-01; models trained before or around then guess UA field
+names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed
+"conversions" to "key events" (see the conversions rows below). If a name feels
+obviously right but returns "Invalid metric/dimension", assume your training
+predates the change and verify with `search_schema`. This skill gives the correct
+GA4 Data API name for every common UA metric and dimension.
+
+## Metrics
+
+| UA name (wrong) | GA4 API name (correct) |
+|---|---|
+| `users` | `totalUsers` |
+| `uniquePageviews` | `screenPageViews` |
+| `pageviews` | `screenPageViews` |
+| `avgSessionDuration` | `averageSessionDuration` |
+| `timeOnPage` / `avgTimeOnPage` | `userEngagementDuration` |
+| `goalCompletionsAll` / `conversions` | `keyEvents` |
+| `goalConversionRateAll` / `conversionRate` / `sessionConversionRate` | `sessionKeyEventRate` |
+| `userConversionRate` | `userKeyEventRate` |
+| `transactions` / `purchases` | `ecommercePurchases` |
+| `transactionRevenue` / `revenue` | `purchaseRevenue` |
+| `revenuePerTransaction` | `averagePurchaseRevenue` |
+| `transactionsPerSession` | `purchaseToViewRate` |
+| `itemQuantity` / `itemViews` | `itemsViewed` |
+| `itemRevenue` | `itemRevenue` (same) |
+| `entrances` | `sessions` (no direct equivalent — use sessions) |
+| `pageValue` | no direct equivalent |
+
+## Dimensions
+
+| UA name (wrong) | GA4 API name (correct) |
+|---|---|
+| `channelGrouping` | `sessionDefaultChannelGroup` |
+| `defaultChannelGrouping` | `sessionDefaultChannelGroup` |
+| `source` | `sessionSource` |
+| `medium` | `sessionMedium` |
+| `campaign` | `sessionCampaignName` |
+| `keyword` | `sessionManualTerm` |
+| `sourceMedium` | `sessionSourceMedium` |
+| `adContent` | `sessionManualAdContent` |
+| `pagePath` | `pagePath` (same) |
+| `pageTitle` | `pageTitle` (same) |
+| `landingPagePath` | `landingPage` |
+| `exitPagePath` | no direct equivalent |
+| `deviceCategory` | `deviceCategory` (same) |
+| `operatingSystem` | `operatingSystem` (same) |
+| `browser` | `browser` (same) |
+| `country` | `country` (same) |
+| `city` | `city` (same) |
+| `userType` | use `newVsReturning` |
+
+## Key rules
+
+All GA4 API names are camelCase — never snake_case.
+
+| Wrong (snake_case) | Correct |
+|---|---|
+| `page_path` | `pagePath` |
+| `session_source` | `sessionSource` |
+| `device_category` | `deviceCategory` |
+| `event_name` | `eventName` |
+| `total_users` | `totalUsers` |
+
+## Attribution scope
+
+GA4 splits attribution into three scopes. Use the right prefix:
+
+| Scope | Prefix | Use for |
+|---|---|---|
+| Session | `session` (e.g. `sessionSource`) | Traffic acquisition analysis |
+| First user | `firstUser` (e.g. `firstUserSource`) | User acquisition analysis |
+| Event | `(none)` (e.g. `pagePath`) | Event-level analysis |
+
+Mixing scopes causes 400 errors — see `compatible-combinations` skill.

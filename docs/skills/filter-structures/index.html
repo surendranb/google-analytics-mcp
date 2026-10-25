@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filter Structures — GA4 MCP skill</title>
+<meta name="description" content="The correct shape for `dimension_filter` in `get_ga4_data`. Wrong structure returns an \&quot;Invalid dimension_filter\&quot; error. Use these templates.">
+<link rel="canonical" href="https://ga4mcp.com/skills/filter-structures/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Filter Structures — GA4 MCP skill">
+<meta property="og:description" content="The correct shape for `dimension_filter` in `get_ga4_data`. Wrong structure returns an \&quot;Invalid dimension_filter\&quot; error. Use these templates.">
+<meta property="og:url" content="https://ga4mcp.com/skills/filter-structures/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Filter Structures — GA4 MCP skill","description":"The correct shape for `dimension_filter` in `get_ga4_data`. Wrong structure returns an \\\"Invalid dimension_filter\\\" error. Use these templates.","url":"https://ga4mcp.com/skills/filter-structures/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/" class="is-active">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/" class="is-active" aria-current="page">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>Filter Structures</h1><p>The correct shape for <code>dimension_filter</code> in <code>get_ga4_data</code>. Wrong structure returns an &quot;Invalid dimension_filter&quot; error. Use these templates.</p>
+<h2>The one rule</h2>
+<p>Every leaf filter <strong>must</strong> be wrapped in a <code>&quot;filter&quot;</code> key. <code>fieldName</code> never appears at the top level.</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>// WRONG — fieldName at top level
+{&quot;fieldName&quot;: &quot;sessionSource&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;google&quot;}}
+
+// CORRECT — wrapped in &quot;filter&quot;
+{&quot;filter&quot;: {&quot;fieldName&quot;: &quot;sessionSource&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;google&quot;}}}</code></pre></div>
+<h2>Template: single field filter</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;DIMENSION_NAME&quot;,
+    &quot;stringFilter&quot;: {
+      &quot;value&quot;: &quot;VALUE&quot;,
+      &quot;matchType&quot;: &quot;EXACT&quot;
+    }
+  }
+}</code></pre></div>
+<p><code>matchType</code> options: <code>EXACT</code>, <code>BEGINS_WITH</code>, <code>ENDS_WITH</code>, <code>CONTAINS</code>, <code>FULL_REGEXP</code>, <code>PARTIAL_REGEXP</code></p>
+<h2>Template: AND — all conditions must match</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;andGroup&quot;: {
+    &quot;expressions&quot;: [
+      {&quot;filter&quot;: {&quot;fieldName&quot;: &quot;deviceCategory&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;mobile&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}}},
+      {&quot;filter&quot;: {&quot;fieldName&quot;: &quot;country&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;United States&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}}}
+    ]
+  }
+}</code></pre></div>
+<h2>Template: OR — any condition matches</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;orGroup&quot;: {
+    &quot;expressions&quot;: [
+      {&quot;filter&quot;: {&quot;fieldName&quot;: &quot;sessionDefaultChannelGroup&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;Organic Search&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}}},
+      {&quot;filter&quot;: {&quot;fieldName&quot;: &quot;sessionDefaultChannelGroup&quot;, &quot;stringFilter&quot;: {&quot;value&quot;: &quot;Organic Social&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}}}
+    ]
+  }
+}</code></pre></div>
+<h2>Template: NOT — exclude matching sessions</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;notExpression&quot;: {
+    &quot;filter&quot;: {
+      &quot;fieldName&quot;: &quot;sessionDefaultChannelGroup&quot;,
+      &quot;stringFilter&quot;: {&quot;value&quot;: &quot;Direct&quot;, &quot;matchType&quot;: &quot;EXACT&quot;}
+    }
+  }
+}</code></pre></div>
+<h2>Template: IN LIST — match any of several values</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
+  &quot;filter&quot;: {
+    &quot;fieldName&quot;: &quot;country&quot;,
+    &quot;inListFilter&quot;: {
+      &quot;values&quot;: [&quot;United States&quot;, &quot;United Kingdom&quot;, &quot;Canada&quot;]
+    }
+  }
+}</code></pre></div>
+<h2>Common wrong keys → correct keys</h2>
+<div class="tw"><table><thead><tr><th>Wrong key</th><th>Correct key</th></tr></thead><tbody><tr><td><code>and_filter</code></td><td><code>andGroup</code></td></tr><tr><td><code>or_filter</code></td><td><code>orGroup</code></td></tr><tr><td><code>not_filter</code></td><td><code>notExpression</code></td></tr><tr><td><code>filters</code></td><td><code>expressions</code></td></tr><tr><td><code>field</code></td><td><code>fieldName</code></td></tr><tr><td><code>stringFilter.exact</code></td><td><code>stringFilter.value</code></td></tr></tbody></table></div>
+<h2>Field names are always camelCase</h2>
+<blockquote><p>⚠️ <strong>CRITICAL FILTER TRAP</strong>: Field names in <code>dimension_filter</code> (inside <code>fieldName</code>) MUST be exact camelCase. Passing <code>page_path</code> or <code>session_default_channel_group</code> will fail with an <code>Unknown field for FilterExpression</code> error.</p></blockquote>
+<div class="tw"><table><thead><tr><th>Wrong (snake_case)</th><th>Correct (camelCase)</th></tr></thead><tbody><tr><td><code>page_path</code></td><td><code>pagePath</code></td></tr><tr><td><code>session_default_channel_group</code></td><td><code>sessionDefaultChannelGroup</code></td></tr><tr><td><code>session_source</code></td><td><code>sessionSource</code></td></tr><tr><td><code>session_source_medium</code></td><td><code>sessionSourceMedium</code></td></tr><tr><td><code>session_campaign_name</code></td><td><code>sessionCampaignName</code></td></tr><tr><td><code>landing_page</code></td><td><code>landingPage</code></td></tr><tr><td><code>device_category</code></td><td><code>deviceCategory</code></td></tr><tr><td><code>event_name</code></td><td><code>eventName</code></td></tr></tbody></table></div>
+<p>If you use snake_case in <code>fieldName</code>, the filter will fail with an &quot;Unknown field&quot; error. Do NOT retry snake_case.</p>
+<h2>Note</h2>
+<p>Only dimensions can be filtered with <code>dimension_filter</code>. To filter on metric values (e.g. sessions &gt; 100), you must do this in post-processing — the GA4 Data API does not support metric filters in <code>RunReport</code>.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

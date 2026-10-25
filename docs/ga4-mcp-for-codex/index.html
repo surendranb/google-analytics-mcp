@@ -2,57 +2,103 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>GA4 MCP for Codex</title>
-<meta name="description" content="Use GA4 MCP from Codex CLI as a local stdio server with verified commands.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GA4 MCP for Codex CLI</title>
+<meta name="description" content="Add the GA4 MCP server to OpenAI Codex. Codex uses TOML, not JSON, and splits environment handling into env and env_vars — the two are not interchangeable.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-codex/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="GA4 MCP for Codex CLI">
+<meta property="og:description" content="Add the GA4 MCP server to OpenAI Codex. Codex uses TOML, not JSON, and splits environment handling into env and env_vars — the two are not interchangeable.">
+<meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-codex/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for Codex CLI","description":"Add the GA4 MCP server to OpenAI Codex. Codex uses TOML, not JSON, and splits environment handling into env and env_vars — the two are not interchangeable.","url":"https://ga4mcp.com/ga4-mcp-for-codex/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
-<main>
-<h1>GA4 MCP for Codex</h1>
-<p>I treat Codex as my terminal agent for GA4: same server, same env keys, added as a local stdio MCP server. GA4 MCP for Codex shows that path without guessing at Codex config filenames I didn't verify today.</p>
-<h2>Proof strip</h2>
-<ul>
-<li>Site lists <strong>v2.11.4</strong>, <strong>MIT</strong>, <strong>15 skills</strong>, <strong>11 tools</strong> (verified 2026-10-09 at https://ga4mcp.com/).</li>
-<li>Site FAQ states OpenAI's Codex CLI connects and is in regular use with this server; the ChatGPT app can't launch local stdio servers so it can't connect.</li>
-<li>Runtimes verified: <code>uvx google-analytics-mcp</code>, <code>npx -y @surendranb/google-analytics-mcp</code>, installer <code>https://ga4.builditwithai.xyz/install</code>.</li>
-<li>Repo: https://github.com/surendranb/google-analytics-mcp. Skills index https://ga4mcp.com/skills/.</li>
-<li>Read-only, local process, telemetry off with <code>DISABLE_TELEMETRY=1</code> or <code>DO_NOT_TRACK=1</code>.</li>
-</ul>
-<h2>Adding GA4 to Codex</h2>
-<p>Prerequisites: Codex CLI installed, uvx on PATH, numeric GA4_PROPERTY_ID, absolute service-account JSON path.</p>
-<ol>
-<li>Export the two values in the shell that launches Codex:<pre>export GA4_PROPERTY_ID="123456789"
-export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</pre></li>
-<li>In Codex, add a local MCP server with command uvx and args ["google-analytics-mcp"], carrying the two env values above. [NEEDS SOURCE: exact Codex MCP config filename and menu path, not verified in this writer run; confirm against Codex docs before publishing.]</li>
-<li>Restart Codex and ask: "List my GA4 properties." You have succeeded when list_properties returns rows with no setup error.</li>
-<li>If Codex offers an installer route, this equivalent writes known clients for you:<pre>curl -fsSL "https://ga4.builditwithai.xyz/install" | bash</pre></li>
-</ol>
-<p>I kept step 2 generic on purpose. The stdio command and env keys are verified; the Codex-side filename wasn't in the repo README or site fetch, so I won't invent it.</p>
-<h2>Skills worth loading first</h2>
-<p>traffic-diagnosis: You ask why traffic moved and want ordered checks. channel-acquisition: You split sessions by source, medium, channel group. ai-referral-analysis: You isolate ChatGPT, Claude, Perplexity, Gemini, Copilot referrals. common-metric-names: The model guesses a UA-era name that GA4 rejects. ga4-limitations: You want the boundary of what the Data API can't answer.</p>
-<p>Full set of 15 at https://ga4mcp.com/skills/, loaded with search_skills.</p>
-<h2>Running your first query</h2>
-<p>Ask: "How much traffic came from AI assistants last week, and how did it behave?" Codex should load ai-referral-analysis, then call get_ga4_data with dimensions ["sessionSource"], metrics ["sessions"], date_range_start "7daysAgo", date_range_end "yesterday", intent "AI assistant referral sessions last week".</p>
-<p>Read the period figure from totals. I read that block because GA4 computes it; row sums mislead once filters narrow the set.</p>
-<h2>Fixing the three errors you will hit</h2>
-<ol>
-<li>Codex can't find the server. Symptom: MCP entry fails to start. Fix: run uvx google-analytics-mcp alone in a terminal, confirm it launches, then re-add with the exact command spelling uvx.</li>
-<li>Setup error on first call. Symptom: missing property or credentials. Fix: re-export both env values in the launching shell with an absolute key path, restart Codex. Steps mirror https://ga4mcp.com/setup/.</li>
-<li>400 on names or filters. Symptom: invalid dimension, metric, or filter shape. Fix: search_schema, load common-metric-names and filter-structures, retry. Offline path: get_troubleshooting_guide(topic="schema").</li>
-</ol>
-<h2>FAQ</h2>
-<p><strong>Does GA4 MCP for Codex really connect?</strong> Yes for Codex CLI as a stdio client. The site FAQ names it as connected and in regular use. The ChatGPT app can't launch local stdio servers, so it can't use this server.</p>
-<p><strong>What is the exact Codex MCP config for GA4?</strong> Command uvx, args ["google-analytics-mcp"], env GA4_PROPERTY_ID plus GOOGLE_APPLICATION_CREDENTIALS. The Codex-side filename is [NEEDS SOURCE] and stays out until Codex docs confirm it.</p>
-<p><strong>Does Codex need a different server version?</strong> No. Same v2.11.4 server, same 11 tools and 15 skills. Only the host entry differs.</p>
-<p><strong>Can Codex use the one-line installer?</strong> The installer covers the clients named on the site. Run it, then confirm Codex lists google-analytics as connected; otherwise use the manual stdio entry above.</p>
-<p><strong>Is Codex usage read-only?</strong> Yes. The server reads GA4 reports and metadata. It doesn't alter GA4 configuration.</p>
-<p><strong>How do I stop telemetry from Codex runs?</strong> Export DISABLE_TELEMETRY=1 or DO_NOT_TRACK=1 in the launching shell. That stops sends and the local ID file.</p>
-<h2>Freshness and machine links</h2>
-<p>Verified 2026-10-09 against https://ga4mcp.com/ (v2.11.4 + Codex FAQ lines), https://ga4mcp.com/setup/, https://ga4mcp.com/skills/, repo README runtimes. Codex config filename deliberately unverified; marked above.</p>
-<p>Version gap (2026-10-09): repo <code>pyproject.toml</code> reads 2.11.5 [source: repo pyproject.toml, verified this run] while the live site labels v2.11.4 [source: https://ga4mcp.com/ fetch 2026-10-09]; installs on this page quote the site label.</p>
-<p>Machine: https://ga4mcp.com/llms.txt, https://ga4mcp.com/data/tools.json, https://ga4mcp.com/data/skills.json.</p>
-<h2>Breadcrumb</h2>
-<p>Hub (/ga4-mcp-for-every-harness/) / GA4 MCP for Codex (you are here) / Plugins (/ga4-plugins/).</p>
-</main>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.6</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/" class="is-active" aria-current="page">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>GA4 MCP for Codex</h1>
+<p>Codex is the one client in this set that configures MCP servers in TOML rather than JSON, and the one that splits environment handling into two separate keys. Both trip people up.</p>
+<h2>One command</h2>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>codex mcp add google-analytics --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json -- uvx google-analytics-mcp</code></pre></div>
+<p>As with Claude Code, the <code>--</code> separates Codex's own flags from the command it will launch.</p>
+<h2>The file</h2>
+<p>Codex reads <code>~/.codex/config.toml</code> for every session, and <code>.codex/config.toml</code> inside a project that Codex has been told to trust. Project config only applies to trusted projects, which is a deliberate security boundary rather than a bug.</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">toml</span><button class="cb__copy" type="button">Copy</button></div><pre><code>[mcp_servers.google-analytics]
+command = &quot;uvx&quot;
+args = [&quot;google-analytics-mcp&quot;]
+
+[mcp_servers.google-analytics.env]
+GA4_PROPERTY_ID = &quot;123456789&quot;
+GOOGLE_APPLICATION_CREDENTIALS = &quot;/absolute/path/to/key.json&quot;</code></pre></div>
+<p>That is the whole entry. TOML table headers do the work that JSON braces do elsewhere.</p>
+<h2>env versus env_vars</h2>
+<p>This is the part that catches people, and it is specific to Codex.</p>
+<ul><li><code>env</code> <strong>sets</strong> a value. Use it when you want to write the value in the file.</li><li><code>env_vars</code> <strong>allows an existing environment variable through</strong> to the server. Use it when the value lives in your shell or a secret manager and you do not want it in the file.</li></ul>
+<p>So these two entries do different things:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">toml</span><button class="cb__copy" type="button">Copy</button></div><pre><code>[mcp_servers.google-analytics.env]
+GA4_PROPERTY_ID = &quot;123456789&quot;</code></pre></div>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">toml</span><button class="cb__copy" type="button">Copy</button></div><pre><code>[mcp_servers.google-analytics]
+env_vars = [&quot;GA4_PROPERTY_ID&quot;, &quot;GOOGLE_APPLICATION_CREDENTIALS&quot;]</code></pre></div>
+<p>The first hardcodes the property ID. The second forwards whatever the shell has. Both are valid; putting a bare value inside <code>env_vars</code> is not, because that key takes names and not assignments.</p>
+<p>A common arrangement is a hardcoded property ID plus a forwarded credentials path:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">toml</span><button class="cb__copy" type="button">Copy</button></div><pre><code>[mcp_servers.google-analytics]
+command = &quot;uvx&quot;
+args = [&quot;google-analytics-mcp&quot;]
+env_vars = [&quot;GOOGLE_APPLICATION_CREDENTIALS&quot;]
+
+[mcp_servers.google-analytics.env]
+GA4_PROPERTY_ID = &quot;123456789&quot;</code></pre></div>
+<h2>Verify</h2>
+<p>Start Codex and ask:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>Then check that the tool appears in Codex's MCP list. If the entry loads but every call fails with a setup error, one of the two variables is missing — the TOML parsed, the <code>env</code> table did not apply.</p>
+<h2>Next</h2>
+<p><a href="/setup/">Install</a> for the two values, <a href="/iam/">permissions</a> for the 403 that means the service account is not on the property yet.</p></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
 </body>
 </html>
