@@ -3,7 +3,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-const DOCS = new URL("../docs", import.meta.url).pathname;
+const DOCS = process.env.DOCS_DIR || new URL("../docs", import.meta.url).pathname;
 const problems = [];
 const warn = [];
 const rows = [];
@@ -70,7 +70,19 @@ for (const f of files) {
   if (h1s.length !== 1) problems.push(`${url}: ${h1s.length} h1 elements`);
   if (title.length > 62) warn.push(`${url}: title ${title.length} chars (${title})`);
   if (desc.length > 165) warn.push(`${url}: description ${desc.length} chars`);
-  if (words < 120 && !url.includes("404")) warn.push(`${url}: thin — ${words} words`);
+  // A thin page is the signature of a client-rendered shell: 200, plausible
+  // byte count, nothing a human can read. Fail, do not warn.
+  if (words < 120 && !url.includes("404")) problems.push(`${url}: only ${words} words of visible text — client-rendered shell?`);
+
+  // Placeholder strings that mean the page never resolved.
+  for (const ph of ["Loading GA4 MCP Docs", 'id="app">Loading', "Loading..."]) {
+    if (html.includes(ph)) problems.push(`${url}: placeholder text "${ph}" — page never resolved`);
+  }
+
+  // A page must carry its own text in the HTML. If it only holds a script and
+  // a mount point, a fetch can never prove it works.
+  const bodyText = html.replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+  if (bodyText < 80 && !url.includes("404")) problems.push(`${url}: ${bodyText} words outside <script> — content depends on the client`);
 
   if (titles.has(title)) problems.push(`${url}: duplicate title with ${titles.get(title)}`);
   titles.set(title, url);
