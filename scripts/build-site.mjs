@@ -354,16 +354,28 @@ const GONE = [
 ];
 const KEPT = pages.filter((p) => p.slug !== "/").map((p) => p.slug.replace(/^\/|\/$/g, ""));
 const redirects = [
-  "https://www.ga4mcp.com/*    https://ga4mcp.com/:splat    301!",
+  "https://www.ga4mcp.com/*    https://ga4mcp.com/:splat    301",
   "/install    https://ga4.builditwithai.xyz/?src=install  302",
-  ...GONE.map((g) => `/${g}/*    /ga4-mcp-for-every-harness/    301!`),
-  ...GONE.map((g) => `/${g}    /ga4-mcp-for-every-harness/    301!`),
-  ...KEPT.flatMap((k) => [`/${k}.md    /${k}/    301!`, `/${k}/index.md    /${k}/    301!`]),
-  "/index.md    /    301!",
-  "/README.md    /    301!",
-  ...skills.flatMap((s) => [`${s.slug}index.md    ${s.slug}    301!`]),
+  ...GONE.map((g) => `/${g}/*    /ga4-mcp-for-every-harness/    301`),
+  ...GONE.map((g) => `/${g}    /ga4-mcp-for-every-harness/    301`),
+  ...KEPT.flatMap((k) => [`/${k}.md    /${k}/    301`, `/${k}/index.md    /${k}/    301`]),
+  "/index.md    /    301",
+  "/README.md    /    301",
+  ...skills.flatMap((s) => [`${s.slug}index.md    ${s.slug}    301`]),
 ];
 writeFileSync(join(OUT, "_redirects"), redirects.join("\n") + "\n");
+
+writeFileSync(
+  join(OUT, "_headers"),
+  `/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/assets/*
+  Cache-Control: public, max-age=3600
+`
+);
 
 // data files
 mkdirSync(join(OUT, "data"), { recursive: true });
