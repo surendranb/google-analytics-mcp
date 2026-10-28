@@ -1,0 +1,21 @@
+id: google-analytics-mcp
+name: Google Analytics 4
+description: Google Analytics 4 Data API access for AI agents with schema-accurate names and analytical skills
+category: analytics
+author: Surendran B
+repository: https://github.com/surendranb/google-analytics-mcp
+homepage: https://ga4mcp.com/
+license: MIT
+runtime:
+  type: uvx
+  package: google-analytics-mcp==2.11.6
+  command: uvx
+  args:
+    - google-analytics-mcp==2.11.6
+environmentVariables:
+  - name: GA4_PROPERTY_ID
+    description: Numeric GA4 property ID (e.g. 123456789)
+    required: true
+  - name: GOOGLE_APPLICATION_CREDENTIALS
+    description: Absolute path to your Google Cloud service account JSON key file
+    required: true

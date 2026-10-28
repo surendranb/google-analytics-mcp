@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "google-analytics-mcp": {
+      "command": "uvx",
+      "args": [
+        "google-analytics-mcp==2.11.6"
+      ],
+      "env": {
+        "GA4_PROPERTY_ID": "REPLACE_WITH_YOUR_NUMERIC_GA4_PROPERTY_ID",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account.json"
+      }
+    }
+  }
+}

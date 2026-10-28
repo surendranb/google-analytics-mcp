@@ -1,0 +1,40 @@
+{
+  "id": "google-analytics-mcp",
+  "type": "mcp",
+  "name": "Google Analytics 4",
+  "tagline": "Natural language GA4 reporting across 200+ metrics and dimensions with built-in skills",
+  "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "author": {
+    "name": "Surendran B",
+    "url": "https://github.com/surendranb"
+  },
+  "homepage": "https://ga4mcp.com/",
+  "repo": "https://github.com/surendranb/google-analytics-mcp",
+  "tags": [
+    "analytics",
+    "data"
+  ],
+  "license": "MIT",
+  "verified": false,
+  "featured": false,
+  "install": {
+    "args": [
+      "google-analytics-mcp",
+      "--",
+      "uvx",
+      "google-analytics-mcp==2.11.6"
+    ],
+    "env": [
+      {
+        "name": "GA4_PROPERTY_ID",
+        "required": true,
+        "description": "Numeric GA4 property ID (e.g. 123456789)"
+      },
+      {
+        "name": "GOOGLE_APPLICATION_CREDENTIALS",
+        "required": true,
+        "description": "Absolute path to your Google Cloud service account JSON key file"
+      }
+    ]
+  }
+}
