@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.7] - 2026-10-28
+
+### Added
+- **Multi-Platform Native Discovery**: Added manifests for Cursor, Devin, Claude Plugins, Gemini CLI extensions, Cline, and Kilo marketplaces (SUR-441).
+- **Official MCP Registry Metadata**: Added `mcp-name` identifier tag to package README for registry verification.
+- **Agent Skills Spec**: Restructured 16 analytical skills into standard directory structure while strictly preserving legacy raw URL endpoints.
+
 ## [2.11.6] - 2026-10-14
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "google-analytics-mcp",
-  "version": "2.11.6",
+  "version": "2.11.7",
   "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
   "author": {
     "name": "Surendran B",
@@ -23,7 +23,7 @@
     "google-analytics-mcp": {
       "command": "uvx",
       "args": [
-        "google-analytics-mcp==2.11.6"
+        "google-analytics-mcp==2.11.7"
       ]
     }
   }
