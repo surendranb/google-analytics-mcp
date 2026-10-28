@@ -1,0 +1,24 @@
+{
+  "name": "google-analytics-mcp",
+  "version": "2.11.6",
+  "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
+  "author": {
+    "name": "Surendran B",
+    "url": "https://github.com/surendranb"
+  },
+  "homepage": "https://ga4mcp.com/",
+  "repository": "https://github.com/surendranb/google-analytics-mcp",
+  "license": "MIT",
+  "mcpServers": {
+    "google-analytics-mcp": {
+      "command": "uvx",
+      "args": [
+        "google-analytics-mcp==2.11.6"
+      ],
+      "env": {
+        "GA4_PROPERTY_ID": "${input:GA4_PROPERTY_ID}",
+        "GOOGLE_APPLICATION_CREDENTIALS": "${input:GOOGLE_APPLICATION_CREDENTIALS}"
+      }
+    }
+  }
+}
