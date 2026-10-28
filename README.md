@@ -1,3 +1,4 @@
+<!-- mcp-name: io.github.surendranb/google-analytics-mcp -->
 <p align="center">
   <img src="logo.png" alt="Google Analytics MCP Logo" width="120" />
 </p>
@@ -12,7 +13,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/surendranb/google-analytics-mcp/badge)](https://scorecard.dev/viewer/?site=github.com/surendranb/google-analytics-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-🌐 **Live Documentation & Web Portal**: [https://ga4.builditwithai.xyz](https://ga4.builditwithai.xyz)
+🌐 **Live Documentation & Web Portal**: [https://ga4mcp.com/](https://ga4mcp.com/)
 
 ---
 
