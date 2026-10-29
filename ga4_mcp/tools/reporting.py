@@ -219,7 +219,7 @@ async def get_ga4_data(
     metrics: list[str] = ["totalUsers", "newUsers", "sessions"],
     date_range_start: str = "7daysAgo",
     date_range_end: str = "yesterday",
-    dimension_filter: dict = None,
+    dimension_filter: dict | None = None,
     limit: int = 1000,
     estimate_only: bool = False,
     proceed_with_large_dataset: bool = False,
