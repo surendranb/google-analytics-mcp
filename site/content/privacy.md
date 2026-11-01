@@ -58,7 +58,7 @@ The check happens before any network call, so with one of them set the server ma
 
 ## Third parties
 
-The site at ga4mcp.com uses Google Analytics and Microsoft Clarity to count page views. The MCP server itself does not load either, and neither is involved in a query.
+The site at ga4mcp.com uses Google Analytics, Microsoft Clarity, and Plausible to count page views. The MCP server itself does not load any of them, and none is involved in a query.
 
 ## Contact
 
