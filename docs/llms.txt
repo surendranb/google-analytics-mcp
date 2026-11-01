@@ -1,6 +1,6 @@
 # GA4 MCP Server
 
-> Model Context Protocol server for Google Analytics 4. Read-only reporting, schema discovery, and 16 analytical skills that load on demand. MIT, local stdio, v2.11.6.
+> Model Context Protocol server for Google Analytics 4. Read-only reporting, schema discovery, and 16 analytical skills that load on demand. MIT, local stdio, v2.11.7.
 
 Docs: https://ga4mcp.com
 Repo: https://github.com/surendranb/google-analytics-mcp

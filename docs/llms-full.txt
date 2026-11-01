@@ -1,5 +1,5 @@
 # GA4 MCP Server — full text
-Version 2.11.6, updated 2026-10-25. https://ga4mcp.com
+Version 2.11.7, updated 2026-10-25. https://ga4mcp.com
 
 
 
