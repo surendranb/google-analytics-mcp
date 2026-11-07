@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-zcode/
-title: "GA4 MCP for ZCode"
+title: "Connect ZCode Harness to Google Analytics 4 (MCP)"
 description: "Add the GA4 MCP server to ZCode. Servers live under mcp.servers in ~/.zcode/cli/config.json, and a competing .agents/mcp.json is skipped entirely, not merged."
 group: clients
 order: 17
 nav: "ZCode"
 ---
 
-# GA4 MCP for ZCode
+# Connect ZCode Harness to Google Analytics 4
 
 ZCode is Z.ai's coding harness. It reads MCP servers from two possible file locations per scope, and the precedence rule between them is the thing that catches people: it is not a merge.
+
+## Copy-paste analytical prompts
+
+Inside ZCode session:
+
+- **Weekly performance check**: "Compare activeUsers, sessions, and engagementRate over the last 7 days against the previous period."
+- **AI referral audit**: "Show me sessions, bounceRate, and keyEvents from ChatGPT, Claude, and Perplexity over the last 30 days."
+- **High-traffic landing pages**: "List top 10 pages by sessions and their engagementRate for the last 30 days."
+- **Channel breakdown**: "Break down sessions and keyEvents by sessionDefaultChannelGroup this month."
+- **Realtime visitors snapshot**: "Run a realtime report for active users and top pages over the last 30 minutes."
 
 ## The entry
 

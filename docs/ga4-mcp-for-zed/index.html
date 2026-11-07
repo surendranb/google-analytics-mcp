@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GA4 MCP for Zed</title>
+<title>Connect Zed Editor to Google Analytics 4 (Setup Guide)</title>
 <meta name="description" content="Add the GA4 MCP server to Zed. Zed calls them context servers, not mcpServers, and the entry lives in Zed's own settings file.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-zed/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="GA4 MCP for Zed">
+<meta property="og:title" content="Connect Zed Editor to Google Analytics 4 (Setup Guide)">
 <meta property="og:description" content="Add the GA4 MCP server to Zed. Zed calls them context servers, not mcpServers, and the entry lives in Zed's own settings file.">
 <meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-zed/">
 <meta name="twitter:card" content="summary">
@@ -25,7 +25,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for Zed","description":"Add the GA4 MCP server to Zed. Zed calls them context servers, not mcpServers, and the entry lives in Zed's own settings file.","url":"https://ga4mcp.com/ga4-mcp-for-zed/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Connect Zed Editor to Google Analytics 4 (Setup Guide)","description":"Add the GA4 MCP server to Zed. Zed calls them context servers, not mcpServers, and the entry lives in Zed's own settings file.","url":"https://ga4mcp.com/ga4-mcp-for-zed/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +34,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/">Skills</a>
       <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,12 +44,12 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/" class="is-active" aria-current="page">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><h1>GA4 MCP for Zed</h1>
+<div class="prose"><h1>Connect Zed Editor to Google Analytics 4</h1>
 <p>Zed calls MCP servers <strong>context servers</strong>, and that is not just naming. The root key in the settings file is <code>context_servers</code>, so a snippet from any other client will not load.</p>
 <h2>Open the settings file</h2>
 <p>From the command palette, run:</p>
@@ -73,11 +74,23 @@ gtag('config', 'G-RX65PWDDEQ');
 <ul><li>The root key is <code>context_servers</code>, not <code>mcpServers</code>.</li><li>There is no <code>type</code> field. Zed infers stdio from the presence of <code>command</code>.</li><li>The file is Zed's single settings document, not a dedicated MCP file. A trailing comma anywhere in it breaks every setting, not just this one.</li></ul>
 <div class="note note--teal"><span class="note__label">Tip</span><p>if Zed shows no GA4 tools after saving, the settings file probably failed to parse. Zed reports a JSON error at the top of the editor for a malformed settings file, and a server that simply never appears is the symptom.</p></div>
 <h2>Verify</h2>
-<p>Open the agent panel and ask:</p>
+<p>Open the assistant panel and ask:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
 <p>The server appears in the context server list when it launched successfully. A listed server with no tools means the process started and exited — check <code>uvx google-analytics-mcp</code> in a terminal.</p>
+<h2>Five questions you can ask in Zed</h2>
+<p>Once connected, ask the assistant panel directly:</p>
+<ol><li><strong>Top landing pages</strong>:</li></ol>
+<p>   ``<code>text    What were our top 10 landing pages by sessions over the last 30 days?    </code>``</p>
+<ol><li><strong>Channel performance</strong>:</li></ol>
+<p>   ``<code>text    Compare sessions, engagement rate, and bounce rate across our acquisition channels for the past 60 days.    </code>``</p>
+<ol><li><strong>AI referral traffic</strong>:</li></ol>
+<p>   ``<code>text    How many sessions arrived from AI tools like ChatGPT, Claude, and Perplexity this month?    </code>``</p>
+<ol><li><strong>Traffic change diagnosis</strong>:</li></ol>
+<p>   ``<code>text    Diagnose why organic search traffic dropped between last week and this week. Which landing pages were most affected?    </code>``</p>
+<ol><li><strong>E-commerce &amp; revenue</strong>:</li></ol>
+<p>   ``<code>text    What was our total purchase revenue and average order value (AOV) for the last 30 days grouped by country?    </code>``</p>
 <h2>Next</h2>
-<p><a href="/setup/">Install</a> for the two values, <a href="/skills/">skills</a> for what to load before asking an analytical question.</p></div>
+<p><a href="/setup/">Install</a> for the two values, <a href="/skills/">skills</a> for what to load before asking an analytical question, and <a href="/google-analytics-ai-prompts/">prompts</a> for 35 tested templates.</p></div>
     </main>
   </div>
 </div>
@@ -88,6 +101,8 @@ gtag('config', 'G-RX65PWDDEQ');
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

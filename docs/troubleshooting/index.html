@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix Common GA4 Data API &amp; IAM Errors (Quick Guide)</title>
+<meta name="description" content="Troubleshooting guide for the top 5 Google Analytics 4 Data API errors: 403 Viewer permission, invalid dimension names, quota exhaustion, and token limits.">
+<link rel="canonical" href="https://ga4mcp.com/troubleshooting/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Fix Common GA4 Data API &amp; IAM Errors (Quick Guide)">
+<meta property="og:description" content="Troubleshooting guide for the top 5 Google Analytics 4 Data API errors: 403 Viewer permission, invalid dimension names, quota exhaustion, and token limits.">
+<meta property="og:url" content="https://ga4mcp.com/troubleshooting/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RX65PWDDEQ');
+</script>
+<script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
+<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Fix Common GA4 Data API & IAM Errors (Quick Guide)","description":"Troubleshooting guide for the top 5 Google Analytics 4 Data API errors: 403 Viewer permission, invalid dimension names, quota exhaustion, and token limits.","url":"https://ga4mcp.com/troubleshooting/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/" class="is-active" aria-current="page">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>Fix Common GA4 Data API &amp; IAM Errors</h1>
+<p>When connecting an AI agent or querying the Google Analytics 4 Data API, five common errors cause over 90% of failures. This guide covers the root cause and immediate resolution for each error.</p>
+<h2>1. Error 403: The Caller Does Not Have Permission</h2>
+<h3>The Symptom</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>google.api_core.exceptions.PermissionDenied: 403 The caller does not have permission
+User does not have sufficient permissions for this property.</code></pre></div>
+<h3>The Root Cause</h3>
+<p>The Google Cloud Service Account authenticated successfully, but it has not been granted access inside Google Analytics. Creating a service account in Google Cloud Console does <strong>not</strong> grant it access to your analytics data. You must add the service account email as a <strong>Viewer</strong> inside the Google Analytics Admin interface.</p>
+<h3>The Nine-Step Resolution</h3>
+<ol><li>Open your service account JSON key file in any text editor.</li><li>Copy the <code>client_email</code> value (format: <code>your-agent@your-project.iam.gserviceaccount.com</code>).</li><li>Open <a href="https://analytics.google.com">Google Analytics</a>.</li><li>Select the property whose ID matches your <code>GA4_PROPERTY_ID</code>.</li><li>Click the gear icon (<strong>Admin</strong>) in the bottom-left corner.</li><li>In the <strong>Property</strong> column, click <strong>Property access management</strong>.</li><li>Click the blue <strong>+</strong> button in the top-right corner, then click <strong>Add users</strong>.</li><li>Paste the <code>client_email</code> into the email field and uncheck <em>Notify new users by email</em>.</li><li>Under <strong>Direct roles</strong>, select <strong>Viewer</strong> (read-only) and click <strong>Add</strong>.</li></ol>
+<p>Access takes effect immediately with zero propagation delay. For screenshots and detailed IAM guidance, see the <a href="/iam/">Permissions Guide</a>.</p>
+<hr>
+<h2>2. Error 400: Invalid Dimension or Metric Name</h2>
+<h3>The Symptom</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>google.api_core.exceptions.InvalidArgument: 400 Field pageviews is not found.
+Field conversions is not found in this property.</code></pre></div>
+<h3>The Root Cause</h3>
+<p>Your AI assistant requested a field name from Universal Analytics (sunset July 2023) or an older API schema. Common legacy terms like <code>pageviews</code>, <code>uniquePageviews</code>, <code>ga:sessions</code>, and <code>conversions</code> are rejected by the GA4 Data API.</p>
+<h3>Common Field Translations</h3>
+<div class="tw"><table><thead><tr><th>Invalid Legacy Name</th><th>Valid GA4 Data API Name</th><th>Type</th><th>Notes</th></tr></thead><tbody><tr><td><code>pageviews</code></td><td><code>screenPageViews</code></td><td>Metric</td><td>Total pages viewed across web and app</td></tr><tr><td><code>uniquePageviews</code></td><td><code>screenPageViews</code></td><td>Metric</td><td>GA4 does not track unique views; use sessions per page</td></tr><tr><td><code>conversions</code></td><td><code>keyEvents</code></td><td>Metric</td><td>Renamed by Google on May 6, 2024</td></tr><tr><td><code>users</code></td><td><code>totalUsers</code> or <code>activeUsers</code></td><td>Metric</td><td><code>activeUsers</code> is GA4's primary user metric</td></tr><tr><td><code>bounceRate</code></td><td><code>bounceRate</code></td><td>Metric</td><td>In GA4, bounceRate is the inverse of engagementRate</td></tr><tr><td><code>avgSessionDuration</code></td><td><code>averageSessionDuration</code></td><td>Metric</td><td>Average duration in seconds</td></tr><tr><td><code>sourceMedium</code></td><td><code>sessionSourceMedium</code></td><td>Dimension</td><td>Dimension combining source and medium</td></tr><tr><td><code>channelGrouping</code></td><td><code>sessionDefaultChannelGroup</code></td><td>Dimension</td><td>Default channel group (Organic, Direct, Paid)</td></tr><tr><td><code>landingPage</code></td><td><code>landingPage</code></td><td>Dimension</td><td>Landing page path without query strings</td></tr><tr><td><code>pagePath</code></td><td><code>pagePath</code></td><td>Dimension</td><td>Page URL path</td></tr></tbody></table></div>
+<p>This MCP server automatically checks names against your live schema before dispatching queries. If you run into an unknown field, ask your agent to call <code>search_schema('&lt;keyword&gt;')</code>.</p>
+<hr>
+<h2>3. Property ID vs. Measurement ID Mismatch</h2>
+<h3>The Symptom</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>google.api_core.exceptions.InvalidArgument: 400 Invalid property ID: &quot;G-XXXXXXXXXX&quot;.
+Property ID must be numeric.</code></pre></div>
+<h3>The Root Cause</h3>
+<p>You passed your web data stream Measurement ID (starting with <code>G-</code>) instead of your numeric <strong>Property ID</strong>.</p>
+<ul><li><strong>Measurement ID</strong> (<code>G-XXXXXXXXXX</code>): Used by front-end tracking snippets (<code>gtag.js</code>, Google Tag Manager) to send events into GA4.</li><li><strong>Property ID</strong> (<code>123456789</code>): A 9-digit number used by the Google Analytics Data API and Admin API to query reports.</li></ul>
+<h3>Where to Find the Numeric Property ID</h3>
+<ol><li>Open <a href="https://analytics.google.com">Google Analytics</a>.</li><li>Click <strong>Admin</strong> (gear icon at bottom left).</li><li>Under the <strong>Property</strong> column, click <strong>Property details</strong>.</li><li>The numeric <strong>Property ID</strong> appears in the top-right corner (e.g. <code>555043732</code>).</li></ol>
+<p>Set this number as your environment variable:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export GA4_PROPERTY_ID=&quot;555043732&quot;</code></pre></div>
+<hr>
+<h2>4. Error 429: Resource Exhausted / Quota Limits</h2>
+<h3>The Symptom</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>google.api_core.exceptions.ResourceExhausted: 429 Exhausted property quota tokens.
+Resource has been exhausted (e.g. check quota).</code></pre></div>
+<h3>The Root Cause</h3>
+<p>Google Analytics 4 enforces hourly and daily API token quotas per property:</p>
+<ul><li><strong>Standard Properties</strong>: 25,000 tokens per hour, 5,000 concurrent requests, and 10 dimensions per query.</li><li><strong>GA4 360 Properties</strong>: 250,000 tokens per hour.</li></ul>
+<p>Tokens are consumed based on query complexity (number of dimensions, date range length, and row count).</p>
+<h3>How to Prevent Quota Exhaustion</h3>
+<ol><li><strong>Narrow Date Ranges</strong>: Query <code>last 30 days</code> instead of <code>last 365 days</code> during interactive exploration.</li><li><strong>Limit Dimensions</strong>: Keep queries to 2–4 dimensions. Each additional dimension multiplies row combinations exponentially.</li><li><strong>Use Row Limits</strong>: Specify <code>limit: 50</code> or <code>limit: 100</code> rather than pulling thousands of rows into your client context window.</li><li><strong>Use Built-in Row Guards</strong>: GA4 MCP includes pre-query row estimators that warn you before large multi-thousand-row requests execute.</li></ol>
+<hr>
+<h2>5. Error 400: Incompatible Dimensions and Metrics</h2>
+<h3>The Symptom</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>google.api_core.exceptions.InvalidArgument: 400 The request's dimensions and metrics are incompatible.</code></pre></div>
+<h3>The Root Cause</h3>
+<p>In GA4, data is organized across three primary scopes:</p>
+<ol><li><strong>User Scope</strong>: Attributes of the person (e.g., <code>firstUserDefaultChannelGroup</code>, <code>firstUserSource</code>).</li><li><strong>Session Scope</strong>: Attributes of the visit (e.g., <code>sessionDefaultChannelGroup</code>, <code>sessionSource</code>, <code>sessions</code>).</li><li><strong>Event Scope</strong>: Attributes of a specific action (e.g., <code>eventName</code>, <code>pagePath</code>, <code>eventCount</code>).</li></ol>
+<p>Mixing incompatible scopes (such as pairing user-scoped acquisition dimensions with hit-level event metrics) will cause the Google Analytics Data API to reject the request.</p>
+<h3>The Compatibility Rules</h3>
+<ul><li>Pair <code>session*</code> dimensions (<code>sessionDefaultChannelGroup</code>, <code>sessionSource</code>) with session metrics (<code>sessions</code>, <code>bounceRate</code>, <code>averageSessionDuration</code>).</li><li>Pair <code>pagePath</code> or <code>eventName</code> with event metrics (<code>screenPageViews</code>, <code>eventCount</code>, <code>keyEvents</code>).</li><li>Pair <code>firstUser*</code> dimensions with user metrics (<code>newUsers</code>, <code>activeUsers</code>).</li></ul>
+<p>To view valid combinations, consult our <a href="/skills/compatible-combinations/">Compatible Combinations Guide</a>.</p>
+<hr>
+<h2>In-Session Setup Recovery</h2>
+<p>If your setup breaks mid-session due to a missing property ID, an expired token, or missing credentials, you do not need to restart your client or edit config files manually.</p>
+<p>Ask your agent:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Run setup_ga4_access to reconnect my analytics credentials.</code></pre></div>
+<p>The server will prompt you for the missing value, validate the connection against Google Cloud, and restore access immediately inside the active chat.</p>
+<hr>
+<h2>Next Steps</h2>
+<ul><li><strong><a href="/setup/">Installation Guide</a></strong>: Set up your Google Cloud Service Account and local MCP server.</li><li><strong><a href="/schema/">Query Shapes</a></strong>: Learn valid filter syntax, regex rules, and ordering parameters.</li><li><strong><a href="/skills/">Skills Index</a></strong>: Browse 16 ready-to-use analytical playbooks with proven field combinations.</li></ul></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

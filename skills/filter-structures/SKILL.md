@@ -1,122 +1,158 @@
 ---
 name: filter-structures
-description: "The correct shape for `dimension_filter` in `get_ga4_data`. Wrong structure returns an \"Invalid dimension_filter\" error. Use these templates."
+titleTag: "GA4 API Filter Expressions & Dimension Regex Syntax"
+description: "Copy-paste filter templates for the GA4 Data API: exact match, beginsWith, contains, regex, AND/OR group expressions, and inListFilter structures."
 ---
-# Filter Structures
 
-The correct shape for `dimension_filter` in `get_ga4_data`.
-Wrong structure returns an "Invalid dimension_filter" error. Use these templates.
+# GA4 API Filter Expressions & Dimension Regex Syntax
 
-## The one rule
+The Google Analytics 4 Data API requires structured `FilterExpression` objects for `dimension_filter`. It does not accept raw SQL, plain strings, or unnested JSON.
 
-Every leaf filter **must** be wrapped in a `"filter"` key. `fieldName` never appears at the top level.
+Use these copy-paste templates to construct valid filters for exact matches, string containment, regular expressions, and boolean logic.
+
+## The Cardinal Wrapping Rule
+Every leaf filter **must** be nested inside a `"filter"` key. `fieldName` cannot appear at the top level of the JSON object.
 
 ```json
-// WRONG — fieldName at top level
+// ❌ WRONG — fieldName at top level causes validation error:
 {"fieldName": "sessionSource", "stringFilter": {"value": "google"}}
 
-// CORRECT — wrapped in "filter"
-{"filter": {"fieldName": "sessionSource", "stringFilter": {"value": "google"}}}
+// ✔️ CORRECT — leaf filter wrapped inside "filter":
+{"filter": {"fieldName": "sessionSource", "stringFilter": {"value": "google", "matchType": "EXACT"}}}
 ```
 
-## Template: single field filter
+---
 
+## 1. Single Field Filter Templates
+
+### Exact Match
 ```json
 {
   "filter": {
-    "fieldName": "DIMENSION_NAME",
+    "fieldName": "sessionDefaultChannelGroup",
     "stringFilter": {
-      "value": "VALUE",
-      "matchType": "EXACT"
+      "matchType": "EXACT",
+      "value": "Organic Search"
     }
   }
 }
 ```
 
-`matchType` options: `EXACT`, `BEGINS_WITH`, `ENDS_WITH`, `CONTAINS`, `FULL_REGEXP`, `PARTIAL_REGEXP`
+### String Contains / Partial Match
+```json
+{
+  "filter": {
+    "fieldName": "pagePath",
+    "stringFilter": {
+      "matchType": "CONTAINS",
+      "value": "/blog/"
+    }
+  }
+}
+```
 
-## Template: AND — all conditions must match
+### Regular Expression (Regex Match)
+```json
+{
+  "filter": {
+    "fieldName": "sessionSource",
+    "stringFilter": {
+      "matchType": "PARTIAL_REGEXP",
+      "value": "chatgpt\\.com|perplexity\\.ai|claude\\.ai"
+    }
+  }
+}
+```
 
+Allowed `matchType` values: `EXACT`, `BEGINS_WITH`, `ENDS_WITH`, `CONTAINS`, `FULL_REGEXP`, `PARTIAL_REGEXP`.
+
+---
+
+## 2. Boolean Group Expressions
+
+### AND Group (All Conditions Must Match)
 ```json
 {
   "andGroup": {
     "expressions": [
-      {"filter": {"fieldName": "deviceCategory", "stringFilter": {"value": "mobile", "matchType": "EXACT"}}},
-      {"filter": {"fieldName": "country", "stringFilter": {"value": "United States", "matchType": "EXACT"}}}
+      {
+        "filter": {
+          "fieldName": "deviceCategory",
+          "stringFilter": {"matchType": "EXACT", "value": "mobile"}
+        }
+      },
+      {
+        "filter": {
+          "fieldName": "country",
+          "stringFilter": {"matchType": "EXACT", "value": "United States"}
+        }
+      }
     ]
   }
 }
 ```
 
-## Template: OR — any condition matches
-
+### OR Group (Any Condition Matches)
 ```json
 {
   "orGroup": {
     "expressions": [
-      {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Search", "matchType": "EXACT"}}},
-      {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Social", "matchType": "EXACT"}}}
+      {
+        "filter": {
+          "fieldName": "sessionDefaultChannelGroup",
+          "stringFilter": {"matchType": "EXACT", "value": "Organic Search"}
+        }
+      },
+      {
+        "filter": {
+          "fieldName": "sessionDefaultChannelGroup",
+          "stringFilter": {"matchType": "EXACT", "value": "Organic Social"}
+        }
+      }
     ]
   }
 }
 ```
 
-## Template: NOT — exclude matching sessions
-
+### NOT Expression (Exclude Matching Values)
 ```json
 {
   "notExpression": {
     "filter": {
       "fieldName": "sessionDefaultChannelGroup",
-      "stringFilter": {"value": "Direct", "matchType": "EXACT"}
+      "stringFilter": {"matchType": "EXACT", "value": "Direct"}
     }
   }
 }
 ```
 
-## Template: IN LIST — match any of several values
+---
+
+## 3. In-List Filter (Match Multiple Strings Efficiently)
+Instead of nesting multiple OR expressions, use `inListFilter` to match against a collection of strings:
 
 ```json
 {
   "filter": {
     "fieldName": "country",
     "inListFilter": {
-      "values": ["United States", "United Kingdom", "Canada"]
+      "values": ["United States", "United Kingdom", "Canada", "Germany"]
     }
   }
 }
 ```
 
-## Common wrong keys → correct keys
+---
 
-| Wrong key | Correct key |
+## Key Structure Translations
+
+| Invalid Key (Common Guess) | Valid GA4 Data API Key |
 |---|---|
 | `and_filter` | `andGroup` |
 | `or_filter` | `orGroup` |
 | `not_filter` | `notExpression` |
 | `filters` | `expressions` |
 | `field` | `fieldName` |
-| `stringFilter.exact` | `stringFilter.value` |
+| `stringFilter.exact` | `stringFilter.value` with `matchType: "EXACT"` |
 
-## Field names are always camelCase
-
-> ⚠️ **CRITICAL FILTER TRAP**: Field names in `dimension_filter` (inside `fieldName`) MUST be exact camelCase. Passing `page_path` or `session_default_channel_group` will fail with an `Unknown field for FilterExpression` error.
-
-| Wrong (snake_case) | Correct (camelCase) |
-|---|---|
-| `page_path` | `pagePath` |
-| `session_default_channel_group` | `sessionDefaultChannelGroup` |
-| `session_source` | `sessionSource` |
-| `session_source_medium` | `sessionSourceMedium` |
-| `session_campaign_name` | `sessionCampaignName` |
-| `landing_page` | `landingPage` |
-| `device_category` | `deviceCategory` |
-| `event_name` | `eventName` |
-
-If you use snake_case in `fieldName`, the filter will fail with an "Unknown field" error. Do NOT retry snake_case.
-
-## Note
-
-Only dimensions can be filtered with `dimension_filter`. To filter on metric
-values (e.g. sessions > 100), you must do this in post-processing — the GA4
-Data API does not support metric filters in `RunReport`.
+> ⚠️ **Field Casing:** Values inside `fieldName` must be strictly **camelCase** (e.g. `sessionDefaultChannelGroup`, `pagePath`, `landingPage`). Snake_case values will be rejected with an `Unknown field for FilterExpression` error.

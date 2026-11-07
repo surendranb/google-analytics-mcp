@@ -1,17 +1,27 @@
 ---
 slug: /ga4-mcp-for-antigravity-ide/
-title: "GA4 MCP for Antigravity IDE"
+title: "Connect Antigravity IDE to GA4 (Setup & Queries)"
 description: "The Antigravity IDE uses the same mcp_config.json schema as the App and CLI. Manage it from the agent panel's MCP Servers screen, or edit the file directly."
 group: clients
 order: 18
 nav: "Antigravity IDE"
 ---
 
-# GA4 MCP for Antigravity IDE
+# Connect Antigravity IDE to Google Analytics 4
 
 The Antigravity IDE shares one MCP schema with the App and the CLI. Google's own documentation states it plainly: `mcp_config.json` follows a standardised schema, and the root object holds an `mcpServers` map.
 
 What differs in the IDE is the management surface, not the file.
+
+## Copy-paste analytical prompts
+
+Once connected, run these directly in the IDE agent panel:
+
+- **Site performance review**: "List top 10 pages by screenPageViews and average engagement time over the last 30 days."
+- **Bot audit**: "Check sessions and bounceRate by city where bounceRate is 100% and session count exceeds 50."
+- **AI referral tracking**: "Show sessions, totalUsers, and keyEvents referred by ChatGPT, Claude, and Perplexity this month."
+- **Channel breakdown**: "Break down sessions and keyEvents by sessionDefaultChannelGroup for the last 14 days."
+- **Realtime visitors**: "Run a realtime report showing active users and top event names right now."
 
 ## The entry
 

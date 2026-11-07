@@ -1,81 +1,72 @@
 ---
 name: ua-to-ga4
-description: "Universal Analytics (UA) and GA4 use different names for equivalent concepts. UA was sunset on 2023-07-01; models trained before or around then guess UA field names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed \"conversions\" to \"key events\" (see the conversions rows below). If a name feels obviously right but returns \"Invalid metric/dimension\", assume your training predates the change and verify with `search_schema`. This skill gives the correct GA4 Data API name for every common UA metric and dimension."
+titleTag: "Universal Analytics to GA4 Field Name Mapping"
+description: "Mapping table from Universal Analytics (UA) field names to Google Analytics 4 (GA4) Data API names. Replace ga:pageviews, ga:bounces, and ga:users correctly."
 ---
-# UA to GA4 Field Name Mapping
 
-Universal Analytics (UA) and GA4 use different names for equivalent concepts.
-UA was sunset on 2023-07-01; models trained before or around then guess UA field
-names that no longer exist in the GA4 Data API. On 2024-05-06 GA4 also renamed
-"conversions" to "key events" (see the conversions rows below). If a name feels
-obviously right but returns "Invalid metric/dimension", assume your training
-predates the change and verify with `search_schema`. This skill gives the correct
-GA4 Data API name for every common UA metric and dimension.
+# Universal Analytics to GA4 Field Name Mapping
 
-## Metrics
+Universal Analytics (UA) was sunset on July 1, 2023. Language models trained on legacy documentation frequently guess deprecated UA field names (e.g., `ga:sessions`, `pageviews`, `uniquePageviews`, `conversions`) that cause hard 400 validation errors in the Google Analytics 4 Data API.
 
-| UA name (wrong) | GA4 API name (correct) |
-|---|---|
-| `users` | `totalUsers` |
-| `uniquePageviews` | `screenPageViews` |
-| `pageviews` | `screenPageViews` |
-| `avgSessionDuration` | `averageSessionDuration` |
-| `timeOnPage` / `avgTimeOnPage` | `userEngagementDuration` |
-| `goalCompletionsAll` / `conversions` | `keyEvents` |
-| `goalConversionRateAll` / `conversionRate` / `sessionConversionRate` | `sessionKeyEventRate` |
-| `userConversionRate` | `userKeyEventRate` |
-| `transactions` / `purchases` | `ecommercePurchases` |
-| `transactionRevenue` / `revenue` | `purchaseRevenue` |
-| `revenuePerTransaction` | `averagePurchaseRevenue` |
-| `transactionsPerSession` | `purchaseToViewRate` |
-| `itemQuantity` / `itemViews` | `itemsViewed` |
-| `itemRevenue` | `itemRevenue` (same) |
-| `entrances` | `sessions` (no direct equivalent — use sessions) |
-| `pageValue` | no direct equivalent |
+Additionally, on May 6, 2024, Google officially renamed **conversions** to **key events** across GA4. Use this mapping table to translate legacy dimensions and metrics into their valid GA4 Data API equivalents.
 
-## Dimensions
+## Metrics Mapping
 
-| UA name (wrong) | GA4 API name (correct) |
-|---|---|
-| `channelGrouping` | `sessionDefaultChannelGroup` |
-| `defaultChannelGrouping` | `sessionDefaultChannelGroup` |
-| `source` | `sessionSource` |
-| `medium` | `sessionMedium` |
-| `campaign` | `sessionCampaignName` |
-| `keyword` | `sessionManualTerm` |
-| `sourceMedium` | `sessionSourceMedium` |
-| `adContent` | `sessionManualAdContent` |
-| `pagePath` | `pagePath` (same) |
-| `pageTitle` | `pageTitle` (same) |
-| `landingPagePath` | `landingPage` |
-| `exitPagePath` | no direct equivalent |
-| `deviceCategory` | `deviceCategory` (same) |
-| `operatingSystem` | `operatingSystem` (same) |
-| `browser` | `browser` (same) |
-| `country` | `country` (same) |
-| `city` | `city` (same) |
-| `userType` | use `newVsReturning` |
+| Legacy UA Name (Invalid) | GA4 Data API Name (Valid) | Type | Notes |
+|---|---|---|---|
+| `users` | `totalUsers` or `activeUsers` | Metric | `activeUsers` is GA4's primary user metric |
+| `pageviews` | `screenPageViews` | Metric | Total pages viewed across web and app |
+| `uniquePageviews` | `screenPageViews` | Metric | GA4 does not track unique views; use sessions per page |
+| `avgSessionDuration` | `averageSessionDuration` | Metric | Average duration in seconds |
+| `timeOnPage` / `avgTimeOnPage` | `userEngagementDuration` | Metric | Total engagement time in seconds |
+| `conversions` / `goalCompletionsAll` | `keyEvents` | Metric | Renamed from conversions on May 6, 2024 |
+| `conversionRate` / `sessionConversionRate` | `sessionKeyEventRate` | Metric | Percentage of sessions with a key event |
+| `userConversionRate` | `userKeyEventRate` | Metric | Percentage of users who triggered a key event |
+| `transactions` / `purchases` | `ecommercePurchases` | Metric | Number of completed e-commerce purchases |
+| `transactionRevenue` / `revenue` | `purchaseRevenue` | Metric | Total purchase revenue |
+| `revenuePerTransaction` | `averagePurchaseRevenue` | Metric | Average purchase revenue per transaction |
+| `itemQuantity` | `itemsViewed` or `itemsPurchased` | Metric | Specify viewed or purchased |
+| `entrances` | `sessions` | Metric | Use session count with landingPage |
+| `bounces` | `bounceRate` | Metric | GA4 calculates bounce rate as (1 - engagementRate) |
 
-## Key rules
+## Dimensions Mapping
 
-All GA4 API names are camelCase — never snake_case.
+| Legacy UA Name (Invalid) | GA4 Data API Name (Valid) | Scope | Notes |
+|---|---|---|---|
+| `channelGrouping` | `sessionDefaultChannelGroup` | Session | Organic Search, Direct, Paid, Referral |
+| `source` | `sessionSource` | Session | Domain or entity driving the session |
+| `medium` | `sessionMedium` | Session | organic, cpc, referral, email |
+| `sourceMedium` | `sessionSourceMedium` | Session | Combined source / medium |
+| `campaign` | `sessionCampaignName` | Session | UTM campaign name |
+| `keyword` | `sessionManualTerm` | Session | UTM term |
+| `landingPagePath` | `landingPage` | Event | Landing page path without query parameters |
+| `pagePath` | `pagePath` | Event | Page path including directories |
+| `pageTitle` | `pageTitle` | Event | Page HTML title tag |
+| `deviceCategory` | `deviceCategory` | Event | desktop, mobile, tablet |
+| `operatingSystem` | `operatingSystem` | Event | iOS, Android, Windows, Macintosh |
+| `browser` | `browser` | Event | Chrome, Safari, Firefox, Edge |
+| `country` | `country` | Event | Full country name |
+| `city` | `city` | Event | Full city name |
+| `userType` | `newVsReturning` | User | 'new' or 'returning' |
 
-| Wrong (snake_case) | Correct |
+## The camelCase Syntax Rule
+
+All GA4 Data API field names are strictly **camelCase**. Using snake_case will cause an invalid field error.
+
+| Wrong (snake_case) | Correct (camelCase) |
 |---|---|
 | `page_path` | `pagePath` |
 | `session_source` | `sessionSource` |
 | `device_category` | `deviceCategory` |
 | `event_name` | `eventName` |
 | `total_users` | `totalUsers` |
+| `screen_page_views` | `screenPageViews` |
 
-## Attribution scope
+## Attribution Scopes
 
-GA4 splits attribution into three scopes. Use the right prefix:
+GA4 splits attribution into three distinct scopes:
+1. **Session Scope (`session*`)**: Attributes the visit (e.g., `sessionSource`, `sessionMedium`). Use for traffic acquisition.
+2. **First User Scope (`firstUser*`)**: Attributes the person across their lifetime (e.g., `firstUserSource`). Use for user acquisition.
+3. **Event Scope (no prefix)**: Attributes the specific action (e.g., `pagePath`, `eventName`). Use for page and event analytics.
 
-| Scope | Prefix | Use for |
-|---|---|---|
-| Session | `session` (e.g. `sessionSource`) | Traffic acquisition analysis |
-| First user | `firstUser` (e.g. `firstUserSource`) | User acquisition analysis |
-| Event | `(none)` (e.g. `pagePath`) | Event-level analysis |
-
-Mixing scopes causes 400 errors — see `compatible-combinations` skill.
+Never mix user-scoped dimensions with session-scoped metrics in the same query. Consult the [Compatible Combinations Guide](/skills/compatible-combinations/) for valid groupings.

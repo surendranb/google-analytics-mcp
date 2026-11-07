@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Custom Dimensions and Event Parameters — GA4 MCP skill</title>
-<meta name="description" content="How to find and query property-specific custom dimensions in GA4.">
+<title>GA4 Custom Dimensions &amp; Event Parameters Guide</title>
+<meta name="description" content="Query custom dimensions and event parameters in the GA4 Data API. How to find parameter names, register them in GA4 Admin, and query custom event schemas.">
 <link rel="canonical" href="https://ga4mcp.com/skills/custom-dimensions/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="Custom Dimensions and Event Parameters — GA4 MCP skill">
-<meta property="og:description" content="How to find and query property-specific custom dimensions in GA4.">
+<meta property="og:title" content="GA4 Custom Dimensions &amp; Event Parameters Guide">
+<meta property="og:description" content="Query custom dimensions and event parameters in the GA4 Data API. How to find parameter names, register them in GA4 Admin, and query custom event schemas.">
 <meta property="og:url" content="https://ga4mcp.com/skills/custom-dimensions/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +25,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Custom Dimensions and Event Parameters — GA4 MCP skill","description":"How to find and query property-specific custom dimensions in GA4.","url":"https://ga4mcp.com/skills/custom-dimensions/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 Custom Dimensions & Event Parameters Guide","description":"Query custom dimensions and event parameters in the GA4 Data API. How to find parameter names, register them in GA4 Admin, and query custom event schemas.","url":"https://ga4mcp.com/skills/custom-dimensions/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +34,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/" class="is-active">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,30 +44,30 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
-<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/" class="is-active" aria-current="page">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">Track AI Referral Traffic in Google Analytics 4</a></li><li><a href="/skills/attribution-scope/">GA4 Attribution Scope: User vs. Session vs. Event</a></li><li><a href="/skills/bot-traffic-detection/">Identify &amp; Filter Bot Traffic in Google Analytics 4</a></li><li><a href="/skills/channel-acquisition/">GA4 Channel Acquisition: Default Grouping Rules</a></li><li><a href="/skills/common-metric-names/">GA4 Dimensions and Metrics Reference: API Field Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension &amp; Metric Combinations in GA4</a></li><li><a href="/skills/content-performance/">GA4 Content Performance: Views &amp; Engagement Rates</a></li><li><a href="/skills/custom-dimensions/" class="is-active" aria-current="page">GA4 Custom Dimensions &amp; Event Parameters Guide</a></li><li><a href="/skills/date-ranges/">GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</a></li><li><a href="/skills/ecommerce-analysis/">GA4 Ecommerce Analysis: Revenue, AOV &amp; Funnel Drop-off</a></li><li><a href="/skills/filter-structures/">GA4 API Filter Expressions &amp; Dimension Regex Syntax</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations, Quotas &amp; Cardinality Boundaries</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 Data API</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/service-account-setup/">GA4 Service Account Setup Guide</a></li><li><a href="/skills/traffic-diagnosis/">Diagnose GA4 Traffic Drops: Step-by-Step Triage</a></li><li><a href="/skills/ua-to-ga4/">Universal Analytics to GA4 Field Name Mapping</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><p class="eyebrow">Agent skill</p><h1>Custom Dimensions and Event Parameters</h1><p>How to find and query property-specific custom dimensions in GA4.</p>
-<h2>The core rule</h2>
-<p>Custom dimensions are <strong>property-specific</strong>. Never guess their names. Always call <code>search_schema(&quot;custom&quot;)</code> first — it will show every registered custom dimension for this exact property.</p>
-<h2>Two valid syntaxes</h2>
-<p>GA4 supports two ways to access custom data:</p>
-<p><strong>Registered custom dimensions</strong> — appear in the schema by their registered name. Find them with <code>search_schema</code>. Use the name exactly as returned.</p>
-<p><strong>Unregistered event parameters</strong> — accessed inline with:</p>
-<ul><li><code>customEvent:parameter_name</code> for event-scoped parameters</li><li><code>customUser:property_name</code> for user-scoped properties</li></ul>
-<p>The <code>parameter_name</code> must exactly match what your tracking code sends. If the property has not collected this parameter, the API returns an error.</p>
-<h2>Why guessing fails</h2>
-<p>The model cannot know what custom parameters a GA4 property uses — they are defined by the site's own tracking code and GA4 Admin settings. <code>customEvent:page_category</code> works on one property and fails on another depending on whether that property's tracking sends a <code>page_category</code> parameter.</p>
-<h2>Workflow</h2>
-<ol><li>Call <code>search_schema(&quot;custom&quot;)</code> — lists all registered custom dimensions.</li><li>If the one you need appears, use its exact API name.</li><li>If it does not appear, ask the user what event parameter name their</li></ol>
-<p>   tracking code uses, then query with <code>customEvent:that_name</code>.</p>
-<ol><li>If the query still fails, the parameter is not collected by this property.</li></ol>
-<h2>Scope matters</h2>
-<div class="tw"><table><thead><tr><th>Scope</th><th>Syntax</th><th>Use for</th></tr></thead><tbody><tr><td>Event</td><td><code>customEvent:name</code></td><td>per-hit data (page category, product id, etc.)</td></tr><tr><td>User</td><td><code>customUser:name</code></td><td>user attributes (plan, cohort, customer type)</td></tr><tr><td>Session</td><td>registered name only</td><td>session-level custom groupings</td></tr></tbody></table></div>
-<p>Mixing scopes can cause incompatibility errors — see the <code>compatible-combinations</code> skill.</p></div>
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>GA4 Custom Dimensions &amp; Event Parameters Guide</h1><p>How to identify, register, and query custom dimensions and event parameters using the Google Analytics 4 Data API.</p>
+<h2>The Core Rule: Property-Specific Schemas</h2>
+<p>Custom dimensions and user properties are unique to your individual website or application. Never guess their names. Always instruct your AI agent to call <code>search_schema(&quot;custom&quot;)</code> first to retrieve the active custom definitions for your specific property.</p>
+<hr>
+<h2>Two Methods to Access Custom Data</h2>
+<h3>1. Registered Custom Dimensions (Standard Syntax)</h3>
+<p>When an event parameter is registered inside Google Analytics (<strong>Admin → Data display → Custom definitions</strong>), it becomes an official dimension in your schema.</p>
+<ul><li>Format: Uses the exact API name assigned during registration (e.g. <code>author_name</code>, <code>membership_tier</code>).</li><li>How to discover: Run <code>search_schema(&quot;keyword&quot;)</code> to inspect live registered names.</li></ul>
+<h3>2. Inline Event Parameters (Direct API Syntax)</h3>
+<p>If a parameter is actively collected by your tracking code (<code>gtag.js</code>, GTM) but has not yet been registered in the GA4 Admin UI, you can query it directly using prefix syntax:</p>
+<ul><li><strong>Event-scoped parameters:</strong> <code>customEvent:&lt;parameter_name&gt;</code> (e.g., <code>customEvent:blog_category</code>, <code>customEvent:error_code</code>).</li><li><strong>User-scoped properties:</strong> <code>customUser:&lt;property_name&gt;</code> (e.g., <code>customUser:plan_type</code>, <code>customUser:company_size</code>).</li></ul>
+<blockquote><p>⚠️ <strong>Note:</strong> The parameter name following the colon must match the exact case-sensitive string sent by your front-end tracking code.</p></blockquote>
+<hr>
+<h2>Scope Boundaries</h2>
+<div class="tw"><table><thead><tr><th>Parameter Scope</th><th>Syntax</th><th>Common Use Cases</th></tr></thead><tbody><tr><td><strong>Event Scope</strong></td><td><code>customEvent:&lt;param&gt;</code></td><td>Page category, button ID, search filter, video title</td></tr><tr><td><strong>User Scope</strong></td><td><code>customUser:&lt;property&gt;</code></td><td>Account tier, signup cohort, customer lifetime segment</td></tr><tr><td><strong>Session Scope</strong></td><td>Registered name only</td><td>Session-level calculated groups (requires Admin registration)</td></tr></tbody></table></div>
+<hr>
+<h2>Verification Workflow</h2>
+<ol><li>Prompt your agent: <code>search_schema(&quot;custom&quot;)</code>.</li><li>If your target dimension appears, use its declared API identifier.</li><li>If it does not appear, verify the parameter name in your Google Tag Manager container or tracking script and query using <code>customEvent:&lt;param_name&gt;</code>.</li><li>If the query returns a 400 error, verify that the parameter has collected at least one event in the queried date range.</li></ol></div>
     </main>
   </div>
 </div>
@@ -77,6 +78,8 @@ gtag('config', 'G-RX65PWDDEQ');
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

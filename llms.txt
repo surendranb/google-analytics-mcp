@@ -1,49 +1,81 @@
-# Google Analytics 4 (GA4) MCP Server
+# GA4 MCP Server
 
-> Model Context Protocol (MCP) server for Google Analytics 4 data exploration, schema discovery, and real-time metrics.
+> Model Context Protocol server for Google Analytics 4. Read-only reporting, schema discovery, and 17 analytical skills that load on demand. MIT, local stdio, v2.11.7.
 
-## Installation
-- UVX: `uvx google-analytics-mcp`
-- NPX: `npx -y google-analytics-mcp`
-- Curl: `curl -fsSL https://ga4.builditwithai.xyz/install | bash`
-- Documentation: https://ga4.builditwithai.xyz
+Docs: https://ga4mcp.com
+Repo: https://github.com/surendranb/google-analytics-mcp
+Not affiliated with Google.
 
-## Primary Tools
-- `get_ga4_data(dimensions, metrics, date_ranges, limit)`: Runs structured reports.
-- `list_accounts()`: Lists accessible GA accounts.
-- `list_properties(account_id)`: Lists properties.
-- `get_property_metadata(property_id)`: Fetches dimensions and metrics schema.
-- `run_realtime_report(metrics, dimensions)`: Fetches live active users.
-- `search_skills(query)`: Searches analytical recipes.
+## Install
+- `curl -fsSL https://ga4.builditwithai.xyz/install | bash`
+- `uvx google-analytics-mcp`
+- `npx -y @surendranb/google-analytics-mcp`
 
-## Environment Variables
-- `GA4_PROPERTY_ID`: Default GA4 property ID.
-- `GOOGLE_APPLICATION_CREDENTIALS`: Path to service account JSON key file.
-- `DO_NOT_TRACK`: Set to `1` to disable anonymous telemetry.
+Requires `GA4_PROPERTY_ID` and `GOOGLE_APPLICATION_CREDENTIALS`.
 
-## Harness guides (verified 2026-10-09; site labels v2.11.4, repo pyproject.toml reads 2.11.5)
-- Hub: https://ga4mcp.com/ga4-mcp-for-every-harness/ — one installer path for every client below.
-- https://ga4mcp.com/ga4-mcp-for-claude/ — Code via CLI, Desktop via JSON, Cowork through Desktop (site FAQ).
-- https://ga4mcp.com/ga4-mcp-for-codex/ — Codex CLI as stdio server.
-- https://ga4mcp.com/ga4-mcp-for-cursor/ — Cursor mcp.json entry.
-- https://ga4mcp.com/ga4-mcp-for-antigravity/ — Antigravity CLI mcp_config.json.
-- https://ga4mcp.com/ga4-mcp-for-antigravity-ide/ — Antigravity IDE MCP Store plus raw config.
-- https://ga4mcp.com/ga4-mcp-for-copilot/ — Copilot CLI config.
-- https://ga4mcp.com/ga4-mcp-for-deepseek/ — DeepSeek Harness dsh-mcp-client entry.
-- https://ga4mcp.com/ga4-mcp-for-devin-desktop/ — Devin MCP config, native path.
-- https://ga4mcp.com/ga4-mcp-for-gemini/ — Gemini CLI settings.json; extension root v2.11.1 vs nested v2.5.0 kept distinct.
-- https://ga4mcp.com/ga4-mcp-for-goose/ — Goose config.yaml extensions block.
-- https://ga4mcp.com/ga4-mcp-for-hermes/ — Hermes config.yaml mcp_servers block.
-- https://ga4mcp.com/ga4-mcp-for-kiro/ — Kiro mcp.json, workspace and user scopes.
-- https://ga4mcp.com/ga4-mcp-for-openclaw/ — openclaw mcp add line; bundle plugins/openclaw/plugin.json v2.4.1 kept distinct.
-- https://ga4mcp.com/ga4-mcp-for-opencode/ — opencode.jsonc block.
-- https://ga4mcp.com/ga4-mcp-for-pi/ — Pi agent-dir mcp.json block.
-- https://ga4mcp.com/ga4-mcp-for-vscode/ — VS Code .vscode/mcp.json block (Cline, Roo).
-- https://ga4mcp.com/ga4-mcp-for-zcode/ — ZCode MCP block.
-- https://ga4mcp.com/ga4-mcp-for-zed/ — Zed context_servers block.
+## Tools (12)
+- `check_for_updates`: Check PyPI for newer versions of this MCP server and get upgrade instructions.
+- `list_properties`: List all GA4 properties associated with an account.
+- `search_schema`: Search for a keyword across all dimensions and metrics for this property.
+- `get_property_schema`: Returns the complete schema for the configured GA4 property, including all available dimensions and metrics (standard and custom).
+- `list_dimension_categories`: List all dimension categories for this GA4 property, with a count of dimensions in each category.
+- `list_metric_categories`: List all metric categories for this GA4 property, with a count of metrics in each category.
+- `get_dimensions_by_category`: Return all dimensions in a specific category with their API names and descriptions.
+- `get_metrics_by_category`: Return all metrics in a specific category with their API names and descriptions.
+- `get_ga4_data`: Retrieve GA4 data with built-in intelligence for better and safer results.
+- `get_troubleshooting_guide`: Returns the troubleshooting/setup guide for a topic, served from inside the server (no network needed).
+- `search_skills`: Fetch analytical recipes and how-to guides from the GA4 skills library.
+- `setup_ga4_access`: Interactively fix a broken GA4 MCP setup (missing property ID, missing or expired credentials, or missing GA4 access) by asking the user for the needed input through...
 
-## Plugin bundles (verified 2026-10-09)
-- Hub: https://ga4mcp.com/ga4-plugins/ — server vs plugin split plus all three bundles.
-- https://ga4mcp.com/ga4-plugin-for-claude-code/ — .claude-plugin/plugin.json v2.11.1.
-- https://ga4mcp.com/ga4-plugin-for-gemini/ — root gemini-extension.json v2.11.1; nested gemini-extension/gemini-extension.json v2.5.0.
-- https://ga4mcp.com/ga4-plugin-for-harness/ — plugins/openclaw/plugin.json v2.4.1, entry ga4-mcp-server over stdio.
+## Skills (17)
+- [Track AI Referral Traffic in Google Analytics 4](https://ga4mcp.com/skills/ai-referral-analysis/): How to track and measure traffic from ChatGPT, Claude, Perplexity, and Gemini in GA4. Exact dimension filters, regex patterns, and channel comparison rules.
+- [GA4 Attribution Scope: User vs. Session vs. Event](https://ga4mcp.com/skills/attribution-scope/): Why session, user, and event metrics never match in GA4. Rules for pairing dimensions and metrics across user-scoped, session-scoped, and event-scoped models.
+- [Identify & Filter Bot Traffic in Google Analytics 4](https://ga4mcp.com/skills/bot-traffic-detection/): Detect and filter automated bot spikes in Google Analytics 4. Patterns for datacenter ASN spikes, zero-second sessions, and single-page screenPageViews.
+- [GA4 Channel Acquisition: Default Grouping Rules](https://ga4mcp.com/skills/channel-acquisition/): How GA4 Default Channel Groups work, how to audit channel performance, and how to spot traffic falling into Unassigned or Direct due to broken UTM parameters.
+- [GA4 Dimensions and Metrics Reference: API Field Names](https://ga4mcp.com/skills/common-metric-names/): Exact API field names for GA4 Data API queries. Avoid 400 errors from Universal Analytics names like ga:sessions or pageviews by using valid GA4 schema.
+- [Compatible Dimension & Metric Combinations in GA4](https://ga4mcp.com/skills/compatible-combinations/): Which dimensions and metrics can be queried together in GA4 without triggering incompatible scope errors. Matrix of user, session, and event-level pairings.
+- [GA4 Content Performance: Views & Engagement Rates](https://ga4mcp.com/skills/content-performance/): Evaluate landing pages and blog content in GA4: screenPageViews, average engagement time, bounce rates, and organic search conversions per URL.
+- [GA4 Custom Dimensions & Event Parameters Guide](https://ga4mcp.com/skills/custom-dimensions/): Query custom dimensions and event parameters in the GA4 Data API. How to find parameter names, register them in GA4 Admin, and query custom event schemas.
+- [GA4 API Date Ranges: Syntax, Offsets & Comparisons](https://ga4mcp.com/skills/date-ranges/): Allowed date string formats for the GA4 Data API: YYYY-MM-DD, today, yesterday, 7daysAgo, 30daysAgo, and multi-range period comparisons without API errors.
+- [GA4 Ecommerce Analysis: Revenue, AOV & Funnel Drop-off](https://ga4mcp.com/skills/ecommerce-analysis/): Analyze GA4 ecommerce performance: purchase revenue, average order value, checkout funnel drop-off, and item revenue by acquisition channel.
+- [GA4 API Filter Expressions & Dimension Regex Syntax](https://ga4mcp.com/skills/filter-structures/): Copy-paste filter templates for the GA4 Data API: exact match, beginsWith, contains, regex, AND/OR group expressions, and inListFilter structures.
+- [GA4 API Limitations, Quotas & Cardinality Boundaries](https://ga4mcp.com/skills/ga4-limitations/): GA4 Data API boundaries: 10-dimension limit, 100,000 row caps, hourly token quotas, and sampling thresholds. How to query safely within API limits.
+- [GCP Service Account Setup for GA4 Data API](https://ga4mcp.com/skills/gcp-setup/): Step-by-step GCP service account provisioning for the GA4 Data API. Create JSON keys, assign the Viewer role in GA4 Admin, and avoid common 403 errors.
+- [Geo and Device Segmentation](https://ga4mcp.com/skills/geo-device-segmentation/): Segment GA4 data by country, city, device category, and browser. Spot localization opportunities and mobile conversion drops with ready queries.
+- [GA4 Service Account Setup Guide](https://ga4mcp.com/skills/service-account-setup/): Step-by-step GA4 service account setup. Generate Google Cloud JSON keys, enable the Data API, and grant Viewer permissions in Google Analytics Admin.
+- [Diagnose GA4 Traffic Drops: Step-by-Step Triage](https://ga4mcp.com/skills/traffic-diagnosis/): A six-step triage framework to diagnose GA4 traffic drops. Isolate channel shifts, check tracking snippet errors, and distinguish real drops from bot drops.
+- [Universal Analytics to GA4 Field Name Mapping](https://ga4mcp.com/skills/ua-to-ga4/): Mapping table from Universal Analytics (UA) field names to Google Analytics 4 (GA4) Data API names. Replace ga:pageviews, ga:bounces, and ga:users correctly.
+
+## Pages
+- https://ga4mcp.com/ga4-mcp-for-every-harness/ — GA4 MCP client setup — the config each one expects
+- https://ga4mcp.com/ga4-mcp-for-antigravity-ide/ — Connect Antigravity IDE to GA4 (Setup & Queries)
+- https://ga4mcp.com/ga4-mcp-for-antigravity/ — Connect Google Antigravity to GA4 (App, IDE & CLI)
+- https://ga4mcp.com/ga4-mcp-for-claude/ — Connect Claude to Google Analytics 4 (Code & Desktop)
+- https://ga4mcp.com/ga4-mcp-for-codex/ — Connect OpenAI Codex to Google Analytics 4 (Data API)
+- https://ga4mcp.com/ga4-mcp-for-cursor/ — Connect Cursor to Google Analytics 4 (Setup & Queries)
+- https://ga4mcp.com/ga4-mcp-for-deepseek/ — Connect DeepSeek Harness to GA4 (Data API Setup)
+- https://ga4mcp.com/ga4-mcp-for-devin-desktop/ — Connect Devin Desktop (Windsurf) to GA4 MCP
+- https://ga4mcp.com/ga4-mcp-for-gemini/ — Connect Gemini CLI to Google Analytics 4 (Data API)
+- https://ga4mcp.com/ga4-mcp-for-goose/ — Connect Goose CLI to Google Analytics 4 (MCP Setup)
+- https://ga4mcp.com/ga4-mcp-for-hermes/ — Connect Hermes Agent to Google Analytics 4 (MCP Setup)
+- https://ga4mcp.com/ga4-mcp-for-kiro/ — Connect Kiro IDE to Google Analytics 4 (MCP Setup)
+- https://ga4mcp.com/ga4-mcp-for-openclaw/ — Connect OpenClaw to Google Analytics 4 (MCP Setup)
+- https://ga4mcp.com/ga4-mcp-for-opencode/ — Connect OpenCode to Google Analytics 4 (Local stdio)
+- https://ga4mcp.com/ga4-mcp-for-pi/ — Connect Pi Agent to Google Analytics 4 (MCP Setup)
+- https://ga4mcp.com/ga4-mcp-for-vscode/ — Connect VS Code & Copilot to Google Analytics 4
+- https://ga4mcp.com/ga4-mcp-for-zcode/ — Connect ZCode Harness to Google Analytics 4 (MCP)
+- https://ga4mcp.com/ga4-mcp-for-zed/ — Connect Zed Editor to Google Analytics 4 (Setup Guide)
+- https://ga4mcp.com/ga4-plugin-for-claude-code/ — GA4 plugin for Claude Code
+- https://ga4mcp.com/ga4-plugin-for-gemini/ — GA4 extension for Gemini CLI
+- https://ga4mcp.com/google-analytics-ai-prompts/ — 35 Production GA4 Prompts for Claude, Cursor & AI
+- https://ga4mcp.com/google-analytics-mcp-vs-official/ — Google Analytics MCP: Official vs Community Server
+- https://ga4mcp.com/iam/ — Fix GA4 Missing Permissions: Service Account 403 Guide
+- https://ga4mcp.com/ — GA4 MCP — Connect Google Analytics 4 to Claude & AI
+- https://ga4mcp.com/natural-language-google-analytics/ — Natural Language Google Analytics: Query GA4 with AI
+- https://ga4mcp.com/ga4-plugins/ — GA4 MCP plugins for Claude Code and Gemini CLI
+- https://ga4mcp.com/privacy/ — Privacy — what the GA4 MCP server sends
+- https://ga4mcp.com/schema/ — GA4 query shapes — filters, field names and totals
+- https://ga4mcp.com/setup/ — Install GA4 MCP: Connect Google Analytics to AI Clients
+- https://ga4mcp.com/skills/ — GA4 skills — sixteen analytical recipes for your agent
+- https://ga4mcp.com/terms/ — Terms of use
+- https://ga4mcp.com/troubleshooting/ — Fix Common GA4 Data API & IAM Errors (Quick Guide)

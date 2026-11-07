@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-hermes/
-title: "GA4 MCP for Hermes"
+title: "Connect Hermes Agent to Google Analytics 4 (MCP Setup)"
 description: "Add the GA4 MCP server to Hermes Agent. The root key is mcp_servers in YAML, not mcpServers in JSON, so a Claude snippet silently adds nothing."
 group: clients
 order: 16
 nav: "Hermes"
 ---
 
-# GA4 MCP for Hermes
+# Connect Hermes Agent to Google Analytics 4
 
 Hermes is Nous Research's agent harness. It configures MCP servers in YAML, and the root key is `mcp_servers` — snake case. A Claude Desktop snippet pasted here produces a file that parses fine and registers nothing.
+
+## Copy-paste analytical prompts
+
+Inside Hermes Agent:
+
+- **Weekly performance overview**: "Compare activeUsers, sessions, and engagementRate for the last 7 days against the previous period."
+- **AI referral audit**: "Show me sessions, bounceRate, and keyEvents referred by ChatGPT, Claude, and Perplexity over the last 30 days."
+- **High-bounce page check**: "List top 10 pages by sessions where bounceRate exceeds 60% over the last 30 days."
+- **Channel breakdown**: "Break down sessions and keyEvents by sessionDefaultChannelGroup this month."
+- **Realtime traffic status**: "Run a realtime report showing active users and top pages over the last 30 minutes."
 
 ## The entry
 

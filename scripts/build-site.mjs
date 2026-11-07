@@ -135,7 +135,7 @@ function parseFrontmatter(raw) {
 
 /* ---------------- content ---------------- */
 
-const stripH1 = (body) => body.replace(/^#\s+.+\n+/, "");
+const stripH1 = (body) => body.replace(/^\s*#\s+[^\n]+\n*/, "");
 
 function loadContent() {
   const dir = join(ROOT, "site/content");
@@ -154,8 +154,8 @@ function loadContent() {
         order: Number(data.order || 50),
         full: data.full === "true",
         hero: data.hero === "true",
-        html: md(stripH1(body)),
-        raw: stripH1(body),
+        html: md(body),
+        raw: body,
         titleTag: data.titleTag || data.title || h1,
       };
     });
@@ -188,6 +188,7 @@ function loadSkills() {
       slug: `/skills/${d.name}/`,
       name: d.name,
       title: h1,
+      titleTag: data.titleTag || `${h1} — GA4 MCP skill`,
       description: data.description || "",
       html: md(stripH1(body)),
       raw: stripH1(body),
@@ -316,7 +317,7 @@ for (const s of skills) {
     `${s.slug.replace(/^\/|\/$/g, "")}/index.html`,
     page({
       slug: s.slug,
-      title: `${s.title} — GA4 MCP skill`,
+      title: s.titleTag || `${s.title} — GA4 MCP skill`,
       description: s.description,
       body: `<div class="prose"><p class="eyebrow">Agent skill</p><h1>${esc(s.title)}</h1>${s.html}</div>`,
       sidebar: sidebarFor(sidebarGroups, s.slug),
@@ -414,6 +415,7 @@ ${skills.map((s) => `- [${s.title}](${SITE}${s.slug}): ${s.description}`).join("
 ${pages.map((p) => `- ${SITE}${p.slug} — ${p.title}`).join("\n")}
 `
 );
+copyFileSync(join(OUT, "llms.txt"), join(ROOT, "llms.txt"));
 
 // llms-full.txt
 writeFileSync(

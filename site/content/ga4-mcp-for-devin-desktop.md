@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-devin-desktop/
-title: "GA4 MCP for Devin Desktop"
+title: "Connect Devin Desktop (Windsurf) to GA4 MCP"
 description: "Add the GA4 MCP server to Devin Desktop, the client formerly named Windsurf. Includes the config path conflict between two live vendor pages."
 group: clients
 nav: "Devin Desktop"
 order: 11
 ---
 
-# GA4 MCP for Devin Desktop
+# Connect Devin Desktop (Windsurf) to GA4 MCP
 
 Devin Desktop is the current name for Windsurf. The rename happened on 2 June 2026, so older guides and forum answers still call it Windsurf. The config schema did not change with the name.
+
+## Copy-paste analytical prompts
+
+In Cascade chat, try asking:
+
+- **Weekly health check**: "Compare activeUsers, sessions, and engagementRate over the last 7 days with the previous 7 days."
+- **AI referral traffic**: "Show sessions, keyEvents, and userEngagementDuration from chatgpt.com and perplexity.ai in the last 30 days."
+- **Bounce rate audit**: "Find top 10 landing pages by sessions where bounceRate is above 60% over the last 30 days."
+- **Channel breakdown**: "Query sessions and keyEvents grouped by sessionDefaultChannelGroup for the last 14 days."
+- **Realtime active visitors**: "Run a realtime report showing active users and top pages right now."
 
 ## The entry
 

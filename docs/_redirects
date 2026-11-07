@@ -42,8 +42,14 @@ https://www.ga4mcp.com/*    https://ga4mcp.com/:splat    301
 /ga4-plugin-for-claude-code/index.md    /ga4-plugin-for-claude-code/    301
 /ga4-plugin-for-gemini.md    /ga4-plugin-for-gemini/    301
 /ga4-plugin-for-gemini/index.md    /ga4-plugin-for-gemini/    301
+/google-analytics-ai-prompts.md    /google-analytics-ai-prompts/    301
+/google-analytics-ai-prompts/index.md    /google-analytics-ai-prompts/    301
+/google-analytics-mcp-vs-official.md    /google-analytics-mcp-vs-official/    301
+/google-analytics-mcp-vs-official/index.md    /google-analytics-mcp-vs-official/    301
 /iam.md    /iam/    301
 /iam/index.md    /iam/    301
+/natural-language-google-analytics.md    /natural-language-google-analytics/    301
+/natural-language-google-analytics/index.md    /natural-language-google-analytics/    301
 /ga4-plugins.md    /ga4-plugins/    301
 /ga4-plugins/index.md    /ga4-plugins/    301
 /privacy.md    /privacy/    301
@@ -56,6 +62,8 @@ https://www.ga4mcp.com/*    https://ga4mcp.com/:splat    301
 /skills/index.md    /skills/    301
 /terms.md    /terms/    301
 /terms/index.md    /terms/    301
+/troubleshooting.md    /troubleshooting/    301
+/troubleshooting/index.md    /troubleshooting/    301
 /index.md    /    301
 /README.md    /    301
 /skills/ai-referral-analysis/index.md    /skills/ai-referral-analysis/    301
@@ -72,5 +80,6 @@ https://www.ga4mcp.com/*    https://ga4mcp.com/:splat    301
 /skills/ga4-limitations/index.md    /skills/ga4-limitations/    301
 /skills/gcp-setup/index.md    /skills/gcp-setup/    301
 /skills/geo-device-segmentation/index.md    /skills/geo-device-segmentation/    301
+/skills/service-account-setup/index.md    /skills/service-account-setup/    301
 /skills/traffic-diagnosis/index.md    /skills/traffic-diagnosis/    301
 /skills/ua-to-ga4/index.md    /skills/ua-to-ga4/    301

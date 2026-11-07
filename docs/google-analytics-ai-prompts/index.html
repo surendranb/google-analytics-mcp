@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>35 Production GA4 Prompts for Claude, Cursor &amp; AI</title>
+<meta name="description" content="Copy-paste prompt cookbook for querying Google Analytics 4 with AI agents. Tested recipes for traffic drops, channel ROI, e-commerce, and AI referrals.">
+<link rel="canonical" href="https://ga4mcp.com/google-analytics-ai-prompts/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="35 Production GA4 Prompts for Claude, Cursor &amp; AI">
+<meta property="og:description" content="Copy-paste prompt cookbook for querying Google Analytics 4 with AI agents. Tested recipes for traffic drops, channel ROI, e-commerce, and AI referrals.">
+<meta property="og:url" content="https://ga4mcp.com/google-analytics-ai-prompts/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RX65PWDDEQ');
+</script>
+<script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
+<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"35 Production GA4 Prompts for Claude, Cursor & AI","description":"Copy-paste prompt cookbook for querying Google Analytics 4 with AI agents. Tested recipes for traffic drops, channel ROI, e-commerce, and AI referrals.","url":"https://ga4mcp.com/google-analytics-ai-prompts/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/" class="is-active" aria-current="page">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>35 Production GA4 Prompts for Claude, Cursor &amp; AI Agents</h1>
+<p>Querying Google Analytics 4 through an AI agent requires prompts that instruct the model on methodology, comparison periods, and scope. Vague questions like <em>&quot;How is my site doing?&quot;</em> produce vague summaries. Precise prompts produce actionable analytical breakdowns.</p>
+<p>This cookbook provides 35 tested prompts designed for Claude Code, Cursor, Codex, Gemini CLI, and any MCP-compatible client connected to GA4 MCP.</p>
+<h2>1. Traffic Change &amp; Drop Diagnosis</h2>
+<p>Use these prompts when metrics shift unexpectedly and you need to isolate the root cause before reacting.</p>
+<h3>Prompt 1.1: Sudden Traffic Drop Triage</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Diagnose our traffic over the last 14 days compared to the prior 14-day period. 
+Break down sessions, active users, and engagement rate by sessionDefaultChannelGroup. 
+Identify which specific channel drove the decline and check if the drop was site-wide or isolated to specific landing pages.</code></pre></div>
+<p><em>API calls: <code>get_ga4_data</code> with <code>sessionDefaultChannelGroup</code>, <code>date</code>, <code>sessions</code>, <code>activeUsers</code>, <code>engagementRate</code>.</em></p>
+<h3>Prompt 1.2: Organic Search Drop vs. Tracking Snippet Error</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Our organic traffic dropped this week. Compare the last 7 days to the previous 7 days. 
+Check daily session totals alongside landingPage paths. 
+Tell me if the drop occurred as a sudden cliff (suggesting a broken tag or consent banner) or a gradual slide (suggesting a ranking or algorithm change).</code></pre></div>
+<h3>Prompt 1.3: Direct Traffic Spike Audit</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>We had an unexpected spike in direct traffic over the last 48 hours. 
+Pull sessions, screenPageViews, and userEngagementDuration broken down by city and deviceCategory. 
+Check whether this traffic exhibits bot patterns (near-zero engagement duration, 100% single-page views, single datacenter origin).</code></pre></div>
+<h3>Prompt 1.4: Channel Mix Shift</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Analyze our traffic mix over the last 30 days compared to the 30 days before that. 
+Calculate the percentage share of total sessions for each sessionDefaultChannelGroup. 
+Which channels gained share and which channels lost share?</code></pre></div>
+<h3>Prompt 1.5: Weekend vs. Weekday Traffic Baseline</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Pull our daily sessions and active users for the past 6 weeks. 
+Calculate our average weekday volume versus our average weekend volume. 
+Flag any weekday that fell more than 20% below our trailing weekday average.</code></pre></div>
+<h3>Prompt 1.6: Campaign UTM Performance Audit</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List all sessions from the past 30 days where sessionMedium is 'cpc' or 'paid'. 
+Group by sessionCampaign and sessionSource. 
+Report sessions, keyEvents, and engagementRate to identify our best-performing and lowest-performing paid campaigns.</code></pre></div>
+<hr>
+<h2>2. AI Search &amp; Answer Engine Tracking</h2>
+<p>Measure visitors arriving from generative AI assistants (ChatGPT, Claude, Perplexity, Gemini).</p>
+<h3>Prompt 2.1: Monthly AI Referral Overview</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Identify all referral traffic from AI platforms over the last 90 days. 
+Filter sessionSource for chatgpt.com, chat.openai.com, claude.ai, perplexity.ai, and gemini.google.com. 
+Report monthly sessions, activeUsers, and average engagement duration per source.</code></pre></div>
+<h3>Prompt 2.2: AI Traffic Quality vs. Organic Search</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Compare the engagement quality of AI assistant referrals (ChatGPT, Perplexity, Claude) against traditional Organic Search for the last 30 days. 
+Show sessions, bounceRate, userEngagementDuration, and keyEvents per session.</code></pre></div>
+<h3>Prompt 2.3: Top Landing Pages for AI Visitors</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Which specific landing pages are AI assistants citing? 
+Filter sessionSource for chatgpt.com and perplexity.ai over the last 60 days. 
+List landingPage sorted by sessions descending with total pageviews and key events.</code></pre></div>
+<h3>Prompt 2.4: Perplexity vs. ChatGPT Share</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Calculate the traffic split between ChatGPT (chatgpt.com, chat.openai.com) and Perplexity (perplexity.ai) over the last 30 days. 
+Show daily session trends for both sources to determine which assistant is growing faster on our domain.</code></pre></div>
+<h3>Prompt 2.5: Conversion Rate of AI Referrals</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>What is the key event conversion rate for visitors arriving from AI assistants compared to our site-wide average? 
+Pull sessions and keyEvents for AI sources over the last 90 days and calculate keyEvents per session.</code></pre></div>
+<h3>Prompt 2.6: New User Acquisition via AI Engines</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>How many first-time visitors arrived via AI engines this quarter? 
+Query newUsers and sessions where sessionSource matches AI platforms, and calculate new users as a percentage of total AI sessions.</code></pre></div>
+<hr>
+<h2>3. Acquisition &amp; Channel Performance</h2>
+<p>Evaluate how marketing channels deliver qualified visitors.</p>
+<h3>Prompt 3.1: Top Acquisition Channels Overview</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Summarize our top 10 acquisition channels for the past 30 days. 
+Include sessions, activeUsers, screenPageViewsPerSession, averageSessionDuration, and keyEvents. 
+Sort by sessions descending.</code></pre></div>
+<h3>Prompt 3.2: First User vs. Session Channel Comparison</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Compare firstUserDefaultChannelGroup (how users first discovered us) with sessionDefaultChannelGroup (how users returned) for the last 60 days. 
+Highlight channels that drive discovery versus channels that drive return visits.</code></pre></div>
+<h3>Prompt 3.3: Referral Domain Quality Breakdown</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List the top 15 referring websites (sessionSource where sessionMedium is 'referral') over the last 30 days. 
+Report sessions, engagementRate, and keyEvents. Exclude internal subdomains.</code></pre></div>
+<h3>Prompt 3.4: Social Media Channel Comparison</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Break down traffic from social media platforms over the last 30 days. 
+Filter for sessionDefaultChannelGroup equals 'Organic Social' and 'Paid Social'. 
+Compare LinkedIn, Twitter/X, YouTube, and Reddit by engagement rate and key events.</code></pre></div>
+<h3>Prompt 3.5: Email Campaign ROI</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Pull all traffic where sessionMedium equals 'email' for the past 60 days. 
+Group by sessionCampaign and show sessions, userEngagementDuration, and keyEvents to identify our most effective newsletter sends.</code></pre></div>
+<h3>Prompt 3.6: Unassigned Traffic Diagnosis</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Check how much traffic fell into the 'Unassigned' channel group over the last 30 days. 
+Pull sessionSource and sessionMedium for all Unassigned sessions so we can identify broken UTM parameters.</code></pre></div>
+<hr>
+<h2>4. Content &amp; Landing Page Audits</h2>
+<p>Discover which URLs attract visitors and which lose them immediately.</p>
+<h3>Prompt 4.1: Top 20 Landing Pages by Engagement</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List our top 20 landing pages by organic search traffic over the last 30 days. 
+Report sessions, activeUsers, userEngagementDuration, and bounceRate. 
+Sort by userEngagementDuration descending.</code></pre></div>
+<h3>Prompt 4.2: High-Traffic, High-Bounce Page Alert</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Find all landing pages that received at least 250 sessions over the past 30 days but have a bounce rate above 65%. 
+Sort by session volume descending so we know which pages require immediate UX or content revision.</code></pre></div>
+<h3>Prompt 4.3: New Content Velocity Check</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Audit traffic to all URLs under our blog or docs path published in the last 60 days. 
+Show weekly screenPageViews and active users for each URL since publication.</code></pre></div>
+<h3>Prompt 4.4: Low-Performing Content Audit</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Identify pages on our site that received fewer than 20 total screenPageViews over the past 90 days. 
+Group by pagePath and sort ascending to help us plan content pruning or consolidation.</code></pre></div>
+<h3>Prompt 4.5: Internal Search Terms Analysis</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>What terms are visitors searching for inside our site? 
+Query the searchTerm dimension for the last 30 days with eventCount and activeUsers. 
+Sort by frequency descending.</code></pre></div>
+<h3>Prompt 4.6: Desktop vs. Mobile Landing Page Drop-off</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Compare bounceRate and userEngagementDuration across mobile and desktop for our top 10 landing pages over the last 30 days. 
+Flag pages where mobile bounce rate exceeds desktop bounce rate by more than 15 percentage points.</code></pre></div>
+<hr>
+<h2>5. E-Commerce &amp; Funnel Conversion</h2>
+<p>Analyze purchases, average order value, and checkout drop-offs.</p>
+<h3>Prompt 5.1: Overall E-Commerce Performance Summary</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Summarize our e-commerce performance for the last 30 days compared to the prior 30 days. 
+Report purchaseRevenue, transactions, averagePurchaseRevenue, and ecommercePurchases. 
+Calculate our average order value (AOV).</code></pre></div>
+<h3>Prompt 5.2: Revenue by Acquisition Channel</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Which marketing channels generate the most revenue? 
+Break down purchaseRevenue, transactions, and averagePurchaseRevenue by sessionDefaultChannelGroup for the last 60 days. 
+Sort by purchaseRevenue descending.</code></pre></div>
+<h3>Prompt 5.3: Checkout Funnel Drop-off Analysis</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Examine our checkout funnel events over the last 30 days: view_item, add_to_cart, begin_checkout, and purchase. 
+Report the total eventCount for each stage and calculate the drop-off percentage between each consecutive step.</code></pre></div>
+<h3>Prompt 5.4: Top 15 Products by Revenue</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List our top 15 products by gross revenue over the past 90 days. 
+Query itemName, itemRevenue, itemsPurchased, and itemsViewed. 
+Calculate the view-to-purchase conversion rate for each product.</code></pre></div>
+<h3>Prompt 5.5: High Cart-Abandonment Products</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Identify products with high cart additions but low final purchases over the last 60 days. 
+Compare itemsAddedToCart against itemsPurchased per itemName for all items added to cart at least 50 times.</code></pre></div>
+<h3>Prompt 5.6: Repeat Buyer vs. First-Time Buyer Revenue</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Compare revenue generated by new users versus returning users over the last 60 days. 
+Query newUsers and activeUsers alongside purchaseRevenue grouped by newVsReturning dimension.</code></pre></div>
+<hr>
+<h2>6. Geographic, Device &amp; Audience Segmentation</h2>
+<p>Identify international opportunities and hardware friction.</p>
+<h3>Prompt 6.1: Top Countries by Active Users &amp; Value</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List our top 15 countries by activeUsers over the last 30 days. 
+Show sessions, userEngagementDuration, and keyEvents per country. 
+Sort by activeUsers descending.</code></pre></div>
+<h3>Prompt 6.2: City-Level Growth in Primary Market</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Filter traffic to our primary country over the last 60 days. 
+Break down sessions, activeUsers, and keyEvents by city. 
+Identify the top 10 fastest-growing metropolitan areas.</code></pre></div>
+<h3>Prompt 6.3: Browser &amp; Operating System Health Check</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Audit traffic by browser and operatingSystem for the past 30 days. 
+Check bounceRate and engagementRate across Chrome, Safari, Firefox, Edge, and mobile in-app browsers. 
+Flag any browser with an unusually high bounce rate that might indicate a rendering bug.</code></pre></div>
+<h3>Prompt 6.4: Screen Resolution Friction Analysis</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Pull screenResolution with sessions and bounceRate for mobile devices over the last 30 days. 
+Check whether specific small-screen resolutions suffer from higher drop-off rates.</code></pre></div>
+<h3>Prompt 6.5: New vs. Returning User Engagement</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Compare new users and returning users over the last 90 days. 
+Report sessions, userEngagementDuration, screenPageViewsPerSession, and keyEvents to see how customer retention influences overall engagement.</code></pre></div>
+<hr>
+<h2>Next Steps</h2>
+<ul><li><strong><a href="/natural-language-google-analytics/">Natural Language Guide</a></strong>: How the schema validation engine prevents API errors.</li><li><strong><a href="/skills/">Analytical Skills Index</a></strong>: Explore the 16 bundled playbooks that power these queries.</li><li><strong><a href="/setup/">Installation Guide</a></strong>: Set up GA4 MCP in your editor or terminal in 60 seconds.</li></ul></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

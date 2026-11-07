@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Channel Acquisition Analysis — GA4 MCP skill</title>
-<meta name="description" content="Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.">
+<title>GA4 Channel Acquisition: Default Grouping Rules</title>
+<meta name="description" content="How GA4 Default Channel Groups work, how to audit channel performance, and how to spot traffic falling into Unassigned or Direct due to broken UTM parameters.">
 <link rel="canonical" href="https://ga4mcp.com/skills/channel-acquisition/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="Channel Acquisition Analysis — GA4 MCP skill">
-<meta property="og:description" content="Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.">
+<meta property="og:title" content="GA4 Channel Acquisition: Default Grouping Rules">
+<meta property="og:description" content="How GA4 Default Channel Groups work, how to audit channel performance, and how to spot traffic falling into Unassigned or Direct due to broken UTM parameters.">
 <meta property="og:url" content="https://ga4mcp.com/skills/channel-acquisition/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +25,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Channel Acquisition Analysis — GA4 MCP skill","description":"Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.","url":"https://ga4mcp.com/skills/channel-acquisition/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 Channel Acquisition: Default Grouping Rules","description":"How GA4 Default Channel Groups work, how to audit channel performance, and how to spot traffic falling into Unassigned or Direct due to broken UTM parameters.","url":"https://ga4mcp.com/skills/channel-acquisition/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +34,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/" class="is-active">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,30 +44,37 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
-<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/" class="is-active" aria-current="page">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">Track AI Referral Traffic in Google Analytics 4</a></li><li><a href="/skills/attribution-scope/">GA4 Attribution Scope: User vs. Session vs. Event</a></li><li><a href="/skills/bot-traffic-detection/">Identify &amp; Filter Bot Traffic in Google Analytics 4</a></li><li><a href="/skills/channel-acquisition/" class="is-active" aria-current="page">GA4 Channel Acquisition: Default Grouping Rules</a></li><li><a href="/skills/common-metric-names/">GA4 Dimensions and Metrics Reference: API Field Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension &amp; Metric Combinations in GA4</a></li><li><a href="/skills/content-performance/">GA4 Content Performance: Views &amp; Engagement Rates</a></li><li><a href="/skills/custom-dimensions/">GA4 Custom Dimensions &amp; Event Parameters Guide</a></li><li><a href="/skills/date-ranges/">GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</a></li><li><a href="/skills/ecommerce-analysis/">GA4 Ecommerce Analysis: Revenue, AOV &amp; Funnel Drop-off</a></li><li><a href="/skills/filter-structures/">GA4 API Filter Expressions &amp; Dimension Regex Syntax</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations, Quotas &amp; Cardinality Boundaries</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 Data API</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/service-account-setup/">GA4 Service Account Setup Guide</a></li><li><a href="/skills/traffic-diagnosis/">Diagnose GA4 Traffic Drops: Step-by-Step Triage</a></li><li><a href="/skills/ua-to-ga4/">Universal Analytics to GA4 Field Name Mapping</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><p class="eyebrow">Agent skill</p><h1>Channel Acquisition Analysis</h1><p>Break down sessions and users by traffic source, medium, and channel group to understand where your audience comes from and which channels perform best.</p>
-<h2>Correct dimension names</h2>
-<div class="tw"><table><thead><tr><th>Concept</th><th>GA4 API name</th></tr></thead><tbody><tr><td>Channel group</td><td><code>sessionDefaultChannelGroup</code></td></tr><tr><td>Source</td><td><code>sessionSource</code></td></tr><tr><td>Medium</td><td><code>sessionMedium</code></td></tr><tr><td>Source / Medium</td><td><code>sessionSourceMedium</code></td></tr><tr><td>Campaign name</td><td><code>sessionCampaignName</code></td></tr><tr><td>Campaign ID</td><td><code>sessionCampaignId</code></td></tr><tr><td>Ad content</td><td><code>sessionManualAdContent</code></td></tr></tbody></table></div>
-<p>Do not use <code>sessionDefaultChannelGrouping</code> — it does not exist. Do not combine <code>sessionCampaignName</code> with user-scoped metrics like <code>totalUsers</code>.</p>
-<h2>Step 1 — Channel overview</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;]
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>GA4 Channel Acquisition: Default Grouping Rules</h1><p>Analyze traffic sources, campaign media, and Default Channel Groups in Google Analytics 4. Determine which channels drive the highest volume, produce the longest engagement times, and deliver conversions.</p>
+<h2>Correct Dimension Names</h2>
+<p>Always use verified GA4 Data API field names:</p>
+<div class="tw"><table><thead><tr><th>Acquisition Dimension</th><th>GA4 API Name</th><th>Notes</th></tr></thead><tbody><tr><td><strong>Default Channel Group</strong></td><td><code>sessionDefaultChannelGroup</code></td><td>Organic Search, Direct, Paid Search, Referral, etc.</td></tr><tr><td><strong>Source</strong></td><td><code>sessionSource</code></td><td>Specific entity (e.g., google, linkedin, newsletter)</td></tr><tr><td><strong>Medium</strong></td><td><code>sessionMedium</code></td><td>Mechanism (e.g., organic, cpc, referral, email)</td></tr><tr><td><strong>Source / Medium Combined</strong></td><td><code>sessionSourceMedium</code></td><td>Combined source and medium string</td></tr><tr><td><strong>Campaign Name</strong></td><td><code>sessionCampaignName</code></td><td>UTM campaign parameter value</td></tr><tr><td><strong>Campaign ID</strong></td><td><code>sessionCampaignId</code></td><td>Numeric ad campaign ID</td></tr><tr><td><strong>Manual Ad Content</strong></td><td><code>sessionManualAdContent</code></td><td><code>utm_content</code> parameter value</td></tr></tbody></table></div>
+<blockquote><p>⚠️ <strong>Common Trap:</strong> Never use <code>sessionDefaultChannelGrouping</code> (it does not exist). Always use <code>sessionDefaultChannelGroup</code>.</p></blockquote>
+<hr>
+<h2>Step 1 — Channel Overview &amp; Efficiency</h2>
+<p>Rank acquisition channels by total sessions and visitor quality:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;]
 metrics: [&quot;sessions&quot;, &quot;totalUsers&quot;, &quot;newUsers&quot;, &quot;userEngagementDuration&quot;,
           &quot;screenPageViewsPerSession&quot;, &quot;bounceRate&quot;]
 date_range: last 30 days
 order_by: sessions DESC</code></pre></div>
-<h2>Step 2 — Source / medium detail</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionSource&quot;, &quot;sessionMedium&quot;]
+<hr>
+<h2>Step 2 — Source &amp; Medium Granularity</h2>
+<p>Look beneath broad channel buckets to examine individual referring platforms:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionSource&quot;, &quot;sessionMedium&quot;]
 metrics: [&quot;sessions&quot;, &quot;newUsers&quot;, &quot;userEngagementDuration&quot;, &quot;keyEvents&quot;]
 date_range: last 30 days
 order_by: sessions DESC
 limit: 25</code></pre></div>
-<h2>Step 3 — Campaign performance (paid)</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionCampaignName&quot;, &quot;sessionDefaultChannelGroup&quot;]
+<hr>
+<h2>Step 3 — Paid Campaign ROI Audit</h2>
+<p>Evaluate performance across paid advertising channels:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionCampaignName&quot;, &quot;sessionDefaultChannelGroup&quot;]
 metrics: [&quot;sessions&quot;, &quot;newUsers&quot;, &quot;keyEvents&quot;, &quot;userEngagementDuration&quot;]
 dimension_filter: {
   &quot;filter&quot;: {
@@ -76,13 +84,21 @@ dimension_filter: {
 }
 date_range: last 30 days
 order_by: sessions DESC</code></pre></div>
-<h2>Step 4 — Trend by channel over time</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;date&quot;, &quot;sessionDefaultChannelGroup&quot;]
-metrics: [&quot;sessions&quot;, &quot;newUsers&quot;]
-date_range: last 90 days
-order_by: date ASC</code></pre></div>
-<h2>What to report</h2>
-<ul><li>Top 5 channels by sessions and by new users</li><li>Engagement quality per channel (userEngagementDuration per session)</li><li>Which channel drives the most key events (conversions)</li><li>Week-over-week or month-over-month trend for top channels</li></ul></div>
+<hr>
+<h2>Step 4 — Diagnosing 'Unassigned' Traffic Spikes</h2>
+<p>If traffic in the <code>Unassigned</code> channel group is growing, your UTM campaign tagging is malformed.</p>
+<p>Query <code>sessionSource</code> and <code>sessionMedium</code> filtered specifically for <code>sessionDefaultChannelGroup = 'Unassigned'</code>. Common causes include:</p>
+<ul><li>Typos in <code>utm_medium</code> (e.g., <code>utm_medium=Social</code> with capital S, or <code>utm_medium=cpc_ads</code>).</li><li>Missing <code>utm_medium</code> while passing <code>utm_source</code>.</li><li>Non-standard medium values not recognized by Google's default channel group definition rules.</li></ul>
+<hr>
+<h2>Three Prompts to Ask Your AI Agent</h2>
+<p>Copy-paste these prompts into Claude Code, Cursor, or Gemini CLI:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>1. &quot;Break down our acquisition channels over the last 30 days. Report sessions, active users, engagement rate, and key events for each channel.&quot;
+
+2. &quot;List all sessions landing in the 'Unassigned' channel group over the past 60 days. Group by sessionSource and sessionMedium to identify malformed UTM tags.&quot;
+
+3. &quot;Compare the engagement duration and conversion rate of Paid Search versus Organic Search over the last 90 days.&quot;</code></pre></div>
+<h2>How to Check Manually in the GA4 Console</h2>
+<ol><li>Navigate to <strong>Reports → Acquisition → Traffic acquisition</strong>.</li><li>Review the <code>Session default channel group</code> table.</li><li>Click the blue <strong>+</strong> icon beside the primary column to add <strong>Traffic source → Session source / medium</strong> as a secondary dimension.</li></ol></div>
     </main>
   </div>
 </div>
@@ -93,6 +109,8 @@ order_by: date ASC</code></pre></div>
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

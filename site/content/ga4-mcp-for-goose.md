@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-goose/
-title: "GA4 MCP for Goose"
+title: "Connect Goose CLI to Google Analytics 4 (MCP Setup)"
 description: "Add the GA4 MCP server to Goose. Goose uses YAML, calls the command cmd, and calls the environment block envs. All three differ from the usual shape."
 group: clients
 nav: "Goose"
 order: 9
 ---
 
-# GA4 MCP for Goose
+# Connect Goose CLI to Google Analytics 4
 
 Goose is the only client here that configures MCP servers in YAML, and it renames two fields you would otherwise expect. `cmd` instead of `command`, `envs` instead of `env`.
+
+## Copy-paste analytical prompts
+
+Inside your Goose session, run:
+
+- **Weekly health check**: "Compare activeUsers, sessions, and engagementRate over the last 7 days against the previous 7 days."
+- **AI referral audit**: "Fetch sessions and keyEvents from chatgpt.com, claude.ai, and perplexity.ai over the last 30 days."
+- **Top content performance**: "Show top 10 landing pages by screenPageViews and average engagement time for the last 30 days."
+- **Acquisition breakdown**: "Break down sessions, activeUsers, and bounceRate by sessionDefaultChannelGroup."
+- **Realtime traffic**: "Run a realtime report for active visitors and current page views."
 
 ## The file
 

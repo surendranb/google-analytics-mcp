@@ -1,8 +1,9 @@
 ---
-name: gcp-setup
-description: "Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth."
+name: service-account-setup
+titleTag: "GA4 Service Account Setup: JSON Key & IAM Guide"
+description: "Step-by-step GA4 service account setup. Generate Google Cloud JSON keys, enable the Data API, and grant Viewer permissions in Google Analytics Admin."
 ---
-# GCP Service Account Setup for GA4 MCP
+# GA4 Service Account Setup Guide
 
 Step-by-step playbook to authenticate the GA4 MCP server using a Google Cloud Platform (GCP) Service Account.
 

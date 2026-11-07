@@ -10,6 +10,7 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 export const TOP_NAV = [
   { label: "Install", href: "/setup/" },
+  { label: "Prompts", href: "/google-analytics-ai-prompts/" },
   { label: "Skills", href: "/skills/" },
   { label: "Clients", href: "/ga4-mcp-for-every-harness/" },
   { label: "Plugins", href: "/ga4-plugins/" },
@@ -94,6 +95,8 @@ ${body}
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

@@ -1,81 +1,55 @@
 ---
 name: date-ranges
-description: "How to specify date ranges in `get_ga4_data` and how to structure period-over-period comparisons."
+titleTag: "GA4 API Date Ranges: Syntax, Offsets & Comparison"
+description: "Allowed date string formats for the GA4 Data API: YYYY-MM-DD, today, yesterday, 7daysAgo, 30daysAgo, and multi-range period comparisons without API errors."
 ---
-# Date Ranges
 
-How to specify date ranges in `get_ga4_data` and how to structure
-period-over-period comparisons.
+# GA4 API Date Ranges: Syntax, Offsets & Comparisons
 
-## Valid formats
+How to specify date ranges in the Google Analytics 4 Data API and structure period-over-period comparisons without triggering syntax or parsing errors.
 
-```
-date_range_start / date_range_end accept:
-  "YYYY-MM-DD"   — absolute date, e.g. "2024-01-15"
-  "today"        — current day (partial — use carefully)
-  "yesterday"    — last complete day
-  "NdaysAgo"     — N days back from today, e.g. "7daysAgo", "30daysAgo", "90daysAgo"
-```
+## Supported Date String Formats
 
-`NdaysAgo` excludes today. `7daysAgo` to `yesterday` = last 7 complete days.
+The GA4 Data API accepts four formats for start and end dates:
 
-## Common windows
-
-| Window | start | end |
+| Format String | Description | Example |
 |---|---|---|
-| Last 7 days | `7daysAgo` | `yesterday` |
-| Last 28 days | `28daysAgo` | `yesterday` |
-| Last 90 days | `90daysAgo` | `yesterday` |
-| This month | `YYYY-MM-01` | `today` |
-| Last month | `YYYY-MM-01` (prior) | `YYYY-MM-last-day` (prior) |
-| Year to date | `YYYY-01-01` | `yesterday` |
+| `YYYY-MM-DD` | Exact calendar date | `"2026-10-15"` |
+| `today` | Current calendar day (partial data) | `"today"` |
+| `yesterday` | Most recent complete calendar day | `"yesterday"` |
+| `NdaysAgo` | Relative offset from current day | `"7daysAgo"`, `"30daysAgo"`, `"90daysAgo"` |
 
-## Period-over-period comparison
+> ⚠️ **Common Syntax Errors:** Strings like `"last7days"`, `"last-week"`, or `"lastMonth"` are **invalid** and will cause an API parse error. Always use `NdaysAgo` or exact ISO dates (`YYYY-MM-DD`).
 
-The GA4 Data API does not support multi-period in a single call. Run two
-separate `get_ga4_data` calls, then compare the results.
+---
 
-**Example: week-over-week**
+## Standard Comparison Windows
 
-Call 1 — this week:
-```
-date_range_start: "7daysAgo"
-date_range_end:   "yesterday"
-```
+| Analysis Window | Recommended Start Date | Recommended End Date |
+|---|---|---|
+| **Last 7 Complete Days** | `"7daysAgo"` | `"yesterday"` |
+| **Last 28 Complete Days** | `"28daysAgo"` | `"yesterday"` |
+| **Last 90 Complete Days** | `"90daysAgo"` | `"yesterday"` |
+| **Current Month to Date** | `"YYYY-MM-01"` | `"today"` |
+| **Full Prior Month** | Prior month 1st | Prior month last day |
+| **Year to Date (YTD)** | `"YYYY-01-01"` | `"yesterday"` |
 
-Call 2 — last week:
-```
-date_range_start: "14daysAgo"
-date_range_end:   "8daysAgo"
-```
+---
 
-**Example: year-over-year for July**
+## Structuring Period-Over-Period Comparisons
 
-Call 1 — this year:
-```
-date_range_start: "2025-07-01"
-date_range_end:   "2025-07-31"
-```
+To compare two non-overlapping timeframes (e.g., week-over-week or month-over-month), execute two separate `get_ga4_data` calls:
 
-Call 2 — last year:
-```
-date_range_start: "2024-07-01"
-date_range_end:   "2024-07-31"
-```
+### Week-Over-Week Example
+- **Current Week (Call 1):** `start_date="7daysAgo"`, `end_date="yesterday"`
+- **Prior Week (Call 2):** `start_date="14daysAgo"`, `end_date="8daysAgo"`
 
-Then compute the delta: `(current - prior) / prior * 100` for each metric.
+**Delta Calculation:** `((current_value - prior_value) / prior_value) * 100`
 
-## Partial-day reads
+### Beware of Day-of-Week Seasonality
+Never compare an incomplete current week against a full prior week, and avoid comparing weekends to weekdays directly. Traffic on Mondays often differs substantially from Saturdays. Always compare identical day-of-week groupings.
 
-`today` includes only the hours elapsed so far. Comparing `today` to `yesterday`
-is misleading — yesterday is a full day, today is partial.
+---
 
-For intra-day analysis, use `today` for both start and end and note the
-IST hours covered in your interpretation.
-
-## Common mistakes
-
-- `"last7days"` is NOT valid — use `"7daysAgo"`
-- `"last-week"` is NOT valid — use absolute dates or `NdaysAgo`
-- Do not use `date_range_end: "today"` when comparing to a prior complete period
-- `"0daysAgo"` = today (same as `"today"`)
+## The Intra-Day "Today" Rule
+`today` contains partial-day data up to the current hour. Comparing `today` to `yesterday` directly will always show an artificial traffic drop because `yesterday` represents 24 hours of data while `today` covers only elapsed hours. For daily trend tracking, use `"yesterday"` as your end boundary.

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Referral Analysis — GA4 MCP skill</title>
-<meta name="description" content="Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.">
+<title>Track AI Traffic in GA4: ChatGPT, Claude, Perplexity</title>
+<meta name="description" content="How to track and measure traffic from ChatGPT, Claude, Perplexity, and Gemini in GA4. Exact dimension filters, regex patterns, and channel comparison rules.">
 <link rel="canonical" href="https://ga4mcp.com/skills/ai-referral-analysis/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="AI Referral Analysis — GA4 MCP skill">
-<meta property="og:description" content="Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.">
+<meta property="og:title" content="Track AI Traffic in GA4: ChatGPT, Claude, Perplexity">
+<meta property="og:description" content="How to track and measure traffic from ChatGPT, Claude, Perplexity, and Gemini in GA4. Exact dimension filters, regex patterns, and channel comparison rules.">
 <meta property="og:url" content="https://ga4mcp.com/skills/ai-referral-analysis/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +25,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"AI Referral Analysis — GA4 MCP skill","description":"Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.","url":"https://ga4mcp.com/skills/ai-referral-analysis/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Track AI Traffic in GA4: ChatGPT, Claude, Perplexity","description":"How to track and measure traffic from ChatGPT, Claude, Perplexity, and Gemini in GA4. Exact dimension filters, regex patterns, and channel comparison rules.","url":"https://ga4mcp.com/skills/ai-referral-analysis/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +34,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/" class="is-active">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,41 +44,56 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
-<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/" class="is-active" aria-current="page">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/" class="is-active" aria-current="page">Track AI Referral Traffic in Google Analytics 4</a></li><li><a href="/skills/attribution-scope/">GA4 Attribution Scope: User vs. Session vs. Event</a></li><li><a href="/skills/bot-traffic-detection/">Identify &amp; Filter Bot Traffic in Google Analytics 4</a></li><li><a href="/skills/channel-acquisition/">GA4 Channel Acquisition: Default Grouping Rules</a></li><li><a href="/skills/common-metric-names/">GA4 Dimensions and Metrics Reference: API Field Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension &amp; Metric Combinations in GA4</a></li><li><a href="/skills/content-performance/">GA4 Content Performance: Views &amp; Engagement Rates</a></li><li><a href="/skills/custom-dimensions/">GA4 Custom Dimensions &amp; Event Parameters Guide</a></li><li><a href="/skills/date-ranges/">GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</a></li><li><a href="/skills/ecommerce-analysis/">GA4 Ecommerce Analysis: Revenue, AOV &amp; Funnel Drop-off</a></li><li><a href="/skills/filter-structures/">GA4 API Filter Expressions &amp; Dimension Regex Syntax</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations, Quotas &amp; Cardinality Boundaries</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 Data API</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/service-account-setup/">GA4 Service Account Setup Guide</a></li><li><a href="/skills/traffic-diagnosis/">Diagnose GA4 Traffic Drops: Step-by-Step Triage</a></li><li><a href="/skills/ua-to-ga4/">Universal Analytics to GA4 Field Name Mapping</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><p class="eyebrow">Agent skill</p><h1>AI Referral Analysis</h1><p>Measure traffic arriving from AI tools — ChatGPT, Claude, Perplexity, Gemini, Copilot, and others — and understand how it behaves compared to other channels.</p>
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>Track AI Referral Traffic in Google Analytics 4</h1><p>Measure traffic arriving from generative AI assistants — ChatGPT, Claude, Perplexity, Gemini, Microsoft Copilot, and others — and understand how AI-driven discovery behaves compared to organic search and direct traffic.</p>
 <h2>When to use</h2>
-<ul><li>You want to quantify how much of your traffic comes from AI assistants</li><li>You're tracking whether AI-driven discovery is growing over time</li><li>You want to compare AI referral quality (engagement, conversion) to SEO or direct</li></ul>
+<ul><li>You want to quantify how much of your total traffic originates from AI assistants</li><li>You're tracking whether AI-driven discovery (Generative Engine Optimization / GEO) is growing over time</li><li>You want to compare AI referral engagement quality (session duration, bounce rate, key events) against traditional organic search</li><li>You need to identify which specific URLs AI models cite and recommend to users</li></ul>
 <h2>Known AI referral sources</h2>
-<p>These domains appear as <code>sessionSource</code> in GA4 when users click links from AI tools:</p>
-<div class="tw"><table><thead><tr><th>Tool</th><th>Source domains</th></tr></thead><tbody><tr><td>ChatGPT</td><td><code>chatgpt.com</code>, <code>chat.openai.com</code></td></tr><tr><td>Claude</td><td><code>claude.ai</code></td></tr><tr><td>Perplexity</td><td><code>perplexity.ai</code></td></tr><tr><td>Gemini</td><td><code>gemini.google.com</code></td></tr><tr><td>Copilot</td><td><code>copilot.microsoft.com</code>, <code>bing.com</code> (when AI-driven)</td></tr><tr><td>You.com</td><td><code>you.com</code></td></tr><tr><td>Grok</td><td><code>grok.x.ai</code>, <code>x.com</code></td></tr></tbody></table></div>
-<h2>Step 1 — Volume and trend</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;date&quot;, &quot;sessionSource&quot;]
+<p>These domains appear in GA4 under the <code>sessionSource</code> dimension when users click links cited inside AI chat windows:</p>
+<div class="tw"><table><thead><tr><th>AI Platform</th><th>Source Domains (<code>sessionSource</code>)</th><th>Default Channel Group</th></tr></thead><tbody><tr><td><strong>ChatGPT</strong></td><td><code>chatgpt.com</code>, <code>chat.openai.com</code></td><td><code>AI Assistant</code> or <code>Referral</code></td></tr><tr><td><strong>Claude</strong></td><td><code>claude.ai</code></td><td><code>AI Assistant</code> or <code>Referral</code></td></tr><tr><td><strong>Perplexity</strong></td><td><code>perplexity.ai</code></td><td><code>AI Assistant</code> or <code>Referral</code></td></tr><tr><td><strong>Google Gemini</strong></td><td><code>gemini.google.com</code></td><td><code>AI Assistant</code> or <code>Referral</code></td></tr><tr><td><strong>Microsoft Copilot</strong></td><td><code>copilot.microsoft.com</code>, <code>bing.com</code></td><td><code>AI Assistant</code> or <code>Organic Search</code></td></tr><tr><td><strong>You.com</strong></td><td><code>you.com</code></td><td><code>Referral</code></td></tr><tr><td><strong>Grok</strong></td><td><code>grok.x.ai</code>, <code>x.com</code></td><td><code>Referral</code> or <code>Organic Social</code></td></tr></tbody></table></div>
+<div class="note"><span class="note__label">Note</span><p>Google Analytics 4 includes an <strong>AI Assistant</strong> channel within the Default Channel Group for major platforms. However, traffic from new AI browsers or unclassified models frequently lands under generic <code>Referral</code> or <code>Direct</code>. Filtering by <code>sessionSource</code> guarantees complete coverage.</p></div>
+<hr>
+<h2>Step 1 — Volume and 90-Day Trend</h2>
+<p>Track total volume and trajectory over time:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;date&quot;, &quot;sessionSource&quot;]
 metrics: [&quot;sessions&quot;, &quot;newUsers&quot;, &quot;userEngagementDuration&quot;, &quot;screenPageViews&quot;]
 dimension_filter: sessionSource contains &quot;chatgpt.com&quot; OR &quot;perplexity.ai&quot; OR
                   &quot;claude.ai&quot; OR &quot;gemini.google.com&quot; OR &quot;copilot.microsoft.com&quot;
 date_range: last 30–90 days</code></pre></div>
-<p>Use <code>date</code> as a dimension to see the growth trend.</p>
-<h2>Step 2 — Quality comparison</h2>
-<p>Compare AI referral quality against your other top channels:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;, &quot;sessionSource&quot;]
+<p>Plotting <code>date</code> against <code>sessions</code> reveals whether AI traffic is expanding month-over-month.</p>
+<hr>
+<h2>Step 2 — Engagement Quality vs. Organic Search</h2>
+<p>Compare visitor engagement quality between AI referrals and your standard channels:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionDefaultChannelGroup&quot;, &quot;sessionSource&quot;]
 metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;, &quot;screenPageViewsPerSession&quot;,
           &quot;keyEvents&quot;, &quot;bounceRate&quot;]
 date_range: last 30 days</code></pre></div>
-<p>Then filter the results to AI sources and compare engagement metrics against <code>Organic Search</code> and <code>Direct</code>.</p>
-<h2>Step 3 — Which pages AI drives traffic to</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionSource&quot;, &quot;landingPage&quot;]
+<p>Filter results to AI sources and evaluate:</p>
+<ul><li>Do AI visitors spend more or less time on site than organic search visitors?</li><li>What is the key event conversion rate from ChatGPT vs. Google Search?</li></ul>
+<hr>
+<h2>Step 3 — Which Pages AI Engines Cite</h2>
+<p>Discover which URLs AI models cite most frequently:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>dimensions: [&quot;sessionSource&quot;, &quot;landingPage&quot;]
 metrics: [&quot;sessions&quot;, &quot;userEngagementDuration&quot;, &quot;keyEvents&quot;]
 dimension_filter: sessionSource contains &quot;chatgpt.com&quot; OR &quot;perplexity.ai&quot; OR &quot;claude.ai&quot;
 date_range: last 30 days
 order_by: sessions DESC</code></pre></div>
-<p>This shows which content AI tools are citing and sending users to.</p>
-<h2>What to report</h2>
-<ul><li>AI referral as % of total sessions (and % of total new users)</li><li>Month-over-month growth rate for AI referral traffic</li><li>Engagement quality: AI vs Organic Search (userEngagementDuration, keyEvents)</li><li>Top landing pages receiving AI referral traffic</li><li>Which AI tool sends the most traffic</li></ul></div>
+<p>This pinpoints the exact documentation, articles, or product pages driving AI search citations.</p>
+<hr>
+<h2>Three Prompts to Ask Your AI Agent</h2>
+<p>Once connected to GA4 MCP, you can copy-paste these prompts directly into Claude, Cursor, or Gemini CLI:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>1. &quot;Show all referral traffic from AI platforms (ChatGPT, Claude, Perplexity, Gemini) over the last 90 days. Report monthly sessions, active users, and average engagement duration per source.&quot;
+
+2. &quot;Compare the engagement quality of AI assistant traffic against traditional Organic Search for the past 30 days. Show bounce rate, session duration, and key events per session.&quot;
+
+3. &quot;Which specific landing pages are AI assistants citing? List the top 10 landing pages for chatgpt.com and perplexity.ai over the last 60 days sorted by sessions descending.&quot;</code></pre></div>
+<h2>How to Check Manually in the GA4 Console</h2>
+<ol><li>Open <a href="https://analytics.google.com">Google Analytics</a>.</li><li>Go to <strong>Reports → Acquisition → Traffic acquisition</strong>.</li><li>Switch the primary dimension dropdown from <em>Session default channel group</em> to <strong>Session source / medium</strong>.</li><li>In the table search bar, type <code>chatgpt.com</code> or <code>perplexity.ai</code> to view immediate session totals.</li></ol></div>
     </main>
   </div>
 </div>
@@ -88,6 +104,8 @@ order_by: sessions DESC</code></pre></div>
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

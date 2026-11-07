@@ -1,84 +1,96 @@
 ---
 name: traffic-diagnosis
-description: "Systematically diagnose why traffic changed — spike, drop, or shift in mix. Follow these steps in order. Each step narrows the hypothesis."
+titleTag: "Diagnose GA4 Traffic Drops: Step-by-Step Triage Guide"
+description: "A six-step triage framework to diagnose GA4 traffic drops. Isolate channel shifts, check tracking snippet errors, and distinguish real drops from bot drops."
 ---
-# Traffic Change Diagnosis
 
-Systematically diagnose why traffic changed — spike, drop, or shift in mix.
-Follow these steps in order. Each step narrows the hypothesis.
+# Diagnose GA4 Traffic Drops: Step-by-Step Triage
 
-## Step 1 — Establish the baseline
+Systematically diagnose why Google Analytics 4 traffic changed — whether a sudden drop, an unexpected spike, or a gradual erosion in quality. Follow these steps in order to eliminate speculation and isolate the root cause.
 
-Compare the period in question to the equivalent prior period:
-```
+## Step 1 — Establish the Baseline
+Compare the affected timeframe to the equivalent prior period (accounting for day-of-week seasonality):
+
+```text
 dimensions: ["date"]
 metrics: ["sessions", "totalUsers", "newUsers", "engagedSessions", "keyEvents"]
 date_range: affected period + same-length prior period
 ```
 
-Measure: absolute change, % change, and whether all metrics moved together.
-If sessions dropped but engagement rate improved, volume dropped but quality held — different cause than if everything dropped proportionally.
+Measure absolute change, percentage change, and whether all metrics moved together:
+- If sessions dropped but engagement rate improved, total volume fell but visitor quality held — indicating bot filtration or paid budget cuts rather than site breakdown.
+- If all metrics fell to zero overnight, the issue is an infrastructure or tag firing failure.
 
-## Step 2 — Isolate which channel changed
+---
 
-```
+## Step 2 — Isolate Which Channel Changed
+Determine which acquisition channel drove the variance:
+
+```text
 dimensions: ["sessionDefaultChannelGroup"]
 metrics: ["sessions", "totalUsers", "engagedSessions", "engagementRate"]
 date_range: affected period vs prior period
 ```
 
-Which channel account for most of the change? Narrow to that channel before going deeper.
+Isolate the channel accounting for the majority of the drop (Organic Search, Paid Search, Direct, Referral, or Social) before investigating deeper.
 
-## Step 3 — Check time pattern (sudden vs gradual)
+---
 
-```
+## Step 3 — Analyze the Time Pattern (Cliff vs. Slide)
+The shape of the decline reveals the underlying mechanism:
+
+```text
 dimensions: ["date", "sessionDefaultChannelGroup"]
 metrics: ["sessions"]
 date_range: last 28 days
 ```
 
-- **Sudden single-day spike/drop** → campaign launch/end, deploy, media mention, bot flood
-- **Gradual decline over weeks** → SEO decay, seasonal drift, quality score drop
-- **Step change that persists** → tracking change, filter change, channel definition update
+- **Sudden vertical cliff (overnight drop):** Points to a tracking failure (broken GTM container, Google Consent Mode v2 misconfiguration, deploy removing gtag.js, or paused ad campaign).
+- **Gradual slide over weeks:** Points to SEO algorithm updates, lost search rankings, seasonal demand shifts, or content decay.
+- **Permanent step change:** Indicates a filter update, internal IP exclusion rule, or channel definition change in GA4 Admin.
 
-## Step 4 — Fingerprint the cause
+---
 
-Run queries matching the suspected cause:
+## Step 4 — Fingerprint the Root Cause
 
-**Bot flood** — see `bot-traffic-detection` skill:
-- `engagementRate` near 0, `averageSessionDuration` ≈ 0
-- Unusual hostname or country concentration
+### A. Bot Traffic Removal vs. Real User Drop
+See the `bot-traffic-detection` skill. If traffic dropped but `engagementRate` surged from 20% to 65%, your site didn't lose real customers — a spam bot network was filtered out.
 
-**Campaign start/end**:
-```
+### B. Paid Campaign Changes
+```text
 dimensions: ["sessionCampaignName", "sessionSource", "sessionMedium"]
 metrics: ["sessions", "keyEvents", "engagementRate"]
 dimension_filter: sessionDefaultChannelGroup IN ["Paid Search", "Paid Social", "Display"]
 ```
+Check whether campaign spend paused, ad group targeting narrowed, or billing expired.
 
-**SEO change (organic)**:
-```
+### C. Organic Search & SEO Shifts
+```text
 dimensions: ["sessionDefaultChannelGroup", "landingPagePlusQueryString"]
 metrics: ["sessions", "engagementRate", "keyEvents"]
 dimension_filter: sessionDefaultChannelGroup = "Organic Search"
-date_range: 90 days (to see gradual trend)
+date_range: 90 days
+```
+Cross-check with Google Search Console:
+- If GSC clicks are steady but GA4 sessions dropped, you have a tracking snippet error.
+- If both GSC clicks and GA4 sessions dropped, you experienced a genuine loss in search rankings.
+
+---
+
+## Three Prompts to Ask Your AI Agent
+
+Copy-paste these prompts into Claude Code, Cursor, or Gemini CLI:
+
+```text
+1. "Diagnose our traffic drop over the last 14 days compared to the prior 14 days. Break down sessions, users, and engagement rate by sessionDefaultChannelGroup and identify the primary driver."
+
+2. "Check daily organic search sessions for the last 30 days alongside landingPage. Was the drop site-wide or isolated to specific landing pages?"
+
+3. "Audit our top 10 landing pages comparing the last 7 days to the prior 7 days. Flag pages with more than a 25% drop in sessions and check if mobile or desktop traffic fell faster."
 ```
 
-**Technical/tracking change** — all channels drop equally at the same moment.
-Check with `dimensions: ["date"]` — a vertical drop on a single date across all channels
-points to a tag firing issue or consent mode change.
-
-## Step 5 — Conclude
-
-State:
-1. What changed (metric + magnitude)
-2. Which channel drove it
-3. When it started (sudden or gradual)
-4. Most likely cause (from fingerprinting)
-5. One action: investigate further / fix tracking / pause campaign / accept as seasonal
-
-## What not to do
-
-Do not conclude "traffic dropped" from a single metric in isolation.
-Do not compare to the prior week without accounting for day-of-week patterns
-(Monday always differs from Sunday — compare Monday-to-Monday or full weeks).
+## How to Check Manually in the GA4 Console
+1. Open **Reports → Acquisition → Traffic acquisition**.
+2. Click the date selector in the top-right corner.
+3. Turn on **Compare** and select **Preceding period (match day of week)**.
+4. Review the percentage change column for `sessionDefaultChannelGroup` to spot the channel with the largest negative delta.

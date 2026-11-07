@@ -1,13 +1,13 @@
 ---
 slug: /iam/
-title: "Fix the GA4 permission error"
-description: "The service account is valid but not authorised on the property. Nine steps in the Analytics UI, plus what to check when the change has not taken effect yet."
+title: "Fix GA4 Missing Permissions: Service Account 403 Guide"
+description: "How to fix Google Analytics missing permissions and 403 Permission Denied errors. Step-by-step resolution for adding service account Viewer access in GA4 Admin."
 group: start
 nav: "Permissions"
-order: 3
+order: 7
 ---
 
-# The 403 that is not a bug
+# Fix Google Analytics Missing Permissions (403 Error)
 
 If you see this error, the credentials worked. The query reached Google and Google said no:
 
@@ -62,8 +62,12 @@ If the client can reach the server at all, this returns the same decision tree o
 get_troubleshooting_guide(topic="iam")
 ```
 
-And `setup_ga4_access` walks the fix in-session where the client supports prompts.
+Or run the interactive fix:
+
+```text
+setup_ga4_access()
+```
 
 ## Next
 
-If permissions are fine and queries still fail, the problem is a field name or a filter shape. Read [query shapes](/schema/).
+[Setup](/setup/) for creating the service account key, [troubleshooting](/troubleshooting/) for common 400 and quota errors, and [query shapes](/schema/) for filter syntax.

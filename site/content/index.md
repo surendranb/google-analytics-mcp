@@ -1,6 +1,6 @@
 ---
 slug: /
-title: "GA4 MCP — Google Analytics 4 for any AI client"
+title: "GA4 MCP — Connect Google Analytics 4 to Claude & AI"
 description: "Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only."
 full: true
 hero: true
@@ -14,10 +14,11 @@ order: 1
 <div>
 <p class="eyebrow">v2.11.6 · MIT · local stdio · read-only</p>
 <h1>Ask GA4 a question. Get the answer an analyst would give.</h1>
-<p class="lede">One MCP server for Claude, Cursor, Codex, Gemini CLI and twelve more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.</p>
+<p class="lede">One MCP server for Claude, Cursor, Codex, Gemini CLI and fourteen more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.</p>
 <div class="hero__cta">
 <a class="btn btn--primary" href="/setup/">Install in one line</a>
-<a class="btn btn--ghost" href="/skills/">See the 16 skills</a>
+<a class="btn btn--ghost" href="/google-analytics-ai-prompts/">35 AI Prompts</a>
+<a class="btn btn--ghost" href="/skills/">16 Skills</a>
 </div>
 </div>
 <div class="card">
@@ -88,6 +89,16 @@ order: 1
 </ul>
 </div>
 </div>
+<p style="margin-top:1.2rem;font-size:.95rem"><a href="/google-analytics-mcp-vs-official/">Read the full technical comparison: Community stdio vs Google Hosted MCP →</a></p>
+</section>
+
+<section class="section">
+<h2 class="section__h">Natural language analytics & production prompts</h2>
+<p class="section__sub">Query your analytics data directly from conversation without memorising API dimension names or building filter JSON by hand.</p>
+<div class="grid2">
+<div class="feat"><h3><a href="/natural-language-google-analytics/">How natural language GA4 works</a></h3><p>Why raw models hallucinate Universal Analytics metrics, how the MCP schema layer bridges the vocabulary gap, and why local stdio keeps company traffic numbers private.</p></div>
+<div class="feat"><h3><a href="/google-analytics-ai-prompts/">35 copy-paste analytical prompts</a></h3><p>Production prompts for traffic diagnosis, ecommerce funnels, AI referral tracking, content audits, and bot traffic detection across Claude, Cursor, and Gemini.</p></div>
+</div>
 </section>
 
 <section class="section">
@@ -126,8 +137,8 @@ export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</code></pre><
 <section class="section">
 <h2 class="section__h">The parts people get stuck on</h2>
 <div class="grid3">
+<div class="feat"><h3><a href="/troubleshooting/">Error triage & fixes</a></h3><p>Step-by-step triage for 403 permission denied, 400 invalid field names, 429 quota limits, and scope errors.</p></div>
 <div class="feat"><h3><a href="/iam/">The 403 that is not a bug</a></h3><p>The service account is valid but was never added to the property. Nine steps in the Analytics UI, with the exact role.</p></div>
 <div class="feat"><h3><a href="/schema/">The filter shape</a></h3><p><code>dimension_filter</code> follows the Data API v1beta schema, not SQL. Working templates for string, list, numeric and AND/OR groups.</p></div>
-<div class="feat"><h3><a href="/setup/">The property ID</a></h3><p>Most setup failures are the measurement ID pasted where the property ID belongs. One paragraph explains the difference.</p></div>
 </div>
 </section>

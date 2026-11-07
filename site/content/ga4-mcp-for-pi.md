@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-pi/
-title: "GA4 MCP for Pi"
+title: "Connect Pi Agent to Google Analytics 4 (MCP Setup)"
 description: "Add the GA4 MCP server to Pi with one mcpServers entry in the agent directory, or with pi mcp add. Tools appear as mcp__ga4__get_ga4_data."
 group: clients
 order: 14
 nav: "Pi"
 ---
 
-# GA4 MCP for Pi
+# Connect Pi Agent to Google Analytics 4
 
 Pi reads MCP servers from a JSON file beside its agent configuration, and also takes them from the command line. Two files matter, and the project one only counts after you trust the project.
+
+## Copy-paste analytical prompts
+
+Inside Pi session:
+
+- **Weekly health check**: "Compare activeUsers, sessions, and engagementRate over the last 7 days with the prior period."
+- **AI referral audit**: "Show sessions, keyEvents, and userEngagementDuration from ChatGPT, Claude, and Perplexity over the last 30 days."
+- **Landing page check**: "List top 10 pages by sessions where bounceRate is above 60% over the last 30 days."
+- **Acquisition channels**: "Break down sessions and keyEvents by sessionDefaultChannelGroup this month."
+- **Realtime traffic check**: "Run a realtime report for active users and top pages right now."
 
 ## The entry
 

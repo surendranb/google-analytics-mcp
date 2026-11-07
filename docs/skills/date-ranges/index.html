@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Date Ranges — GA4 MCP skill</title>
-<meta name="description" content="How to specify date ranges in `get_ga4_data` and how to structure period-over-period comparisons.">
+<title>GA4 API Date Ranges: Syntax, Offsets &amp; Comparison</title>
+<meta name="description" content="Allowed date string formats for the GA4 Data API: YYYY-MM-DD, today, yesterday, 7daysAgo, 30daysAgo, and multi-range period comparisons without API errors.">
 <link rel="canonical" href="https://ga4mcp.com/skills/date-ranges/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="Date Ranges — GA4 MCP skill">
-<meta property="og:description" content="How to specify date ranges in `get_ga4_data` and how to structure period-over-period comparisons.">
+<meta property="og:title" content="GA4 API Date Ranges: Syntax, Offsets &amp; Comparison">
+<meta property="og:description" content="Allowed date string formats for the GA4 Data API: YYYY-MM-DD, today, yesterday, 7daysAgo, 30daysAgo, and multi-range period comparisons without API errors.">
 <meta property="og:url" content="https://ga4mcp.com/skills/date-ranges/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +25,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Date Ranges — GA4 MCP skill","description":"How to specify date ranges in `get_ga4_data` and how to structure period-over-period comparisons.","url":"https://ga4mcp.com/skills/date-ranges/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 API Date Ranges: Syntax, Offsets & Comparison","description":"Allowed date string formats for the GA4 Data API: YYYY-MM-DD, today, yesterday, 7daysAgo, 30daysAgo, and multi-range period comparisons without API errors.","url":"https://ga4mcp.com/skills/date-ranges/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +34,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/" class="is-active">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,44 +44,31 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
-<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/" class="is-active" aria-current="page">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/google-analytics-mcp-vs-official/">Server Comparison</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">Track AI Referral Traffic in Google Analytics 4</a></li><li><a href="/skills/attribution-scope/">GA4 Attribution Scope: User vs. Session vs. Event</a></li><li><a href="/skills/bot-traffic-detection/">Identify &amp; Filter Bot Traffic in Google Analytics 4</a></li><li><a href="/skills/channel-acquisition/">GA4 Channel Acquisition: Default Grouping Rules</a></li><li><a href="/skills/common-metric-names/">GA4 Dimensions and Metrics Reference: API Field Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension &amp; Metric Combinations in GA4</a></li><li><a href="/skills/content-performance/">GA4 Content Performance: Views &amp; Engagement Rates</a></li><li><a href="/skills/custom-dimensions/">GA4 Custom Dimensions &amp; Event Parameters Guide</a></li><li><a href="/skills/date-ranges/" class="is-active" aria-current="page">GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</a></li><li><a href="/skills/ecommerce-analysis/">GA4 Ecommerce Analysis: Revenue, AOV &amp; Funnel Drop-off</a></li><li><a href="/skills/filter-structures/">GA4 API Filter Expressions &amp; Dimension Regex Syntax</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations, Quotas &amp; Cardinality Boundaries</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 Data API</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/service-account-setup/">GA4 Service Account Setup Guide</a></li><li><a href="/skills/traffic-diagnosis/">Diagnose GA4 Traffic Drops: Step-by-Step Triage</a></li><li><a href="/skills/ua-to-ga4/">Universal Analytics to GA4 Field Name Mapping</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><p class="eyebrow">Agent skill</p><h1>Date Ranges</h1><p>How to specify date ranges in <code>get_ga4_data</code> and how to structure period-over-period comparisons.</p>
-<h2>Valid formats</h2>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>date_range_start / date_range_end accept:
-  &quot;YYYY-MM-DD&quot;   — absolute date, e.g. &quot;2024-01-15&quot;
-  &quot;today&quot;        — current day (partial — use carefully)
-  &quot;yesterday&quot;    — last complete day
-  &quot;NdaysAgo&quot;     — N days back from today, e.g. &quot;7daysAgo&quot;, &quot;30daysAgo&quot;, &quot;90daysAgo&quot;</code></pre></div>
-<p><code>NdaysAgo</code> excludes today. <code>7daysAgo</code> to <code>yesterday</code> = last 7 complete days.</p>
-<h2>Common windows</h2>
-<div class="tw"><table><thead><tr><th>Window</th><th>start</th><th>end</th></tr></thead><tbody><tr><td>Last 7 days</td><td><code>7daysAgo</code></td><td><code>yesterday</code></td></tr><tr><td>Last 28 days</td><td><code>28daysAgo</code></td><td><code>yesterday</code></td></tr><tr><td>Last 90 days</td><td><code>90daysAgo</code></td><td><code>yesterday</code></td></tr><tr><td>This month</td><td><code>YYYY-MM-01</code></td><td><code>today</code></td></tr><tr><td>Last month</td><td><code>YYYY-MM-01</code> (prior)</td><td><code>YYYY-MM-last-day</code> (prior)</td></tr><tr><td>Year to date</td><td><code>YYYY-01-01</code></td><td><code>yesterday</code></td></tr></tbody></table></div>
-<h2>Period-over-period comparison</h2>
-<p>The GA4 Data API does not support multi-period in a single call. Run two separate <code>get_ga4_data</code> calls, then compare the results.</p>
-<p><strong>Example: week-over-week</strong></p>
-<p>Call 1 — this week:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>date_range_start: &quot;7daysAgo&quot;
-date_range_end:   &quot;yesterday&quot;</code></pre></div>
-<p>Call 2 — last week:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>date_range_start: &quot;14daysAgo&quot;
-date_range_end:   &quot;8daysAgo&quot;</code></pre></div>
-<p><strong>Example: year-over-year for July</strong></p>
-<p>Call 1 — this year:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>date_range_start: &quot;2025-07-01&quot;
-date_range_end:   &quot;2025-07-31&quot;</code></pre></div>
-<p>Call 2 — last year:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>date_range_start: &quot;2024-07-01&quot;
-date_range_end:   &quot;2024-07-31&quot;</code></pre></div>
-<p>Then compute the delta: <code>(current - prior) / prior * 100</code> for each metric.</p>
-<h2>Partial-day reads</h2>
-<p><code>today</code> includes only the hours elapsed so far. Comparing <code>today</code> to <code>yesterday</code> is misleading — yesterday is a full day, today is partial.</p>
-<p>For intra-day analysis, use <code>today</code> for both start and end and note the IST hours covered in your interpretation.</p>
-<h2>Common mistakes</h2>
-<ul><li><code>&quot;last7days&quot;</code> is NOT valid — use <code>&quot;7daysAgo&quot;</code></li><li><code>&quot;last-week&quot;</code> is NOT valid — use absolute dates or <code>NdaysAgo</code></li><li>Do not use <code>date_range_end: &quot;today&quot;</code> when comparing to a prior complete period</li><li><code>&quot;0daysAgo&quot;</code> = today (same as <code>&quot;today&quot;</code>)</li></ul></div>
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</h1><p>How to specify date ranges in the Google Analytics 4 Data API and structure period-over-period comparisons without triggering syntax or parsing errors.</p>
+<h2>Supported Date String Formats</h2>
+<p>The GA4 Data API accepts four formats for start and end dates:</p>
+<div class="tw"><table><thead><tr><th>Format String</th><th>Description</th><th>Example</th></tr></thead><tbody><tr><td><code>YYYY-MM-DD</code></td><td>Exact calendar date</td><td><code>&quot;2026-10-15&quot;</code></td></tr><tr><td><code>today</code></td><td>Current calendar day (partial data)</td><td><code>&quot;today&quot;</code></td></tr><tr><td><code>yesterday</code></td><td>Most recent complete calendar day</td><td><code>&quot;yesterday&quot;</code></td></tr><tr><td><code>NdaysAgo</code></td><td>Relative offset from current day</td><td><code>&quot;7daysAgo&quot;</code>, <code>&quot;30daysAgo&quot;</code>, <code>&quot;90daysAgo&quot;</code></td></tr></tbody></table></div>
+<blockquote><p>⚠️ <strong>Common Syntax Errors:</strong> Strings like <code>&quot;last7days&quot;</code>, <code>&quot;last-week&quot;</code>, or <code>&quot;lastMonth&quot;</code> are <strong>invalid</strong> and will cause an API parse error. Always use <code>NdaysAgo</code> or exact ISO dates (<code>YYYY-MM-DD</code>).</p></blockquote>
+<hr>
+<h2>Standard Comparison Windows</h2>
+<div class="tw"><table><thead><tr><th>Analysis Window</th><th>Recommended Start Date</th><th>Recommended End Date</th></tr></thead><tbody><tr><td><strong>Last 7 Complete Days</strong></td><td><code>&quot;7daysAgo&quot;</code></td><td><code>&quot;yesterday&quot;</code></td></tr><tr><td><strong>Last 28 Complete Days</strong></td><td><code>&quot;28daysAgo&quot;</code></td><td><code>&quot;yesterday&quot;</code></td></tr><tr><td><strong>Last 90 Complete Days</strong></td><td><code>&quot;90daysAgo&quot;</code></td><td><code>&quot;yesterday&quot;</code></td></tr><tr><td><strong>Current Month to Date</strong></td><td><code>&quot;YYYY-MM-01&quot;</code></td><td><code>&quot;today&quot;</code></td></tr><tr><td><strong>Full Prior Month</strong></td><td>Prior month 1st</td><td>Prior month last day</td></tr><tr><td><strong>Year to Date (YTD)</strong></td><td><code>&quot;YYYY-01-01&quot;</code></td><td><code>&quot;yesterday&quot;</code></td></tr></tbody></table></div>
+<hr>
+<h2>Structuring Period-Over-Period Comparisons</h2>
+<p>To compare two non-overlapping timeframes (e.g., week-over-week or month-over-month), execute two separate <code>get_ga4_data</code> calls:</p>
+<h3>Week-Over-Week Example</h3>
+<ul><li><strong>Current Week (Call 1):</strong> <code>start_date=&quot;7daysAgo&quot;</code>, <code>end_date=&quot;yesterday&quot;</code></li><li><strong>Prior Week (Call 2):</strong> <code>start_date=&quot;14daysAgo&quot;</code>, <code>end_date=&quot;8daysAgo&quot;</code></li></ul>
+<p><strong>Delta Calculation:</strong> <code>((current_value - prior_value) / prior_value) * 100</code></p>
+<h3>Beware of Day-of-Week Seasonality</h3>
+<p>Never compare an incomplete current week against a full prior week, and avoid comparing weekends to weekdays directly. Traffic on Mondays often differs substantially from Saturdays. Always compare identical day-of-week groupings.</p>
+<hr>
+<h2>The Intra-Day &quot;Today&quot; Rule</h2>
+<p><code>today</code> contains partial-day data up to the current hour. Comparing <code>today</code> to <code>yesterday</code> directly will always show an artificial traffic drop because <code>yesterday</code> represents 24 hours of data while <code>today</code> covers only elapsed hours. For daily trend tracking, use <code>&quot;yesterday&quot;</code> as your end boundary.</p></div>
     </main>
   </div>
 </div>
@@ -91,6 +79,8 @@ date_range_end:   &quot;2024-07-31&quot;</code></pre></div>
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

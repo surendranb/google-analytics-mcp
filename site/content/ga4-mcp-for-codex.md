@@ -1,13 +1,13 @@
 ---
 slug: /ga4-mcp-for-codex/
-title: "GA4 MCP for Codex CLI"
+title: "Connect OpenAI Codex to Google Analytics 4 (Data API)"
 description: "Add the GA4 MCP server to OpenAI Codex. Codex uses TOML, not JSON, and splits environment handling into env and env_vars — the two are not interchangeable."
 group: clients
 nav: "Codex"
 order: 5
 ---
 
-# GA4 MCP for Codex
+# Connect OpenAI Codex to Google Analytics 4
 
 Codex is the one client in this set that configures MCP servers in TOML rather than JSON, and the one that splits environment handling into two separate keys. Both trip people up.
 
@@ -78,6 +78,31 @@ List my GA4 properties.
 
 Then check that the tool appears in Codex's MCP list. If the entry loads but every call fails with a setup error, one of the two variables is missing — the TOML parsed, the `env` table did not apply.
 
+## Five questions you can ask Codex CLI
+
+Once registered, you can query your analytics directly in your terminal:
+
+1. **Traffic overview**:
+   ```text
+   What were our top 10 landing pages by sessions over the last 30 days?
+   ```
+2. **Channel performance**:
+   ```text
+   Compare sessions, engagement rate, and bounce rate across our top 5 acquisition channels.
+   ```
+3. **AI search citations**:
+   ```text
+   How much referral traffic did we receive from ChatGPT, Claude, and Perplexity over the last 60 days?
+   ```
+4. **Traffic change diagnosis**:
+   ```text
+   Analyze our traffic drop over the last 14 days compared to the prior period. Which channel fell first?
+   ```
+5. **E-commerce metrics**:
+   ```text
+   What was our total purchase revenue and conversion rate by country for the past 30 days?
+   ```
+
 ## Next
 
-[Install](/setup/) for the two values, [permissions](/iam/) for the 403 that means the service account is not on the property yet.
+[Install](/setup/) for the two values, [permissions](/iam/) for the 403 that means the service account is not on the property yet, and [prompts](/google-analytics-ai-prompts/) for 35 tested templates.

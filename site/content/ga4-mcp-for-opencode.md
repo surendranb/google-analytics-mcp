@@ -1,13 +1,13 @@
 ---
 slug: /ga4-mcp-for-opencode/
-title: "GA4 MCP for OpenCode"
+title: "Connect OpenCode to Google Analytics 4 (Local stdio)"
 description: "Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env."
 group: clients
 nav: "OpenCode"
 order: 12
 ---
 
-# GA4 MCP for OpenCode
+# Connect OpenCode to Google Analytics 4
 
 OpenCode's MCP config is the furthest from the Claude Desktop baseline in this whole set. Four things are named differently, and a standard snippet will not load.
 
@@ -79,6 +79,31 @@ OpenCode's project-scoped config makes it easy to run one entry per property, wh
 
 The agent then sees two servers with the same tools and different data, which is usually clearer than one server whose property changes between sessions.
 
+## Five questions you can ask in OpenCode
+
+Once registered, you can ask OpenCode directly during agentic sessions:
+
+1. **Traffic overview**:
+   ```text
+   What were our top 10 landing pages by sessions over the last 30 days?
+   ```
+2. **Channel performance**:
+   ```text
+   Compare sessions, engagement rate, and bounce rate across our acquisition channels for the past 60 days.
+   ```
+3. **AI referral tracking**:
+   ```text
+   How many sessions arrived from AI tools like ChatGPT, Claude, and Perplexity this month?
+   ```
+4. **Traffic change diagnosis**:
+   ```text
+   Diagnose why organic search traffic dropped between last week and this week. Which landing pages were most affected?
+   ```
+5. **E-commerce & revenue**:
+   ```text
+   What was our total purchase revenue and average order value (AOV) for the last 30 days grouped by country?
+   ```
+
 ## Next
 
-[Setup](/setup/) for the two values, [permissions](/iam/) when the first query returns a 403.
+[Setup](/setup/) for the two values, [permissions](/iam/) when the first query returns a 403, and [prompts](/google-analytics-ai-prompts/) for 35 tested templates.

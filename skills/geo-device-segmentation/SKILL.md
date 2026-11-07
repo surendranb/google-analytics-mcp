@@ -1,11 +1,29 @@
 ---
 name: geo-device-segmentation
-description: "Break down user behaviour by country, city, device category, and OS to understand regional patterns and optimise for your key markets."
+titleTag: "GA4 Geographic & Device Segmentation Analysis"
+description: "Segment GA4 data by country, city, device category, and browser. Spot localization opportunities and mobile conversion drops with ready queries."
 ---
 # Geo and Device Segmentation
 
 Break down user behaviour by country, city, device category, and OS
 to understand regional patterns and optimise for your key markets.
+
+## Copy-paste prompts
+
+### Mobile vs desktop drop-off audit
+```text
+Break down sessions, bounceRate, and userEngagementDuration by deviceCategory over the last 30 days. Highlight if mobile bounce rate is significantly higher than desktop.
+```
+
+### Top international markets performance
+```text
+Show my top 10 countries by totalUsers and sessions over the last 30 days, including engagementRate and keyEvents. Flag any countries where engagement is 20% below the average.
+```
+
+### City-level conversion breakdown
+```text
+Query the top 15 cities in our primary market by sessions and keyEvents over the last 30 days. Show me where conversion concentration is highest.
+```
 
 ## Correct dimension names
 | Concept | GA4 API name |
