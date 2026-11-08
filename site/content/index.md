@@ -89,7 +89,6 @@ order: 1
 </ul>
 </div>
 </div>
-<p style="margin-top:1.2rem;font-size:.95rem"><a href="/google-analytics-mcp-vs-official/">Read the full technical comparison: Community stdio vs Google Hosted MCP →</a></p>
 </section>
 
 <section class="section">

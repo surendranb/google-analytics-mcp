@@ -49,6 +49,8 @@ export function page({ slug, title, description, body, sidebar = null, active = 
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${canonical}">
+<link rel="alternate" type="text/markdown" href="${canonical === `${SITE}/` ? `${SITE}/index.md` : `${canonical}index.md`}">
+<link rel="alternate" type="text/plain" title="LLM summary" href="${SITE}/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
 <meta property="og:title" content="${esc(title)}">
