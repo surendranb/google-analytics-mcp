@@ -8,6 +8,7 @@ call time. Adding a new skill requires no PyPI release — just a commit."""
 import urllib.request
 import urllib.error
 
+from pathlib import Path
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
 from ga4_mcp.coordinator import mcp, fire_skill_tip
@@ -18,10 +19,17 @@ _SKILLS_BASE = "https://raw.githubusercontent.com/surendranb/google-analytics-mc
 _TIMEOUT = 8
 
 
-def _fetch(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "google-analytics-mcp"})
-    with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
-        return resp.read().decode("utf-8")
+def _fetch(url: str, filename: str = None) -> str:
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "google-analytics-mcp"})
+        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
+            return resp.read().decode("utf-8")
+    except Exception:
+        if filename:
+            local = Path(__file__).resolve().parent.parent.parent / "skills" / filename
+            if local.is_file():
+                return local.read_text(encoding="utf-8")
+        raise
 
 
 @mcp.tool(annotations=_READ_ONLY_EXTERNAL)
@@ -33,7 +41,7 @@ def search_skills(query: str, ctx: Context = None) -> str:
     exact dimensions, metrics, filters, and interpretation logic for each use case.
     Call this BEFORE querying get_ga4_data for any domain-specific analysis.
 
-    Available skills: gcp-setup, traffic-diagnosis, attribution-scope,
+    Available skills: setup, gcp-setup, service-account-setup, traffic-diagnosis, attribution-scope,
     channel-acquisition, content-performance, geo-device-segmentation,
     ecommerce-analysis, ai-referral-analysis, bot-traffic-detection,
     common-metric-names, filter-structures, custom-dimensions,
@@ -41,7 +49,7 @@ def search_skills(query: str, ctx: Context = None) -> str:
 
     Usage:
     - search_skills("")              → returns full index of all skills
-    - search_skills("gcp-setup")     → returns the GCP service-account setup playbook
+    - search_skills("setup")         → returns the GCP service-account setup playbook
     - search_skills("ecommerce")     → returns the ecommerce-analysis skill
     - search_skills("ua-to-ga4")     → returns the UA→GA4 field name mapping
 
@@ -49,7 +57,7 @@ def search_skills(query: str, ctx: Context = None) -> str:
         query: A skill name (exact slug) or empty string to browse the full index.
     """
     try:
-        index = _fetch(f"{_SKILLS_BASE}/index.md")
+        index = _fetch(f"{_SKILLS_BASE}/index.md", "index.md")
     except urllib.error.URLError as e:
         return f"Skills library unavailable: {e}. Proceed with your best judgement."
     except Exception as e:
@@ -57,9 +65,14 @@ def search_skills(query: str, ctx: Context = None) -> str:
 
     # If the query looks like an exact skill slug, try fetching it directly
     slug = query.strip().lower().replace(" ", "-")
+    if slug.endswith(".md"):
+        slug = slug[:-3]
+    if slug in ("setup", "gcp-setup", "service-account-setup"):
+        # Normalize setup requests
+        slug = "setup" if slug == "setup" else slug
     if slug and all(c.isalnum() or c == "-" for c in slug):
         try:
-            content = _fetch(f"{_SKILLS_BASE}/{slug}.md")
+            content = _fetch(f"{_SKILLS_BASE}/{slug}.md", f"{slug}.md")
             fire_skill_tip(ctx, f"💡 Skill '{slug}' loaded. Follow the methodology above, then call get_ga4_data with the exact dimensions and metrics specified in the skill.", skill=slug, trigger="skill_fetched", tool_name="search_skills")
             return content
         except urllib.error.HTTPError as e:
