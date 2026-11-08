@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GA4 MCP — Google Analytics 4 for any AI client</title>
+<title>GA4 MCP — Connect Google Analytics 4 to Claude &amp; AI</title>
 <meta name="description" content="Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.">
 <link rel="canonical" href="https://ga4mcp.com/">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/index.md">
+<link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="GA4 MCP — Google Analytics 4 for any AI client">
+<meta property="og:title" content="GA4 MCP — Connect Google Analytics 4 to Claude &amp; AI">
 <meta property="og:description" content="Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.">
 <meta property="og:url" content="https://ga4mcp.com/">
 <meta name="twitter:card" content="summary">
@@ -25,7 +27,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GA4 MCP — Google Analytics 4 for any AI client","description":"Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.","url":"https://ga4mcp.com/","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","softwareVersion":"2.11.7","license":"https://opensource.org/licenses/MIT","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GA4 MCP — Connect Google Analytics 4 to Claude & AI","description":"Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.","url":"https://ga4mcp.com/","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows","softwareVersion":"2.11.7","license":"https://opensource.org/licenses/MIT","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +36,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -50,10 +53,11 @@ gtag('config', 'G-RX65PWDDEQ');
 <div>
 <p class="eyebrow">v2.11.6 · MIT · local stdio · read-only</p>
 <h1>Ask GA4 a question. Get the answer an analyst would give.</h1>
-<p class="lede">One MCP server for Claude, Cursor, Codex, Gemini CLI and twelve more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.</p>
+<p class="lede">One MCP server for Claude, Cursor, Codex, Gemini CLI and fourteen more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.</p>
 <div class="hero__cta">
 <a class="btn btn--primary" href="/setup/">Install in one line</a>
-<a class="btn btn--ghost" href="/skills/">See the 16 skills</a>
+<a class="btn btn--ghost" href="/google-analytics-ai-prompts/">35 AI Prompts</a>
+<a class="btn btn--ghost" href="/skills/">16 Skills</a>
 </div>
 </div>
 <div class="card">
@@ -121,6 +125,14 @@ gtag('config', 'G-RX65PWDDEQ');
 </div>
 </section>
 <section class="section">
+<h2 class="section__h">Natural language analytics & production prompts</h2>
+<p class="section__sub">Query your analytics data directly from conversation without memorising API dimension names or building filter JSON by hand.</p>
+<div class="grid2">
+<div class="feat"><h3><a href="/natural-language-google-analytics/">How natural language GA4 works</a></h3><p>Why raw models hallucinate Universal Analytics metrics, how the MCP schema layer bridges the vocabulary gap, and why local stdio keeps company traffic numbers private.</p></div>
+<div class="feat"><h3><a href="/google-analytics-ai-prompts/">35 copy-paste analytical prompts</a></h3><p>Production prompts for traffic diagnosis, ecommerce funnels, AI referral tracking, content audits, and bot traffic detection across Claude, Cursor, and Gemini.</p></div>
+</div>
+</section>
+<section class="section">
 <h2 class="section__h">Sixteen skills, loaded only when needed</h2>
 <p class="section__sub">Each one is a short playbook with the exact dimensions, metrics and interpretation rules for one job. The agent calls <code>search_skills</code>, gets one back, and follows it.</p>
 <div class="tw"><table><thead><tr><th>Skill</th><th>What it settles</th></tr></thead><tbody>
@@ -153,9 +165,9 @@ export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</code></pre><
 <section class="section">
 <h2 class="section__h">The parts people get stuck on</h2>
 <div class="grid3">
+<div class="feat"><h3><a href="/troubleshooting/">Error triage & fixes</a></h3><p>Step-by-step triage for 403 permission denied, 400 invalid field names, 429 quota limits, and scope errors.</p></div>
 <div class="feat"><h3><a href="/iam/">The 403 that is not a bug</a></h3><p>The service account is valid but was never added to the property. Nine steps in the Analytics UI, with the exact role.</p></div>
 <div class="feat"><h3><a href="/schema/">The filter shape</a></h3><p><code>dimension_filter</code> follows the Data API v1beta schema, not SQL. Working templates for string, list, numeric and AND/OR groups.</p></div>
-<div class="feat"><h3><a href="/setup/">The property ID</a></h3><p>Most setup failures are the measurement ID pasted where the property ID belongs. One paragraph explains the difference.</p></div>
 </div>
 </section>
     </main>
@@ -168,6 +180,8 @@ export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/key.json"</code></pre><
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

@@ -1,7 +1,7 @@
 ---
 slug: /setup/
-title: "Install GA4 MCP — setup guide"
-description: "Install the Google Analytics 4 MCP server, connect a service account, and verify it works. Three install routes, the two values it needs, and the four errors you can hit."
+title: "Install GA4 MCP: Connect Google Analytics to AI Clients"
+description: "Step-by-step setup guide for the Google Analytics 4 MCP server. 1-line installer, service account authentication, and verification for Claude, Cursor & AI agents."
 group: start
 nav: "Install"
 order: 2
@@ -9,7 +9,7 @@ order: 2
 
 # Install GA4 MCP
 
-This guide takes you from nothing to a working GA4 query inside your agent. It assumes you have a Google Analytics 4 property and a client that speaks MCP.
+This guide takes you from nothing to a working GA4 query inside your agent. It assumes you have a Google Analytics 4 property and an AI client that speaks MCP.
 
 ## What you need first
 
@@ -109,4 +109,4 @@ If the client supports prompts, `setup_ga4_access` collects the missing value an
 
 ## Next
 
-Read [your client's guide](/ga4-mcp-for-every-harness/) for the exact config shape it expects, since four of the eleven clients use a different key than the rest. Then read the [skills index](/skills/) to see what the agent can do once it is connected.
+Read [your client's guide](/ga4-mcp-for-every-harness/) for the exact config shape it expects, since four of the eleven clients use a different key than the rest. Then read the [skills index](/skills/) to see what the agent can do once it is connected, or browse [prompts](/google-analytics-ai-prompts/) for 35 tested templates.

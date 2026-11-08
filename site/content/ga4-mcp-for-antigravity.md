@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-antigravity/
-title: "GA4 MCP for Google Antigravity"
+title: "Connect Google Antigravity to GA4 (App, IDE & CLI)"
 description: "Add the GA4 MCP server to Antigravity, App, IDE or CLI. All three read the same mcp_config.json schema, and the App registers servers through the settings UI."
 group: clients
 nav: "Antigravity"
 order: 7
 ---
 
-# GA4 MCP for Google Antigravity
+# Connect Google Antigravity to Google Analytics 4
 
 Antigravity ships as an app, an IDE and a CLI, and all three use the same `mcp_config.json` schema and the same two file paths. What differs is only how you get the entry in.
+
+## Copy-paste analytical prompts
+
+Once connected, ask Antigravity:
+
+- **Weekly health check**: "Compare activeUsers, sessions, and engagementRate over the last 7 days against the previous 7 days."
+- **AI referral audit**: "Check sessions and keyEvents from chatgpt.com, claude.ai, and perplexity.ai over the last 30 days."
+- **Drop-off triage**: "Identify our top 5 pages by screenPageViews that have an engagementRate below 40% over the last 30 days."
+- **Channel breakdown**: "Show sessions, keyEvents, and userEngagementDuration by sessionDefaultChannelGroup for this month."
+- **Live traffic check**: "Run a realtime report showing active users and top pages over the last 30 minutes."
 
 ## App and IDE: use the settings UI
 

@@ -1,13 +1,13 @@
 ---
 slug: /ga4-mcp-for-vscode/
-title: "GA4 MCP for VS Code and Copilot"
-description: "The GA4 MCP server in VS Code agent mode. Note the root key: .vscode/mcp.json uses servers, while .mcp.json uses mcpServers. Copying between them silently fails."
+title: "Connect VS Code & Copilot to Google Analytics 4"
+description: "Add GA4 MCP to VS Code Copilot agent mode. Includes the critical root key distinction between .vscode/mcp.json and .mcp.json plus sample queries."
 group: clients
 nav: "VS Code"
 order: 4
 ---
 
-# GA4 MCP for VS Code
+# Connect VS Code & Copilot to Google Analytics 4
 
 VS Code's agent mode runs MCP servers, and the configuration has one trap that catches almost everyone: the root key depends on which file you are editing.
 
@@ -107,7 +107,7 @@ curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
 
 ## Verify
 
-Open the agent panel and ask for something that forces a tool call:
+Open the Copilot Chat agent panel and ask for something that forces a tool call:
 
 ```text
 List my GA4 properties.
@@ -115,6 +115,31 @@ List my GA4 properties.
 
 Then check the server shows as running in the MCP servers view. A server that is listed but stopped is almost always a launch failure — run `uvx google-analytics-mcp` in a terminal to see the real error.
 
+## Five questions you can ask in VS Code
+
+Once connected, ask Copilot or Cline directly in your editor:
+
+1. **Traffic summary**:
+   ```text
+   What were our top 10 landing pages by sessions over the last 30 days?
+   ```
+2. **Channel performance**:
+   ```text
+   Compare sessions, engagement rate, and bounce rate across our top 5 acquisition channels.
+   ```
+3. **AI search citations**:
+   ```text
+   How much referral traffic did we receive from ChatGPT, Claude, and Perplexity over the last 60 days?
+   ```
+4. **Traffic change diagnosis**:
+   ```text
+   Analyze our traffic drop over the last 14 days compared to the prior period. Which channel fell first?
+   ```
+5. **E-commerce metrics**:
+   ```text
+   What was our total purchase revenue and conversion rate by country for the past 30 days?
+   ```
+
 ## Next
 
-[Setup](/setup/) for credentials, [query shapes](/schema/) when the first query fails on a filter.
+[Setup](/setup/) for credentials, [query shapes](/schema/) when the first query fails on a filter, and [prompts](/google-analytics-ai-prompts/) for 35 tested templates.

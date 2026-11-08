@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GCP Service Account Setup for GA4 MCP — GA4 MCP skill</title>
-<meta name="description" content="Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.">
+<title>GCP Service Account Setup for GA4 Data API Access</title>
+<meta name="description" content="Step-by-step GCP service account provisioning for the GA4 Data API. Create JSON keys, assign the Viewer role in GA4 Admin, and avoid common 403 errors.">
 <link rel="canonical" href="https://ga4mcp.com/skills/gcp-setup/">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/skills/gcp-setup/index.md">
+<link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="GCP Service Account Setup for GA4 MCP — GA4 MCP skill">
-<meta property="og:description" content="Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.">
+<meta property="og:title" content="GCP Service Account Setup for GA4 Data API Access">
+<meta property="og:description" content="Step-by-step GCP service account provisioning for the GA4 Data API. Create JSON keys, assign the Viewer role in GA4 Admin, and avoid common 403 errors.">
 <meta property="og:url" content="https://ga4mcp.com/skills/gcp-setup/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +27,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GCP Service Account Setup for GA4 MCP — GA4 MCP skill","description":"Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth.","url":"https://ga4mcp.com/skills/gcp-setup/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GCP Service Account Setup for GA4 Data API Access","description":"Step-by-step GCP service account provisioning for the GA4 Data API. Create JSON keys, assign the Viewer role in GA4 Admin, and avoid common 403 errors.","url":"https://ga4mcp.com/skills/gcp-setup/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +36,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/" class="is-active">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,13 +46,13 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
-<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/" class="is-active" aria-current="page">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">Track AI Referral Traffic in Google Analytics 4</a></li><li><a href="/skills/attribution-scope/">GA4 Attribution Scope: User vs. Session vs. Event</a></li><li><a href="/skills/bot-traffic-detection/">Identify &amp; Filter Bot Traffic in Google Analytics 4</a></li><li><a href="/skills/channel-acquisition/">GA4 Channel Acquisition: Default Grouping Rules</a></li><li><a href="/skills/common-metric-names/">GA4 Dimensions and Metrics Reference: API Field Names</a></li><li><a href="/skills/compatible-combinations/">Compatible Dimension &amp; Metric Combinations in GA4</a></li><li><a href="/skills/content-performance/">GA4 Content Performance: Views &amp; Engagement Rates</a></li><li><a href="/skills/custom-dimensions/">GA4 Custom Dimensions &amp; Event Parameters Guide</a></li><li><a href="/skills/date-ranges/">GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</a></li><li><a href="/skills/ecommerce-analysis/">GA4 Ecommerce Analysis: Revenue, AOV &amp; Funnel Drop-off</a></li><li><a href="/skills/filter-structures/">GA4 API Filter Expressions &amp; Dimension Regex Syntax</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations, Quotas &amp; Cardinality Boundaries</a></li><li><a href="/skills/gcp-setup/" class="is-active" aria-current="page">GCP Service Account Setup for GA4 Data API</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/service-account-setup/">GA4 Service Account Setup Guide</a></li><li><a href="/skills/traffic-diagnosis/">Diagnose GA4 Traffic Drops: Step-by-Step Triage</a></li><li><a href="/skills/ua-to-ga4/">Universal Analytics to GA4 Field Name Mapping</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><p class="eyebrow">Agent skill</p><h1>GCP Service Account Setup for GA4 MCP</h1><p>Step-by-step playbook to authenticate the GA4 MCP server using a Google Cloud Platform (GCP) Service Account.</p>
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>GCP Service Account Setup for GA4 Data API</h1><p>Step-by-step playbook to authenticate the GA4 MCP server using a Google Cloud Platform (GCP) Service Account.</p>
 <p>This is the standard, enterprise-grade authentication method:</p>
 <ul><li><strong>Offline &amp; Headless</strong>: Requires no interactive browser popups or OAuth consent screens.</li><li><strong>Persistent</strong>: Service account JSON keys never expire (unlike user OAuth tokens).</li><li><strong>Least-Privilege</strong>: Grants read-only Viewer access exclusively to the target GA4 property.</li></ul>
 <hr>
@@ -125,20 +128,13 @@ gcloud iam service-accounts keys create ~/.config/ga4-mcp/service-account.json \
     }
   }
 }</code></pre></div>
-<h3>Claude Code CLI</h3>
-<p>Run directly:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>claude mcp add google-analytics -- uvx google-analytics-mcp -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json -e GA4_PROPERTY_ID=123456789</code></pre></div>
+<h3>Claude Code</h3>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>claude mcp add --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json --transport stdio google-analytics -- uvx google-analytics-mcp</code></pre></div>
 <hr>
-<h2>6. How to Verify It Works</h2>
-<p>Run this one-liner in your terminal to verify end-to-end connectivity without restarting your IDE:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>GOOGLE_APPLICATION_CREDENTIALS=&quot;/path/to/service-account.json&quot; \
-GA4_PROPERTY_ID=&quot;123456789&quot; \
-uvx google-analytics-mcp</code></pre></div>
-<p><strong>Expected output</strong>:</p>
-<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Starting GA4 MCP server...
-Fetching schema for property '123456789'...
-Schema loaded successfully.</code></pre></div>
-<p>If you see <code>Schema loaded successfully</code>, your service account is 100% operational.</p></div>
+<h2>6. Verification</h2>
+<p>Restart your AI harness and prompt your agent:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
+<p>If it returns your property details and account name, your service account is configured and authenticated.</p></div>
     </main>
   </div>
 </div>
@@ -149,6 +145,8 @@ Schema loaded successfully.</code></pre></div>
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

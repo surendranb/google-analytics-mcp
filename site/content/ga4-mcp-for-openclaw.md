@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-openclaw/
-title: "GA4 MCP for OpenClaw"
+title: "Connect OpenClaw to Google Analytics 4 (MCP Setup)"
 description: "Add the GA4 MCP server to OpenClaw with openclaw mcp add, stored under mcp.servers in ~/.openclaw/openclaw.json. No plugin needed."
 group: clients
 order: 15
 nav: "OpenClaw"
 ---
 
-# GA4 MCP for OpenClaw
+# Connect OpenClaw to Google Analytics 4
 
 OpenClaw is an MCP client directly, so the server needs no plugin. One command writes the entry.
+
+## Copy-paste analytical prompts
+
+Inside OpenClaw, try:
+
+- **Weekly performance overview**: "Compare activeUsers, sessions, and engagementRate over the last 7 days against the previous 7 days."
+- **AI referral audit**: "Show sessions and keyEvents from ChatGPT, Claude, and Perplexity over the last 30 days."
+- **Landing page triage**: "List top 10 pages by sessions where bounceRate is higher than 60%."
+- **Channel breakdown**: "Break down sessions and keyEvents by sessionDefaultChannelGroup this month."
+- **Realtime traffic snapshot**: "Run a realtime report for active users and top pages over the last 30 minutes."
 
 ## Add the server
 

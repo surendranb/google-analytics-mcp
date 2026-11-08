@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Compatible Dimension and Metric Combinations — GA4 MCP skill</title>
-<meta name="description" content="GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: \&quot;The request's…">
+<title>GA4 Compatible Dimensions &amp; Metrics (Avoid 400s)</title>
+<meta name="description" content="Which dimensions and metrics can be queried together in GA4 without triggering incompatible scope errors. Matrix of user, session, and event-level pairings.">
 <link rel="canonical" href="https://ga4mcp.com/skills/compatible-combinations/">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/skills/compatible-combinations/index.md">
+<link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="Compatible Dimension and Metric Combinations — GA4 MCP skill">
-<meta property="og:description" content="GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: \&quot;The request's…">
+<meta property="og:title" content="GA4 Compatible Dimensions &amp; Metrics (Avoid 400s)">
+<meta property="og:description" content="Which dimensions and metrics can be queried together in GA4 without triggering incompatible scope errors. Matrix of user, session, and event-level pairings.">
 <meta property="og:url" content="https://ga4mcp.com/skills/compatible-combinations/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +27,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Compatible Dimension and Metric Combinations — GA4 MCP skill","description":"GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: \\\"The request's…","url":"https://ga4mcp.com/skills/compatible-combinations/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 Compatible Dimensions & Metrics (Avoid 400s)","description":"Which dimensions and metrics can be queried together in GA4 without triggering incompatible scope errors. Matrix of user, session, and event-level pairings.","url":"https://ga4mcp.com/skills/compatible-combinations/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +36,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/" class="is-active">Skills</a>
       <a href="/ga4-mcp-for-every-harness/">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,25 +46,30 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
-<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">AI Referral Analysis</a></li><li><a href="/skills/attribution-scope/">Attribution Scope</a></li><li><a href="/skills/bot-traffic-detection/">Bot Traffic Detection</a></li><li><a href="/skills/channel-acquisition/">Channel Acquisition Analysis</a></li><li><a href="/skills/common-metric-names/">Common Metric &amp; Dimension Names</a></li><li><a href="/skills/compatible-combinations/" class="is-active" aria-current="page">Compatible Dimension and Metric Combinations</a></li><li><a href="/skills/content-performance/">Content Performance Analysis</a></li><li><a href="/skills/custom-dimensions/">Custom Dimensions and Event Parameters</a></li><li><a href="/skills/date-ranges/">Date Ranges</a></li><li><a href="/skills/ecommerce-analysis/">Ecommerce Analysis</a></li><li><a href="/skills/filter-structures/">Filter Structures</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 MCP</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/traffic-diagnosis/">Traffic Change Diagnosis</a></li><li><a href="/skills/ua-to-ga4/">UA to GA4 Field Name Mapping</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Skills</p><ul><li><a href="/skills/">All skills</a></li><li><a href="/skills/ai-referral-analysis/">Track AI Referral Traffic in Google Analytics 4</a></li><li><a href="/skills/attribution-scope/">GA4 Attribution Scope: User vs. Session vs. Event</a></li><li><a href="/skills/bot-traffic-detection/">Identify &amp; Filter Bot Traffic in Google Analytics 4</a></li><li><a href="/skills/channel-acquisition/">GA4 Channel Acquisition: Default Grouping Rules</a></li><li><a href="/skills/common-metric-names/">GA4 Dimensions and Metrics Reference: API Field Names</a></li><li><a href="/skills/compatible-combinations/" class="is-active" aria-current="page">Compatible Dimension &amp; Metric Combinations in GA4</a></li><li><a href="/skills/content-performance/">GA4 Content Performance: Views &amp; Engagement Rates</a></li><li><a href="/skills/custom-dimensions/">GA4 Custom Dimensions &amp; Event Parameters Guide</a></li><li><a href="/skills/date-ranges/">GA4 API Date Ranges: Syntax, Offsets &amp; Comparisons</a></li><li><a href="/skills/ecommerce-analysis/">GA4 Ecommerce Analysis: Revenue, AOV &amp; Funnel Drop-off</a></li><li><a href="/skills/filter-structures/">GA4 API Filter Expressions &amp; Dimension Regex Syntax</a></li><li><a href="/skills/ga4-limitations/">GA4 API Limitations, Quotas &amp; Cardinality Boundaries</a></li><li><a href="/skills/gcp-setup/">GCP Service Account Setup for GA4 Data API</a></li><li><a href="/skills/geo-device-segmentation/">Geo and Device Segmentation</a></li><li><a href="/skills/service-account-setup/">GA4 Service Account Setup Guide</a></li><li><a href="/skills/traffic-diagnosis/">Diagnose GA4 Traffic Drops: Step-by-Step Triage</a></li><li><a href="/skills/ua-to-ga4/">Universal Analytics to GA4 Field Name Mapping</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><p class="eyebrow">Agent skill</p><h1>Compatible Dimension and Metric Combinations</h1><p>GA4 enforces strict rules about which dimensions and metrics can appear in the same request. Incompatible combinations return a 400 error: &quot;The request's dimensions &amp; metrics are incompatible.&quot;</p>
-<h2>The core rule</h2>
-<p>GA4 data is scoped at three levels: <strong>event</strong>, <strong>session</strong>, and <strong>user</strong>. Mixing dimensions and metrics from incompatible scopes causes errors.</p>
-<div class="tw"><table><thead><tr><th>Scope</th><th>Example dimensions</th><th>Example metrics</th></tr></thead><tbody><tr><td>Event</td><td><code>eventName</code>, <code>customEvent:*</code></td><td><code>eventCount</code></td></tr><tr><td>Session</td><td><code>sessionDefaultChannelGroup</code>, <code>sessionSource</code>, <code>sessionCampaignName</code></td><td><code>sessions</code>, <code>bounceRate</code>, <code>sessionKeyEventRate</code></td></tr><tr><td>User</td><td><code>firstUserDefaultChannelGroup</code>, <code>firstUserSource</code></td><td><code>totalUsers</code>, <code>newUsers</code></td></tr></tbody></table></div>
-<h2>Most common incompatible pairs</h2>
-<div class="tw"><table><thead><tr><th>Dimension</th><th>Incompatible metric</th><th>Use instead</th></tr></thead><tbody><tr><td><code>sessionSource</code> / <code>sessionMedium</code> / <code>sessionCampaignName</code></td><td><code>eventCount</code></td><td><code>sessions</code></td></tr><tr><td><code>eventName</code></td><td><code>sessions</code></td><td><code>eventCount</code></td></tr><tr><td><code>promotionId</code> / <code>promotionName</code></td><td>most session/user metrics</td><td>only pair with <code>promotionViews</code>, <code>promotionClicks</code></td></tr><tr><td><code>itemId</code> / <code>itemName</code></td><td><code>sessions</code>, <code>totalUsers</code></td><td><code>itemsViewed</code>, <code>addToCarts</code>, <code>ecommercePurchases</code></td></tr><tr><td><code>firstUserSource</code> / <code>firstUserMedium</code></td><td><code>sessions</code></td><td><code>totalUsers</code>, <code>newUsers</code></td></tr></tbody></table></div>
-<h2>When you hit this error</h2>
-<p>The GA4 error message names the exact field to remove: <code>&quot;Please remove eventCount to make the request compatible for example.&quot;</code></p>
-<p>Read the message literally — remove that field and replace it with a scope-compatible equivalent.</p>
-<h2>Safe combinations (always work)</h2>
-<ul><li><code>date</code> + any metric</li><li><code>deviceCategory</code> + any metric</li><li><code>country</code> / <code>city</code> + any metric</li><li><code>pagePath</code> / <code>pageTitle</code> + <code>screenPageViews</code>, <code>totalUsers</code>, <code>sessions</code></li><li><code>sessionDefaultChannelGroup</code> + <code>sessions</code>, <code>totalUsers</code>, <code>bounceRate</code></li></ul>
-<h2>Ecommerce-specific</h2>
-<p>Ecommerce metrics (<code>ecommercePurchases</code>, <code>purchaseRevenue</code>, <code>addToCarts</code>, <code>itemsViewed</code>) are event-scoped. Pair them with event-scoped or <code>date</code>/<code>deviceCategory</code>/geo dimensions — not with session campaign dimensions.</p></div>
+<div class="prose"><p class="eyebrow">Agent skill</p><h1>Compatible Dimension &amp; Metric Combinations in GA4</h1><p>Google Analytics 4 enforces strict scoping boundaries. Attempting to query dimensions and metrics with conflicting scopes causes the API to return a 400 error: <code>The request's dimensions &amp; metrics are incompatible.</code></p>
+<p>This reference outlines which field pairings are valid across event, session, and user scopes.</p>
+<h2>The Scope Hierarchy</h2>
+<p>All data in GA4 is partitioned into three hierarchical scopes:</p>
+<div class="tw"><table><thead><tr><th>Scope Level</th><th>Description</th><th>Key Dimensions</th><th>Key Metrics</th></tr></thead><tbody><tr><td><strong>Event Scope</strong></td><td>Actions taken at a specific moment</td><td><code>eventName</code>, <code>pagePath</code>, <code>linkUrl</code></td><td><code>eventCount</code>, <code>screenPageViews</code>, <code>keyEvents</code></td></tr><tr><td><strong>Session Scope</strong></td><td>Attributes of a single visit</td><td><code>sessionDefaultChannelGroup</code>, <code>sessionSource</code></td><td><code>sessions</code>, <code>bounceRate</code>, <code>averageSessionDuration</code></td></tr><tr><td><strong>User Scope</strong></td><td>Lifetime attributes of an individual</td><td><code>firstUserDefaultChannelGroup</code>, <code>firstUserSource</code></td><td><code>totalUsers</code>, <code>newUsers</code>, <code>activeUsers</code></td></tr></tbody></table></div>
+<hr>
+<h2>Most Common Incompatible Pairings (What Fails)</h2>
+<div class="tw"><table><thead><tr><th>Dimension In Query</th><th>Incompatible Metric</th><th>What Fails</th><th>Valid Alternative</th></tr></thead><tbody><tr><td><code>sessionSource</code> / <code>sessionMedium</code></td><td><code>eventCount</code></td><td>Mixing session dimension with hit metric</td><td>Use <code>sessions</code> or <code>engagedSessions</code></td></tr><tr><td><code>eventName</code></td><td><code>sessions</code></td><td>Asking for session counts of an event</td><td>Use <code>eventCount</code></td></tr><tr><td><code>itemId</code> / <code>itemName</code></td><td><code>sessions</code> or <code>totalUsers</code></td><td>Item dimensions do not carry session scope</td><td>Use <code>itemsViewed</code>, <code>addToCarts</code>, <code>itemsPurchased</code></td></tr><tr><td><code>firstUserSource</code></td><td><code>sessions</code></td><td>Lifetime acquisition with session metric</td><td>Use <code>newUsers</code> or <code>totalUsers</code></td></tr><tr><td><code>promotionName</code></td><td><code>sessions</code></td><td>Promotion items are hit-scoped</td><td>Use <code>promotionViews</code>, <code>promotionClicks</code></td></tr></tbody></table></div>
+<hr>
+<h2>Guaranteed Safe Combinations (Universal Dimensions)</h2>
+<p>Certain dimensions are universally compatible across almost all metrics:</p>
+<ul><li><strong>Temporal Dimensions</strong>: <code>date</code>, <code>month</code>, <code>year</code>, <code>week</code></li><li><strong>Geographic Dimensions</strong>: <code>country</code>, <code>city</code>, <code>region</code></li><li><strong>Device &amp; Platform</strong>: <code>deviceCategory</code>, <code>operatingSystem</code>, <code>browser</code></li></ul>
+<p>These can be safely combined with event metrics (<code>screenPageViews</code>, <code>eventCount</code>), session metrics (<code>sessions</code>, <code>bounceRate</code>), and e-commerce metrics (<code>purchaseRevenue</code>).</p>
+<hr>
+<h2>How to Resolve 400 Incompatible Errors</h2>
+<p>When Google Analytics returns an incompatibility error, the API payload explicitly names the offending field:</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Please remove eventCount to make the request compatible for example.</code></pre></div>
+<p>Follow the recommendation directly: remove the conflicting metric and replace it with a metric from the same scope as your dimensions.</p></div>
     </main>
   </div>
 </div>
@@ -72,6 +80,8 @@ gtag('config', 'G-RX65PWDDEQ');
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

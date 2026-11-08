@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GA4 MCP for OpenCode</title>
+<title>Connect OpenCode to Google Analytics 4 (Local stdio)</title>
 <meta name="description" content="Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-opencode/">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/ga4-mcp-for-opencode/index.md">
+<link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="GA4 MCP for OpenCode">
+<meta property="og:title" content="Connect OpenCode to Google Analytics 4 (Local stdio)">
 <meta property="og:description" content="Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.">
 <meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-opencode/">
 <meta name="twitter:card" content="summary">
@@ -25,7 +27,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for OpenCode","description":"Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.","url":"https://ga4mcp.com/ga4-mcp-for-opencode/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Connect OpenCode to Google Analytics 4 (Local stdio)","description":"Add the GA4 MCP server to OpenCode. The config is the furthest from the common shape: root key mcp, type local, command as an array, environment not env.","url":"https://ga4mcp.com/ga4-mcp-for-opencode/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +36,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/">Skills</a>
       <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,12 +46,12 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/" class="is-active" aria-current="page">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><h1>GA4 MCP for OpenCode</h1>
+<div class="prose"><h1>Connect OpenCode to Google Analytics 4</h1>
 <p>OpenCode's MCP config is the furthest from the Claude Desktop baseline in this whole set. Four things are named differently, and a standard snippet will not load.</p>
 <h2>The entry</h2>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
@@ -91,8 +94,20 @@ gtag('config', 'G-RX65PWDDEQ');
   }
 }</code></pre></div>
 <p>The agent then sees two servers with the same tools and different data, which is usually clearer than one server whose property changes between sessions.</p>
+<h2>Five questions you can ask in OpenCode</h2>
+<p>Once registered, you can ask OpenCode directly during agentic sessions:</p>
+<ol><li><strong>Traffic overview</strong>:</li></ol>
+<p>   ``<code>text    What were our top 10 landing pages by sessions over the last 30 days?    </code>``</p>
+<ol><li><strong>Channel performance</strong>:</li></ol>
+<p>   ``<code>text    Compare sessions, engagement rate, and bounce rate across our acquisition channels for the past 60 days.    </code>``</p>
+<ol><li><strong>AI referral tracking</strong>:</li></ol>
+<p>   ``<code>text    How many sessions arrived from AI tools like ChatGPT, Claude, and Perplexity this month?    </code>``</p>
+<ol><li><strong>Traffic change diagnosis</strong>:</li></ol>
+<p>   ``<code>text    Diagnose why organic search traffic dropped between last week and this week. Which landing pages were most affected?    </code>``</p>
+<ol><li><strong>E-commerce &amp; revenue</strong>:</li></ol>
+<p>   ``<code>text    What was our total purchase revenue and average order value (AOV) for the last 30 days grouped by country?    </code>``</p>
 <h2>Next</h2>
-<p><a href="/setup/">Setup</a> for the two values, <a href="/iam/">permissions</a> when the first query returns a 403.</p></div>
+<p><a href="/setup/">Setup</a> for the two values, <a href="/iam/">permissions</a> when the first query returns a 403, and <a href="/google-analytics-ai-prompts/">prompts</a> for 35 tested templates.</p></div>
     </main>
   </div>
 </div>
@@ -103,6 +118,8 @@ gtag('config', 'G-RX65PWDDEQ');
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

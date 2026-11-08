@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-deepseek/
-title: "GA4 MCP for DeepSeek Harness"
+title: "Connect DeepSeek Harness to GA4 (Data API Setup)"
 description: "Add the GA4 MCP server to DeepSeek Harness with one entry in your patch layer. Tools then appear as mcp__ga4__get_ga4_data inside the session."
 group: clients
 order: 13
 nav: "DeepSeek Harness"
 ---
 
-# GA4 MCP for DeepSeek Harness
+# Connect DeepSeek Harness to Google Analytics 4
 
 DeepSeek Harness mounts MCP servers as config entries in its composed tree, not through a settings screen. One entry in your patch layer adds the server, and its tools appear inside the session.
+
+## Copy-paste analytical prompts
+
+Ask DeepSeek Harness inside your session:
+
+- **Weekly traffic diagnosis**: "Compare activeUsers and sessions between this week and last week. Identify top 3 traffic sources by drop or gain."
+- **AI referral report**: "Report all sessions, bounceRate, and keyEvents from chatgpt.com, claude.ai, and perplexity.ai in the last 30 days."
+- **Page engagement check**: "Fetch top 10 pages by screenPageViews and userEngagementDuration for the last 14 days."
+- **Conversion funnel audit**: "Query sessions, keyEvents, and sessionConversionRate grouped by sessionDefaultChannelGroup."
+- **Live traffic snapshot**: "Run a realtime report to see active visitors and active pages right now."
 
 ## The entry
 

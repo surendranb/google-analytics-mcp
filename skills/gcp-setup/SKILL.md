@@ -1,8 +1,10 @@
 ---
 name: gcp-setup
-description: "Step-by-step playbook to configure GA4 MCP using a Google Cloud Service Account (offline, CI/CD, enterprise) instead of 1-Click browser OAuth."
+titleTag: "GCP Service Account Setup for GA4 Data API Access"
+description: "Step-by-step GCP service account provisioning for the GA4 Data API. Create JSON keys, assign the Viewer role in GA4 Admin, and avoid common 403 errors."
 ---
-# GCP Service Account Setup for GA4 MCP
+
+# GCP Service Account Setup for GA4 Data API
 
 Step-by-step playbook to authenticate the GA4 MCP server using a Google Cloud Platform (GCP) Service Account.
 
@@ -130,29 +132,18 @@ File: `~/.cursor/mcp.json` or `.cursor/mcp.json` in your workspace:
 }
 ```
 
-### Claude Code CLI
-Run directly:
+### Claude Code
 ```bash
-claude mcp add google-analytics -- uvx google-analytics-mcp -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json -e GA4_PROPERTY_ID=123456789
+claude mcp add --env GA4_PROPERTY_ID=123456789 --env GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json --transport stdio google-analytics -- uvx google-analytics-mcp
 ```
 
 ---
 
-## 6. How to Verify It Works
+## 6. Verification
 
-Run this one-liner in your terminal to verify end-to-end connectivity without restarting your IDE:
-
-```bash
-GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json" \
-GA4_PROPERTY_ID="123456789" \
-uvx google-analytics-mcp
+Restart your AI harness and prompt your agent:
+```text
+List my GA4 properties.
 ```
 
-**Expected output**:
-```
-Starting GA4 MCP server...
-Fetching schema for property '123456789'...
-Schema loaded successfully.
-```
-
-If you see `Schema loaded successfully`, your service account is 100% operational.
+If it returns your property details and account name, your service account is configured and authenticated.

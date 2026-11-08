@@ -10,6 +10,7 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 export const TOP_NAV = [
   { label: "Install", href: "/setup/" },
+  { label: "Prompts", href: "/google-analytics-ai-prompts/" },
   { label: "Skills", href: "/skills/" },
   { label: "Clients", href: "/ga4-mcp-for-every-harness/" },
   { label: "Plugins", href: "/ga4-plugins/" },
@@ -48,6 +49,8 @@ export function page({ slug, title, description, body, sidebar = null, active = 
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${canonical}">
+<link rel="alternate" type="text/markdown" href="${canonical === `${SITE}/` ? `${SITE}/index.md` : `${canonical}index.md`}">
+<link rel="alternate" type="text/plain" title="LLM summary" href="${SITE}/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
 <meta property="og:title" content="${esc(title)}">
@@ -94,6 +97,8 @@ ${body}
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

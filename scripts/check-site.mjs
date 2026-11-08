@@ -67,6 +67,8 @@ for (const f of files) {
   if (!desc) problems.push(`${url}: missing meta description`);
   if (!canon) problems.push(`${url}: missing canonical`);
   else if (!canon.startsWith("https://ga4mcp.com")) problems.push(`${url}: canonical not absolute — ${canon}`);
+  const mdLink = (html.match(/<link rel="alternate" type="text\/markdown" href="([^"]*)">/) || [])[1];
+  if (!mdLink && !url.includes("404")) problems.push(`${url}: missing <link rel="alternate" type="text/markdown">`);
   if (h1s.length !== 1) problems.push(`${url}: ${h1s.length} h1 elements`);
   if (title.length > 62) warn.push(`${url}: title ${title.length} chars (${title})`);
   if (desc.length > 165) warn.push(`${url}: description ${desc.length} chars`);
@@ -121,6 +123,14 @@ for (const u of locs) if (!onDisk.includes(u)) problems.push(`sitemap lists unkn
 // machine files parse
 try { JSON.parse(readFileSync(join(DOCS, "data/tools.json"), "utf8")); } catch { problems.push("tools.json is not valid JSON"); }
 try { JSON.parse(readFileSync(join(DOCS, "data/skills.json"), "utf8")); } catch { problems.push("skills.json is not valid JSON"); }
+
+// markdown twins exist and are not empty
+for (const r of rows) {
+  if (r.url.includes("404")) continue;
+  const mdFile = r.url === "/" ? join(DOCS, "index.md") : join(DOCS, r.url, "index.md");
+  if (!existsSync(mdFile)) problems.push(`${r.url}: missing markdown twin index.md`);
+  else if (statSync(mdFile).size < 100) problems.push(`${r.url}: markdown twin index.md is too small (${statSync(mdFile).size}b)`);
+}
 
 rows.sort((a, b) => a.words - b.words);
 console.log(`pages: ${rows.length}`);

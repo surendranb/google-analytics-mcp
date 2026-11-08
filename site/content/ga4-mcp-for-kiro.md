@@ -1,15 +1,25 @@
 ---
 slug: /ga4-mcp-for-kiro/
-title: "GA4 MCP for Kiro"
+title: "Connect Kiro IDE to Google Analytics 4 (MCP Setup)"
 description: "Add the GA4 MCP server to Kiro. Kiro hot-reloads mcp.json on save, so no restart is needed, and it carries per-tool approval settings the other clients do not."
 group: clients
 nav: "Kiro"
 order: 10
 ---
 
-# GA4 MCP for Kiro
+# Connect Kiro IDE to Google Analytics 4
 
 Kiro reads MCP servers from `mcp.json` and reloads the file the moment you save it. That is the main practical difference from the rest of this set — you will not be restarting the editor.
+
+## Copy-paste analytical prompts
+
+Ask Kiro directly in the chat panel:
+
+- **Weekly performance overview**: "Compare activeUsers, sessions, and engagementRate over the last 7 days against the previous 7 days."
+- **AI referral audit**: "Show me sessions, bounceRate, and keyEvents from ChatGPT, Claude, and Perplexity over the last 30 days."
+- **Content drop-off triage**: "List top 10 pages by screenPageViews where engagementRate is below 40%."
+- **Acquisition channels**: "Break down sessions and keyEvents by sessionDefaultChannelGroup for the last 14 days."
+- **Realtime traffic check**: "Run a realtime report showing active users and top pages over the last 30 minutes."
 
 ## Where the file lives
 

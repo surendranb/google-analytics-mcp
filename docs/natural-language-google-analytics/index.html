@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Natural Language Google Analytics: Query GA4 with AI</title>
+<meta name="description" content="How to query Google Analytics 4 in natural language using Claude, Cursor, and AI agents. Local stdio execution, pre-flight schema checks, zero data leakage.">
+<link rel="canonical" href="https://ga4mcp.com/natural-language-google-analytics/">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/natural-language-google-analytics/index.md">
+<link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GA4 MCP">
+<meta property="og:title" content="Natural Language Google Analytics: Query GA4 with AI">
+<meta property="og:description" content="How to query Google Analytics 4 in natural language using Claude, Cursor, and AI agents. Local stdio execution, pre-flight schema checks, zero data leakage.">
+<meta property="og:url" content="https://ga4mcp.com/natural-language-google-analytics/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fef6e4">
+<link rel="icon" href="/assets/logo.png" type="image/png">
+<link rel="stylesheet" href="/assets/site.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RX65PWDDEQ"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RX65PWDDEQ');
+</script>
+<script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
+<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Natural Language Google Analytics: Query GA4 with AI","description":"How to query Google Analytics 4 in natural language using Claude, Cursor, and AI agents. Local stdio execution, pre-flight schema checks, zero data leakage.","url":"https://ga4mcp.com/natural-language-google-analytics/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
+    <nav class="top__nav" aria-label="Primary">
+      <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/skills/">Skills</a>
+      <a href="/ga4-mcp-for-every-harness/">Clients</a>
+      <a href="/ga4-plugins/">Plugins</a>
+      <a href="https://github.com/surendranb/google-analytics-mcp" class="gh" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap">
+  <div class="frame">
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/" class="is-active" aria-current="page">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
+<div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
+<div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
+<div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
+    <main id="main">
+<div class="prose"><h1>Natural Language Google Analytics</h1>
+<p>Querying Google Analytics 4 through a conversation changes how teams extract marketing insights. Instead of building custom explorations in the GA4 web UI, writing BigQuery SQL, or navigating the Analytics Data API documentation, you ask questions in plain English and receive structured, verified answers.</p>
+<p>General-purpose language models fail when pointed directly at the Google Analytics Data API without a specialized protocol layer. This guide explains why naive LLM queries fail, how the Model Context Protocol (MCP) fixes them, and how to query your analytics with natural language.</p>
+<h2>Why General LLMs Fail on Google Analytics 4</h2>
+<p>Every developer who asks an untuned AI to query GA4 encounters three structural failures:</p>
+<h3>1. Universal Analytics Vocabulary Hallucination</h3>
+<p>Language models were trained on millions of pages of Universal Analytics (UA) documentation and StackOverflow answers written prior to July 2023. When asked for traffic data, models reflexively generate queries containing <code>ga:sessions</code>, <code>pageviews</code>, <code>uniquePageviews</code>, and <code>bounces</code>.</p>
+<p>In the GA4 Data API:</p>
+<ul><li><code>pageviews</code> does not exist; the dimension is <code>pagePath</code> and the metric is <code>screenPageViews</code>.</li><li><code>conversions</code> was renamed to <code>keyEvents</code> on May 6, 2024.</li><li><code>ga:</code> prefixes cause hard 400 validation errors.</li></ul>
+<p>An unassisted model enters a retry loop, guessing variations until hitting API rate limits.</p>
+<h3>2. Incompatible Dimensional Scopes</h3>
+<p>GA4 enforces strict separation between user-scoped, session-scoped, and event-scoped data:</p>
+<ul><li><code>firstUserDefaultChannelGroup</code> (user-scoped) cannot be paired with event-scoped metrics like <code>eventCount</code> without distorting attribution.</li><li>Session dimensions require session metrics.</li></ul>
+<p>When an AI guesses dimension pairings, the GA4 API rejects the request with: <code>The request's dimensions and metrics are incompatible.</code></p>
+<h3>3. Mental Arithmetic Drift on Ratios and Averages</h3>
+<p>If an agent pulls seven daily rows and calculates the weekly bounce rate, average session duration, or conversion rate, it sums or averages the ratio column. Ratios and averages do not sum arithmetically. The resulting figures look plausible but are mathematically incorrect.</p>
+<h2>How GA4 MCP Solves Natural Language Queries</h2>
+<p>The GA4 MCP server acts as an intelligent intermediary between your AI harness (Claude, Cursor, Codex, Gemini CLI) and the Google Analytics Data API.</p>
+<div class="cb"><div class="cb__bar"><span class="cb__lang">shell</span><button class="cb__copy" type="button">Copy</button></div><pre><code>┌─────────────────┐       Natural Language Question       ┌────────────────────────┐
+│  Claude / Cursor│ ────────────────────────────────────► │  GA4 MCP Coordinator   │
+└─────────────────┘                                       └───────────┬────────────┘
+         ▲                                                            │
+         │ Verified Response + Totals                                 ▼
+┌────────┴────────┐       Validated API Request           ┌────────────────────────┐
+│  GA4 Data API   │ ◄──────────────────────────────────── │ Pre-Flight Validation  │
+│  (Google Cloud) │                                       │ • Property Schema Match│
+└─────────────────┘                                       │ • Scope Compatibility  │
+                                                          │ • Server-Side Totals   │
+                                                          └────────────────────────┘</code></pre></div>
+<p>Three mechanisms guarantee accuracy:</p>
+<ol><li><strong>Pre-Flight Schema Validation</strong>: Before executing any request, <code>get_ga4_data</code> inspects the live metadata of your property. If an agent requests an invalid field, the server intercepts the call and returns the valid GA4 equivalent.</li><li><strong>Deterministic Skills on Demand</strong>: When an agent faces an analytical task, it loads a local skill (<code>traffic-diagnosis</code>, <code>ecommerce-analysis</code>, <code>attribution-scope</code>). The skill dictates the proven dimensions, metrics, and interpretation rules.</li><li><strong>GA4 Server-Side Totals</strong>: The server requests <code>metricAggregations: [&quot;TOTAL&quot;]</code> directly from Google. The agent reports the Google-computed total rather than performing client-side math.</li></ol>
+<h2>Ten Natural Language Questions You Can Ask Today</h2>
+<p>Once configured in your AI client, you can ask questions directly in your editor or chat terminal:</p>
+<h3>Traffic &amp; Acquisition</h3>
+<ul><li><em>&quot;What were our top 5 acquisition channels by sessions over the last 30 days, and which had the highest engagement rate?&quot;</em></li><li><em>&quot;Compare this week's active users with last week's. Did organic search or direct traffic drive the variance?&quot;</em></li><li><em>&quot;Show me all referral traffic from AI platforms (ChatGPT, Claude, Perplexity) for the past 90 days.&quot;</em></li></ul>
+<h3>Content &amp; Engagement</h3>
+<ul><li><em>&quot;Which blog posts had the highest average engagement time among users from organic search this month?&quot;</em></li><li><em>&quot;List the top 10 landing pages with the highest bounce rate that received at least 200 sessions.&quot;</em></li><li><em>&quot;What are our top pages viewed by mobile users compared to desktop users?&quot;</em></li></ul>
+<h3>E-Commerce &amp; Conversions</h3>
+<ul><li><em>&quot;What is our overall checkout-to-purchase conversion rate across the last 60 days?&quot;</em></li><li><em>&quot;Which traffic channel produced the highest average order value (AOV) last month?&quot;</em></li><li><em>&quot;Show me purchase revenue broken down by country and city for the last quarter.&quot;</em></li></ul>
+<h3>Technical &amp; Anomaly Detection</h3>
+<ul><li><em>&quot;Did our site experience an abnormal spike in direct traffic yesterday? Check city and device category to verify if it was bot traffic.&quot;</em></li></ul>
+<h2>Local Stdio Architecture &amp; Data Privacy</h2>
+<p>Security is a primary concern when connecting analytics to AI assistants. Cloud-hosted analytics SaaS wrappers require passing your Google Cloud credentials to third-party servers.</p>
+<p>GA4 MCP operates entirely over local <strong>stdio transport</strong>:</p>
+<ul><li><strong>Direct Connection</strong>: All communication travels over stdin/stdout between your local AI harness and the local Python subprocess.</li><li><strong>No Third-Party Relay</strong>: API calls travel directly from your machine to <code>https://analyticsdata.googleapis.com</code> via your own Google Cloud Service Account.</li><li><strong>Zero Query Retention</strong>: Your analytics numbers never touch external proxy databases or third-party loggers.</li></ul>
+<h2>Next Steps</h2>
+<ul><li><strong><a href="/setup/">Installation Guide</a></strong>: Step-by-step setup using the 1-line auto-installer or native package managers.</li><li><strong><a href="/google-analytics-ai-prompts/">Prompt Cookbook</a></strong>: 35 production-tested prompts across e-commerce, SEO, and acquisition.</li><li><strong><a href="/ga4-mcp-for-every-harness/">Client Configuration</a></strong>: How to add GA4 MCP to Cursor, Claude, VS Code, and 14 other environments.</li></ul></div>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>MIT licensed. Built by <a href="https://builditwithai.xyz" rel="noopener">Surendran B</a>. Not affiliated with Google.</div>
+    <div class="foot__links">
+      <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
+      <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('.cb__copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var c=b.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(c).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o},1200)})
+  })
+})
+</script>
+</body>
+</html>

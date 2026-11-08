@@ -135,7 +135,7 @@ function parseFrontmatter(raw) {
 
 /* ---------------- content ---------------- */
 
-const stripH1 = (body) => body.replace(/^#\s+.+\n+/, "");
+const stripH1 = (body) => body.replace(/^\s*#\s+[^\n]+\n*/, "");
 
 function loadContent() {
   const dir = join(ROOT, "site/content");
@@ -154,8 +154,8 @@ function loadContent() {
         order: Number(data.order || 50),
         full: data.full === "true",
         hero: data.hero === "true",
-        html: md(stripH1(body)),
-        raw: stripH1(body),
+        html: md(body),
+        raw: body,
         titleTag: data.titleTag || data.title || h1,
       };
     });
@@ -188,6 +188,7 @@ function loadSkills() {
       slug: `/skills/${d.name}/`,
       name: d.name,
       title: h1,
+      titleTag: data.titleTag || `${h1} — GA4 MCP skill`,
       description: data.description || "",
       html: md(stripH1(body)),
       raw: stripH1(body),
@@ -281,6 +282,75 @@ function emit(path, html) {
   writeFileSync(f, html);
 }
 
+function formatMarkdownTwin(title, description, url, raw) {
+  const parts = [];
+  parts.push(`# ${title}`);
+  if (description) {
+    parts.push(`> ${description.replace(/^"|"$/g, "")}`);
+  }
+  parts.push(`Canonical URL: ${url}`);
+  parts.push("");
+  const cleaned = raw.replace(/^\s*#\s+[^\n]+\n*/, "");
+  parts.push(cleaned.trim());
+  return parts.join("\n\n") + "\n";
+}
+
+function homeMarkdownTwin() {
+  const tools = JSON.parse(readFileSync(join(ROOT, "site/data/tools.json"), "utf8"));
+  const clientPages = pages.filter((p) => p.group === "clients" && p.slug !== "/ga4-mcp-for-every-harness/");
+  const docPages = pages.filter((p) => p.slug !== "/");
+  return `# GA4 MCP Server
+
+> Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.
+
+Canonical URL: ${SITE}/
+Version: v${VERSION}
+Repository: https://github.com/surendranb/google-analytics-mcp
+
+Ask GA4 a question. Get the answer an analyst would give. One Model Context Protocol (MCP) server for Claude, Cursor, Codex, Gemini CLI and 14 more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.
+
+## 1-Line Universal Install
+
+\`\`\`bash
+curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+\`\`\`
+
+Or launch via package runners:
+\`\`\`bash
+uvx google-analytics-mcp
+npx -y @surendranb/google-analytics-mcp
+\`\`\`
+
+## Required Credentials
+
+- \`GA4_PROPERTY_ID\`: 9-digit numeric Property ID (from Admin -> Property Settings -> Property Details).
+- \`GOOGLE_APPLICATION_CREDENTIALS\`: Absolute path to a Google Cloud Service Account JSON key with Viewer access on the GA4 property.
+
+## Key Capabilities
+
+- **Schema Check Before Query**: Validates every dimension and metric against your live property schema. Replaces 400 errors with correct field suggestions.
+- **Server-Side Computed Totals**: Returns pre-calculated metric totals so LLMs don't improperly sum non-additive rates or active users.
+- **16 Embedded Analytical Skills**: Playbooks for traffic drops, e-commerce funnels, bot detection, and AI referral attribution.
+- **Zero Third-Party Relays**: Local stdio process running on your machine. All queries go directly from your machine to Google Analytics APIs.
+
+## Supported Clients (${clientPages.length})
+
+${clientPages.map((p) => `- [${p.nav}](${SITE}${p.slug}) ([markdown](${SITE}${p.slug}index.md)): ${p.description}`).join("\n")}
+
+## Analytical Skills (${skills.length})
+
+${skills.map((s) => `- [${s.title}](${SITE}${s.slug}) ([markdown](${SITE}${s.slug}index.md)): ${s.description}`).join("\n")}
+
+## Tools (${tools.count})
+
+${tools.tools.map((t) => `- \`${t.name}\`: ${t.summary || t.description}`).join("\n")}
+
+## Documentation & Guides
+
+${docPages.map((p) => `- [${p.title}](${SITE}${p.slug}) ([markdown](${SITE}${p.slug}index.md)): ${p.description}`).join("\n")}
+`;
+}
+
 // keep only generated artefacts; drop the old docsify + hand-written twins
 const KEEP = new Set(["assets", ".netlify", ".wrangler"]);
 for (const e of readdirSync(OUT, { withFileTypes: true })) {
@@ -309,6 +379,18 @@ for (const p of pages) {
       type: p.slug === "/" ? "SoftwareApplication" : "TechArticle",
     })
   );
+
+  // Markdown twin
+  if (p.slug === "/") {
+    const homeMd = homeMarkdownTwin();
+    emit("index.md", homeMd);
+    emit("README.md", homeMd);
+  } else {
+    const slugClean = p.slug.replace(/^\/|\/$/g, "");
+    const pageMd = formatMarkdownTwin(p.title, p.description, `${SITE}${p.slug}`, p.raw);
+    emit(`${slugClean}/index.md`, pageMd);
+    emit(`${slugClean}.md`, pageMd);
+  }
 }
 
 for (const s of skills) {
@@ -316,13 +398,19 @@ for (const s of skills) {
     `${s.slug.replace(/^\/|\/$/g, "")}/index.html`,
     page({
       slug: s.slug,
-      title: `${s.title} — GA4 MCP skill`,
+      title: s.titleTag || `${s.title} — GA4 MCP skill`,
       description: s.description,
       body: `<div class="prose"><p class="eyebrow">Agent skill</p><h1>${esc(s.title)}</h1>${s.html}</div>`,
       sidebar: sidebarFor(sidebarGroups, s.slug),
       active: "/skills/",
     })
   );
+
+  // Skill Markdown twin
+  const skillClean = s.slug.replace(/^\/|\/$/g, "");
+  const skillMd = formatMarkdownTwin(s.title, s.description, `${SITE}${s.slug}`, s.raw);
+  emit(`${skillClean}/index.md`, skillMd);
+  emit(`${skillClean}.md`, skillMd);
 }
 
 // 404
@@ -352,16 +440,13 @@ writeFileSync(join(OUT, "robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SI
 const GONE = [
   "ga4-plugin-for-harness", // never a valid manifest; OpenClaw registers servers via `openclaw mcp add`
 ];
-const KEPT = pages.filter((p) => p.slug !== "/").map((p) => p.slug.replace(/^\/|\/$/g, ""));
 const redirects = [
   "https://www.ga4mcp.com/*    https://ga4mcp.com/:splat    301",
   "/install    https://ga4.builditwithai.xyz/?src=install  302",
   ...GONE.map((g) => `/${g}/*    /ga4-mcp-for-every-harness/    301`),
   ...GONE.map((g) => `/${g}    /ga4-mcp-for-every-harness/    301`),
-  ...KEPT.flatMap((k) => [`/${k}.md    /${k}/    301`, `/${k}/index.md    /${k}/    301`]),
-  "/index.md    /    301",
-  "/README.md    /    301",
-  ...skills.flatMap((s) => [`${s.slug}index.md    ${s.slug}    301`]),
+  "/google-analytics-mcp-vs-official/*    /    301",
+  "/google-analytics-mcp-vs-official    /    301",
 ];
 writeFileSync(join(OUT, "_redirects"), redirects.join("\n") + "\n");
 
@@ -371,6 +456,26 @@ writeFileSync(
   Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+/*.md
+  Access-Control-Allow-Origin: *
+  Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/llms.txt
+  Access-Control-Allow-Origin: *
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/llms-full.txt
+  Access-Control-Allow-Origin: *
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+
+/data/*
+  Access-Control-Allow-Origin: *
+  Content-Type: application/json; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
 
 /assets/*
   Cache-Control: public, max-age=3600
@@ -408,12 +513,13 @@ Requires \`GA4_PROPERTY_ID\` and \`GOOGLE_APPLICATION_CREDENTIALS\`.
 ${tools.tools.map((t) => `- \`${t.name}\`: ${t.summary || t.description}`).join("\n")}
 
 ## Skills (${skills.length})
-${skills.map((s) => `- [${s.title}](${SITE}${s.slug}): ${s.description}`).join("\n")}
+${skills.map((s) => `- [${s.title}](${SITE}${s.slug}) ([markdown](${SITE}${s.slug}index.md)): ${s.description}`).join("\n")}
 
 ## Pages
-${pages.map((p) => `- ${SITE}${p.slug} — ${p.title}`).join("\n")}
+${pages.map((p) => `- [${p.title}](${SITE}${p.slug}) ([markdown](${SITE}${p.slug === "/" ? "/index.md" : `${p.slug}index.md`}))`).join("\n")}
 `
 );
+copyFileSync(join(OUT, "llms.txt"), join(ROOT, "llms.txt"));
 
 // llms-full.txt
 writeFileSync(

@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GA4 MCP for Claude — Code and Desktop</title>
-<meta name="description" content="Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Both configs quoted from Anthropic's documentation.">
+<title>Connect Claude to Google Analytics 4 (Code &amp; Desktop)</title>
+<meta name="description" content="Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Includes five production natural language prompts.">
 <link rel="canonical" href="https://ga4mcp.com/ga4-mcp-for-claude/">
+<link rel="alternate" type="text/markdown" href="https://ga4mcp.com/ga4-mcp-for-claude/index.md">
+<link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="GA4 MCP for Claude — Code and Desktop">
-<meta property="og:description" content="Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Both configs quoted from Anthropic's documentation.">
+<meta property="og:title" content="Connect Claude to Google Analytics 4 (Code &amp; Desktop)">
+<meta property="og:description" content="Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Includes five production natural language prompts.">
 <meta property="og:url" content="https://ga4mcp.com/ga4-mcp-for-claude/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -25,7 +27,7 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP for Claude — Code and Desktop","description":"Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Both configs quoted from Anthropic's documentation.","url":"https://ga4mcp.com/ga4-mcp-for-claude/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Connect Claude to Google Analytics 4 (Code & Desktop)","description":"Add the GA4 MCP server to Claude Code with one CLI command, or to Claude Desktop with one JSON entry. Includes five production natural language prompts.","url":"https://ga4mcp.com/ga4-mcp-for-claude/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,6 +36,7 @@ gtag('config', 'G-RX65PWDDEQ');
     <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
       <a href="/skills/">Skills</a>
       <a href="/ga4-mcp-for-every-harness/" class="is-active">Clients</a>
       <a href="/ga4-plugins/">Plugins</a>
@@ -43,12 +46,12 @@ gtag('config', 'G-RX65PWDDEQ');
 </header>
 <div class="wrap">
   <div class="frame">
-    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/iam/">Permissions</a></li><li><a href="/schema/">Query shapes</a></li></ul></div>
+    <aside class="side"><div class="side__group"><p class="side__h">Start</p><ul><li><a href="/">Overview</a></li><li><a href="/setup/">Install</a></li><li><a href="/natural-language-google-analytics/">Natural Language</a></li><li><a href="/google-analytics-ai-prompts/">AI Prompts</a></li><li><a href="/schema/">Query shapes</a></li><li><a href="/troubleshooting/">Troubleshooting</a></li><li><a href="/iam/">Permissions</a></li></ul></div>
 <div class="side__group"><p class="side__h">Clients</p><ul><li><a href="/ga4-mcp-for-every-harness/">All clients</a></li><li><a href="/ga4-mcp-for-claude/" class="is-active" aria-current="page">Claude</a></li><li><a href="/ga4-mcp-for-cursor/">Cursor</a></li><li><a href="/ga4-mcp-for-vscode/">VS Code</a></li><li><a href="/ga4-mcp-for-codex/">Codex</a></li><li><a href="/ga4-mcp-for-gemini/">Gemini CLI</a></li><li><a href="/ga4-mcp-for-antigravity/">Antigravity</a></li><li><a href="/ga4-mcp-for-zed/">Zed</a></li><li><a href="/ga4-mcp-for-goose/">Goose</a></li><li><a href="/ga4-mcp-for-kiro/">Kiro</a></li><li><a href="/ga4-mcp-for-devin-desktop/">Devin Desktop</a></li><li><a href="/ga4-mcp-for-opencode/">OpenCode</a></li><li><a href="/ga4-mcp-for-deepseek/">DeepSeek Harness</a></li><li><a href="/ga4-mcp-for-pi/">Pi</a></li><li><a href="/ga4-mcp-for-openclaw/">OpenClaw</a></li><li><a href="/ga4-mcp-for-hermes/">Hermes</a></li><li><a href="/ga4-mcp-for-zcode/">ZCode</a></li><li><a href="/ga4-mcp-for-antigravity-ide/">Antigravity IDE</a></li></ul></div>
 <div class="side__group"><p class="side__h">Plugins</p><ul><li><a href="/ga4-plugins/">All plugins</a></li><li><a href="/ga4-plugin-for-claude-code/">Claude Code bundle</a></li><li><a href="/ga4-plugin-for-gemini/">Gemini extension</a></li></ul></div>
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
-<div class="prose"><h1>GA4 MCP for Claude</h1>
+<div class="prose"><h1>Connect Claude to Google Analytics 4</h1>
 <p>Claude has two surfaces that run local MCP servers, and they take different configuration. Claude Code is a CLI and registers the server from your terminal. Claude Desktop reads a JSON file.</p>
 <h2>Prerequisites</h2>
 <p>You need the numeric property ID and either a service-account key path or a <code>gcloud</code> login. Both are covered in <a href="/setup/">install</a>. Keep the key path absolute.</p>
@@ -83,12 +86,24 @@ gtag('config', 'G-RX65PWDDEQ');
 <p>Ask this in either surface:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
 <p>Success is <code>list_properties</code> returning rows with no setup error. An empty list means the credentials work but the service account has access to no properties — see <a href="/iam/">permissions</a>.</p>
+<h2>Five questions you can ask Claude once connected</h2>
+<p>Once connected, Claude has direct access to the Google Analytics Data API with server-side totals and schema verification:</p>
+<ol><li><strong>Executive acquisition summary</strong>:</li></ol>
+<p>   ``<code>text    Summarize our top 5 acquisition channels by sessions over the last 30 days. Report sessions, active users, and key event conversions.    </code>``</p>
+<ol><li><strong>AI search traffic analysis</strong>:</li></ol>
+<p>   ``<code>text    Show all traffic arriving from AI tools like ChatGPT, Claude, and Perplexity over the last 90 days. What is the month-over-month growth rate?    </code>``</p>
+<ol><li><strong>Traffic drop investigation</strong>:</li></ol>
+<p>   ``<code>text    Our organic traffic dropped this week compared to last week. Follow the traffic-diagnosis methodology to isolate which channel and pages dropped first.    </code>``</p>
+<ol><li><strong>Landing page bounce audit</strong>:</li></ol>
+<p>   ``<code>text    Which top landing pages have a bounce rate over 60% with at least 150 sessions this month?    </code>``</p>
+<ol><li><strong>E-commerce funnel conversion</strong>:</li></ol>
+<p>   ``<code>text    What was our overall checkout-to-purchase conversion rate across the last 60 days? Break down purchase revenue by channel.    </code>``</p>
 <h2>The two failures specific to Claude</h2>
 <p><strong>The server does not appear in Claude Code.</strong> Run <code>uvx google-analytics-mcp</code> on its own in a terminal. If that fails, the CLI is not the problem and no amount of re-registering will fix it. Usually <code>uv</code> is missing from the PATH that the client inherits.</p>
 <p><strong>Claude Desktop shows a setup error on launch.</strong> The <code>env</code> block is outside the server object, or the credentials path is relative. Both variables must sit inside the same object as <code>command</code>, and the path must start with <code>/</code> on macOS or a drive letter on Windows.</p>
 <div class="note"><span class="note__label">Note</span><p>the installer at <code>/setup/</code> writes both entries for you, which avoids the JSON entirely.</p></div>
 <h2>Next</h2>
-<p><a href="/skills/">Skills</a> explains what to load before asking an analytical question. <a href="/schema/">Query shapes</a> covers the filter syntax when a query fails on structure rather than credentials.</p></div>
+<p><a href="/skills/">Skills</a> explains what to load before asking an analytical question. <a href="/schema/">Query shapes</a> covers filter syntax, and <a href="/google-analytics-ai-prompts/">prompts</a> provides 35 tested templates.</p></div>
     </main>
   </div>
 </div>
@@ -99,6 +114,8 @@ gtag('config', 'G-RX65PWDDEQ');
       <a href="https://github.com/surendranb/google-analytics-mcp" rel="noopener">GitHub</a>
       <a href="https://pypi.org/project/google-analytics-mcp/" rel="noopener">PyPI</a>
       <a href="https://www.npmjs.com/package/@surendranb/google-analytics-mcp" rel="noopener">npm</a>
+      <a href="/google-analytics-ai-prompts/">Prompts</a>
+      <a href="/troubleshooting/">Troubleshooting</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>

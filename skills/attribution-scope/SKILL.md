@@ -1,73 +1,78 @@
 ---
 name: attribution-scope
-description: "GA4 has three distinct attribution scopes. Using the wrong scope gives misleading results. Choose based on the question you are answering."
+titleTag: "GA4 Attribution Scope: User vs Session vs Event"
+description: "Why session, user, and event metrics never match in GA4. Rules for pairing dimensions and metrics across user-scoped, session-scoped, and event-scoped models."
 ---
-# Attribution Scope
 
-GA4 has three distinct attribution scopes. Using the wrong scope gives
-misleading results. Choose based on the question you are answering.
+# GA4 Attribution Scope: User vs. Session vs. Event
 
-## The three scopes
+Google Analytics 4 features three distinct attribution scopes. Selecting the wrong scope produces distorted reports and misleading ROI conclusions. Choose your dimensions based on the specific business question you are answering.
 
-| Scope | Dimension prefix | Question it answers | When to use |
+## The Three Scopes Explained
+
+| Scope | Dimension Prefix | Core Question | Standard GA4 Report |
 |---|---|---|---|
-| **Session** | `session` | Where did THIS session come from? | Traffic Acquisition — volume, engagement, conversions by source |
-| **First-user** | `firstUser` | Which channel originally acquired this user? | User Acquisition — who brought in new users |
-| **Event/attribution** | *(no prefix)* | Which channel gets credit for this conversion? | Advertising reports — AI-weighted conversion credit allocation |
+| **Session Scope** | `session*` | Where did *this specific visit* originate? | **Traffic Acquisition** (Reports > Acquisition) |
+| **First-User Scope** | `firstUser*` | Which channel originally introduced this person? | **User Acquisition** (Reports > Acquisition) |
+| **Event / Cross-Channel** | *(no prefix)* | Which touchpoint receives credit for this conversion? | **Advertising / Attribution** (Explore > Attribution) |
 
-## Dimensions by scope
+---
 
-**Session scope** — use for traffic analysis:
+## Dimensions by Attribution Scope
+
+### Session Scope (Use for Traffic Analysis)
 - `sessionDefaultChannelGroup`
 - `sessionSource`
 - `sessionMedium`
-- `sessionCampaignName`
 - `sessionSourceMedium`
+- `sessionCampaignName`
 
-**First-user scope** — use for acquisition analysis:
+*Pair with session metrics: `sessions`, `engagedSessions`, `bounceRate`, `averageSessionDuration`.*
+
+### First-User Scope (Use for Top-of-Funnel Acquisition)
 - `firstUserDefaultChannelGroup`
 - `firstUserSource`
 - `firstUserMedium`
 - `firstUserCampaignName`
 
-**Event/attribution scope** — use only in advertising/conversion contexts:
-- `defaultChannelGroup` *(no prefix)*
-- `source` *(no prefix)*
-- `medium` *(no prefix)*
+*Pair with user metrics: `newUsers`, `totalUsers`, `userKeyEventRate`.*
 
-## How to choose
+### Event / Cross-Channel Scope (Use for Fractional Attribution)
+- `defaultChannelGroup` (no prefix)
+- `source` (no prefix)
+- `medium` (no prefix)
+- `campaignName` (no prefix)
 
-**"Where is my traffic coming from?"** → session scope
-```
-dimensions: ["sessionDefaultChannelGroup", "sessionSource", "sessionMedium"]
-metrics: ["sessions", "totalUsers", "engagedSessions", "keyEvents"]
+*Pair with event and conversion metrics: `keyEvents`, `purchaseRevenue`.*
+
+---
+
+## How to Choose the Right Scope
+
+### Scenario 1: "Where is our daily web traffic coming from?"
+Use **Session Scope**. This tells you which channels are actively generating sessions today.
+```text
+dimensions: ["sessionDefaultChannelGroup", "sessionSource"]
+metrics: ["sessions", "activeUsers", "engagementRate"]
+date_range: last 30 days
 ```
 
-**"Which channels are bringing in new users?"** → first-user scope
-```
+### Scenario 2: "Which marketing channels attract new customers?"
+Use **First-User Scope**. This isolates the initial touchpoint that converted an anonymous person into a known visitor.
+```text
 dimensions: ["firstUserDefaultChannelGroup", "firstUserSource"]
-metrics: ["newUsers", "totalUsers"]
+metrics: ["newUsers", "activeUsers"]
+date_range: last 90 days
 ```
 
-**"How should I attribute conversion credit across channels?"** → event scope
-(Use only with advertising campaign analysis; this is AI-weighted attribution.)
+---
 
-## Common mistake
+## The Attribution Multi-Touch Trap
+Consider a visitor who discovers your website via a LinkedIn post, returns two days later via an organic Google search, and buys a subscription.
 
-A user acquired via Instagram who later converts via Google Organic will show:
-- `sessionDefaultChannelGroup = "Organic Search"` (where this session came from)
-- `firstUserDefaultChannelGroup = "Organic Social"` (where they were first acquired)
+In GA4:
+- In a **User Acquisition** report, the conversion attributes to `Organic Social` (`firstUserDefaultChannelGroup`).
+- In a **Traffic Acquisition** report, the session attributes to `Organic Search` (`sessionDefaultChannelGroup`).
+- In an **Advertising Attribution** model, credit is split according to data-driven weighting.
 
-These are different questions. Mixing scopes in one query produces meaningless results.
-Never combine `sessionSource` with `firstUserMedium` in the same report.
-
-## Nested filters
-
-When filtering, use the same scope as your dimensions:
-```json
-// Filtering traffic acquisition report — use session-scoped dimension
-{"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Organic Search", "matchType": "EXACT"}}}
-
-// NOT source (attribution scope) — wrong scope for this report
-{"filter": {"fieldName": "source", "stringFilter": {"value": "google", "matchType": "EXACT"}}}
-```
+Neither report is broken; they simply measure different stages of the customer journey. Always specify which scope you want your AI agent to examine.

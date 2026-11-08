@@ -1,74 +1,78 @@
 ---
 name: common-metric-names
-description: "The correct GA4 Data API names for fields models most often get wrong. Use these before calling `get_ga4_data` — wrong names return a hard error."
+titleTag: "GA4 Dimensions & Metrics Reference: API Field Names"
+description: "Exact API field names for GA4 Data API queries. Avoid 400 errors from Universal Analytics names like ga:sessions or pageviews by using valid GA4 schema."
 ---
-# Common Metric & Dimension Names
 
-The correct GA4 Data API names for fields models most often get wrong.
-Use these before calling `get_ga4_data` — wrong names return a hard error.
+# GA4 Dimensions and Metrics Reference: API Field Names
 
-> ⚠️ **YOUR TRAINING DATA IS OUTDATED**: Universal Analytics was sunset
-> 2023-07-01, and on 2024-05-06 Google Analytics 4 renamed all conversion metrics to **"key events"**
-> (`conversions` → `keyEvents`, `conversionRate` → `sessionKeyEventRate`).
-> Querying `conversions` will fail with an `Invalid metric` error. Always use `keyEvents`.
+The Google Analytics 4 (GA4) Data API enforces strict field naming conventions. Universal Analytics was sunset on July 1, 2023, and on May 6, 2024, Google renamed all conversion metrics to **key events** (`conversions` → `keyEvents`).
 
-## Metrics — correct API names
+Querying invalid field names causes a hard 400 error. Use this reference table before constructing queries or prompts.
 
-| What you mean | Wrong (will fail) | Correct API name |
+## Metrics Reference Table
+
+| Metric Intent | Legacy / Invalid Names (Fails) | Valid GA4 Data API Name |
 |---|---|---|
-| Goal completions / conversions (RENAMED 2024) | `conversions`, `goals`, `conversion` | `keyEvents` |
-| Total users | `users`, `totalVisitors` | `totalUsers` |
-| Active users (rolling 30-day ≈ MAU) | `MAU`, `monthlyActiveUsers`, `activeVisitors` | `active28DayUsers` |
-| Active users (rolling 7-day ≈ WAU) | `WAU`, `weeklyActiveUsers` | `active7DayUsers` |
-| Active users (rolling 1-day ≈ DAU) | `DAU`, `dailyActiveUsers` | `active1DayUsers` |
-| Distinct users in the queried range | `uniqueUsers` | `activeUsers` |
-| Page views | `pageViews`, `pageviews`, `page_views` | `screenPageViews` |
-| E-commerce purchases | `purchases`, `transactions` | `ecommercePurchases` |
-| Product views | `itemViews`, `productViews` | `itemsViewed` |
-| Items added to cart | `addToCarts`, `cartAdds` | `itemsAddedToCart` |
-| Revenue | `revenue`, `ecommerceRevenue` | `purchaseRevenue` |
-| Avg session duration | `avgSessionDuration`, `avgTimeOnSite` | `averageSessionDuration` |
-| Total engagement time | `engagementDuration`, `timeOnSite` | `userEngagementDuration` |
-| Session key event rate (was "conversion rate", renamed 2024) | `conversionRate`, `goalConversionRate`, `sessionConversionRate` | `sessionKeyEventRate` |
-| User key event rate | `userConversionRate` | `userKeyEventRate` |
-| Engaged sessions | `qualifiedSessions`, `validSessions` | `engagedSessions` |
-| Pages per session | `pagesPerSession`, `pageDepth` | `screenPageViewsPerSession` |
+| **Conversions / Goal Completions** | `conversions`, `goals`, `conversion` | `keyEvents` |
+| **Session Conversion Rate** | `conversionRate`, `sessionConversionRate` | `sessionKeyEventRate` |
+| **User Conversion Rate** | `userConversionRate` | `userKeyEventRate` |
+| **Total Users** | `users`, `totalVisitors` | `totalUsers` |
+| **Active Users** | `uniqueUsers`, `activeVisitors` | `activeUsers` |
+| **Daily Active Users (DAU)** | `DAU`, `dailyActiveUsers` | `active1DayUsers` |
+| **Weekly Active Users (WAU)** | `WAU`, `weeklyActiveUsers` | `active7DayUsers` |
+| **Monthly Active Users (MAU)** | `MAU`, `monthlyActiveUsers` | `active28DayUsers` |
+| **Pageviews** | `pageviews`, `pageViews`, `page_views` | `screenPageViews` |
+| **Pages per Session** | `pagesPerSession`, `pageDepth` | `screenPageViewsPerSession` |
+| **E-commerce Purchases** | `purchases`, `transactions` | `ecommercePurchases` |
+| **Product Views** | `itemViews`, `productViews` | `itemsViewed` |
+| **Items Added to Cart** | `addToCarts`, `cartAdds` | `itemsAddedToCart` |
+| **Purchase Revenue** | `revenue`, `ecommerceRevenue` | `purchaseRevenue` |
+| **Average Order Value (AOV)** | `revenuePerTransaction` | `averagePurchaseRevenue` |
+| **Average Session Duration** | `avgSessionDuration`, `avgTimeOnSite` | `averageSessionDuration` |
+| **Total Engagement Time** | `engagementDuration`, `timeOnSite` | `userEngagementDuration` |
+| **Engaged Sessions** | `qualifiedSessions`, `validSessions` | `engagedSessions` |
+| **Bounce Rate** | `bounce_rate` | `bounceRate` |
 
-## Dimensions — correct API names
+---
 
-| What you mean | Wrong (will fail) | Correct API name |
+## Dimensions Reference Table
+
+| Dimension Intent | Legacy / Invalid Names (Fails) | Valid GA4 Data API Name |
 |---|---|---|
-| Traffic channel group | `sessionDefaultChannelGrouping`, `channelGrouping` | `sessionDefaultChannelGroup` |
-| Landing page + query | `landingPage` (often wrong scope) | `landingPagePlusQueryString` |
-| Page path | `pagePath`, `page` | `pagePath` |
-| Page path + query | `pagePathPlusQueryString` | `unifiedPagePathScreen` |
-| Session source | `source` (wrong scope — see attribution-scope skill) | `sessionSource` |
-| Session medium | `medium` (wrong scope) | `sessionMedium` |
-| Device type | `device`, `deviceType` | `deviceCategory` |
-| Operating system | `os` | `operatingSystem` |
-| Browser | `userAgent` | `browser` |
-| Week of year | `week`, `weekNumber` | `week` (this one IS correct) |
+| **Default Channel Group** | `channelGrouping`, `sessionDefaultChannelGrouping` | `sessionDefaultChannelGroup` |
+| **Traffic Source** | `source`, `session_source` | `sessionSource` |
+| **Traffic Medium** | `medium`, `session_medium` | `sessionMedium` |
+| **Source / Medium Combined** | `sourceMedium` | `sessionSourceMedium` |
+| **Campaign Name** | `campaign` | `sessionCampaignName` |
+| **Page Path** | `page`, `page_path` | `pagePath` |
+| **Page Path with Query** | `pagePathPlusQueryString` | `unifiedPagePathScreen` |
+| **Landing Page** | `landingPagePath` | `landingPage` |
+| **Landing Page with Query** | `landingPage` (when query needed) | `landingPagePlusQueryString` |
+| **Page Title** | `title`, `page_title` | `pageTitle` |
+| **Device Category** | `device`, `deviceType` | `deviceCategory` |
+| **Operating System** | `os` | `operatingSystem` |
+| **Browser** | `userAgent` | `browser` |
+| **Country** | `countryName` | `country` |
+| **City** | `cityName` | `city` |
 
-## Note on active users (MAU / WAU / DAU)
+---
 
-GA4 has no `MAU`, `WAU`, `DAU`, `monthlyActiveUsers`, or `dailyActiveUsers` metric —
-these hard-error. Use the rolling n-day metrics: `active1DayUsers` (≈ DAU),
-`active7DayUsers` (≈ WAU), `active28DayUsers` (≈ MAU). Each counts distinct users
-active in the N days *ending on that date* (a rolling window, not a calendar bucket).
-`activeUsers` = distinct users in the queried range. Never sum daily `activeUsers`
-across rows to get a period total — it double-counts users active on multiple days.
-For a monthly total, query `activeUsers` once over the whole range (no date dimension),
-or use `active28DayUsers` for a rolling month. Stickiness ratios `dauPerMau`,
-`dauPerWau`, `wauPerMau` are also available as metrics.
+## Active Users Mechanics (DAU / WAU / MAU)
+GA4 does not provide literal `DAU` or `MAU` metrics. It provides rolling windows:
+- `active1DayUsers`: Users active in the 1 day ending on that date (DAU).
+- `active7DayUsers`: Rolling 7-day distinct active users (WAU).
+- `active28DayUsers`: Rolling 28-day distinct active users (MAU).
 
-## Note on bounce rate
+> **Important:** Never sum daily `activeUsers` across rows to compute a monthly total. Summing rows double-counts returning users. Request `activeUsers` once over the full date range with no `date` dimension, and GA4 will return the true deduped count.
 
-GA4 bounce rate = sessions with NO engaged session (opposite of GA3 logic).
-A bounce rate of 60% means 60% of sessions had no engagement — that is high.
-In GA3, bounce rate meant single-page sessions. Do not compare GA3 and GA4 bounce rates.
+---
 
-## When you hit a schema error
+## How to Check Field Names in-Session
+If you are unsure of a dimension or metric name for your specific property, ask your agent:
 
-If `get_ga4_data` returns "Invalid dimension" or "Invalid metric", do not guess
-alternatives. Use `search_schema` with a keyword to find the correct name, or
-check this skill's table above.
+```text
+search_schema("keyword")
+```
+
+The server queries your live GA4 metadata schema and returns all matching dimensions and metrics with exact API identifiers.

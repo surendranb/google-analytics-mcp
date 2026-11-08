@@ -1,77 +1,85 @@
 ---
 name: bot-traffic-detection
-description: "Identify and exclude bot, scraper, and spam sessions from GA4 data."
+titleTag: "Identify & Filter Bot Traffic in Google Analytics 4"
+description: "Detect and filter automated bot spikes in Google Analytics 4. Patterns for datacenter ASN spikes, zero-second sessions, and single-page screenPageViews."
 ---
-# Bot Traffic Detection
 
-Identify and exclude bot, scraper, and spam sessions from GA4 data.
+# Identify & Filter Bot Traffic in Google Analytics 4
+
+Identify and exclude bot, scraper, crawler, and spam sessions from your Google Analytics 4 reporting to protect conversion rates and prevent skewed traffic baselines.
 
 ## When to use
-- Traffic has unexplained spikes that don't correlate with any activity
-- Bounce rate is 0% or near-100% across many sessions
-- Sessions show 0 engagement time but high pageview counts
-- Referrers look suspicious (random domains, unrecognised TLDs)
-- You want to establish a clean baseline before any analysis
+- Traffic has unexplained spikes that don't correlate with marketing campaigns or product releases
+- Bounce rate is 0% or near-100% across hundreds of new sessions
+- Sessions show 0 seconds average engagement time with high screenPageViews
+- Referrers show unfamiliar domains, spam keywords, or suspicious TLDs
+- You need clean, validated baseline data before presenting quarterly numbers
 
-## How to detect
+## Four Forensic Bot Signals
 
-### Step 1 — Check engagement time distribution
-Query sessions with very low or zero engagement:
+### 1. Zero-Second Engagement Distribution
+Query sessions exhibiting zero or near-zero engagement duration:
 
-```
+```text
 dimensions: ["sessionDefaultChannelGroup", "sessionSource", "sessionMedium"]
 metrics: ["sessions", "userEngagementDuration", "bounceRate", "screenPageViewsPerSession"]
 date_range: last 7–14 days
 ```
 
-Bot signals: `userEngagementDuration` near 0, `screenPageViewsPerSession` exactly 1,
-`bounceRate` at 1.0 (100%).
+**Bot indicators:** `userEngagementDuration` < 1.0 second, `screenPageViewsPerSession` exactly 1.0, and `bounceRate` at 1.0 (100%).
 
-### Step 2 — Inspect referrer sources
-```
+### 2. Suspicious Referral Sources & Ghost Domains
+```text
 dimensions: ["sessionSource", "sessionMedium", "sessionDefaultChannelGroup"]
 metrics: ["sessions", "userEngagementDuration", "newUsers"]
 dimension_filter: sessionMedium = "referral"
 ```
 
-Flag sources where `userEngagementDuration / sessions` < 2 seconds.
+Flag and isolate any referral source where `userEngagementDuration / sessions` is under 2 seconds.
 
-### Step 3 — Check hostname
-```
+### 3. Invalid or Missing Hostnames
+```text
 dimensions: ["hostname"]
 metrics: ["sessions", "screenPageViews"]
 ```
 
-Bot traffic often hits unexpected hostnames (staging domains, raw IPs,
-or hostnames you don't own). Filter to your known production hostnames.
+Scrapers and spambots frequently fire Google Analytics measurement tags without actually visiting your domain (hitting raw IP addresses, scraper staging proxies, or ghost hosts). Always verify that `hostname` matches your legitimate production domains.
 
-### Step 4 — Geographic anomalies
-```
+### 4. Geographic & Datacenter Clustering
+```text
 dimensions: ["country", "city", "sessionSource"]
 metrics: ["sessions", "userEngagementDuration"]
-dimension_filter: country = [countries with no expected traffic]
+order_by: sessions DESC
 ```
 
-Clusters of sessions from unexpected countries with 0 engagement = bot signal.
+Clusters of hundreds of sessions originating from known datacenter hubs (e.g., Boardman, Ashburn, Council Bluffs) with zero engagement indicate automated cloud scraper runs rather than human browsing.
 
-## Exclusion approach
-GA4 does not have a native bot filter toggle beyond the automatic Google filter.
-To exclude suspected bot traffic from your analysis, add a dimension filter:
+---
 
+## Filtering Strategy
+
+While Google Analytics 4 excludes known IAB-registered bots automatically, headless crawlers and custom scrapers bypass default filters.
+
+To filter suspected bot traffic in API queries, combine dimension and metric filters:
+- Exclude sessions where `userEngagementDuration` equals 0 and `screenPageViewsPerSession` equals 1.
+- Restrict `hostname` strictly to your verified production domain.
+
+---
+
+## Three Prompts to Ask Your AI Agent
+
+Copy-paste these prompts into Claude, Cursor, or Gemini CLI:
+
+```text
+1. "Audit our traffic from the last 7 days for bot contamination. Check bounce rate, average session duration, and single-page sessions grouped by sessionSource."
+
+2. "List all sessions grouped by hostname over the past 30 days. Flag any traffic hitting hostnames other than our primary domain."
+
+3. "Show me cities generating more than 100 sessions over the last 14 days where average engagement duration was under 3 seconds."
 ```
-dimension_filter: {
-  "filter": {
-    "fieldName": "sessionDefaultChannelGroup",
-    "stringFilter": {"matchType": "EXACT", "value": "Direct"}
-  }
-}
-```
-…combined with a metric filter on `userEngagementDuration > 0`.
 
-Note: GA4 already filters known bots automatically. What remains are
-unknown/new bots and scrapers that mimic real browser behaviour.
-
-## What to report
-- Total suspicious sessions as % of all sessions
-- Top suspicious sources with their engagement metrics
-- Whether the pattern is new (spike) or chronic (baseline contamination)
+## How to Check Manually in the GA4 Console
+1. Open **Reports → Acquisition → Traffic acquisition**.
+2. Add a secondary dimension: click the **+** icon next to the primary column and choose **Geography → City**.
+3. Sort by **Sessions** descending.
+4. Scan the **Average engagement time per session** column. Any city generating hundreds of sessions with 0:00 engagement represents automated bot traffic.
