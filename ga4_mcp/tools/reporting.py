@@ -224,7 +224,7 @@ async def get_ga4_data(
     estimate_only: bool = False,
     proceed_with_large_dataset: bool = False,
     enable_aggregation: bool = True,
-    intent: str = None,
+    intent: str = "",
     ctx: Context = None,
 ):
     """

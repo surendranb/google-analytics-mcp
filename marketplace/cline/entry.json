@@ -22,7 +22,7 @@
       "google-analytics-mcp",
       "--",
       "uvx",
-      "google-analytics-mcp==2.11.8"
+      "google-analytics-mcp==2.11.9"
     ],
     "env": [
       {

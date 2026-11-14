@@ -8,10 +8,10 @@ homepage: https://ga4mcp.com/
 license: MIT
 runtime:
   type: uvx
-  package: google-analytics-mcp==2.11.8
+  package: google-analytics-mcp==2.11.9
   command: uvx
   args:
-    - google-analytics-mcp==2.11.8
+    - google-analytics-mcp==2.11.9
 environmentVariables:
   - name: GA4_PROPERTY_ID
     description: Numeric GA4 property ID (e.g. 123456789)
