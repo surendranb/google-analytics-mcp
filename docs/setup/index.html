@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Install GA4 MCP: Connect Google Analytics to AI Clients</title>
-<meta name="description" content="Step-by-step setup guide for the Google Analytics 4 MCP server. 1-line installer, service account authentication, and verification for Claude, Cursor &amp; AI…">
+<title>GA4 MCP Setup Error: GA4_PROPERTY_ID or Credentials</title>
+<meta name="description" content="Fix GA4 MCP setup failures: GA4_PROPERTY_ID unset, 401 invalid authentication, and a credentials path that does not resolve. Env block and verification.">
 <link rel="canonical" href="https://ga4mcp.com/setup/">
 <link rel="alternate" type="text/markdown" href="https://ga4mcp.com/setup/index.md">
 <link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="Install GA4 MCP: Connect Google Analytics to AI Clients">
-<meta property="og:description" content="Step-by-step setup guide for the Google Analytics 4 MCP server. 1-line installer, service account authentication, and verification for Claude, Cursor &amp; AI…">
+<meta property="og:title" content="GA4 MCP Setup Error: GA4_PROPERTY_ID or Credentials">
+<meta property="og:description" content="Fix GA4 MCP setup failures: GA4_PROPERTY_ID unset, 401 invalid authentication, and a credentials path that does not resolve. Env block and verification.">
 <meta property="og:url" content="https://ga4mcp.com/setup/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -27,13 +27,13 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Install GA4 MCP: Connect Google Analytics to AI Clients","description":"Step-by-step setup guide for the Google Analytics 4 MCP server. 1-line installer, service account authentication, and verification for Claude, Cursor & AI…","url":"https://ga4mcp.com/setup/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 MCP Setup Error: GA4_PROPERTY_ID or Credentials","description":"Fix GA4 MCP setup failures: GA4_PROPERTY_ID unset, 401 invalid authentication, and a credentials path that does not resolve. Env block and verification.","url":"https://ga4mcp.com/setup/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap top__in">
-    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.9</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/" class="is-active">Install</a>
       <a href="/google-analytics-ai-prompts/">Prompts</a>
@@ -52,9 +52,11 @@ gtag('config', 'G-RX65PWDDEQ');
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
 <div class="prose"><h1>Install GA4 MCP</h1>
-<p>This guide takes you from nothing to a working GA4 query inside your agent. It assumes you have a Google Analytics 4 property and an AI client that speaks MCP.</p>
+<p>Setup fails in four ways, and each has a different fix. Find your error in the first table, or work down the page from the install.</p>
+<div class="tw"><table><thead><tr><th>Error you see</th><th>What is wrong</th><th>Fix</th></tr></thead><tbody><tr><td><code>InitError</code> / <code>GA4_PROPERTY_ID environment variable not set</code></td><td>The property ID is missing, or it sits outside the server's <code>env</code> block</td><td><a href="#step-2-connect-it-to-your-property">Step 2</a></td></tr><tr><td><code>401 invalid authentication</code> or <code>ADCExpired</code></td><td>Credentials were presented and Google rejected them: expired <code>gcloud</code> session, or a deleted or rotated key</td><td><a href="#when-credentials-are-rejected">Credentials</a></td></tr><tr><td><code>403</code> / <code>IAMError</code></td><td>The account authenticated but has no Viewer role on that property</td><td><a href="/iam/">Permissions guide</a></td></tr><tr><td><code>400</code> invalid dimension or metric</td><td>The field name is a UA name or a guess</td><td><a href="/schema/">Query shapes</a></td></tr></tbody></table></div>
+<p>Everything below assumes a Google Analytics 4 property and an AI client that speaks MCP.</p>
 <h2>What you need first</h2>
-<p>Three things, and only the first one is easy to get wrong.</p>
+<p>Three things, and only the first one is usually wrong.</p>
 <p><strong>A GA4 property ID.</strong> It is a number like <code>123456789</code>. You find it in Analytics under <strong>Admin → Property details</strong>. It is not the <code>G-XXXXXXXXXX</code> measurement ID, and it is not the numeric stream ID. Pasting the measurement ID is the single most common setup failure.</p>
 <p><strong>A Google Cloud project</strong> with the Analytics Data API enabled.</p>
 <p><strong>Credentials,</strong> picked in the next section. Either a service-account JSON key or the local <code>gcloud</code> login works.</p>
@@ -72,25 +74,43 @@ gtag('config', 'G-RX65PWDDEQ');
 <p>The server reads two environment variables. Both belong inside the client's server entry, not in your shell profile, unless you launch the client from a shell that has them.</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>export GA4_PROPERTY_ID=&quot;123456789&quot;
 export GOOGLE_APPLICATION_CREDENTIALS=&quot;/absolute/path/to/service-account.json&quot;</code></pre></div>
-<p>The credentials path must be absolute. A relative path resolves against whatever directory the client happens to start in, which is not the one you expect.</p>
+<p>The credentials path must be absolute. A relative path resolves against whatever directory the client happens to start in, which is not the one you expect. The server checks this at boot: a path that does not exist, or one still holding the <code>/ABSOLUTE/PATH/TO</code> placeholder from a copied snippet, fails with the path quoted back to you.</p>
 <p><strong>If you use a service account,</strong> create it in the Google Cloud console under <strong>IAM &amp; Admin → Service Accounts</strong>, then <strong>Keys → Add key → JSON</strong>. That key file is what the path points at. The service account also has to be added to the GA4 property itself — that is a separate step and it is where most people stop. The <a href="/iam/">permissions guide</a> walks through it.</p>
 <p><strong>If you use <code>gcloud</code> instead,</strong> run this once and skip the key file entirely:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div><pre><code>gcloud auth application-default login</code></pre></div>
 <p>Then omit <code>GOOGLE_APPLICATION_CREDENTIALS</code>. The server picks up application default credentials.</p>
 <div class="note note--teal"><span class="note__label">Tip</span><p>the property ID is numeric and has no prefix. If yours starts with <code>G-</code>, you have the measurement ID, and every query will fail with a permissions error that has nothing to do with permissions.</p></div>
+<h2>When credentials are rejected</h2>
+<p>A <code>401 invalid authentication</code> is not a missing file. The file was read, sent to Google, and refused. Three causes, in order of frequency:</p>
+<p><strong>The <code>gcloud</code> session expired.</strong> Application default credentials carry a refresh token that stops working after re-authentication events. Run <code>gcloud auth application-default login</code> again and retry — no config edit, no client restart.</p>
+<p><strong>The key was deleted or rotated.</strong> A service-account key is a static file, so a 401 from a key path means that key ID was removed in the Cloud console. Download a new key and point <code>GOOGLE_APPLICATION_CREDENTIALS</code> at it. This is the failure mode that recurs, which is the argument for preferring a key over ADC on a long-lived machine.</p>
+<p><strong>The file is not a service-account key.</strong> An OAuth client secret JSON or a downloaded <code>credentials.json</code> from another Google product loads as JSON and authenticates as nothing. The key must contain <code>&quot;type&quot;: &quot;service_account&quot;</code>.</p>
+<p>The same 401 shows up as <code>503</code> when it arrives mid-session rather than at boot. Both mean the credential expired rather than the permission being missing, so treat them the same way.</p>
 <h2>Step 3 — Verify it actually works</h2>
 <p>Open your client and ask this exact question:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>List my GA4 properties.</code></pre></div>
-<p>You have succeeded when the agent calls <code>list_properties</code> and returns rows. A setup error at this point is one of four things, and the next section names all of them.</p>
+<p>You have succeeded when the agent calls <code>list_properties</code> and returns rows. An empty list is not a setup failure — it means the credentials work and the account reads no properties, which is a <a href="/iam/">permissions</a> problem.</p>
 <p>Then ask one question that exercises the analysis layer:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>Why did organic sessions drop in the last 7 days?</code></pre></div>
 <p>A working install loads the <code>traffic-diagnosis</code> skill, calls <code>get_ga4_data</code>, and answers with a <code>totals</code> block rather than a summary of daily rows.</p>
 <h2>When it fails</h2>
-<div class="tw"><table><thead><tr><th>What you see</th><th>What it means</th><th>Where to go</th></tr></thead><tbody><tr><td><code>InitError</code> on startup</td><td>One or both environment variables are missing or outside the server's <code>env</code> block</td><td><a href="/setup/#when-it-fails">Setup errors</a></td></tr><tr><td><code>IAMError</code> or <code>403</code></td><td>The service account is valid but was never added to the property</td><td><a href="/iam/">Permissions guide</a></td></tr><tr><td><code>ADCExpired</code> or <code>503</code></td><td>The <code>gcloud</code> login expired</td><td>Run <code>gcloud auth application-default login</code> again</td></tr><tr><td><code>400</code> invalid dimension or metric</td><td>The field name is a UA name or a guess</td><td><a href="/schema/">Query shapes</a> and <code>search_schema</code></td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>What you see</th><th>What it means</th><th>Where to go</th></tr></thead><tbody><tr><td><code>InitError</code> on startup</td><td>One or both environment variables are missing or outside the server's <code>env</code> block</td><td><a href="#step-2-connect-it-to-your-property">Setup errors</a></td></tr><tr><td><code>401</code> or <code>invalid_grant</code></td><td>The credential was rejected, not the permission</td><td><a href="#when-credentials-are-rejected">When credentials are rejected</a></td></tr><tr><td><code>IAMError</code> or <code>403</code></td><td>The service account is valid but was never added to the property</td><td><a href="/iam/">Permissions guide</a></td></tr><tr><td><code>ADCExpired</code> or <code>503</code></td><td>The <code>gcloud</code> login expired</td><td>Run <code>gcloud auth application-default login</code> again</td></tr><tr><td><code>400</code> invalid dimension or metric</td><td>The field name is a UA name or a guess</td><td><a href="/schema/">Query shapes</a> and <code>search_schema</code></td></tr></tbody></table></div>
 <p>The server also carries these fix paths inside the package, so an agent can resolve most of them without a browser:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>get_troubleshooting_guide(topic=&quot;setup&quot; | &quot;iam&quot; | &quot;schema&quot;)</code></pre></div>
 <h2>Or let the agent fix it</h2>
 <p>If the client supports prompts, <code>setup_ga4_access</code> collects the missing value and reconnects without a restart. That is usually faster than editing config by hand.</p>
+<h2>Five prompts that fix a broken install</h2>
+<p>Paste one into the client whose config you are editing — <a href="/ga4-mcp-for-claude/">Claude</a>, <a href="/ga4-mcp-for-cursor/">Cursor</a>, <a href="/ga4-mcp-for-vscode/">VS Code</a>, or any of the <a href="/ga4-mcp-for-every-harness/">17 clients</a>. Each is written to make the agent read its own bundled guide instead of guessing.</p>
+<ol><li><strong>Missing property ID</strong></li></ol>
+<p>   ``<code>text    My GA4 MCP server failed to start with GA4_PROPERTY_ID unset. Call get_troubleshooting_guide(topic=&quot;setup&quot;), then tell me the exact env block to add and which number is the property ID.    </code>``</p>
+<ol><li><strong>Collect and reconnect in-session</strong></li></ol>
+<p>   ``<code>text    Run setup_ga4_access. Ask me for whichever value is missing, validate it against Google, and confirm the property is readable without a client restart.    </code>``</p>
+<ol><li><strong>401 invalid authentication</strong></li></ol>
+<p>   ``<code>text    The server returns 401 invalid authentication. Determine whether my credentials are an expired gcloud ADC session or a service-account key that was deleted, then give me the one command or console step that replaces it.    </code>``</p>
+<ol><li><strong>Placeholder or relative credentials path</strong></li></ol>
+<p>   ``<code>text    Check my GOOGLE_APPLICATION_CREDENTIALS value. Tell me whether it is absolute, whether the file exists, and whether it contains &quot;type&quot;: &quot;service_account&quot; — quote the path back before suggesting a change.    </code>``</p>
+<ol><li><strong>Confirm the install end to end</strong></li></ol>
+<p>   ``<code>text    Call list_properties and show me the raw result. Then run one get_ga4_data query for sessions over the last 7 days and show the totals block, so I can see the full path works.    </code>``</p>
 <h2>Next</h2>
 <p>Read <a href="/ga4-mcp-for-every-harness/">your client's guide</a> for the exact config shape it expects, since four of the eleven clients use a different key than the rest. Then read the <a href="/skills/">skills index</a> to see what the agent can do once it is connected, or browse <a href="/google-analytics-ai-prompts/">prompts</a> for 35 tested templates.</p></div>
     </main>

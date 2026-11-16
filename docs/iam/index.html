@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fix GA4 Missing Permissions: Service Account 403 Guide</title>
-<meta name="description" content="How to fix Google Analytics missing permissions and 403 Permission Denied errors. Step-by-step resolution for adding service account Viewer access in GA4…">
+<title>GA4 403 Permission Denied: Service Account Viewer Fix</title>
+<meta name="description" content="Fix 403 The caller does not have permission and IAMError on GA4. Add the service account as Viewer in Property access management, then check the property ID.">
 <link rel="canonical" href="https://ga4mcp.com/iam/">
 <link rel="alternate" type="text/markdown" href="https://ga4mcp.com/iam/index.md">
 <link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="Fix GA4 Missing Permissions: Service Account 403 Guide">
-<meta property="og:description" content="How to fix Google Analytics missing permissions and 403 Permission Denied errors. Step-by-step resolution for adding service account Viewer access in GA4…">
+<meta property="og:title" content="GA4 403 Permission Denied: Service Account Viewer Fix">
+<meta property="og:description" content="Fix 403 The caller does not have permission and IAMError on GA4. Add the service account as Viewer in Property access management, then check the property ID.">
 <meta property="og:url" content="https://ga4mcp.com/iam/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -27,13 +27,13 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"Fix GA4 Missing Permissions: Service Account 403 Guide","description":"How to fix Google Analytics missing permissions and 403 Permission Denied errors. Step-by-step resolution for adding service account Viewer access in GA4…","url":"https://ga4mcp.com/iam/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 403 Permission Denied: Service Account Viewer Fix","description":"Fix 403 The caller does not have permission and IAMError on GA4. Add the service account as Viewer in Property access management, then check the property ID.","url":"https://ga4mcp.com/iam/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap top__in">
-    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.9</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
       <a href="/google-analytics-ai-prompts/">Prompts</a>
@@ -52,11 +52,11 @@ gtag('config', 'G-RX65PWDDEQ');
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
 <div class="prose"><h1>Fix Google Analytics Missing Permissions (403 Error)</h1>
-<p>If you see this error, the credentials worked. The query reached Google and Google said no:</p>
+<p>A 403 on a GA4 query means the credentials worked. The request reached Google, and Google said no:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>IAM Error: The service account does not have Viewer access to the GA4 property</code></pre></div>
-<p>Nothing is wrong with your JSON key, your file path, or your property ID. The service account exists, it authenticated, and it has no permission on that property. Adding it is nine clicks.</p>
+<p>Nothing is wrong with your JSON key, your file path, or your token. The account authenticated and has no role on that property. Adding the role takes nine clicks, below. If the error instead reads <code>401 invalid authentication</code>, the problem is the credential and not the permission — go to <a href="/setup/#when-credentials-are-rejected">setup</a>.</p>
 <h2>The nine steps</h2>
-<p>You need the <code>client_email</code> value from your service-account JSON key. It looks like <code>my-agent@my-project.iam.gserviceaccount.com</code>. Open the key file in any text editor and copy that field — not <code>client_id</code>, not the private key.</p>
+<p>You need the <code>client_email</code> value from your service-account JSON key. It looks like <code>my-agent@my-project.iam.gserviceaccount.com</code>. Open the key file in any text editor and copy that field — not <code>client_id</code>, not the private key. If you authenticate with <code>gcloud</code> instead of a key, the grantee is the Google account you signed in with, and its address is the one to paste.</p>
 <ol><li>Open <a href="https://analytics.google.com">analytics.google.com</a>.</li><li>Select the property whose ID matches your <code>GA4_PROPERTY_ID</code>.</li><li>Click <strong>Admin</strong>, the gear at the bottom left.</li><li>In the <strong>Property</strong> column, click <strong>Property access management</strong>.</li><li>Click the blue <strong>+</strong> at the top right, then <strong>Add users</strong>.</li><li>Paste the <code>client_email</code> into the email field.</li><li>Leave <strong>Notify new users by email</strong> switched off. It is a robot address and the mail bounces.</li><li>Under <strong>Direct roles</strong>, tick <strong>Viewer</strong>. Do not tick Administrator.</li><li>Click <strong>Add</strong>.</li></ol>
 <p>Retry the query. It works immediately — there is no propagation delay on property access.</p>
 <h2>When Viewer is not enough</h2>
@@ -69,11 +69,26 @@ gtag('config', 'G-RX65PWDDEQ');
 <p><strong><code>API has not been used in project ... before or it is disabled</code>.</strong> The Analytics Data API is off. Enable it in the Google Cloud console under <strong>APIs &amp; Services → Library</strong>.</p>
 <p><strong><code>invalid_grant</code> or <code>ADCExpired</code>.</strong> Your <code>gcloud</code> session expired. Run <code>gcloud auth application-default login</code> again. If you use a JSON key, this error means the key was deleted or rotated.</p>
 <p><strong><code>The caller does not have permission</code> on <code>list_properties</code>.</strong> The service account has no access at the account level. This is expected and harmless if the property-level grant above is in place.</p>
+<h2>Which account to grant</h2>
+<p>The server names the grantee in the boot error, because the right email depends on how you authenticated. A service-account key produces <code>the service account you@project.iam.gserviceaccount.com</code>. Application default credentials produce <code>the Google account you authenticated with via gcloud</code>. Grant the one that appears in the message — granting the other is the usual reason a second attempt still returns 403.</p>
+<p>If the message quotes a property ID you do not recognise, stop: you are about to grant a role on someone else's property. Fix <code>GA4_PROPERTY_ID</code> first.</p>
 <h2>Let the agent check for you</h2>
 <p>If the client can reach the server at all, this returns the same decision tree offline:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>get_troubleshooting_guide(topic=&quot;iam&quot;)</code></pre></div>
 <p>Or run the interactive fix:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>setup_ga4_access()</code></pre></div>
+<h2>Five prompts that resolve a 403</h2>
+<p>Paste one into <a href="/ga4-mcp-for-claude/">Claude</a>, <a href="/ga4-mcp-for-cursor/">Cursor</a>, <a href="/ga4-mcp-for-codex/">Codex</a>, or any of the <a href="/ga4-mcp-for-every-harness/">17 clients</a>. Each makes the agent read the grant path from the server rather than inventing one.</p>
+<ol><li><strong>Identify the exact grantee</strong></li></ol>
+<p>   ``<code>text    My GA4 query returns 403. Read the boot error, tell me the exact account it names as lacking access, and whether that is a service account or my gcloud identity. Do not tell me to re-download the key.    </code>``</p>
+<ol><li><strong>Walk the grant</strong></li></ol>
+<p>   ``<code>text    Call get_troubleshooting_guide(topic=&quot;iam&quot;) and walk me through the property access grant for this exact grantee, naming the Admin screen at each step.    </code>``</p>
+<ol><li><strong>Wrong property ID</strong></li></ol>
+<p>   ``<code>text    The 403 message quotes a property ID. Compare it against my configured GA4_PROPERTY_ID digit by digit and tell me whether I granted access to a different property.    </code>``</p>
+<ol><li><strong>Zero properties listed</strong></li></ol>
+<p>   ``<code>text    list_properties returned an empty list and no error. Explain what that result means about my permissions, and list which properties this identity can actually read.    </code>``</p>
+<ol><li><strong>After the grant</strong></li></ol>
+<p>   ``<code>text    I added the service account as Viewer. Retry the failed query now without restarting the client, and confirm with a totals block whether access is working.    </code>``</p>
 <h2>Next</h2>
 <p><a href="/setup/">Setup</a> for creating the service account key, <a href="/troubleshooting/">troubleshooting</a> for common 400 and quota errors, and <a href="/schema/">query shapes</a> for filter syntax.</p></div>
     </main>

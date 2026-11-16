@@ -1,6 +1,6 @@
 # GA4 MCP Server
 
-> Model Context Protocol server for Google Analytics 4. Read-only reporting, schema discovery, and 17 analytical skills that load on demand. MIT, local stdio, v2.11.7.
+> Model Context Protocol server for Google Analytics 4. Read-only reporting, schema discovery, and 17 analytical skills that load on demand. MIT, local stdio, v2.11.9.
 
 Docs: https://ga4mcp.com
 Repo: https://github.com/surendranb/google-analytics-mcp
@@ -68,13 +68,13 @@ Requires `GA4_PROPERTY_ID` and `GOOGLE_APPLICATION_CREDENTIALS`.
 - [GA4 plugin for Claude Code](https://ga4mcp.com/ga4-plugin-for-claude-code/) ([markdown](https://ga4mcp.com/ga4-plugin-for-claude-code/index.md))
 - [GA4 extension for Gemini CLI](https://ga4mcp.com/ga4-plugin-for-gemini/) ([markdown](https://ga4mcp.com/ga4-plugin-for-gemini/index.md))
 - [35 Production GA4 Prompts for Claude, Cursor & AI](https://ga4mcp.com/google-analytics-ai-prompts/) ([markdown](https://ga4mcp.com/google-analytics-ai-prompts/index.md))
-- [Fix GA4 Missing Permissions: Service Account 403 Guide](https://ga4mcp.com/iam/) ([markdown](https://ga4mcp.com/iam/index.md))
+- [GA4 403 Permission Denied: Service Account Viewer Fix](https://ga4mcp.com/iam/) ([markdown](https://ga4mcp.com/iam/index.md))
 - [GA4 MCP — Connect Google Analytics 4 to Claude & AI](https://ga4mcp.com/) ([markdown](https://ga4mcp.com/index.md))
 - [Natural Language Google Analytics: Query GA4 with AI](https://ga4mcp.com/natural-language-google-analytics/) ([markdown](https://ga4mcp.com/natural-language-google-analytics/index.md))
 - [GA4 MCP plugins for Claude Code and Gemini CLI](https://ga4mcp.com/ga4-plugins/) ([markdown](https://ga4mcp.com/ga4-plugins/index.md))
 - [Privacy — what the GA4 MCP server sends](https://ga4mcp.com/privacy/) ([markdown](https://ga4mcp.com/privacy/index.md))
-- [GA4 query shapes — filters, field names and totals](https://ga4mcp.com/schema/) ([markdown](https://ga4mcp.com/schema/index.md))
-- [Install GA4 MCP: Connect Google Analytics to AI Clients](https://ga4mcp.com/setup/) ([markdown](https://ga4mcp.com/setup/index.md))
+- [GA4 Invalid Dimension or Metric: Fix the 400 Error](https://ga4mcp.com/schema/) ([markdown](https://ga4mcp.com/schema/index.md))
+- [GA4 MCP Setup Error: GA4_PROPERTY_ID or Credentials](https://ga4mcp.com/setup/) ([markdown](https://ga4mcp.com/setup/index.md))
 - [GA4 skills — sixteen analytical recipes for your agent](https://ga4mcp.com/skills/) ([markdown](https://ga4mcp.com/skills/index.md))
 - [Terms of use](https://ga4mcp.com/terms/) ([markdown](https://ga4mcp.com/terms/index.md))
 - [Fix Common GA4 Data API & IAM Errors (Quick Guide)](https://ga4mcp.com/troubleshooting/) ([markdown](https://ga4mcp.com/troubleshooting/index.md))

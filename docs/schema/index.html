@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GA4 query shapes — filters, field names and totals</title>
-<meta name="description" content="The exact JSON shapes for dimension_filter and metric_filter in the GA4 Data API v1beta schema, plus the field-name rule that prevents most 400 errors.">
+<title>GA4 Invalid Dimension or Metric: Fix the 400 Error</title>
+<meta name="description" content="Fix 400 invalid dimension or metric, incompatible dimensions and metrics, and filter parse errors on GA4. Verify every field name with search_schema first.">
 <link rel="canonical" href="https://ga4mcp.com/schema/">
 <link rel="alternate" type="text/markdown" href="https://ga4mcp.com/schema/index.md">
 <link rel="alternate" type="text/plain" title="LLM summary" href="https://ga4mcp.com/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GA4 MCP">
-<meta property="og:title" content="GA4 query shapes — filters, field names and totals">
-<meta property="og:description" content="The exact JSON shapes for dimension_filter and metric_filter in the GA4 Data API v1beta schema, plus the field-name rule that prevents most 400 errors.">
+<meta property="og:title" content="GA4 Invalid Dimension or Metric: Fix the 400 Error">
+<meta property="og:description" content="Fix 400 invalid dimension or metric, incompatible dimensions and metrics, and filter parse errors on GA4. Verify every field name with search_schema first.">
 <meta property="og:url" content="https://ga4mcp.com/schema/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#fef6e4">
@@ -27,13 +27,13 @@ gtag('config', 'G-RX65PWDDEQ');
 </script>
 <script defer data-domain="ga4mcp.com" src="https://plausible.io/js/script.js"></script>
 <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "yz7dkr0x9s");</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 query shapes — filters, field names and totals","description":"The exact JSON shapes for dimension_filter and metric_filter in the GA4 Data API v1beta schema, plus the field-name rule that prevents most 400 errors.","url":"https://ga4mcp.com/schema/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","name":"GA4 Invalid Dimension or Metric: Fix the 400 Error","description":"Fix 400 invalid dimension or metric, incompatible dimensions and metrics, and filter parse errors on GA4. Verify every field name with search_schema first.","url":"https://ga4mcp.com/schema/","isPartOf":{"@type":"WebSite","name":"GA4 MCP","url":"https://ga4mcp.com"},"dateModified":"2026-10-25"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap top__in">
-    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.7</span></a>
+    <a class="brand" href="/"><span class="brand__mark">GA</span>GA4 MCP<span class="brand__ver">v2.11.9</span></a>
     <nav class="top__nav" aria-label="Primary">
       <a href="/setup/">Install</a>
       <a href="/google-analytics-ai-prompts/">Prompts</a>
@@ -52,11 +52,12 @@ gtag('config', 'G-RX65PWDDEQ');
 <div class="side__group"><p class="side__h">Legal</p><ul><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/">Terms</a></li></ul></div></aside>
     <main id="main">
 <div class="prose"><h1>Query shapes</h1>
-<p><code>get_ga4_data</code> takes filters in the shape of the Google Analytics Data API v1beta schema. It is not SQL, and it is not a query string. This page is the six shapes that cover every filter you will write, copied exactly.</p>
+<p><code>get_ga4_data</code> takes filters in the shape of the Google Analytics Data API v1beta schema. It is not SQL, and it is not a query string. This page is the six shapes that cover every filter you will write, plus the three 400 errors they prevent.</p>
+<div class="tw"><table><thead><tr><th>The 400 says</th><th>What is actually wrong</th><th>Jump to</th></tr></thead><tbody><tr><td><code>Field pageviews is not found</code></td><td>The field name is a Universal Analytics name or a guess</td><td><a href="#field-names-come-from-your-property-not-from-training">Field names</a></td></tr><tr><td><code>dimensions and metrics are incompatible</code></td><td>A user-, session- or event-scoped dimension is paired with the wrong metric family</td><td><a href="#scope-rules-are-what-cause-incompatible-errors">Scope rules</a></td></tr><tr><td><code>Invalid JSON payload</code> on a filter</td><td>Two expression keys in one object, or <code>and</code> instead of <code>andGroup</code></td><td><a href="#the-rule-that-prevents-most-errors">The rule</a></td></tr></tbody></table></div>
 <h2>The rule that prevents most errors</h2>
 <p><strong>One top-level key per expression.</strong> A filter expression has exactly one of these keys, and nothing else beside it:</p>
 <ul><li><code>filter</code> — a single condition</li><li><code>andGroup</code> — all conditions must match</li><li><code>orGroup</code> — any condition may match</li><li><code>notExpression</code> — invert one condition</li></ul>
-<p>Two keys in the same object is the most common 400. The server translates between <code>camelCase</code> and <code>snake_case</code>, so <code>fieldName</code> and <code>field_name</code> both work, but the structure still has to be right.</p>
+<p>Two keys in the same object is the most common 400. So is <code>fieldName</code> sitting at the top level of the expression instead of nested inside <code>filter</code>. The server translates between <code>camelCase</code> and <code>snake_case</code>, so <code>fieldName</code> and <code>field_name</code> both work, but the structure still has to be right.</p>
 <h2>Exact match on a string</h2>
 <p>Cities that are exactly London:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
@@ -120,7 +121,7 @@ gtag('config', 'G-RX65PWDDEQ');
     ]
   }
 }</code></pre></div>
-<p>The <code>expressions</code> array is required and the key is <code>andGroup</code>, not <code>and</code>. Writing <code>&quot;and&quot;: [...]</code> is invalid.</p>
+<p>The <code>expressions</code> array is required and the key is <code>andGroup</code>, not <code>and</code>. Writing <code>&quot;and&quot;: [...]</code> is invalid. The other wrong keys the server sees are <code>or_filter</code> for <code>orGroup</code>, <code>not_filter</code> for <code>notExpression</code>, and <code>filters</code> for <code>expressions</code>.</p>
 <h2>Excluding one condition</h2>
 <p>Everything except direct traffic:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">json</span><button class="cb__copy" type="button">Copy</button></div><pre><code>{
@@ -136,14 +137,32 @@ gtag('config', 'G-RX65PWDDEQ');
 }</code></pre></div>
 <p><code>notExpression</code> wraps exactly one expression. To exclude two things, use <code>notExpression</code> around an <code>orGroup</code>.</p>
 <h2>Field names come from your property, not from training</h2>
-<p>If you get an invalid dimension or metric error, the name you used does not exist in that property. It is usually a Universal Analytics name — <code>pageviews</code>, <code>users</code>, <code>conversions</code> — and GA4 renamed all three.</p>
+<p>If you get an invalid dimension or metric error, the name you used does not exist in that property. It is usually a Universal Analytics name — <code>pageviews</code>, <code>users</code>, <code>conversions</code> — and GA4 renamed all three. These are the substitutions the server's own guide carries:</p>
+<div class="tw"><table><thead><tr><th>Wrong name</th><th>Correct GA4 name</th></tr></thead><tbody><tr><td><code>pageviews</code>, <code>uniquePageviews</code></td><td><code>screenPageViews</code></td></tr><tr><td><code>users</code></td><td><code>totalUsers</code> or <code>activeUsers</code></td></tr><tr><td><code>conversions</code></td><td><code>keyEvents</code> (renamed May 2024)</td></tr><tr><td><code>conversionRate</code>, <code>sessionConversionRate</code></td><td><code>sessionKeyEventRate</code></td></tr><tr><td><code>avgSessionDuration</code></td><td><code>averageSessionDuration</code></td></tr><tr><td><code>timeOnPage</code>, <code>avgTimeOnPage</code></td><td><code>userEngagementDuration</code></td></tr><tr><td><code>sessionDefaultChannelGrouping</code></td><td><code>sessionDefaultChannelGroup</code></td></tr><tr><td><code>source</code>, <code>medium</code></td><td><code>sessionSource</code>, <code>sessionMedium</code></td></tr></tbody></table></div>
+<p>All API names are camelCase. <code>page_path</code> and <code>event_name</code> are rejected; <code>pagePath</code> and <code>eventName</code> are not.</p>
 <p>Use the search tool before typing a name:</p>
 <div class="cb"><div class="cb__bar"><span class="cb__lang">text</span><button class="cb__copy" type="button">Copy</button></div><pre><code>search_schema(keyword=&quot;conversions&quot;)</code></pre></div>
-<p>That returns <code>keyEvents</code> today, not <code>conversions</code>, because GA4 renamed the concept in 2024. The server validates field names against the live property before the query runs, so a wrong name comes back with the reason and a candidate instead of a bare 400.</p>
+<p>That returns <code>keyEvents</code> today, because GA4 renamed the concept in 2024. The server validates field names against the live property before the query runs, so a wrong name comes back with the reason and a candidate instead of a bare 400.</p>
 <p>For a whole category at once, <code>list_dimension_categories</code> and <code>list_metric_categories</code> return counts first; then <code>get_dimensions_by_category</code> gives you the names.</p>
+<h2>Scope rules are what cause incompatible errors</h2>
+<p>GA4 groups every field by the thing it describes. Pair across two groups and the API returns <code>The request's dimensions and metrics are incompatible</code>, which is a 400 about the combination rather than any single name.</p>
+<ul><li><strong>Session scope</strong> — <code>sessionSource</code>, <code>sessionMedium</code>, <code>sessionCampaignName</code>. Pair with <code>sessions</code>, <code>bounceRate</code>, <code>sessionKeyEventRate</code>. Not with <code>eventCount</code>.</li><li><strong>Event scope</strong> — <code>eventName</code>, <code>pagePath</code>. Pair with <code>eventCount</code>, <code>screenPageViews</code>, <code>keyEvents</code>. Not with <code>sessions</code>.</li><li><strong>User scope</strong> — <code>firstUserSource</code>, <code>firstUserMedium</code>. Pair with <code>totalUsers</code>, <code>newUsers</code>. Not with <code>sessions</code>.</li><li><strong>Safe with any metric</strong> — <code>date</code>, <code>deviceCategory</code>, <code>country</code>, <code>city</code>, <code>pagePath</code>, <code>pageTitle</code>.</li></ul>
+<p>When a combination is rejected, do not retry with a guessed pair. <code>search_skills('compatible-combinations')</code> returns the tested pairs, and the <a href="/skills/">skills index</a> lists every recipe with the fields it uses.</p>
 <h2>Rows, totals and the reason both exist</h2>
 <p>Every multi-row pull returns a <code>totals</code> block that GA4 computed server-side, alongside the rows. Read the period figure from <code>totals</code>. Do not add up daily rows in the model — rates do not sum, and a seven-day total built by arithmetic is wrong while looking reasonable.</p>
 <p>Large queries are estimated before they run and warn above 2,500 rows. If you need more than that, narrow the date range or the dimensions rather than forcing it through; a wide pull with no aggregation fills the context window and answers nothing.</p>
+<h2>Five prompts that resolve a schema error</h2>
+<p>Paste one into <a href="/ga4-mcp-for-claude/">Claude</a>, <a href="/ga4-mcp-for-cursor/">Cursor</a>, <a href="/ga4-mcp-for-gemini/">Gemini CLI</a>, or any of the <a href="/ga4-mcp-for-every-harness/">17 clients</a>. Each forces a lookup instead of a second guess.</p>
+<ol><li><strong>Find the name that replaced a UA field</strong></li></ol>
+<p>   ``<code>text    My query failed with &quot;Field pageviews is not found&quot;. Call search_schema(&quot;pageviews&quot;), tell me the GA4 name it resolves to, and rewrite my query with every legacy name replaced.    </code>``</p>
+<ol><li><strong>Resolve an incompatible pair</strong></li></ol>
+<p>   ``<code>text    GA4 returned &quot;dimensions and metrics are incompatible&quot;. Load search_skills(&quot;compatible-combinations&quot;), name the scope each of my dimensions and metrics belongs to, and give me the smallest valid rewrite that still answers my question.    </code>``</p>
+<ol><li><strong>Fix a filter that will not parse</strong></li></ol>
+<p>   ``<code>text    My dimension_filter is rejected. Check it for two keys in one expression, for fieldName outside a filter object, and for and/or/not instead of andGroup/orGroup/notExpression. Show the corrected JSON.    </code>``</p>
+<ol><li><strong>Discover the valid fields before writing the query</strong></li></ol>
+<p>   ``<code>text    Before running anything, call list_metric_categories, then get_dimensions_by_category for the category that fits my question, and list the exact names you will use. Then run the query with those names only.    </code>``</p>
+<ol><li><strong>Reject a plausible-looking name</strong></li></ol>
+<p>   ``<code>text    Do not trust your training for GA4 field names. Verify each dimension and metric in my query with search_schema first, list any that do not exist in this property, and substitute the returned candidates.    </code>``</p>
 <h2>Next</h2>
 <p>If the query runs but the answer is nonsense, the problem is method rather than syntax. Read the <a href="/skills/">skills index</a> and pick the recipe that matches the question.</p></div>
     </main>
