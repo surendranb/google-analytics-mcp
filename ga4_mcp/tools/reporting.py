@@ -13,7 +13,8 @@ from google.analytics.data_v1beta.types import (
 )
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
-from ga4_mcp.coordinator import mcp, fire_skill_tip, note_brief_version
+from ga4_mcp.coordinator import mcp, fire_skill_tip, note_brief_version, classify_setup_failure
+from ga4_mcp.tools import metadata
 from ga4_mcp.telemetry import client_supports_elicitation
 
 # S3: version tags for the field-proven error briefs below. The brief TEXT is
@@ -23,7 +24,8 @@ BRIEF_INVALID_DIMENSION = "ga4-schema-dim-v1"
 BRIEF_INVALID_METRIC = "ga4-schema-met-v1"
 BRIEF_FILTER_SHAPE = "ga4-filter-v1"
 BRIEF_INCOMPATIBLE = "ga4-incompatible-v1"
-BRIEF_IAM_QUERY = "ga4-iam-query-v1"
+BRIEF_FIELD_UNAVAILABLE = "ga4-gsc-field-v1"
+BRIEF_TRANSIENT = "ga4-transient-v1"
 
 # get_ga4_data hits the external GA4 Data API: open world, read-only, idempotent.
 _READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
@@ -56,6 +58,20 @@ def _get_smart_sorting(dimensions, metrics):
     if metrics:
         order_bys.append(OrderBy(metric=OrderBy.MetricOrderBy(metric_name=metrics[0]), desc=True))
     return order_bys
+
+# Upstream GA4 failures that retry cleanly: quota (429), service unavailable
+# (503), gateway timeout (504) — including the gRPC/transport spellings the
+# google client raises. A retry-once directive beats a bare gRPC string.
+_TRANSIENT_MARKERS = (
+    "429", "503", "504", "unavailable", "resource_exhausted", "resourceexhausted",
+    "deadline", "stream removed", "recvmsg", "socket closed", "connection reset",
+)
+
+
+def _is_transient(error_text: str) -> bool:
+    low = error_text.lower()
+    return any(marker in low for marker in _TRANSIENT_MARKERS)
+
 
 def _should_aggregate(dimensions, metrics):
     """Request GA4 server-side metric totals whenever a dimension splits the
@@ -332,8 +348,23 @@ async def get_ga4_data(
         parsed_metrics = [METRIC_ALIASES.get(m, m) for m in parsed_metrics]
         parsed_dimensions = [DIMENSION_ALIASES.get(d, d) for d in parsed_dimensions]
 
+        # GA4 400s on a repeated field ("Found duplicate dimensions/metrics").
+        # Order-preserving dedupe keeps the caller's intent, same answer, no
+        # round-trip spent.
+        parsed_dimensions = list(dict.fromkeys(parsed_dimensions))
+        parsed_metrics = list(dict.fromkeys(parsed_metrics))
+
         if not parsed_metrics:
             return {"error": "Metrics list cannot be empty."}
+
+        # Fields this property cannot serve at all (removed from the allowlist at
+        # schema load) fail locally, naming the field and where the number lives.
+        unservable = metadata.unavailable_fields()
+        for met in parsed_metrics:
+            if met in unservable:
+                fire_skill_tip(ctx, f"💡 '{met}' is a Search Console metric, not a GA4 one — read it from the Google Search Console API instead.", skill="ga4-limitations", trigger="error_schema", tool_name="get_ga4_data")
+                note_brief_version(BRIEF_FIELD_UNAVAILABLE)
+                return {"error": f"'{met}' cannot be read from this property: GA4's Search Console metrics require an active Search Console link, and this property has none — every request for them returns 400 upstream, so none was sent. The same number lives in the Google Search Console API as '{unservable[met]}' (searchanalytics.query, dimensions=['date'], type='web'). Do NOT retry '{met}' or try a dimension variant. For organic search traffic, use a Google Search Console tool; for on-site behaviour in GA4, use search_schema('<keyword>') for the GA4 names this property does have."}
 
         valid_dims = PROPERTY_SCHEMA["dimensions"].keys()
         valid_mets = PROPERTY_SCHEMA["metrics"].keys()
@@ -450,12 +481,23 @@ async def get_ga4_data(
             error_message += " SYSTEM DIRECTIVE: Call search_skills('compatible-combinations') to learn which dimensions and metrics can be combined."
             note_brief_version(BRIEF_INCOMPATIBLE)
 
-        elif "403" in error_message or "PermissionDenied" in error_message or "permission" in error_message.lower():
-            fire_skill_tip(ctx, "💡 Permission error detected. Call get_troubleshooting_guide(topic='iam') for the exact steps to grant GA4 Viewer access to your service account.", skill=None, trigger="error_iam", tool_name="get_ga4_data")
-            error_message += " SYSTEM DIRECTIVE: You do not know how to solve this. You MUST immediately call get_troubleshooting_guide(topic='iam') to read the step-by-step IAM permissions guide and help the user resolve this."
-            note_brief_version(BRIEF_IAM_QUERY)
-
         else:
-            fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures') for correct patterns.", skill=None, trigger="error_generic", tool_name="get_ga4_data")
+            # Setup-class failures (401 family, 403) and transient upstream
+            # failures get at runtime what boot gives them — one classifier,
+            # one brief formatter, no library string.
+            category, brief_version, brief = classify_setup_failure(
+                e, os.getenv("GA4_PROPERTY_ID") or "", os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or "")
+            if category in ("IAMError", "ADCExpired"):
+                fire_skill_tip(ctx, "💡 Auth failure — the setup brief in this error names the fix and who can do it.", skill=None,
+                               trigger="error_iam" if category == "IAMError" else "error_auth", tool_name="get_ga4_data")
+                note_brief_version(brief_version)
+                return {"error": brief}
+
+            if _is_transient(error_message):
+                fire_skill_tip(ctx, "💡 Upstream GA4 API is briefly unavailable — the query itself is valid.", skill=None, trigger="error_transient", tool_name="get_ga4_data")
+                note_brief_version(BRIEF_TRANSIENT)
+                error_message += " SYSTEM DIRECTIVE: Transient upstream failure (429/503/504) — your query is NOT wrong. Retry this exact call ONCE, unchanged; if it fails again, stop and tell the user the GA4 API is having a temporary outage. Do not change fields or dates to work around it."
+            else:
+                fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures') for correct patterns.", skill=None, trigger="error_generic", tool_name="get_ga4_data")
 
         return {"error": error_message}

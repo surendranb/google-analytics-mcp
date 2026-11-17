@@ -48,13 +48,7 @@ def main():
         config_status = "error"
     elif not property_id:
         print("ERROR: GA4_PROPERTY_ID environment variable not set.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
-            "No GA4 Property ID is set — GA4_PROPERTY_ID is unset.",
-            ["Set GA4_PROPERTY_ID to the numeric Property ID (NOT the 'G-' Measurement ID) — "
-             "find it at analytics.google.com > Admin > Property details (e.g. 123456789).",
-             coordinator.config_hint()],
-            "property-id",
-            why="Every query must target a specific property; without the ID nothing can be read.")
+        coordinator.SERVER_INIT_ERROR = coordinator.property_id_brief()
         coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-property-id-v1"
         config_status = "error"
     elif credentials_path and "ABSOLUTE/PATH/TO" in credentials_path:
@@ -71,7 +65,7 @@ def main():
     elif credentials_path and not os.path.exists(credentials_path):
         print(f"ERROR: Credentials file not found at '{credentials_path}'.", file=sys.stderr)
         coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
-            f"The credentials file does not exist at the configured path '{credentials_path}'.",
+            f"The credentials file does not exist at the configured path '{os.path.basename(credentials_path)}'.",
             ["Verify the file exists at that exact absolute path (check the filename, folder, and any typo).",
              "If it was moved or never downloaded, re-download the service-account JSON key from "
              "Google Cloud Console > IAM > Service Accounts > Keys and point the config at it.",
@@ -90,51 +84,9 @@ def main():
             telemetry.mark_ever_worked()
         except Exception as e:
             print(f"FATAL: Could not fetch GA4 property schema: {e}", file=sys.stderr)
-            err_str = str(e)
-            if "403" in err_str or "PermissionDenied" in err_str or "permission" in err_str.lower():
-                grantee = "your connected Google account"
-                if credentials_path:
-                    model, email, _ = coordinator.inspect_credentials(credentials_path)
-                    if model == "service_account" and email:
-                        grantee = f"the service account {email}"
-                    elif model == "adc":
-                        grantee = "the Google account you authenticated with via gcloud"
-                handoff = (f"Please add {grantee} as a Viewer on GA4 property {property_id} "
-                           f"(analytics.google.com > Admin > Property Access Management).")
-                coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
-                    f"Credentials are valid, but {grantee} has no access to GA4 property {property_id}.",
-                    [f"At analytics.google.com > Admin > Property Access Management, add {grantee} with the Viewer role.",
-                     "Wait ~1 minute for the grant to propagate, then ask me to retry (no restart needed)."],
-                    "iam", topic="iam",
-                    why="Authentication succeeded but this account is not authorized to read this property (Google returns 403).",
-                    who="the user, or whoever administers this GA4 property if that is someone else",
-                    handoff=handoff)
-                coordinator.SERVER_INIT_ERROR_CATEGORY = "IAMError"
-                coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-iam-v1"
-            elif ("Reauthentication is needed" in err_str or "invalid_grant" in err_str
-                    or "expired or revoked" in err_str):
-                worked_before = telemetry.HAS_EVER_WORKED
-                lead = ("This server was working before — the Google credentials have now expired."
-                        if worked_before else "The Google credentials are expired or revoked.")
-                coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
-                    lead,
-                    ["Re-authenticate: run 'gcloud auth application-default login' in a terminal (for ADC), "
-                     "or replace the service-account key file if that is what this server uses.",
-                     "Then ask me to retry — no config changes needed.",
-                     "Tip: service-account keys do not expire; prefer one if this recurs."],
-                    "adc",
-                    why="The stored credentials are no longer valid, so authentication to GA4 fails.",
-                    who="the user (re-auth is a local action only they can take)")
-                coordinator.SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
-                coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-auth-v1"
-            else:
-                coordinator.SERVER_INIT_ERROR = coordinator.build_guided_init_error(
-                    f"Could not fetch GA4 property schema: {err_str}.",
-                    ["Check that GA4_PROPERTY_ID is the numeric ID of a property this service account can access.",
-                     "Check the credentials file is a valid service-account JSON key.",
-                     coordinator.config_hint()],
-                    "setup")
-                coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-setup-v1"
+            (coordinator.SERVER_INIT_ERROR_CATEGORY, coordinator.SERVER_INIT_BRIEF_VERSION,
+             coordinator.SERVER_INIT_ERROR) = coordinator.classify_setup_failure(
+                e, property_id, credentials_path)
             config_status = "error"
 
     # 3. Register tools (importing the modules registers their @mcp.tool functions)

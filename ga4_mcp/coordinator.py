@@ -103,6 +103,74 @@ def build_guided_init_error(what, steps, anchor="setup", topic="setup", why=None
     return "  ".join(parts)
 
 
+def property_id_brief():
+    """The one missing-property brief, shared by boot, re-init, and
+    list_properties. A bare 'no property configured' string leaves the model
+    with nothing to tell the user."""
+    return build_guided_init_error(
+        "No GA4 Property ID is set — GA4_PROPERTY_ID is unset.",
+        ["Set GA4_PROPERTY_ID to the numeric Property ID (NOT the 'G-' Measurement ID) — "
+         "find it at analytics.google.com > Admin > Property details (e.g. 123456789).",
+         config_hint(AGENT_NAME)],
+        "property-id",
+        why="Every query must target a specific property; without the ID nothing can be read.")
+
+
+def classify_setup_failure(err, property_id="", credentials_path=""):
+    """Map a failed GA4 auth/schema call to (category, brief_version, brief).
+
+    One classifier for boot (server.py), re-init (reinitialize), and runtime
+    tool errors: every path ends at build_guided_init_error, so the model gets
+    the fix for the right family instead of a raw library string. Matching is
+    case-insensitive — Google returns ACCESS_TOKEN_EXPIRED in caps, and a
+    case-sensitive 'expired' check was sending expired tokens down the generic
+    'check your property ID' path.
+    """
+    text = str(err)
+    low = text.lower()
+    if "403" in text or "permissiondenied" in low or "permission_denied" in low or "permission" in low:
+        grantee = "the connected Google user"
+        if credentials_path:
+            model, email, _ = inspect_credentials(credentials_path)
+            if model == "service_account" and email:
+                grantee = f"the service account {email}"
+            elif model == "adc":
+                grantee = "the Google account you authenticated with via gcloud"
+        target = f"GA4 property {property_id}" if property_id else "this GA4 property"
+        handoff = (f"Please add {grantee} as a Viewer on {target} "
+                   f"(analytics.google.com > Admin > Property Access Management).")
+        return "IAMError", "ga4-iam-v1", build_guided_init_error(
+            f"Credentials are valid, but {grantee} has no access to {target}.",
+            [f"At analytics.google.com > Admin > Property Access Management, add {grantee} with the Viewer role.",
+             "Wait ~1 minute for the grant to propagate, then ask me to retry (no restart needed)."],
+            "iam", topic="iam",
+            why="Authentication succeeded but this account is not authorized to read this property (Google returns 403).",
+            who="the user, or whoever administers this GA4 property if that is someone else",
+            handoff=handoff)
+    if ("401" in text or "unauthenticated" in low or "invalid auth" in low
+            or "access_token_expired" in low or "reauthentication" in low
+            or "invalid_grant" in low or "invalid_client" in low
+            or "expired" in low or "revoked" in low):
+        lead = ("This server was working before — the Google credentials have now expired."
+                if telemetry.HAS_EVER_WORKED else "The Google credentials are invalid, expired, or revoked.")
+        return "ADCExpired", "ga4-auth-v1", build_guided_init_error(
+            lead,
+            ["Re-authenticate: run 'gcloud auth application-default login' in a terminal (for ADC), "
+             "or replace the service-account key file if that is what this server uses.",
+             "Then ask me to retry — no config changes needed.",
+             "Tip: service-account keys do not expire; prefer one if this recurs."],
+            "adc",
+            why="The stored credentials are no longer valid, so authentication to GA4 fails.",
+            who="the user (re-auth is a local action only they can take)")
+    target = f"GA4 property {property_id}" if property_id else "the configured GA4 property"
+    return "InitError", "ga4-setup-v1", build_guided_init_error(
+        f"Could not fetch the schema for {target}: {text}.",
+        ["Check that GA4_PROPERTY_ID is the numeric ID of a property this service account can access.",
+         "Check the credentials file is a valid service-account JSON key.",
+         config_hint(AGENT_NAME)],
+        "setup")
+
+
 def inspect_credentials(path):
     """Report the SHAPE of a credentials file so error messages can be
     auth-model-correct and hand the model exact values — without logging any
@@ -249,7 +317,8 @@ def _classify_result(result):
                 return "error", "SchemaHallucination"
             if "IAM Error" in err_str or "PermissionDenied" in err_str or "403" in err_str:
                 return "error", "IAMError"
-            if "Schema not loaded" in err_str or "Setup paused" in err_str or SERVER_INIT_ERROR:
+            if ("Schema not loaded" in err_str or "Setup paused" in err_str or "[SETUP BLOCKED]" in err_str
+                    or SERVER_INIT_ERROR):
                 return "error", SERVER_INIT_ERROR_CATEGORY
             return "error", "APIError"
         if "warning" in result:
@@ -520,6 +589,8 @@ def fire_skill_tip(ctx, message: str, skill: str | None, trigger: str, tool_name
                  'error_schema'      invalid dimension/metric
                  'error_filter'      filter parse failure
                  'error_iam'         403/permission denied
+                 'error_auth'        401-family (invalid/expired credentials), runtime
+                 'error_transient'   429/503/504 upstream blip — retry-once directive
                  'error_incompatible' incompatible dim/metric combination
                  'error_generic'     other API error
                  'skill_index'       search_skills index served
@@ -580,19 +651,13 @@ def reinitialize():
         SERVER_INIT_BRIEF_VERSION = "ga4-reinit-creds-v1"
         return False, "credentials", "credentials path not set"
     if not prop:
-        SERVER_INIT_ERROR = build_guided_init_error(
-            "No GA4 Property ID is set — GA4_PROPERTY_ID is unset.",
-            ["Set GA4_PROPERTY_ID to the numeric Property ID (NOT the 'G-' Measurement ID) — "
-             "find it at analytics.google.com > Admin > Property details (e.g. 123456789).",
-             config_hint(AGENT_NAME)],
-            "property-id",
-            why="Every query must target a specific property; without the ID nothing can be read.")
+        SERVER_INIT_ERROR = property_id_brief()
         SERVER_INIT_ERROR_CATEGORY = "InitError"
-        SERVER_INIT_BRIEF_VERSION = "ga4-reinit-property-v1"
+        SERVER_INIT_BRIEF_VERSION = "ga4-property-id-v1"
         return False, "property-id", "property id not set"
     if creds and not os.path.exists(creds):
         SERVER_INIT_ERROR = build_guided_init_error(
-            f"The credentials file does not exist at the configured path '{creds}'.",
+            f"The credentials file does not exist at the configured path '{os.path.basename(creds)}'.",
             ["Verify the file exists at that exact absolute path (check the filename, folder, and any typo).",
              "If it was moved or never downloaded, re-download the service-account JSON key from "
              "Google Cloud Console > IAM > Service Accounts > Keys and point the config at it.",
@@ -612,51 +677,9 @@ def reinitialize():
         return True, "ok", "initialized"
     except Exception as e:
         err = str(e)
-        if "403" in err or "PermissionDenied" in err or "permission" in err.lower():
-            grantee = "the connected Google user"
-            if creds:
-                model, email, _ = inspect_credentials(creds)
-                if model == "service_account" and email:
-                    grantee = f"the service account {email}"
-                elif model == "adc":
-                    grantee = "the Google account you authenticated with via gcloud"
-            handoff = (f"Please add {grantee} as a Viewer on GA4 property {prop} "
-                       f"(analytics.google.com > Admin > Property Access Management).")
-            SERVER_INIT_ERROR = build_guided_init_error(
-                f"Credentials are valid, but {grantee} has no access to GA4 property {prop}.",
-                [f"At analytics.google.com > Admin > Property Access Management, add {grantee} with the Viewer role.",
-                 "Wait ~1 minute for the grant to propagate, then ask me to retry (no restart needed)."],
-                "iam", topic="iam",
-                why="Authentication succeeded but this account is not authorized to read this property (Google returns 403).",
-                who="the user, or whoever administers this GA4 property if that is someone else",
-                handoff=handoff)
-            SERVER_INIT_ERROR_CATEGORY = "IAMError"
-            SERVER_INIT_BRIEF_VERSION = "ga4-reinit-iam-v1"
-            cat = "iam"
-        elif "Reauthentication" in err or "invalid_grant" in err or "expired" in err or "revoked" in err:
-            worked_before = telemetry.HAS_EVER_WORKED
-            lead = ("This server was working before — the Google credentials have now expired."
-                    if worked_before else "The Google credentials are expired or revoked.")
-            SERVER_INIT_ERROR = build_guided_init_error(
-                lead,
-                ["Re-authenticate: run 'gcloud auth application-default login' in a terminal (for ADC), "
-                 "or replace the service-account key file if that is what this server uses.",
-                 "Then ask me to retry — no config changes needed.",
-                 "Tip: service-account keys do not expire; prefer one if this recurs."],
-                "adc",
-                why="The stored credentials are no longer valid, so authentication to GA4 fails.",
-                who="the user (re-auth is a local action only they can take)")
-            SERVER_INIT_ERROR_CATEGORY = "ADCExpired"
-            SERVER_INIT_BRIEF_VERSION = "ga4-reinit-auth-v1"
-            cat = "adc"
-        else:
-            SERVER_INIT_ERROR = build_guided_init_error(
-                f"Could not fetch GA4 property schema: {err}.",
-                ["Check that GA4_PROPERTY_ID is the numeric ID of a property this service account can access.",
-                 "Check the credentials file is a valid service-account JSON key.",
-                 config_hint(AGENT_NAME)],
-                "setup")
-            SERVER_INIT_ERROR_CATEGORY = "InitError"
-            SERVER_INIT_BRIEF_VERSION = "ga4-reinit-setup-v1"
-            cat = "setup"
+        category, version, brief = classify_setup_failure(e, prop, creds)
+        SERVER_INIT_ERROR = brief
+        SERVER_INIT_ERROR_CATEGORY = category
+        SERVER_INIT_BRIEF_VERSION = version
+        cat = {"IAMError": "iam", "ADCExpired": "adc"}.get(category, "setup")
         return False, cat, err
