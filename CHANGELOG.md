@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.0] - 2026-11-17
+
+### Fixed
+- **Search Console fields stopped being advertised where they cannot be read**: GA4's metadata advertises `organicGoogleSearchClicks`, `organicGoogleSearchImpressions`, `organicGoogleSearchAveragePosition` and `organicGoogleSearchClickThroughRate` for every property, but the report path 400s all four on a property without an active Search Console link. One guarded probe at schema load drops them from the allowlist and from `search_schema`, and `get_ga4_data` now fails locally naming the field and the Search Console field that carries the same number (`clicks`, `impressions`, `position`, `clickThroughRate`) — no upstream request.
+- **Duplicate dimensions/metrics are deduped** instead of costing a round-trip on GA4's "Found duplicate dimensions/metrics" 400.
+- **Transient upstream failures return a retry-once directive**: 429/503/504 (and their gRPC spellings) now say the query is valid and to retry once, instead of passing through a bare library string.
+- **Setup-class failures are classified in one place**: 401-family, 403 and generic schema failures share one classifier across boot, re-init and runtime calls. `ACCESS_TOKEN_EXPIRED` (returned in caps) previously fell through the case-sensitive check into the generic "check your property ID" brief; it now gets the re-authentication brief.
+- **`list_properties` and the schema tools return guided setup briefs** instead of `No GA4 property configured.` and `Schema not loaded. Please check server startup logs.` Model-facing briefs no longer carry the user's local credentials path.
+
 ## [2.11.7] - 2026-10-28
 
 ### Added
