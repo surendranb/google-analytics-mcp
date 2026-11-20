@@ -145,3 +145,58 @@ def test_missing_property_tool_error_is_a_brief_not_a_bare_string():
     assert "[SETUP BLOCKED]" in result["error"]
     assert "GA4_PROPERTY_ID" in result["error"]
     assert coord._classify_result(result)[1] == coord.SERVER_INIT_ERROR_CATEGORY
+
+
+def _error_from(exc, dimensions=("date",), metrics=("sessions",)):
+    class _Raises:
+        def run_report(self, request=None):
+            raise exc
+
+    _reset_schema()
+    coord.get_data_client = lambda: _Raises()
+    return _run(reporting.get_ga4_data(dimensions=list(dimensions), metrics=list(metrics)))["error"]
+
+
+def test_transient_status_beats_setup_classifier_on_shared_text():
+    """2.12.0 sent these 503s to the IAM/ADC briefs because their text carried
+    'expired'/'permission' — a recoverable blip reported as a setup blocker."""
+    for text in ("503 Deadline Exceeded: upstream channel expired before response",
+                 "503 failed to connect: metadata permission plugin unavailable"):
+        err = _error_from(Exception(text))
+        assert "Retry this exact call ONCE" in err, text
+        assert "[SETUP BLOCKED]" not in err, text
+        assert "Re-authenticate" not in err, text
+
+
+def test_genuine_401_still_gets_adc_brief():
+    err = _error_from(Exception("401 Request had invalid authentication credentials. ACCESS_TOKEN_EXPIRED"))
+    assert "[SETUP BLOCKED]" in err
+    assert "Re-authenticate" in err
+    assert "Retry this exact call ONCE" not in err
+
+
+def test_genuine_403_still_gets_iam_brief():
+    err = _error_from(Exception("403 PermissionDenied: caller does not have permission"))
+    assert "[SETUP BLOCKED]" in err
+    assert "Viewer role" in err
+    assert "Retry this exact call ONCE" not in err
+
+
+def test_unrecognised_400_gets_field_shape_brief_not_raw_text():
+    err = _error_from(Exception("400 Field fooBar is not a valid dimension for this property."))
+    assert not err.startswith("Error fetching GA4 data:")
+    assert "Error fetching GA4 data:" not in err
+    assert "GA4 rejected this request" in err
+    assert "search_schema('<keyword>')" in err
+    assert "search_skills('compatible-combinations')" in err
+    assert "fooBar" in err
+
+
+def test_invalid_dimension_400_still_routes_to_invalid_dimension_brief():
+    """Local admission pre-empts the catch-all: a bad name never reaches it."""
+    _reset_schema()
+    coord.get_data_client = _no_upstream()
+    err = _run(reporting.get_ga4_data(dimensions=["nopeDim"], metrics=["sessions"]))["error"]
+    assert "Invalid dimension: 'nopeDim'" in err
+    assert "GA4 rejected this request" not in err
+    assert "Error fetching GA4 data:" not in err

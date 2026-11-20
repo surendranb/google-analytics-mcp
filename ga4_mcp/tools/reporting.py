@@ -26,6 +26,7 @@ BRIEF_FILTER_SHAPE = "ga4-filter-v1"
 BRIEF_INCOMPATIBLE = "ga4-incompatible-v1"
 BRIEF_FIELD_UNAVAILABLE = "ga4-gsc-field-v1"
 BRIEF_TRANSIENT = "ga4-transient-v1"
+BRIEF_FIELD_SHAPE = "ga4-field-shape-v1"
 
 # get_ga4_data hits the external GA4 Data API: open world, read-only, idempotent.
 _READ_ONLY = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
@@ -470,21 +471,31 @@ async def get_ga4_data(
         return _build_report_payload(response, skill)
 
     except Exception as e:
-        error_message = f"Error fetching GA4 data: {str(e)}"
+        upstream = str(e)
+        error_message = f"Error fetching GA4 data: {upstream}"
         print(error_message, file=sys.stderr)
         if hasattr(e, 'details'):
             details_val = e.details() if callable(getattr(e, 'details', None)) else getattr(e, 'details')
+            upstream += f" Details: {details_val}"
             error_message += f" Details: {details_val}"
 
-        if "incompatible" in error_message.lower() or "dimensions & metrics" in error_message.lower():
+        # Upstream STATUS beats text matching. A recoverable blip is not a setup
+        # problem: 2.12.0 sent 503s to the IAM/ADC briefs because their text
+        # carried 'expired'/'permission', telling the model to stop when one
+        # retry would have worked.
+        if _is_transient(error_message):
+            fire_skill_tip(ctx, "💡 Upstream GA4 API is briefly unavailable — the query itself is valid.", skill=None, trigger="error_transient", tool_name="get_ga4_data")
+            note_brief_version(BRIEF_TRANSIENT)
+            error_message += " SYSTEM DIRECTIVE: Transient upstream failure (429/503/504) — your query is NOT wrong. Retry this exact call ONCE, unchanged; if it fails again, stop and tell the user the GA4 API is having a temporary outage. Do not change fields or dates to work around it."
+
+        elif "incompatible" in error_message.lower() or "dimensions & metrics" in error_message.lower():
             fire_skill_tip(ctx, "💡 Skill tip: search_skills('compatible-combinations') explains which dimension/metric scopes can be paired. Session dims need session metrics; event dims need event metrics.", skill="compatible-combinations", trigger="error_incompatible", tool_name="get_ga4_data")
             error_message += " SYSTEM DIRECTIVE: Call search_skills('compatible-combinations') to learn which dimensions and metrics can be combined."
             note_brief_version(BRIEF_INCOMPATIBLE)
 
         else:
-            # Setup-class failures (401 family, 403) and transient upstream
-            # failures get at runtime what boot gives them — one classifier,
-            # one brief formatter, no library string.
+            # Setup-class failures (401 family, 403) get at runtime what boot
+            # gives them — one classifier, one brief formatter, no library string.
             category, brief_version, brief = classify_setup_failure(
                 e, os.getenv("GA4_PROPERTY_ID") or "", os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or "")
             if category in ("IAMError", "ADCExpired"):
@@ -493,11 +504,22 @@ async def get_ga4_data(
                 note_brief_version(brief_version)
                 return {"error": brief}
 
-            if _is_transient(error_message):
-                fire_skill_tip(ctx, "💡 Upstream GA4 API is briefly unavailable — the query itself is valid.", skill=None, trigger="error_transient", tool_name="get_ga4_data")
-                note_brief_version(BRIEF_TRANSIENT)
-                error_message += " SYSTEM DIRECTIVE: Transient upstream failure (429/503/504) — your query is NOT wrong. Retry this exact call ONCE, unchanged; if it fails again, stop and tell the user the GA4 API is having a temporary outage. Do not change fields or dates to work around it."
-            else:
-                fire_skill_tip(ctx, "💡 If this error involves field names or filter structure, call search_skills('common-metric-names') or search_skills('filter-structures') for correct patterns.", skill=None, trigger="error_generic", tool_name="get_ga4_data")
+            # Nothing left may reach the model as a raw library string: the
+            # residual 400/field-shape class names its causes and the next call.
+            fire_skill_tip(ctx, "💡 Skill tip: search_schema() has this property's live field names; search_skills('compatible-combinations') has the pairing rules.", skill="compatible-combinations", trigger="error_generic", tool_name="get_ga4_data")
+            note_brief_version(BRIEF_FIELD_SHAPE)
+            return {"error": (
+                "GA4 rejected this request — the fields, their pairing, or their shape do not match what this property accepts.  "
+                "WHY: the GA4 Data API rejects (400) a field name it does not know, a dimension/metric pairing drawn from "
+                "different scopes (session dimensions need session metrics; event dimensions need event metrics), or a field "
+                "this property cannot serve at all.  "
+                "LIKELY CAUSES: (1) an invalid dimension or metric name — GA4 names differ from Universal Analytics and from "
+                "older-GA4 names in model training data; (2) an incompatible dimension-metric pairing; (3) an unsupported "
+                "field for this property.  "
+                "NEXT CALL: search_schema('<keyword>') for this property's live field names, search_skills('compatible-combinations') "
+                "for pairing rules, or search_skills('filter-structures') if a filter was involved. Do NOT resend this exact request — "
+                "change the field or the pairing.  "
+                f"UPSTREAM SAID: {upstream}"
+            )}
 
         return {"error": error_message}
