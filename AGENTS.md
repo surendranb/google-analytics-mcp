@@ -14,7 +14,7 @@ curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
 
 # Or launch directly via stdio:
 uvx google-analytics-mcp
-npx -y google-analytics-mcp
+npx -y @surendranb/google-analytics-mcp
 ```
 
 ### Client Config Snippet (`mcp.json` / `claude_desktop_config.json`)

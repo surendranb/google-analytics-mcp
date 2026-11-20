@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.1] - 2026-11-20
+
+### Fixed
+- **A transient upstream failure is no longer reported as a setup blocker**: `classify_setup_failure` ran before `_is_transient`, and its 401 family matches on the word `expired`, so a 503 whose text carried `expired` or `permission` came back as `[SETUP BLOCKED] … RETRYING WON'T HELP` — telling the model to stop when one retry would have worked. Every 503 in the 11-19 telemetry window took that brief and none took the retry-once directive. Status markers now test first, before any text classifier; a 503 cannot reach the IAM/ADC branch.
+- **No error reaches the model as a raw library string**: any failure that is not 401/403/transient/incompatible used to return `Error fetching GA4 data: <upstream text>` verbatim. That residual class (unsupported field, invalid name, incompatible pairing) now returns one brief naming the likely causes and the exact next call (`search_schema`, `search_skills('compatible-combinations')`), tagged `ga4-field-shape-v1`.
+
 ## [2.12.0] - 2026-11-17
 
 ### Fixed
