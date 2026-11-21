@@ -78,6 +78,35 @@ def config_hint(agent_name=""):
     return "Set these env values in your MCP client's server config for ga4-analytics"
 
 
+# Upstream GA4 failures that retry cleanly: quota (429), service unavailable
+# (503), gateway timeout (504) — including the gRPC/transport spellings the
+# google client raises. Upstream STATUS is tested before any text family, so a
+# recoverable blip can never be reported as a setup blocker.
+_TRANSIENT_MARKERS = (
+    "429", "503", "504", "unavailable", "resource_exhausted", "resourceexhausted",
+    "deadline", "stream removed", "recvmsg", "socket closed", "connection reset",
+)
+
+
+def is_transient_error(error_text) -> bool:
+    low = str(error_text).lower()
+    return any(marker in low for marker in _TRANSIENT_MARKERS)
+
+
+def build_transient_error(operation, upstream):
+    """The ONE transient formatter for this server: the boot schema load,
+    reinitialize, and get_ga4_data all return this text, so a 429/503/504 reads
+    as 'retry once, nothing for the user to fix' rather than a setup brief."""
+    return (
+        f"[TRANSIENT UPSTREAM — NOT A SETUP PROBLEM] GA4 returned a temporary failure while {operation}.  "
+        "WHY: this is GA4's own availability or quota, not your credentials, property ID, or query.  "
+        "SYSTEM DIRECTIVE: Transient upstream failure (429/503/504) — your query is NOT wrong. "
+        "Retry this exact call ONCE, unchanged; if it fails again, stop and tell the user the GA4 API "
+        "is having a temporary outage. Do not change fields, dates, or config to work around it.  "
+        f"UPSTREAM SAID: {upstream}"
+    )
+
+
 def build_guided_init_error(what, steps, anchor="setup", topic="setup", why=None, who=None, handoff=None):
     """Self-contained decision brief written FOR THE MODEL: what broke, why it
     blocks everything, that retrying is futile, exactly what the user must do
@@ -128,6 +157,12 @@ def classify_setup_failure(err, property_id="", credentials_path=""):
     """
     text = str(err)
     low = text.lower()
+    # STATUS FIRST. A 429/503/504 is GA4's availability, not the user's config:
+    # 2.12.1 sent four 503s (search_schema x3, list_dimension_categories x1) out
+    # of this function as [SETUP BLOCKED] "RETRYING WON'T HELP".
+    if is_transient_error(text):
+        return "TransientError", "ga4-transient-v1", build_transient_error(
+            "loading this property's schema", text)
     if "403" in text or "permissiondenied" in low or "permission_denied" in low or "permission" in low:
         grantee = "the connected Google user"
         if credentials_path:
@@ -433,6 +468,13 @@ def _telemetry_tool(*args, **kwargs):
             # who, forwardable, optional depth. Deliver it as-is; no extra hop.
             if not SERVER_INIT_ERROR or name in _INIT_ERROR_EXEMPT:
                 return None
+            # A transient upstream blip at boot is not a setup fault, and nothing
+            # outside this process can clear it. Re-attempt the schema load so the
+            # retry-once brief we hand back can actually be honoured.
+            if SERVER_INIT_ERROR_CATEGORY == "TransientError":
+                reinitialize()
+                if not SERVER_INIT_ERROR:
+                    return None
             # If this tool can recover in-place and the client can be prompted,
             # let its body run and elicit — the brief is only for clients that
             # cannot show a prompt.

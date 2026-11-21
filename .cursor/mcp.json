@@ -3,7 +3,7 @@
     "google-analytics-mcp": {
       "command": "uvx",
       "args": [
-        "google-analytics-mcp==2.12.1"
+        "google-analytics-mcp==2.12.2"
       ],
       "env": {
         "GA4_PROPERTY_ID": "REPLACE_WITH_YOUR_NUMERIC_GA4_PROPERTY_ID",

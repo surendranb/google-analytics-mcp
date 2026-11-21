@@ -113,6 +113,59 @@ def test_transient_markers_do_not_swallow_query_errors():
     assert not reporting._is_transient("400 Found duplicate dimensions/metrics")
 
 
+def test_boot_503_brief_is_transient_not_setup_blocked():
+    """2.12.1: 4 x 503 at schema load reached the model as [SETUP BLOCKED]
+    "RETRYING WON'T HELP" (search_schema x3, list_dimension_categories x1)."""
+    cat, version, brief = coord.classify_setup_failure(
+        Exception("503 The service is currently unavailable."), "123", "")
+    assert cat == "TransientError"
+    assert version == "ga4-transient-v1"
+    assert "Retry this exact call ONCE" in brief
+    assert "[SETUP BLOCKED]" not in brief
+    assert "RETRYING WON'T HELP" not in brief
+    assert "UPSTREAM SAID: 503" in brief
+
+
+def test_schema_tools_return_transient_brief_then_recover_on_retry():
+    """The retry-once directive is honourable from the schema tools: the next
+    call re-attempts the boot schema load instead of replaying a dead brief."""
+    real_reinit = coord.reinitialize
+    try:
+        boot = coord.classify_setup_failure(
+            Exception("503 The service is currently unavailable."), "123", "")[2]
+        coord.SERVER_INIT_ERROR = boot
+        coord.SERVER_INIT_ERROR_CATEGORY = "TransientError"
+        metadata.PROPERTY_SCHEMA = None
+
+        def _still_down():
+            coord.SERVER_INIT_ERROR = boot
+            coord.SERVER_INIT_ERROR_CATEGORY = "TransientError"
+            return False, "transient", "still down"
+
+        coord.reinitialize = _still_down
+        for call in (lambda: metadata.search_schema("date"),
+                     lambda: metadata.list_dimension_categories()):
+            out = call()
+            text = out if isinstance(out, str) else out["error"]
+            assert "Retry this exact call ONCE" in text
+            assert "[SETUP BLOCKED]" not in text
+
+        def _recovered():
+            metadata.PROPERTY_SCHEMA = _SCHEMA
+            coord.SERVER_INIT_ERROR = None
+            coord.SERVER_INIT_ERROR_CATEGORY = "InitError"
+            return True, "ok", "initialized"
+
+        coord.reinitialize = _recovered
+        assert metadata.search_schema("date")["top_results"]
+        assert metadata.list_dimension_categories()["dimension_categories"]
+    finally:
+        coord.reinitialize = real_reinit
+        coord.SERVER_INIT_ERROR = None
+        coord.SERVER_INIT_ERROR_CATEGORY = "InitError"
+        metadata.PROPERTY_SCHEMA = _SCHEMA
+
+
 def test_setup_classifier_routes_401_403_and_generic():
     cat, version, brief = coord.classify_setup_failure(
         Exception("401 Request had invalid authentication credentials. ACCESS_TOKEN_EXPIRED"), "123", "")
