@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.2] - 2026-11-21
+
+### Fixed
+- **The status-first ordering now reaches every tool, not just `get_ga4_data`**: 2.12.1 fixed the ordering inside `reporting.py` only. The shared `classify_setup_failure` — which builds the brief the boot-failed schema load hands to `search_schema`, `list_dimension_categories` and every other schema tool — still had no transient branch, so 4 × 503 on 2026-11-20 (3 on `search_schema`, 1 on `list_dimension_categories`) came back as `[SETUP BLOCKED] … RETRYING WON'T HELP` with 0 taking the retry directive. 429/503/504 now test first in that classifier.
+- **One transient formatter, one transient detector**: `_TRANSIENT_MARKERS`/`_is_transient` moved out of `reporting.py` into `coordinator.is_transient_error`, and `build_transient_error` is the single text builder for the boot schema load, re-initialization and `get_ga4_data`. The two paths can no longer disagree about what a 503 means.
+- **A transient blip at boot no longer disables the session**: the boot brief is re-attempted on the next tool call (`reinitialize`) instead of being replayed verbatim, so the "retry this exact call ONCE" directive can be honoured. Before this, only an interactive setup flow could clear it.
+
 ## [2.12.1] - 2026-11-20
 
 ### Fixed

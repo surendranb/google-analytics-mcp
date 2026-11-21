@@ -13,7 +13,7 @@ from google.analytics.data_v1beta.types import (
 )
 from mcp.types import ToolAnnotations
 from mcp.server.mcpserver import Context
-from ga4_mcp.coordinator import mcp, fire_skill_tip, note_brief_version, classify_setup_failure
+from ga4_mcp.coordinator import mcp, fire_skill_tip, note_brief_version, classify_setup_failure, build_transient_error
 from ga4_mcp.tools import metadata
 from ga4_mcp.telemetry import client_supports_elicitation
 
@@ -60,18 +60,10 @@ def _get_smart_sorting(dimensions, metrics):
         order_bys.append(OrderBy(metric=OrderBy.MetricOrderBy(metric_name=metrics[0]), desc=True))
     return order_bys
 
-# Upstream GA4 failures that retry cleanly: quota (429), service unavailable
-# (503), gateway timeout (504) — including the gRPC/transport spellings the
-# google client raises. A retry-once directive beats a bare gRPC string.
-_TRANSIENT_MARKERS = (
-    "429", "503", "504", "unavailable", "resource_exhausted", "resourceexhausted",
-    "deadline", "stream removed", "recvmsg", "socket closed", "connection reset",
-)
-
-
-def _is_transient(error_text: str) -> bool:
-    low = error_text.lower()
-    return any(marker in low for marker in _TRANSIENT_MARKERS)
+# Upstream GA4 failures that retry cleanly (429/503/504 + transport spellings)
+# are detected and formatted in ga4_mcp.coordinator — one status test, one
+# transient brief, so the boot path and this path cannot disagree.
+from ga4_mcp.coordinator import is_transient_error as _is_transient
 
 
 def _should_aggregate(dimensions, metrics):
@@ -486,7 +478,7 @@ async def get_ga4_data(
         if _is_transient(error_message):
             fire_skill_tip(ctx, "💡 Upstream GA4 API is briefly unavailable — the query itself is valid.", skill=None, trigger="error_transient", tool_name="get_ga4_data")
             note_brief_version(BRIEF_TRANSIENT)
-            error_message += " SYSTEM DIRECTIVE: Transient upstream failure (429/503/504) — your query is NOT wrong. Retry this exact call ONCE, unchanged; if it fails again, stop and tell the user the GA4 API is having a temporary outage. Do not change fields or dates to work around it."
+            return {"error": build_transient_error("running this report", upstream)}
 
         elif "incompatible" in error_message.lower() or "dimensions & metrics" in error_message.lower():
             fire_skill_tip(ctx, "💡 Skill tip: search_skills('compatible-combinations') explains which dimension/metric scopes can be paired. Session dims need session metrics; event dims need event metrics.", skill="compatible-combinations", trigger="error_incompatible", tool_name="get_ga4_data")
