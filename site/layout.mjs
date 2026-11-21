@@ -8,6 +8,21 @@ const UPDATED = new Date().toISOString().slice(0, 10);
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+// The three registries that carry the package, so a crawler can bind this URL to them.
+const SAME_AS = [
+  "https://github.com/surendranb/google-analytics-mcp",
+  "https://pypi.org/project/google-analytics-mcp/",
+  "https://www.npmjs.com/package/@surendranb/google-analytics-mcp",
+];
+const ORG_ID = `${SITE}/#organization`;
+const ORGANIZATION = {
+  "@type": "Organization",
+  "@id": ORG_ID,
+  name: "BuildItWithAI",
+  url: "https://builditwithai.xyz",
+  sameAs: ["https://github.com/surendranb"],
+};
+
 export const TOP_NAV = [
   { label: "Install", href: "/setup/" },
   { label: "Prompts", href: "/google-analytics-ai-prompts/" },
@@ -24,7 +39,7 @@ export function page({ slug, title, description, body, sidebar = null, active = 
     description = cut.slice(0, cut.lastIndexOf(" ")).replace(/[,.;:]$/, "") + "…";
   }
   const h = esc(slug);
-  const ld = JSON.stringify({
+  const node = {
     "@context": "https://schema.org",
     "@type": type,
     name: title,
@@ -37,9 +52,12 @@ export function page({ slug, title, description, body, sidebar = null, active = 
           softwareVersion: VERSION,
           license: "https://opensource.org/licenses/MIT",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          sameAs: SAME_AS,
+          publisher: { "@id": ORG_ID },
         }
       : { isPartOf: { "@type": "WebSite", name: "GA4 MCP", url: SITE }, dateModified: UPDATED }),
-  });
+  };
+  const ld = JSON.stringify(type === "SoftwareApplication" ? [node, ORGANIZATION] : node);
 
   return `<!doctype html>
 <html lang="en">
