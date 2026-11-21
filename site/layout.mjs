@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 const SITE = "https://ga4mcp.com";
 const VERSION = readFileSync(new URL("../pyproject.toml", import.meta.url), "utf8")
   .match(/^version\s*=\s*"([^"]+)"/m)[1];
-const UPDATED = "2026-10-25";
+const UPDATED = new Date().toISOString().slice(0, 10);
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
