@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.3] - 2026-11-22
+
+### Fixed
+- **The transient directive names the real upstream status**: 2.12.2 printed a fixed `(429/503/504)` on every transient failure, so a 503 read as a quota error, and telemetry's path scrub turned the slash list into `(429<path>`. The status now comes from the upstream text (`(HTTP 503)`); a failure with no numeric code prints no parenthetical, and `UPSTREAM SAID` still carries the raw text.
+- **An unknown argument name returns a brief instead of a `TypeError`**: `get_ga4_data(date_ranges=[...])` reached the model as `get_ga4_data() got an unexpected keyword argument 'date_ranges'` — a Python exception the model cannot act on, and an argument name the README advertised. The shared tool wrapper now binds the call before running it and returns the accepted argument names; the README lists the real ones (`date_range_start`, `date_range_end`).
+- **A not-loaded schema is actionable**: `get_ga4_data` returned `Schema not loaded. Please check server startup logs.` — a log the model cannot read. It now returns the same brief the schema tools use: retry once while startup finishes, then `setup_ga4_access` with the config hint. That brief also no longer claims the schema reloads on the next call, which only holds for a transient boot failure.
+
+### Changed
+- **Homepage entity points at ga4mcp.com**: `pyproject.toml` `Homepage` (PyPI `home_page`/`project_urls`) and the npm `homepage` move from GitHub and `ga4.builditwithai.xyz` to `https://ga4mcp.com`; the README install one-liner uses `https://ga4mcp.com/install`. Repository and Issues stay on GitHub.
+
 ## [2.12.2] - 2026-11-21
 
 ### Fixed

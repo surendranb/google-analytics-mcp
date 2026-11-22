@@ -95,9 +95,9 @@ def _no_schema_error():
         return {"error": str(coordinator.SERVER_INIT_ERROR)}
     return {"error": coordinator.build_guided_init_error(
         "The GA4 property schema is not loaded, so no field name can be resolved for this property.",
-        ["Ask me to retry — the server reloads the schema from GA4 on the next tool call.",
-         "If it stays unloaded, the property ID or credentials are wrong (call setup_ga4_access "
-         "to set a missing value in-session).",
+        ["Retry this exact call once — if the server is still finishing startup, the schema arrives with it.",
+         "If it stays unloaded, call setup_ga4_access: the property ID or the Google credentials are not usable, "
+         "and no tool can load a schema until they are.",
          coordinator.config_hint()],
         "setup",
         why="Field names are read from the live property schema; without it a query would be a guess.")}

@@ -100,7 +100,8 @@ def test_transient_failure_returns_retry_once_directive():
     coord.get_data_client = lambda: _Blip()
     result = _run(reporting.get_ga4_data(dimensions=["date"], metrics=["sessions"]))
     err = result["error"]
-    assert "Transient upstream failure (429/503/504)" in err
+    assert "Transient upstream failure (HTTP 503)" in err
+    assert "429" not in err.split("UPSTREAM SAID")[0]
     assert "Retry this exact call ONCE" in err
     assert "do not change fields" in err.lower() or "Do not change fields" in err
 
@@ -226,6 +227,36 @@ def test_genuine_401_still_gets_adc_brief():
     assert "[SETUP BLOCKED]" in err
     assert "Re-authenticate" in err
     assert "Retry this exact call ONCE" not in err
+
+
+def test_unknown_kwarg_returns_a_caller_shape_brief_not_a_typeerror():
+    """2.12.2 let `get_ga4_data(date_ranges=[...])` reach the model as a raw
+    TypeError string. The wrapper binds first and names the accepted arguments."""
+    _reset_schema()
+    coord.SERVER_INIT_ERROR = None
+    result = _run(reporting.get_ga4_data(date_ranges=[{"start_date": "7daysAgo"}]))
+    err = result["error"]
+    assert "ACCEPTED ARGUMENTS:" in err
+    assert "date_range_start" in err and "date_range_end" in err
+    assert "date_ranges" in err
+    assert "unexpected keyword argument" in err
+
+
+def test_unloaded_schema_tells_the_caller_what_to_do():
+    """'Schema not loaded. Please check server startup logs.' named an artifact
+    the model cannot read; the brief names the next call instead."""
+    coord.SERVER_INIT_ERROR = None
+    metadata.PROPERTY_SCHEMA = None
+    reporting.PROPERTY_SCHEMA = None
+    try:
+        err = _run(reporting.get_ga4_data(dimensions=["date"], metrics=["sessions"]))["error"]
+    finally:
+        metadata.PROPERTY_SCHEMA = _SCHEMA
+        reporting.PROPERTY_SCHEMA = _SCHEMA
+    assert "schema is not loaded" in err
+    assert "Retry this exact call once" in err
+    assert "setup_ga4_access" in err
+    assert "startup logs" not in err
 
 
 def test_genuine_403_still_gets_iam_brief():
