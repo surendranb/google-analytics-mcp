@@ -7,12 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.4] - 2026-11-22
+
+### Fixed
+- **The not-loaded-schema brief no longer contradicts itself**: 2.12.3 routed `get_ga4_data` into the shared schema brief, but that brief was built by `build_guided_init_error`, whose boilerplate reads `RETRYING WON'T HELP — every call fails identically until the user changes setup`. The same text then advised retrying once while startup finishes. With no recorded boot error the state is genuinely unknown, so the brief now states what is true and what to do next (retry once, then `setup_ga4_access` with the config hint) with no don't-retry boilerplate.
+- **The empty-schema brief no longer claims an automatic reload**: it said the server reloads the schema on the next tool call, which only holds for a transient boot failure — `reinitialize()` otherwise runs only inside `setup_ga4_access`.
+
 ## [2.12.3] - 2026-11-22
 
 ### Fixed
 - **The transient directive names the real upstream status**: 2.12.2 printed a fixed `(429/503/504)` on every transient failure, so a 503 read as a quota error, and telemetry's path scrub turned the slash list into `(429<path>`. The status now comes from the upstream text (`(HTTP 503)`); a failure with no numeric code prints no parenthetical, and `UPSTREAM SAID` still carries the raw text.
 - **An unknown argument name returns a brief instead of a `TypeError`**: `get_ga4_data(date_ranges=[...])` reached the model as `get_ga4_data() got an unexpected keyword argument 'date_ranges'` — a Python exception the model cannot act on, and an argument name the README advertised. The shared tool wrapper now binds the call before running it and returns the accepted argument names; the README lists the real ones (`date_range_start`, `date_range_end`).
-- **A not-loaded schema is actionable**: `get_ga4_data` returned `Schema not loaded. Please check server startup logs.` — a log the model cannot read. It now returns the same brief the schema tools use: retry once while startup finishes, then `setup_ga4_access` with the config hint. That brief also no longer claims the schema reloads on the next call, which only holds for a transient boot failure.
+- **A not-loaded schema is actionable**: `get_ga4_data` returned `Schema not loaded. Please check server startup logs.` — a log the model cannot read. It now returns the shared schema brief, which names `setup_ga4_access` and the config hint.
 
 ### Changed
 - **Homepage entity points at ga4mcp.com**: `pyproject.toml` `Homepage` (PyPI `home_page`/`project_urls`) and the npm `homepage` move from GitHub and `ga4.builditwithai.xyz` to `https://ga4mcp.com`; the README install one-liner uses `https://ga4mcp.com/install`. Repository and Issues stay on GitHub.

@@ -93,14 +93,14 @@ def _no_schema_error():
     a pointer to a log it cannot read."""
     if coordinator.SERVER_INIT_ERROR:
         return {"error": str(coordinator.SERVER_INIT_ERROR)}
-    return {"error": coordinator.build_guided_init_error(
-        "The GA4 property schema is not loaded, so no field name can be resolved for this property.",
-        ["Retry this exact call once — if the server is still finishing startup, the schema arrives with it.",
-         "If it stays unloaded, call setup_ga4_access: the property ID or the Google credentials are not usable, "
-         "and no tool can load a schema until they are.",
-         coordinator.config_hint()],
-        "setup",
-        why="Field names are read from the live property schema; without it a query would be a guess.")}
+    return {"error": (
+        "The GA4 property schema is not loaded, so no field name can be resolved for this property.  "
+        "WHY: field names are read from the live property schema, which this server loads once at startup; "
+        "without it any query would be a guess, so none was sent.  "
+        "NEXT CALL: retry this exact call once — startup may still be finishing. If it stays unloaded, call "
+        "setup_ga4_access: the property ID or the Google credentials are not usable, and no tool can load a "
+        f"schema until they are.  {coordinator.config_hint()}"
+    )}
 
 
 def get_property_schema_uncached(property_id: str) -> dict:
