@@ -254,9 +254,10 @@ def test_unloaded_schema_tells_the_caller_what_to_do():
         metadata.PROPERTY_SCHEMA = _SCHEMA
         reporting.PROPERTY_SCHEMA = _SCHEMA
     assert "schema is not loaded" in err
-    assert "Retry this exact call once" in err
+    assert "retry this exact call once" in err
     assert "setup_ga4_access" in err
     assert "startup logs" not in err
+    assert "RETRYING WON'T HELP" not in err
 
 
 def test_genuine_403_still_gets_iam_brief():
