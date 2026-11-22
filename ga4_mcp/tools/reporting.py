@@ -330,7 +330,10 @@ async def get_ga4_data(
                 return {"error": message}
             # reinitialize() repopulated the module schema global; fall through.
         if not PROPERTY_SCHEMA:
-            return {"error": "Schema not loaded. Please check server startup logs."}
+            # Same brief the schema tools hand back: what is missing, whether it
+            # is still booting, and the next call. "Check server startup logs"
+            # was un-actionable for a model that cannot read them.
+            return metadata._no_schema_error()
 
     try:
         # --- Input Parsing and Validation ---

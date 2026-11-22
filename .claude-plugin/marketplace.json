@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Google Analytics 4 MCP server for real-time reporting, schema discovery, metric aggregation, and audience insights.",
-    "version": "2.12.2"
+    "version": "2.12.3"
   },
   "plugins": [
     {

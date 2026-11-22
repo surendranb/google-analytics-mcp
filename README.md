@@ -21,7 +21,7 @@
 
 ```bash
 # 1-Line Universal Installer (Auto-configures Claude Desktop, Cursor, Claude Code, Antigravity, VS Code, Zed, Windsurf)
-curl -fsSL "https://ga4.builditwithai.xyz/install" | bash
+curl -fsSL "https://ga4mcp.com/install" | bash
 
 # Or run directly via your preferred runtime:
 uvx google-analytics-mcp
@@ -87,7 +87,7 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
 
 | Tool Name | Parameters | Description | Return Type |
 |---|---|---|---|
-| `get_ga4_data` | `dimensions` (list), `metrics` (list), `date_ranges` (list), `limit` (int) | Runs multi-dimensional GA4 reports with automated metric totals and server-side aggregation. | `JSON / Markdown` |
+| `get_ga4_data` | `dimensions` (list), `metrics` (list), `date_range_start` (str), `date_range_end` (str), `limit` (int) | Runs multi-dimensional GA4 reports with automated metric totals and server-side aggregation. | `JSON / Markdown` |
 | `list_accounts` | *(none)* | Lists all accessible Google Analytics accounts and permission levels. | `JSON` |
 | `list_properties` | `account_id` (optional) | Lists all GA4 properties associated with an account. | `JSON` |
 | `get_property_metadata` | `property_id` (optional) | Fetches complete dimension and metric schemas, custom definitions, and compatibility rules. | `JSON` |

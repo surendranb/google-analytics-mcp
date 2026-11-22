@@ -4,6 +4,7 @@
 and boot-error interception. Telemetry mechanics live in ga4_mcp.telemetry."""
 
 import os
+import re
 import sys
 import json
 import time
@@ -97,10 +98,14 @@ def build_transient_error(operation, upstream):
     """The ONE transient formatter for this server: the boot schema load,
     reinitialize, and get_ga4_data all return this text, so a 429/503/504 reads
     as 'retry once, nothing for the user to fix' rather than a setup brief."""
+    # The status is the upstream's own code, never a fixed guess: 2.12.2 printed
+    # "(429/503/504)" on a 503 and telemetry's path scrub turned that slash list
+    # into "(429<path>". A single code also survives the scrub.
+    status = re.search(r"\b(429|503|504)\b", str(upstream))
     return (
         f"[TRANSIENT UPSTREAM — NOT A SETUP PROBLEM] GA4 returned a temporary failure while {operation}.  "
         "WHY: this is GA4's own availability or quota, not your credentials, property ID, or query.  "
-        "SYSTEM DIRECTIVE: Transient upstream failure (429/503/504) — your query is NOT wrong. "
+        f"SYSTEM DIRECTIVE: Transient upstream failure{' (HTTP ' + status.group(1) + ')' if status else ''} — your query is NOT wrong. "
         "Retry this exact call ONCE, unchanged; if it fails again, stop and tell the user the GA4 API "
         "is having a temporary outage. Do not change fields, dates, or config to work around it.  "
         f"UPSTREAM SAID: {upstream}"
@@ -458,6 +463,30 @@ def _emit_tool_telemetry(func, w_args, w_kwargs, status, error_category, rows_re
     send_telemetry("tool_executed", props)
 
 
+def _caller_shape_brief(func, call_args, call_kwargs):
+    """A call the tool cannot bind (unknown argument name, wrong arity) left this
+    server as a raw `TypeError: ... unexpected keyword argument 'date_ranges'` —
+    2.12.2 shipped that string to the model. Bind before calling: on failure the
+    model gets the accepted argument names instead of a Python exception."""
+    params = inspect.signature(func).parameters
+    try:
+        inspect.signature(func).bind(*call_args, **call_kwargs)
+    except TypeError as e:
+        accepted = ", ".join(
+            p.name for p in params.values()
+            if p.kind in (p.POSITIONAL_OR_KEYWORD, p.KEYWORD_ONLY) and p.name != "ctx")
+        return {"error": (
+            f"{func.__name__} cannot be called with those arguments ({e}).  "
+            f"ACCEPTED ARGUMENTS: {accepted}.  "
+            "WHY: argument names are the tool schema, not prose — a name outside that list is not a "
+            "shorthand for one inside it (e.g. get_ga4_data takes date_range_start/date_range_end, not "
+            "date_ranges).  "
+            "NEXT CALL: resend with names from ACCEPTED ARGUMENTS only; see the tool's input schema for "
+            "types and defaults. Do not resend the same names."
+        )}
+    return None
+
+
 def _telemetry_tool(*args, **kwargs):
     def decorator(func):
         is_async = inspect.iscoroutinefunction(func)
@@ -492,6 +521,10 @@ def _telemetry_tool(*args, **kwargs):
                     if intercepted is not None:
                         status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
                         return intercepted
+                    shape = _caller_shape_brief(func, w_args, w_kwargs)
+                    if shape is not None:
+                        status, error_category = "error", "CallerShapeError"
+                        return shape
                     result = await func(*w_args, **w_kwargs)
                     status, error_category = _classify_result(result)
                     rows_returned = _count_rows(result)
@@ -526,6 +559,10 @@ def _telemetry_tool(*args, **kwargs):
                     if intercepted is not None:
                         status, error_category = "error", SERVER_INIT_ERROR_CATEGORY
                         return intercepted
+                    shape = _caller_shape_brief(func, w_args, w_kwargs)
+                    if shape is not None:
+                        status, error_category = "error", "CallerShapeError"
+                        return shape
                     result = func(*w_args, **w_kwargs)
                     status, error_category = _classify_result(result)
                     rows_returned = _count_rows(result)
