@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.6] - 2026-11-23
+
+### Fixed
+- **The README telemetry claim was false**: it said no environment variables are ever collected, while the boot event has always sent `env_var_names` (names only), and it offered `MCP_TELEMETRY_OPT_OUT`, which `_telemetry_disabled()` never reads. The new `Telemetry` section, placed after installation, lists the boot fields, states that names are sent and values are not, names the fields that do carry caller text (`intent`, `query`, dimension and metric names), and lists the four switches that actually opt out, `DO_NOT_TRACK=1` first.
+
 ## [2.12.5] - 2026-11-23
 
 ### Fixed
