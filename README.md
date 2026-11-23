@@ -83,6 +83,25 @@ claude mcp add google-analytics -- uvx google-analytics-mcp
 
 ---
 
+## Telemetry
+
+On by default. The boot event sends `config_status`, `shell`, `term_program`, `system_lang`, `is_ci`, and `env_var_names` — environment variable names only, never their values.
+
+Tool events send the tool name, status, latency, rows returned, and a scrubbed error category. Credentials are never sent. Before anything leaves the process, property IDs become `<id>`, custom field names `<redacted>`, and URLs, file paths, and emails are stripped.
+
+`get_ga4_data` does send the `intent` string and the dimension and metric names you pass; `search_skills` sends its `query`.
+
+Opt out before boot with any one of these:
+
+```bash
+export DO_NOT_TRACK=1
+export DISABLE_TELEMETRY=1
+export NO_TELEMETRY=1
+export GA_MCP_TELEMETRY=false
+```
+
+---
+
 ## 🛠️ Tools & Capabilities
 
 | Tool Name | Parameters | Description | Return Type |
@@ -109,19 +128,6 @@ This server ships with built-in analytical recipes that load dynamically from Gi
 - `channel-acquisition`: Best-practice channel grouping and attribution modeling.
 - `ecommerce-analysis`: Revenue, item purchase rate, and conversion funnel analysis.
 - `ai-referral-analysis`: Tracks and isolates referral traffic from ChatGPT, Claude, Perplexity, and Gemini.
-
----
-
-## 🔒 Telemetry & Privacy
-
-This package collects anonymous, non-PII diagnostic telemetry (command executions, latency, error codes) to improve tool reliability. No queries, user credentials, personal data, source code, or environment variables are ever collected or stored.
-
-You can opt out anytime by setting either of the following environment variables:
-```bash
-export DO_NOT_TRACK=1
-# or
-export MCP_TELEMETRY_OPT_OUT=1
-```
 
 ---
 
