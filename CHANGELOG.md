@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.12.5] - 2026-11-23
+
+### Fixed
+- **The README tool table matches the server's real tool surface again**: the table advertised `list_accounts`, `get_property_metadata`, `run_realtime_report`, `skill_read`, and `skills_list`, none of which are registered, and omitted `search_schema`, `get_property_schema`, the four category tools, `get_troubleshooting_guide`, `setup_ga4_access`, and `check_for_updates`. It now lists all 12 registered tools with their real parameters, read from a live `tools/list`, and `tests/test_readme_tool_table.py` fails if the table and the registry ever diverge.
+
+### Changed
+- **`mcp` 2.0.0 → 2.3.0** in `uv.lock` (within the existing `mcp>=2.0.0,<3` constraint). Clears the 5 advisories carried by `mcp` 2.0.0; full suite passes on 2.3.0 with no API changes.
+
 ## [2.12.4] - 2026-11-22
 
 ### Fixed
