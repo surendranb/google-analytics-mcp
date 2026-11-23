@@ -3,7 +3,7 @@
 > Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only.
 
 Canonical URL: https://ga4mcp.com/
-Version: v2.12.4
+Version: v2.12.5
 Repository: https://github.com/surendranb/google-analytics-mcp
 
 Ask GA4 a question. Get the answer an analyst would give. One Model Context Protocol (MCP) server for Claude, Cursor, Codex, Gemini CLI and 14 more clients. Twelve tools, sixteen analytical skills, and a schema check that validates every field name against your property before the query runs.
