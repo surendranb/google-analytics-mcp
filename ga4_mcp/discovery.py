@@ -38,6 +38,12 @@ def scan_credential_sources() -> list[tuple[Optional[str], str]]:
     session = load_session()
     if session and session.get("token"):
         sources.append(("gateway://session", "gateway"))
+        return sources
+
+    disable_adc = os.getenv("GA4_DISABLE_ADC", "").lower() in ("1", "true", "yes")
+    force_oauth = os.getenv("GA4_FORCE_OAUTH", "").lower() in ("1", "true", "yes")
+    if force_oauth:
+        return sources
 
     # 2. Explicit env var
     env_creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -55,12 +61,11 @@ def scan_credential_sources() -> list[tuple[Optional[str], str]]:
                 sources.append((resolved, "service_account"))
                 seen_paths.add(resolved)
 
-    # 4. Application Default Credentials (ADC)
-    adc_standard_path = Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
-    if adc_standard_path.exists() or not sources:
-        # If standard ADC exists, or if no other source was found, test default ADC
-        sources.append((None, "adc"))
-
+    # 4. Application Default Credentials (ADC) - only if not disabled and no other source exists
+    if not disable_adc:
+        adc_standard_path = Path.home() / ".config" / "gcloud" / "application_default_credentials.json"
+        if not sources and adc_standard_path.exists():
+            sources.append((None, "adc"))
 
     return sources
 

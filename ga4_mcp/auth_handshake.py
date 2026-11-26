@@ -10,7 +10,11 @@ import threading
 import urllib.parse
 import webbrowser
 from typing import Optional, Dict, Any, Tuple
+import sys
 
+from mcp.types import ToolAnnotations
+from mcp.server.mcpserver import Context
+from .coordinator import mcp
 from ga4_mcp.auth_session import save_session, get_gateway_url
 
 SUCCESS_HTML = """<!DOCTYPE html>
@@ -227,7 +231,7 @@ def start_login_flow(
     assigned_port = server.server_address[1]
 
     base_gw = (gateway_url or get_gateway_url()).rstrip("/")
-    login_url = f"{base_gw}/auth/login?port={assigned_port}&state={expected_state}"
+    login_url = f"{base_gw}/auth/login?port={assigned_port}&state={expected_state}&service=ga4"
 
     # Run server loop in background thread
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -250,3 +254,49 @@ def start_login_flow(
     finally:
         server.shutdown()
         server.server_close()
+
+
+@mcp.tool(annotations=ToolAnnotations(read_only_hint=False, idempotent_hint=True, open_world_hint=True))
+def connect_google_analytics(ctx: Context = None) -> dict:
+    """
+    Connect to Google Analytics 4 via official Google OAuth in your browser.
+    Opens the Google OAuth consent screen to grant read-only access (analytics.readonly),
+    captures the session token, and auto-discovers all accessible GA4 properties.
+    Call this whenever you need to sign in or reconnect your Google account.
+    """
+    from ga4_mcp.sites import registry
+    import ga4_mcp.coordinator as coordinator
+
+    session, err = start_login_flow(open_browser=True)
+    if err:
+        return {"status": "error", "error": err}
+
+    registry.initialize(force_refresh=True)
+    coordinator.SERVER_INIT_ERROR = None
+    coordinator.SERVER_INIT_BRIEF_VERSION = None
+
+    props = registry.list_all()
+    default_prop = next((p for p in props if p.get("is_default")), props[0] if props else None)
+    return {
+        "status": "connected",
+        "email": session.get("email"),
+        "total_properties": len(props),
+        "active_property": f"{default_prop.get('display_name')} (ID: {default_prop.get('property_id')})" if default_prop else "None",
+        "properties": props[:10],
+        "message": "Successfully connected to Google Analytics! You can now query your data using get_ga4_data."
+    }
+
+
+if __name__ == "__main__":
+    print("\n" + "=" * 60)
+    print("GA4 MCP - Google OAuth Browser Sign-In")
+    print("=" * 60)
+    print("Opening browser for Google OAuth sign-in...")
+    sess, error = start_login_flow(open_browser=True)
+    if error:
+        print(f"\n[ERROR] Authentication failed: {error}", file=sys.stderr)
+        sys.exit(1)
+    print(f"\n[SUCCESS] Connected to Google Analytics!")
+    print(f"Signed in as: {sess.get('email')}")
+    print(f"Session saved to ~/.config/ga4-mcp/session.json")
+

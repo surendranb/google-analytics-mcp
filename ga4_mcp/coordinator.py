@@ -134,7 +134,7 @@ def _result_chars(result):
 
 # These run even when misconfigured (they help fix it).
 # search_skills fetches from GitHub — no GA4 credentials needed.
-_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills"}
+_INIT_ERROR_EXEMPT = {"get_troubleshooting_guide", "setup_ga4_access", "search_skills", "connect_google_analytics"}
 
 # Tools that, on an elicitation-capable client, recover the broken config AT the
 # point of friction (MCP 2.0 MRTR) instead of returning the static setup brief.

@@ -70,6 +70,9 @@ jobs:
       - name: Publish to npm
         run: |
           cd npm
-          npm publish --access public || echo "NPM publish requires interactive token or trusted publisher setup"
+          npm publish --access public || {
+            echo "::error::npm publish failed. E401/ENEEDAUTH means secrets.NPM_TOKEN is missing, expired, or lacks publish rights for this package; E403 'cannot publish over the previously published version' means the version is already on npm and the manifests are out of step."
+            exit 1
+          }
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

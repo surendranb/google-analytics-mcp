@@ -108,6 +108,8 @@ class SiteRegistry:
 
     def _load_legacy_env(self):
         """Loads legacy GA4_PROPERTY_ID and GOOGLE_APPLICATION_CREDENTIALS."""
+        if os.getenv("GA4_FORCE_OAUTH", "").lower() in ("1", "true", "yes"):
+            return
         prop_id = os.getenv("GA4_PROPERTY_ID")
         creds_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
         if prop_id:

@@ -7,6 +7,7 @@ from .tools import metadata, reporting, gsc, youtube, ads, troubleshooting, skil
 from . import resources
 from . import prompts  # noqa: F401  registers the workflow prompts (S6)
 from . import setup_flow  # noqa: F401
+from . import auth_handshake  # noqa: F401
 from .sites import registry
 from .schema_cache import schema_cache
 
@@ -33,6 +34,7 @@ def main():
     import ga4_mcp.tools.youtube         # Register YouTube Analytics & Data tools
     import ga4_mcp.tools.ads             # Register Google Ads tools
     import ga4_mcp.setup_flow  # Register the interactive setup-recovery tool
+    import ga4_mcp.auth_handshake  # Register browser OAuth connect tool
 
     config_status = "valid"
 
@@ -76,6 +78,9 @@ def main():
 
     credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     property_id = os.getenv("GA4_PROPERTY_ID")
+    if os.getenv("GA4_FORCE_OAUTH", "").lower() in ("1", "true", "yes"):
+        credentials_path = None
+        property_id = None
 
     if credentials_path and "ABSOLUTE/PATH/TO" in credentials_path:
         print(f"ERROR: Dummy credentials path detected: '{credentials_path}'.", file=sys.stderr)
@@ -102,15 +107,12 @@ def main():
         config_status = "error"
     elif not registry.has_any():
         print("WARNING: No properties discovered or configured at startup.", file=sys.stderr)
-        coordinator.SERVER_INIT_ERROR = _guided(
-            "No Google Analytics credentials found or no GA4 properties accessible.",
-            ["Run 'gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.readonly' "
-             "in a terminal to connect your Google account with 1 command;",
-             "OR point GOOGLE_APPLICATION_CREDENTIALS at a Google service-account JSON key;",
-             _config_hint()],
-            "credentials",
-            why="The server has no credentials to authenticate with GA4, so no query can run.")
-        coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-creds-unset-v1"
+        coordinator.SERVER_INIT_ERROR = (
+            "Not connected to Google Analytics. "
+            "Please call the `connect_google_analytics` tool to sign in with your Google account via browser, "
+            "or run 'python -m ga4_mcp.auth_handshake' in your terminal."
+        )
+        coordinator.SERVER_INIT_BRIEF_VERSION = "ga4-oauth-needed-v1"
         config_status = "error"
     else:
         # Properties found or configured

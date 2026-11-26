@@ -9,7 +9,7 @@ import pathlib
 import time
 from typing import Optional, Dict, Any
 
-DEFAULT_GATEWAY_URL = "https://ga4.builditwithai.xyz"
+DEFAULT_GATEWAY_URL = "https://ga4-gateway.reachsuren.workers.dev"
 
 
 def get_gateway_url() -> str:
