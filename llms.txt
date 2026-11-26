@@ -69,7 +69,7 @@ Requires `GA4_PROPERTY_ID` and `GOOGLE_APPLICATION_CREDENTIALS`.
 - [GA4 extension for Gemini CLI](https://ga4mcp.com/ga4-plugin-for-gemini/) ([markdown](https://ga4mcp.com/ga4-plugin-for-gemini/index.md))
 - [35 Production GA4 Prompts for Claude, Cursor & AI](https://ga4mcp.com/google-analytics-ai-prompts/) ([markdown](https://ga4mcp.com/google-analytics-ai-prompts/index.md))
 - [GA4 403 Permission Denied: Service Account Viewer Fix](https://ga4mcp.com/iam/) ([markdown](https://ga4mcp.com/iam/index.md))
-- [GA4 MCP — Connect Google Analytics 4 to Claude & AI](https://ga4mcp.com/) ([markdown](https://ga4mcp.com/index.md))
+- [Google Analytics MCP — GA4 MCP Server for Claude & AI](https://ga4mcp.com/) ([markdown](https://ga4mcp.com/index.md))
 - [Natural Language Google Analytics: Query GA4 with AI](https://ga4mcp.com/natural-language-google-analytics/) ([markdown](https://ga4mcp.com/natural-language-google-analytics/index.md))
 - [GA4 MCP plugins for Claude Code and Gemini CLI](https://ga4mcp.com/ga4-plugins/) ([markdown](https://ga4mcp.com/ga4-plugins/index.md))
 - [Privacy — what the GA4 MCP server sends](https://ga4mcp.com/privacy/) ([markdown](https://ga4mcp.com/privacy/index.md))

@@ -1,6 +1,6 @@
 ---
 slug: /
-title: "GA4 MCP — Connect Google Analytics 4 to Claude & AI"
+title: "Google Analytics MCP — GA4 MCP Server for Claude & AI"
 description: "Query Google Analytics 4 from your AI agent. Twelve tools, sixteen analytical skills, schema validation before every query. MIT, local, read-only."
 full: true
 hero: true
