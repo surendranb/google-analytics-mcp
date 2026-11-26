@@ -1,0 +1,68 @@
+name: deploy-site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+env:
+  CF_ACCOUNT_ID: b8a2db803c867cf7208358fd8bcb191a
+  CF_PROJECT: ga4mcp
+
+jobs:
+  deploy:
+    name: build, assert, deploy ga4mcp.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+        timeout-minutes: 3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+        timeout-minutes: 3
+
+      - name: Require deploy token
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Repo secret CLOUDFLARE_API_TOKEN is missing. Create a Cloudflare API token with account permission Pages:Edit for account ${CF_ACCOUNT_ID} and add it as a repository secret. Nothing was deployed."
+            exit 1
+          fi
+        timeout-minutes: 1
+
+      - name: Build site
+        run: node scripts/build-site.mjs
+        timeout-minutes: 4
+
+      - name: Assert built output carries the repo release
+        run: node .github/scripts/assert-built-release.mjs
+        timeout-minutes: 2
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CF_ACCOUNT_ID }}
+          command: pages deploy docs --project-name=${{ env.CF_PROJECT }} --branch=main
+        timeout-minutes: 5
+
+      - name: Assert live site serves this build
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: node .github/scripts/assert-live-release.mjs
+        timeout-minutes: 4

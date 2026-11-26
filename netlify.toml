@@ -1,3 +1,5 @@
+# Leftover. ga4mcp.com is served by Cloudflare Pages project `ga4mcp`, built and deployed by .github/workflows/deploy-site.yml.
+# This file is inert unless someone re-links the repo to Netlify. Safe to delete.
 [build]
   base = "docs"
   publish = "."
