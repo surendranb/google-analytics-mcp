@@ -394,7 +394,7 @@ wheels = [
 
 [[package]]
 name = "google-analytics-mcp"
-version = "2.12.4"
+version = "2.12.6"
 source = { editable = "." }
 dependencies = [
     { name = "google-analytics-data" },
