@@ -57,6 +57,41 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
+  publish-to-mcp-registry:
+    name: Publish to official MCP registry
+    needs: [publish-to-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.16
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      # shortcut: installs from the pinned module tag via sum.golang.org instead of the
+      # release tarball + cosign verify-blob flow the registry docs prescribe. The binary
+      # reports its version as "dev", which we do not use. Move to the verified tarball if
+      # the version string ever needs to be asserted in CI.
+      - name: Install mcp-publisher
+        run: go install "github.com/modelcontextprotocol/registry/cmd/publisher@${MCP_PUBLISHER_VERSION}"
+
+      # GitHub OIDC proves this repo belongs to the io.github.surendranb namespace, so no
+      # long-lived registry token secret is needed and nothing can expire silently.
+      - name: Authenticate to the registry
+        run: "$(go env GOPATH)/bin/publisher login github-oidc"
+
+      - name: Publish server.json
+        run: "$(go env GOPATH)/bin/publisher publish server.json"
+
   publish-to-npm:
     name: Publish NPX wrapper to npm
     runs-on: ubuntu-latest
