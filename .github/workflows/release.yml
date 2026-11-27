@@ -90,7 +90,17 @@ jobs:
         run: "$(go env GOPATH)/bin/publisher login github-oidc"
 
       - name: Publish server.json
-        run: "$(go env GOPATH)/bin/publisher publish server.json"
+        run: |
+          # release.yml runs on both tag push and release publish, so a second run
+          # re-publishes an identical version. Mirrors skip-existing on the PyPI step:
+          # a duplicate is success, every other failure is not.
+          if out=$("$(go env GOPATH)/bin/publisher publish server.json" 2>&1); then
+            echo "$out"
+          else
+            echo "$out"
+            grep -q "cannot publish duplicate version" <<<"$out" || exit 1
+            echo "::notice::already published; registry untouched"
+          fi
 
   publish-to-npm:
     name: Publish NPX wrapper to npm
